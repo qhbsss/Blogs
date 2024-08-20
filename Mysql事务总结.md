@@ -14,8 +14,8 @@ A(原子性)C(一致性)I(隔离性)D(持久性)
 | 串行化  |   |   |   |
 
 ## mysql中读的两种方式：
-**快照读(一致性非锁定读)**：普通的 select 语句（不包括 select ... lock in share mode ,select ... for update），innodb中，在快照读下是靠MVCC（多版本并发控制）来保证隔离性的
-**当前读(锁定读)**：如下语句select ... lock in share mode，select ... for update，insert、update、delete 操作，innodb中，当前读是靠加锁来保证隔离性的，同一事务中加的锁直到事务提交才会释放
+**快照读(一致性非锁定读)**：普通的 select 语句（不包括 select ... lock in share mode ,select ... for update），innodb中，在快照读下是靠MVCC（多版本并发控制）来保证隔离性的。快照读根据ReadView读取历史版本。
+**当前读(锁定读)**：如下语句select ... lock in share mode，select ... for update，insert、update、delete 操作，innodb中，当前读是靠加锁来保证隔离性的，同一事务中加的锁直到事务提交才会释放，但锁是可重入的，可在同一事务中对同一记录多次修改。当前读都是读取最新版本的记录。
 
 ## 可重复读隔离级别下MVCC工作原理
 MVCC 的实现依赖于：**隐藏字段、Read View、undo log**，在可重复读隔离级别下，当在事务中第一次执行快照读时，会生成整个事务的ReadView，该ReadView在当前事务下是不会发生改变的，记录对于后续事务中快照读的可见性根据记录隐藏字段中的trx_id和事务的ReadView来决定，当记录的tri_id对于事务的ReadView是可见的，就读取当前页面中的记录，否则读取记录在undo_log中的历史版本
