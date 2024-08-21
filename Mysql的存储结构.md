@@ -1,4 +1,5 @@
 [TOC]
+
 ps:win下mysql安装教程（https://www.cnblogs.com/qjoanven/p/7898006.html）
 
 # Mysql数据的存放位置（innodb）
