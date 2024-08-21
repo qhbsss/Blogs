@@ -168,7 +168,8 @@ chkconfig --add mysql
 systemctl start mysql
 ```
 # 
-PS:此处执行时出现了报错“ERROR 2002 (HY000): Can't connect to local MySQL server through socket”，是无法找到正确的mysql.sock的位置，可用`mysql -S /usr/local/mysql-8.0.24-linux-glibc2.12-x86_64/mysql.sock -u root -p`命令指定sock位置， 也可以将我们之前设置的mysql.sock软链接到错误查找的位置
+### PS:sock位置错误
+此处执行时出现了报错“ERROR 2002 (HY000): Can't connect to local MySQL server through socket”，是无法找到正确的mysql.sock的位置，可用`mysql -S /usr/local/mysql-8.0.24-linux-glibc2.12-x86_64/mysql.sock -u root -p`命令指定sock位置， 也可以将我们之前设置的mysql.sock软链接到错误查找的位置
 ```bash
 ln -s /usr/local/mysql-8.0.24-linux-glibc2.12-x86_64/mysql.sock /tmp/mysql.sock
 ```
