@@ -210,7 +210,7 @@ CREATE USER 'test'@'%' IDENTIFIED BY 'ABC';
 GRANT ALL ON *.* TO 'test'@'%';
 
 ```
-
+第一步是在mysql数据库下的user表中加入用户‘test’，并且配置其host为‘%’，表示允许‘test’用户从任何ip访问，同时设定密码为‘ABC’，下一步是赋予用户‘test’所有权限。
 3. 使链接生效
 
 ```sql
