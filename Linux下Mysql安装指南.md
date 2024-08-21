@@ -193,3 +193,31 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'ABC';
 flush privileges;
 ```
 
+## 远程连接mysql
+1. 选择mysql数据库
+
+```sql
+use mysql;
+```
+
+
+2. 修改远程链接
+
+
+```sql
+CREATE USER 'test'@'%' IDENTIFIED BY 'ABC';
+
+GRANT ALL ON *.* TO 'test'@'%';
+
+```
+
+3. 使链接生效
+
+```sql
+flush privileges;
+```
+4. 用navicat根据远程ip使用指定的用户名和密码连接数据库
+用户名：上一步中设定的'test'
+密码：上一步中设定的‘ABC’
+
+
