@@ -127,7 +127,7 @@ icon:email [220221878@seu.edu.cn](mailto:220221878@seu.edu.cn)
   前后端分离项目，实现台站设备信息的采集与存储，支持设备状态巡检、用户管理、权限管理等内容。
 - **技术栈**：Spring Boot, MySQL, JWT，Redis.
 - **工作内容**：
-  - 使用LinkedBlockingQueue记录首尾事件的信息，实现设备发生变更时触发的延时更新任务；
+  - 使用LinkedBlockingDeque记录首尾事件的信息，实现设备发生变更时触发的延时更新任务；
   - 使用Mysql + Mybaits + druid连接池实现数据持久化，使用线程池处理定时任务，进行设备巡检；
     
     <!-- 使用注解指定线程池进行设备巡检任务，与设备间ping通，检测设备状态。-->
