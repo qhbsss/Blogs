@@ -5,6 +5,7 @@
 在进行 I/O 设备和内存的数据传输的时候，数据搬运的工作全部交给 DMA 控制器，而 CPU 不再参与任何与数据搬运相关的事情，这样 CPU 就可以去处理别的事务。
 ![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/68747470733a2f2f63646e2e6a7364656c6976722e6e65742f67682f7869616f6c696e636f6465722f496d616765486f7374322f2545362539332538442545342542442539432545372542332542422545372542422539462f2545392539422542362545362538422542372545382542342539442f44524d253230495f4f2532302545382542462538372545372541382538422e706e67)
 具体过程：
+
 - 用户进程调用 read 方法，向操作系统发出 I/O 请求，请求读取数据到自己的内存缓冲区中，进程进入阻塞状态；
 - 操作系统收到请求后，进一步将 I/O 请求发送 DMA，然后让 CPU 执行其他任务；
 - DMA 进一步将 I/O 请求发送给磁盘；
@@ -301,14 +302,14 @@ recv(c, ...);
 //将数据打印出来
 printf(...)
 ```
-![](./images/image.png)
+![0912d7be906fa6cc4b39bf68e2f4310](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/0912d7be906fa6cc4b39bf68e2f4310.jpg)
 1. 当进程A执行到创建socket的语句时，操作系统会创建一个由文件系统管理的socket对象（如下图）。这个socket对象包含了发送缓冲区、接收缓冲区、等待队列等成员。等待队列是个非常重要的结构，它指向所有需要等待该socket事件的进程。
-![](./images/1724653274175_image.png)
+![35b422868de80ca931c8b08eaf19fa3](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/35b422868de80ca931c8b08eaf19fa3.jpg)
 2. 当程序执行到recv时，操作系统会将进程A从工作队列移动到该socket的等待队列中（如下图）。由于工作队列只剩下了进程B和C，依据进程调度，cpu会轮流执行这两个进程的程序，不会执行进程A的程序。所以进程A被阻塞，不会往下执行代码，也不会占用cpu资源。
-![](./images/1724653337934_image.png)
+![f22d3cf28910e702556129e48ebc97e](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/f22d3cf28910e702556129e48ebc97e.jpg)
 ps：操作系统添加等待队列只是添加了对这个“等待中”进程的引用，以便在接收到数据时获取进程对象、将其唤醒，而非直接将进程管理纳入自己之下。上图为了方便说明，直接将进程挂到等待队列之下。
 3. 当socket接收到数据后，操作系统将该socket等待队列上的进程重新放回到工作队列，该进程变成运行状态，继续执行代码。也由于socket的接收缓冲区已经有了数据，recv可以返回接收到的数据。
-![](./images/1724653443752_image.png)
+![01a34a545b6f63c84bb17c15817bcd2](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/01a34a545b6f63c84bb17c15817bcd2.jpg)
 ### select/poll
 select 实现多路复用的方式是，将已连接的 Socket 都放到一个**文件描述符集合**，然后调用 `select()` 函数将文件描述符集合**拷贝**到内核里，让内核来检查是否有网络事件产生，检查的方式很粗暴，就是通过**遍历**文件描述符集合的方式，当检查到有事件产生后，将此 Socket 标记为可读或可写，接着再把整个文件描述符集合**拷贝**回用户态里，然后用户态还需要再通过**遍历**的方法找到可读或可写的 Socket，然后再对其处理。
 
@@ -331,9 +332,9 @@ while(1){
     }}
 ```
 1. 程序同时监视如下图的sock1、sock2和sock3三个socket，那么在调用select之后，操作系统把进程A分别加入这三个socket的等待队列中。
-![](./images/1724653645882_image.png)
+![14eafc3ba9be43584af5ca3d8d99cc1](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/14eafc3ba9be43584af5ca3d8d99cc1.jpg)
 2. 当任何一个socket收到数据后，中断程序将唤起进程。
-![](./images/1724653715806_image.png)
+![7fcb96abb1124f2294d6b9de08b2be3](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/7fcb96abb1124f2294d6b9de08b2be3.jpg)
 
 
 ### epoll
@@ -360,15 +361,15 @@ while(1){
 }
 ```
 1. 当某个进程调用epoll_create方法时，内核会创建一个eventpoll对象（也就是程序中epfd所代表的对象）。eventpoll对象也是文件系统中的一员，和socket一样，它也会有等待队列。
-![](./images/1724653968338_image.png)
+![5f00e62187044bb5b26ea429c399e21](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/5f00e62187044bb5b26ea429c399e21.jpg)
 2. 创建epoll对象后，可以用epoll_ctl添加或删除所要监听的socket。以添加socket为例，如下图，如果通过epoll_ctl添加sock1、sock2和sock3的监视，内核会将eventpoll添加到这三个socket的等待队列中
-![](./images/1724654051695_image.png)
+![b98a253f4405ea1e7e076842caf2e62](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/b98a253f4405ea1e7e076842caf2e62.jpg)
 3. 当socket收到数据后，中断程序会给eventpoll的“就绪列表”添加socket引用。eventpoll对象相当于是socket和进程之间的中介，socket的数据接收并不直接影响进程，而是通过改变eventpoll的就绪列表来改变进程状态。当程序执行到epoll_wait时，如果rdlist已经引用了socket，那么epoll_wait直接返回，如果rdlist为空，阻塞进程。
-![](./images/1724654100187_image.png)
+![7b913545730d48b5705b6d359aa3c58](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/7b913545730d48b5705b6d359aa3c58.jpg)
 4. 假设计算机中正在运行进程A和进程B，在某时刻进程A运行到了epoll_wait语句。如下图所示，内核会将进程A放入eventpoll的等待队列中，阻塞进程。
-![](./images/1724654224491_image.png)
+![a99c4a97dae451d8fe182f3398b92f8](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/a99c4a97dae451d8fe182f3398b92f8.jpg)
 5. 当socket接收到数据，中断程序一方面修改rdlist，另一方面唤醒eventpoll等待队列中的进程，进程A再次进入运行状态（如下图）。也因为rdlist的存在，进程A可以知道哪些socket发生了变化。
-![](./images/1724654250517_image.png)
+![e42c685aa367481cc64e6cde4922fd6](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/e42c685aa367481cc64e6cde4922fd6.jpg)
 ## Reactor模式
 Reactor 模式也叫 Dispatcher 模式，我觉得这个名字更贴合该模式的含义，即 I/O 多路复用监听事件，收到事件后，根据事件类型分配（Dispatch）给某个进程 / 线程。
 ### 单 Reactor 单进程 / 线程
