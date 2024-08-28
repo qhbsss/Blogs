@@ -10,16 +10,16 @@
 
 认证：
 
-![认证登录](https://oss.javaguide.cn/github/javaguide/system-design/security/authentication-login.png)
+![认证登录](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesauthentication-login.png)
 
 授权：
 
-![没有权限](https://oss.javaguide.cn/github/javaguide/system-design/security/20210604161032412.png)
+![没有权限](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures20210604161032412.png)
 
 这两个一般在我们的系统中被结合在一起使用，目的就是为了保护我们系统的安全性。
 
 # Cookie
-![](https://oss.javaguide.cn/github/javaguide/system-design/security/cookie-sessionId.png)
+![](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturescookie-sessionId.png)
 
 `Cookie` 和 `Session` 都是用来跟踪浏览器用户身份的会话方式，但是两者的应用场景不太一样。
 
@@ -52,7 +52,7 @@ Session 代表着服务器和客户端一次会话的过程。Session 对象存�
 
 关于这种认证方式更详细的过程如下：
 
-![](https://oss.javaguide.cn/github/javaguide/system-design/security/session-cookie-authentication-process.png)
+![](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturessession-cookie-authentication-process.png)
 
 1. 用户向服务器发送用户名、密码、验证码用于登陆系统。
 2. 服务器验证通过后，服务器为用户创建一个 `Session`，并将 `Session` 信息存储起来。
@@ -83,7 +83,7 @@ Session 代表着服务器和客户端一次会话的过程。Session 对象存�
 
 但是，我们使用 `Token` 的话就不会存在这个问题，在我们登录成功获得 `Token` 之后，一般会选择存放在 `localStorage` （浏览器本地存储）中。然后我们在前端通过某些方式会给每个发到后端的请求加上这个 `Token`,这样就不会出现 CSRF 漏洞的问题。因为，即使你点击了非法链接发送了请求到服务端，这个非法请求是不会携带 `Token` 的，所以这个请求将是非法的。
 
-![](https://oss.javaguide.cn/github/javaguide/system-design/security/20210615161108272.png)
+![](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures20210615161108272.png)
 
 ## 不论是 `Cookie` 还是 `Token` 都无法避免 **跨站脚本攻击（Cross Site Scripting）XSS** 
 
@@ -105,7 +105,7 @@ JWT 自身包含了身份验证所需要的所有信息，因此，我们的服�
 并且， 使用 JWT 认证可以有效避免 CSRF 攻击，因为 JWT 一般是存在在 localStorage 中，使用 JWT 进行身份验证的过程中是不会涉及到 Cookie 的。
 
 ## JWT组成
-![JWT 组成](https://oss.javaguide.cn/javaguide/system-design/jwt/jwt-composition.png)
+![JWT 组成](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesjwt-composition.png)
 
 JWT 本质上就是一组字串，通过（`.`）切分成三个为 Base64 编码的部分：
 
@@ -117,7 +117,7 @@ JWT 本质上就是一组字串，通过（`.`）切分成三个为 Base64 编�
 
 在基于 JWT 进行身份验证的的应用程序中，服务器通过 Payload、Header 和 Secret(密钥)创建 JWT 并将 JWT 发送给客户端。客户端接收到 JWT 之后，会将其保存在 Cookie 或者 localStorage 里面，以后客户端发出的所有请求都会携带这个令牌。
 
-![ JWT 身份验证示意图](https://oss.javaguide.cn/github/javaguide/system-design/jwt/jwt-authentication%20process.png)
+![ JWT 身份验证示意图](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesjwt-authentication%20process.png)
 
 简化后的步骤如下：
 
