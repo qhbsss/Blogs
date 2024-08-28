@@ -94,19 +94,16 @@ POST 的语义是根据请求负荷（报文主体）对指定的资源做出处
 
 比如，你打开我的文章，浏览器就会发送 GET 请求给服务器，服务器就会返回文章的所有文字及资源。
 
-![GET 请求](https://cdn.xiaolincoding.com/gh/xiaolincoder/ImageHost/计算机网络/HTTP/12-Get请求.png)
+![GET 请求](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures12-Get%E8%AF%B7%E6%B1%82.png)
 
 根据 RFC 规范，**POST 的语义是根据请求负荷（报文 body）对指定的资源做出处理**，具体的处理方式视资源类型而不同。POST 请求携带数据的位置一般是写在报文 body 中，body 中的数据可以是任意格式的数据，只要客户端与服务端协商好即可，而且浏览器不会对 body 大小做限制。
 
 比如，你在我文章底部，敲入了留言后点击「提交」（**暗示你们留言**），浏览器就会执行一次 POST 请求，把你的留言文字放进了报文 body 里，然后拼接好 POST 请求头，通过 TCP 协议发送给服务器。
 
-![POST 请求](https://cdn.xiaolincoding.com/gh/xiaolincoder/ImageHost/计算机网络/HTTP/13-Post请求.png)
+![POST 请求](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures13-Post%E8%AF%B7%E6%B1%82.png)
 
 - **GET 方法就是安全且幂等的**，因为它是「只读」操作，无论操作多少次，服务器上的数据都是安全的，且每次的结果都是相同的。所以，**可以对 GET 请求的数据做缓存，这个缓存可以做到浏览器本身上（彻底避免浏览器发请求），也可以做到代理上（如 nginx），而且在浏览器中 GET 请求可以保存为书签**。
 - **POST** 因为是「新增或提交数据」的操作，会修改服务器上的资源，所以是**不安全**的，且多次提交数据就会创建多个资源，所以**不是幂等**的。所以，**浏览器一般不会缓存 POST 请求，也不能把 POST 请求保存为书签**。
-
-
-
 
 >安全和幂等的概念：
 - 在 HTTP 协议里，所谓的「安全」是指请求方法不会「破坏」服务器上的资源。
