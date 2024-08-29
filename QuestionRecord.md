@@ -5,3 +5,4 @@ https://cloud.tencent.com/developer/article/1412651  （kafka linux安装）
 https://mp.weixin.qq.com/s/4V1jI6RylJr7Jr9JsQe73A  (消息队列比较)
 https://koktlzz.github.io/posts/how-does-kafka-synchronize-replicas/  （kafka副本同步机制）
 https://blog.csdn.net/u011066470/article/details/123314486
+https://blog.csdn.net/qq_52897088/article/details/122798949
