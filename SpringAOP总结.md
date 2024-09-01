@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 # AOP
 
 AOP（Aspect Oriented Programming）即面向切面编程，AOP 是 OOP（面向对象编程）的一种延续，二者互补，并不对立。AOP 的目的是将横切关注点（如日志记录、事务管理、权限控制、接口限流、接口幂等等）从核心业务逻辑中分离出来，通过动态代理、字节码操作等技术，实现代码的复用和解耦，提高代码的可维护性和可扩展性。OOP 的目的是将业务逻辑按照对象的属性和行为进行封装，通过类、对象、继承、多态等概念，实现代码的模块化和层次化（也能实现代码的复用），提高代码的可读性和可维护性。
@@ -175,4 +179,54 @@ public interface BeanPostProcessor {
 ![e18573be06013940acccc9a6205aafd5](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/e18573be06013940acccc9a6205aafd5.png)
 
  从源码可以知道，Spring在调用BeanPostProcessor的postProcessAfterInitialization方法会传入原始对象，并把postProcessAfterInitialization方法返回的对象替换原始对象，所以我们只要在postProcessAfterInitialization方法实现代理对象的生成逻辑即可。
+
+# 注解的本质
+
+注解本质是一个继承了Annotation的特殊接口，其具体实现类是Java运行时生成的动态代理类。通过代理对象调用自定义注解（接口）的方法，会最终调用AnnotationInvocationHandler的invoke方法。该方法会从memberValues这个Map中索引出对应的值。而memberValues的来源是Java常量池。
+
+反射注解的工作原理：
+
+1. 首先，我们通过键值对的形式可以为注解属性赋值，像这样：@Hello(value = "hello")。
+
+2. 接着，你用注解修饰某个元素，编译器将在编译期扫描每个类或者方法上的注解，会做一个基本的检查，你的这个注解是否允许作用在当前位置，最后会将注解信息写入元素的属性表。
+
+3. 然后，当你进行反射的时候，虚拟机将所有生命周期在 RUNTIME的注解取出来放到一个 map 中，并创建一个 AnnotationInvocationHandler 实例，把这个 map 传递给它。
+
+4. 最后，虚拟机将采用 JDK 动态代理机制生成一个目标注解的代理类，并初始化好处理器。
+
+## 反射注解
+- 一般情况下，继承于class类的子类可以通过class基类的方法反射获取得到子类的property，method等，但是对于注解，子类如何通过父类得到呢？这里的class类需要对AnnotatedElement接口进行实现，这个接口提供要返回的Annotation的方法。
+- Java反射机制解析注解主要是通过java.lang.reflect包下的提供的AnnotatedElement接口，Class<T>实现了该接口定义的方法，返回本元素/所有的注解（Annotation接口）。
+
+![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures076e4647149398d41eb6610106890d73.jpeg)
+
+- AnnotatedElement是所有注解元素的父接口，所有的注解元素都可以通过某个类反射获取AnnotatedElement对象，该对象有以下4个方法来访问Annotation信息。AnnotatedElement接口定义如下：    
+
+    public interface AnnotatedElement {
+        
+        default boolean isAnnotationPresent(Class<? extends Annotation> annotationClass)     {
+            return getAnnotation(annotationClass) != null;
+        }
+        
+         <T extends Annotation> T getAnnotation(Class<T> annotationClass);
+        
+        Annotation[] getAnnotations();
+        
+        default <T extends Annotation> T getDeclaredAnnotation(Class<T> annotationClass) {}
+        
+        default <T extends Annotation> T[] getDeclaredAnnotationsByType(Class<T> annotationClass) {
+            ...
+        }
+        
+        Annotation[] getDeclaredAnnotations();
+    }
+这个接口有default方法，Class类可直接使用。
+
+## 反射返回动态代理对象 & 注解实现类
+
+注解本质上是继承了 Annotation 接口的接口，而当你通过反射获取一个注解类实例的时候，其实 JDK 是通过动态代理机制生成一个实现我们注解（接口）的代理类。该动态代理类实现了注解所对应的接口，对该注解接口内定义的方法通过定义一个代理方法，该代理方法内通过AnnotationInvocationHandler的类通过反射调用注解接口内对应的方法。该方法会从memberValues这个Map中索引出对应的值，而memberValues的来源是Java常量池。
+
+![在这里插入图片描述](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures013586c59e690beac6d83f14ef46d057.png)
+
+![在这里插入图片描述](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesc69c6edf4a62dade860333771a527f8a.png)
 
