@@ -6,3 +6,6 @@ https://mp.weixin.qq.com/s/4V1jI6RylJr7Jr9JsQe73A  (消息队列比较)
 https://koktlzz.github.io/posts/how-does-kafka-synchronize-replicas/  （kafka副本同步机制）
 https://blog.csdn.net/u011066470/article/details/123314486
 https://blog.csdn.net/qq_52897088/article/details/122798949
+https://www.cnblogs.com/ygbh/p/17248397.html （容器目录与宿主机目录）
+https://www.cnblogs.com/JasonCeng/p/17659502.html  （修复容器中的top指令以及/proc文件系统中的信息）
+https://blog.csdn.net/Ciellee/article/details/107917965  （一个进程可以有多个命名空间）
