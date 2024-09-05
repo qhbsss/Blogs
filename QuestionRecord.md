@@ -9,3 +9,4 @@ https://blog.csdn.net/qq_52897088/article/details/122798949
 https://www.cnblogs.com/ygbh/p/17248397.html （容器目录与宿主机目录）
 https://www.cnblogs.com/JasonCeng/p/17659502.html  （修复容器中的top指令以及/proc文件系统中的信息）
 https://blog.csdn.net/Ciellee/article/details/107917965  （一个进程可以有多个命名空间）
+https://dingjingmaster.github.io/2022/05/0002-rebase%E4%B8%8Emerge%E7%9A%84%E5%8C%BA%E5%88%AB/   (merge和rebase区别)
