@@ -2,9 +2,13 @@
 >参考（https://dingjingmaster.github.io/2022/05/0002-rebase%E4%B8%8Emerge%E7%9A%84%E5%8C%BA%E5%88%AB/#comments）
 
 从 master 拉一个叫feature的分支出来，
+
 ![](https://img2023.cnblogs.com/blog/2229336/202302/2229336-20230212212632543-172414776.png)
+
 在 feature 分支进行了两次提交，此时其它人也进行了两次提交，并且合并到了 master 分支，
+
 ![](https://img2023.cnblogs.com/blog/2229336/202302/2229336-20230212212639166-1738345736.png)
+
 此时是无法push到远程仓库的，需要进行分支合并，下面来演示git rebase 和 git merge 这两个命令的差异。
 ## 1. git merge
 ```bash
