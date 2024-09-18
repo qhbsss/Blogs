@@ -443,7 +443,7 @@ CREATE TABLE `user` (
 
 表中的有这些行记录：
 
-![](https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/行级锁/user.png)
+![](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesuser.png)
 
 这次实验环境的 **MySQL 版本是 8.0.26，隔离级别是「可重复读」**。
 
@@ -500,6 +500,29 @@ Empty set (0.03 sec)
 > 间隙锁的范围`(1, 5)` ，是怎么确定的？
 根据我的经验，如果 LOCK_MODE 是 next-key 锁或者间隙锁，那么 LOCK_DATA 就表示锁的范围「右边界」，此次的事务 A 的 LOCK_DATA 是 5。
 然后锁范围的「左边界」是表中 id 为 5 的上一条记录的 id 值，即 1。因此，间隙锁的范围`(1, 5)`。
+
+##### eg:
+以表 t 为例，表 t 的建表语句和初始化语句如下。
+```sql
+CREATE TABLE `t` (
+`id` int(11) NOT NULL,
+`c` int(11) DEFAULT NULL,
+`d` int(11) DEFAULT NULL,
+PRIMARY KEY (`id`),
+KEY `c` (`c`)
+) ENGINE=InnoDB;
+insert into t values(0,0,0),(5,5,5),
+(10,10,10),(15,15,15),(20,20,20),(25,25,25);
+```
+
+![image-20240918235429581](C:\Users\dell\AppData\Roaming\Typora\typora-user-images\image-20240918235429581.png)
+
+由于表 t 中没有 id=7 的记录，所以用我们上面提到的加锁规则判断一下的话：
+1. 根据原则 1，加锁单位是 next-key lock，session A 加锁范围就是 (5,10]；
+2. 同时根据优化 2，这是一个等值查询 (id=7)，而 id=10 不满足查询条件，next-key lock
+退化成间隙锁，因此最终加锁的范围是 (5,10)。
+所以，session B 要往这个间隙里面插入 id=8 的记录会被锁住，但是 session C 修改 id=10 这
+行是可以的。
 
 ### 唯一索引范围查询
 
@@ -614,6 +637,19 @@ select * from user where id < 5 for update;
 
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/行级锁/唯一索引范围查询小于5.drawio.png)
 
+#### 主键索引范围锁
+
+```sql
+mysql> select * from t where id>=10 and id<11 for update;
+```
+
+![image-20240919000324622](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919000324622.png)
+
+1. 开始执行的时候，要找到第一个 id=10 的行，因此本该是 next-key lock(5,10]。 根据优化主键 id 上的等值条件，退化成行锁，只加了 id=10 这一行的行锁。
+2. 范围查找就往后继续找，找到 id=15 这一行停下来，因此需要加 next-key lock(10,15]。
+
+所以，session A 这时候锁的范围就是主键索引上，行锁 id=10 和 next-key lock(10,15]。这样，session B 和 session C 的结果就能理解了。
+首次 session A 定位查找 id=10 的行的时候，是当做等值查询来判断的，而向右扫描到 id=15 的时候，用的是范围查询判断。
 
 ### 非唯一索引等值查询
 
@@ -642,6 +678,23 @@ Empty set (0.00 sec)
 
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/行级锁/非唯一索引等值查询age=25.drawio.png)
 
+##### eg: 非唯一索引等值锁覆盖索引
+
+![image-20240918235638345](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240918235638345.png)
+
+这里 session A 要给索引 c 上 c=5 的这一行加上读锁。
+1. 根据原则 1，加锁单位是 next-key lock，因此会给 (0,5] 加上 next-key lock。
+2. 要注意 c 是普通索引，因此仅访问 c=5 这一条记录是不能马上停下来的，需要向右遍历，查到 c=10 才放弃。根据原则 2，访问到的都要加锁，因此要给 (5,10] 加 next-key lock。
+3. 但是同时这个符合优化 2：等值判断，向右遍历，最后一个值不满足 c=5 这个等值条件，因此退化成间隙锁 (5,10)。
+4. 只有访问到的对象才会加锁，这个查询使用覆盖索引，并不需要访问主键索引，所以主键索引上没有加任何锁，这就是为什么 session B 的 update 语句可以执行完成。但 session C 要插入一个 (7,7,7) 的记录，就会被 session A 的间隙锁 (5,10) 锁住。
+
+需要注意，在这个例子中，lock in share mode 只锁覆盖索引，但是如果是 for update 就不一
+样了。 执行 for update 时，系统会认为你接下来要更新数据，因此会顺便给主键索引上满足条
+件的行加上行锁。
+这个例子说明，锁是加在索引上的；同时，它给我们的指导是，如果你要用 lock in share
+mode 来给行加读锁避免数据被更新的话，就必须得绕过覆盖索引的优化，在查询字段中加入
+索引中不存在的字段。比如，将 session A 的查询语句改成 select d from t where c=5 lock
+in share mode。
 
 #### 2、记录存在的情况
 
@@ -667,6 +720,52 @@ mysql> select * from user where age = 22 for update;
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/行级锁/非唯一索引等值查询存在.drawio.png)
 
 
+
+#### 非唯一索引上存在"等值"的例子
+
+```sql
+mysql> insert into t values(30,10,30);
+```
+
+新插入的这一行 c=10，也就是说现在表里有两个 c=10 的行。
+
+![image-20240919001211232](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919001211232.png)
+
+![image-20240919001229698](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919001229698.png)
+
+session A 在遍历的时候，先访问第一个 c=10 的记录。同样地，根据原则 1，这里加的是 (c=5,id=5) 到 (c=10,id=10) 这个 next-key lock。
+然后，session A 向右查找，直到碰到 (c=15,id=15) 这一行，循环才结束。根据优化 2，这是一个等值查询，向右查找到了不满足条件的行，所以会退化成 (c=10,id=10) 到 (c=15,id=15)的间隙锁。
+也就是说，这个 delete 语句在索引 c 上的加锁范围，就是下图中蓝色区域覆盖的部分。
+
+![image-20240919001310139](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919001310139.png)
+
+这个蓝色区域左右两边都是虚线，表示开区间，即 (c=5,id=5) 和 (c=15,id=15) 这两行上都没有锁。
+
+#### limit 语句加锁
+
+![image-20240919001443814](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919001443814.png)
+
+这个例子里，session A 的 delete 语句加了 limit 2。你知道表 t 里 c=10 的记录其实只有两条，因此加不加 limit 2，删除的效果都是一样的，但是加锁的效果却不同。可以看到，sessionB 的 insert 语句执行通过了，跟案例六的结果不同。
+这是因为，案例七里的 delete 语句明确加了 limit 2 的限制，因此在遍历到 (c=10, id=30) 这一行之后，满足条件的语句已经有两条，循环就结束了。
+因此，索引 c 上的加锁范围就变成了从（c=5,id=5) 到（c=10,id=30) 这个前开后闭区间，如下图所示：
+
+![image-20240919001517196](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919001517196.png)
+
+可以看到，(c=10,id=30）之后的这个间隙并没有在加锁范围里，因此 insert 语句插入 c=12是可以执行成功的。
+
+#### 死锁例子
+
+![image-20240919001745805](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919001745805.png)
+
+1. session A 启动事务后执行查询语句加 lock in share mode，在索引 c 上加了 next-keylock(5,10] 和间隙锁 (10,15)；
+
+2. session B 的 update 语句也要在索引 c 上加 next-key lock(5,10] ，进入锁等待；
+
+3. 然后 session A 要再插入 (8,8,8) 这一行，被 session B 的间隙锁锁住。由于出现了死锁，InnoDB 让 session B 回滚。
+
+session B 的 next-key lock 不是还没申请成功吗？
+其实是这样的，session B 的“加 next-key lock(5,10] ”操作，实际上分成了两步，先是加(5,10) 的间隙锁，加锁成功；然后加 c=10 的行锁，这时候才被锁住的。
+
 ### 非唯一索引范围查询
 
 非唯一索引和主键索引的范围查询的加锁也有所不同，不同之处在于**非唯一索引范围查询，索引的 next-key lock 不会有退化为间隙锁和记录锁的情况**，也就是非唯一索引进行范围查询时，对二级索引记录加锁都是加 next-key 锁。
@@ -691,6 +790,11 @@ mysql> select * from user where age >= 22  for update;
 
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/行级锁/非唯一索引范围查询age大于等于22.drawio.png)
 
+##### eg:
+
+![image-20240919000839832](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240919000839832.png)
+
+session A 是一个范围查询，按照原则 1 的话，应该是索引 id 上只加 (10,15] 这个 next-keylock，并且因为 id 是唯一键，所以循环判断到 id=15 这一行就应该停止了。但是实现上，InnoDB 会往前扫描到第一个不满足条件的行为止，也就是 id=20。而且由于这是个范围扫描，因此索引 id 上的 (15,20] 这个 next-key lock 也会被锁上。所以你看到了，session B 要更新 id=20 这一行，是会被锁住的。同样地，session C 要插入id=16 的一行，也会被锁住。
 
 ### 没有加索引的查询
 
