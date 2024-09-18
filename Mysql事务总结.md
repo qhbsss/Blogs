@@ -19,6 +19,8 @@ A(原子性)C(一致性)I(隔离性)D(持久性)
 
 ## 可重复读隔离级别下MVCC工作原理
 MVCC 的实现依赖于：**隐藏字段、Read View、undo log**，在可重复读隔离级别下，当在事务中第一次执行快照读时，会生成整个事务的ReadView，该ReadView在当前事务下是不会发生改变的，记录对于后续事务中快照读的可见性根据记录隐藏字段中的trx_id和事务的ReadView来决定，当记录的tri_id对于事务的ReadView是可见的，就读取当前页面中的记录，否则读取记录在undo_log中的历史版本
+>undo log中的历史版本并不是物理上真实存在的，**真实物理存在只有最新的一条记录，其他历史记录都是通过回滚日志推导出来的。**
+
 **Read View中包含以下字段**：
 ![](./images/image.png)
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/ImageHost4@main/mysql/事务隔离/readview结构.drawio.png)
