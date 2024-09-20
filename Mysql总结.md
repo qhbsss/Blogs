@@ -877,3 +877,58 @@ session A 的加锁范围是索引 c 上的 (5,10]、(10,15]、(15,20]、(20,25]
 
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/mysql/行级锁/非唯一索引加锁流程.jpeg)
 
+# join原理
+## 场景构造
+```sql
+CREATE TABLE `t2` (
+`id` int(11) NOT NULL,
+`a` int(11) DEFAULT NULL,
+`b` int(11) DEFAULT NULL,
+PRIMARY KEY (`id`),
+KEY `a` (`a`)
+) ENGINE=InnoDB;
+drop procedure idata;
+delimiter ;;
+create procedure idata()
+begin
+declare i int;
+set i=1;
+while(i<=1000)do
+insert into t2 values(i, i, i);
+set i=i+1;
+end while;
+end;;
+delimiter ;
+call idata();
+create table t1 like t2;
+insert into t1 (select * from t2 where id<=100)
+```
+这两个表都有一个主键索引 id 和一个索引 a，字段 b 上无索引。存储过程
+idata() 往表 t2 里插入了 1000 行数据，在表 t1 里插入的是 100 行数据。
+## Index Nested-Loop Join
+
+```sql
+select * from t1 straight_join t2 on (t1.a=t2.a);
+```
+用straight_join 让 MySQL 使用固定的连接方式执行查询，这样优化器只会按照我们指定的方式去 join。在这个语句里，t1 是驱动表，t2 是被驱动表。
+![](./images/1726730084209_image.png)
+被驱动表 t2 的字段 a 上有索引，join 过程用上了这个索引，因此这个语句的执行流程是这样的：
+1. 从表 t1 中读入一行数据 R；
+2. 从数据行 R 中，取出 a 字段到表 t2 里去查找；
+3. 取出表 t2 中满足条件的行，跟 R 组成一行，作为结果集的一部分；
+4. 重复执行步骤 1 到 3，直到表 t1 的末尾循环结束。
+
+这个过程是先遍历表 t1，然后根据从表 t1 中取出的每行数据中的 a 值，去表 t2 中查找满足条件的记录。在形式上，这个过程就跟我们写程序时的嵌套查询类似，并且可以用上被驱动表的索引，所以我们称之为“Index Nested-Loop Join”，简称 NLJ。
+## Simple Nested-Loop Join
+
+```sql
+select * from t1 straight_join t2 on (t1.a=t2.b);
+```
+由于表 t2 的字段 b 上没有索引，因此再用图 2 的执行流程时，每次到 t2 去匹配的时候，就要做一次全表扫描。
+## Block Nested-Loop Join
+MySQL 也没有使用这个 Simple Nested-Loop Join 算法，而是使用了另一个叫作“Block Nested-Loop Join”的算法，简称 BNL。
+被驱动表上没有可用的索引，算法的流程是这样的：
+1. 把表 t1 的数据读入线程内存 join_buffer 中，由于我们这个语句中写的是 select *，因此是把整个表 t1 放入了内存；
+2. 扫描表 t2，把表 t2 中的每一行取出来，跟join_buffer 中的数据做对比，满足 join 条件的，作为结果集的一部分返回。
+![](./images/1726730250123_image.png)
+如果使用 Simple Nested-Loop Join 算法进行查询，扫描行数也是 10 万行。因此，从时间复杂度上来说，这两个算法是一样的。但是，Block Nested-Loop Join算法的这 10 万次判断是内存操作，速度上会快很多，性能也更好。
