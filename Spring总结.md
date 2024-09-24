@@ -361,7 +361,7 @@ ViewResolver 与 View 接⼝：
 Jar 的启动类
 - MANIFEST.MF
   - Main-Class: org.springframework.boot.loader.JarLauncher
-项⽬目的主类
+  项⽬目的主类
 - @SpringApplication
 - MANIFEST.MF
   - Start-Class: xxx.yyy.zzz
@@ -457,4 +457,53 @@ Spring Cloud Config Client
 @HystrixCommand
 - fallbackMethod / commandProperties
 - @HystrixProperty(name="execution.isolation.strategy",value=“SEMAPHORE")
+
 ## Resilience4j
+
+
+
+# 消息驱动
+
+## Spring Cloud Stream
+
+Spring Cloud Stream 是一款⽤用于构建消息驱动的微服务应⽤用程序的轻量量级框架
+特性
+• 声明式编程模型
+• 引⼊入多种概念抽象
+• 发布订阅、消费组、分区
+• ⽀支持多种消息中间件
+• RabbitMQ、Kafka ……
+
+![image-20240924235252952](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240924235252952.png)
+
+### Binder
+• RabbitMQ
+• Apache Kafka
+• Kafka Streams
+• Amazon Kinesis
+• RocketMQ
+
+### Binding
+应⽤用中⽣生产者、消费者与消息系统之间的桥梁梁
+• @EnableBinding
+• @Input / SubscribableChannel
+• @Output / MessageChannel
+
+### 消费组
+• 对同一消息，每个组中都会有⼀一个消费者收到消息
+
+### 分区
+
+![image-20240924235404907](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20240924235404907.png)
+
+### 如何发送与接收消息
+生产消息
+• 使⽤用 MessageChannel 中的 send()
+• @SendTo
+消费消息
+• @StreamListener
+• @Payload / @Headers / @Header
+
+## kafka使用
+
+诞⽣生之初被⽤用作消息队列列，现已发展为强⼤大的分布式事件流平台

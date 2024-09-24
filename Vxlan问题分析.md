@@ -65,6 +65,24 @@ sysctl net.ipv4.conf.all.arp_ignore=0
 sysctl net.ipv4.conf.vxlan88.arp_ignore=0
 sysctl net.ipv4.conf.lo.arp_ignore=0
 ```
+>`net.ipv4.conf.all.arp_accept=1` 是一个与 ARP（Address Resolution Protocol）相关的内核参数，它主要在网络协议栈的 **链路层（数据链路层）** 起作用，具体来说是 **ARP 协议** 处理的一部分。
+
+>### 作用层次：
+>- **链路层（数据链路层，Layer 2）**：ARP 协议属于 OSI 模型的第二层，也就是链路层。ARP 的主要功能是将网络层的 IP 地址解析为链路层的 MAC 地址。在这一层，主机通过 ARP 请求查找同一网络中目标设备的 MAC 地址。
+
+>### 参数作用：
+>`arp_accept` 控制主机如何响应接收到的 Gratuitous ARP（任意 ARP）请求。
+
+>- **默认值为 0**（`arp_accept=0`）：表示内核只会对自身绑定的 IP 地址的 ARP 请求进行应答，通常只接受到达本设备的 ARP 请求。
+
+>- **设置为 1**（`arp_accept=1`）：则表示主机会对其他子接口的 ARP 请求也做出应答，适用于某些场景下的高级路由或代理 ARP。这样设置的情况下，主机会接受不同网络接口上收到的 ARP 应答请求，通常用于处理冗余的链路或复杂的网络环境。
+
+>### 应用场景：
+>- **冗余网络**：如果网络有多个路径或者多条接口连接到不同的子网，`arp_accept=1` 可以帮助这些接口更好地处理和识别 ARP 请求。
+
+>- **代理 ARP（Proxy ARP）**：在一些代理 ARP 或特殊路由的场景下，需要主机为非本机的 IP 地址应答 ARP 请求。此参数的开启可以配合代理 ARP 机制，使得设备可以处理转发来自不同子网的 ARP 流量。
+
+>总结来说，`net.ipv4.conf.all.arp_accept=1` 在网络协议栈的 **链路层** 起作用，影响设备对 ARP 请求的接受和处理行为。
 
 ### 4. **手动静态ARP配置**
 
