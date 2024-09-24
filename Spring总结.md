@@ -369,3 +369,92 @@ Jar 的启动类
 ![](./images/1727080357661_image.png)
 • 打包后的 Jar 可直接运⾏行行，⽆无需 java 命令
 • 可以在 .conf 的同名⽂文件中配置参数
+
+# 服务注册与发现
+## Eureka
+### 注册中心
+Starter
+- spring-cloud-dependencies
+- spring-cloud-starter-netflix-eureka-starter
+声明
+- @EnableEurekaServer
+### 服务注册
+Starter
+- spring-cloud-starter-netflix-eureka-client
+声明
+- @EnableDiscoveryClient
+- @EnableEurekaClient
+### 服务发现
+#### 获得服务地址
+EurekaClient
+- getNextServerFromEureka()
+DiscoveryClient
+- getInstances()
+#### 负载均衡
+Load Balancer Client
+RestTemplate 与 WebClient
+- @LoadBalaced
+- 实际是通过 ClientHttpRequestInterceptor 实现的
+  - LoadBalancerInterceptor
+  - LoadBalancerClient
+    - RibbonLoadBalancerClient
+## Nacos
+![](./images/1727159906704_image.png)
+
+# 服务配置管理
+Spring Cloud Config
+目标
+- 在分布式系统中，提供外置配置⽀支持
+实现
+- 类似于 Spring 应⽤用中的 Environment 与 PropertySource
+- 在上下⽂文中增加 Spring Cloud Config 的 PropertySource
+## 配置中心
+Spring Cloud Config Server
+
+EnvironmentRepository
+- Git / SVN / Vault / JDBC …
+目的
+- 提供针对外置配置的 HTTP API
+依赖
+- spring-cloud-config-server
+- @EnableConfigServer
+- ⽀支持 Git / SVN / Vault / JDBC …
+## 服务配置发现
+Spring Cloud Config Client
+依赖
+- spring-cloud-starter-config
+发现配置中⼼心
+- bootstrap.properties | yml
+- spring.cloud.config.fail-fast=true
+- 通过配置
+  - spring.cloud.config.uri=http://localhost:8888
+
+发现配置中心
+- bootstrap.properties | yml
+- 通过服务发现
+- spring.cloud.config.discovery.enabled=true
+- spring.cloud.config.discovery.service-id=configserver
+配置刷新
+- @RefreshScope
+- Endpoint - /actuator/refresh
+
+配置的组合顺序
+以 yml 为例
+- 应⽤用名-profile.yml
+- 应⽤用名.yml
+- application-profile.yml
+- application.yml
+
+# 服务熔断与降级
+## 断路器模式
+核心思想
+- 在断路路器器对象中封装受保护的⽅方法调用
+- 该对象监控调⽤用和断路路情况
+- 调⽤用失败触发阈值后，后续调⽤用直接由断路路器器返回错误，不不再执⾏行行实际调⽤用
+![](./images/1727166037291_image.png)
+## Hystrix
+实现了了断路路器器模式
+@HystrixCommand
+- fallbackMethod / commandProperties
+- @HystrixProperty(name="execution.isolation.strategy",value=“SEMAPHORE")
+## Resilience4j
