@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 ![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures414248014bf825dd610c3095eed75377.jpg)
 
 # JVM执行字节码
@@ -15,6 +19,265 @@
 当退出当前执行的方法时，不管是正常返回还是异常返回，Java 虚拟机均会弹出当前线程的当前栈帧，并将之舍弃。
 
 ![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesab5c3523af08e0bf2f689c1d6033ef77.png)
+
+### java字节码
+
+eg:
+
+```java
+public class Foo {
+  private int tryBlock;
+  private int catchBlock;
+  private int finallyBlock;
+  private int methodExit;
+ 
+  public void test() {
+    try {
+      tryBlock = 0;
+    } catch (Exception e) {
+      catchBlock = 1;
+    } finally {
+      finallyBlock = 2;
+    }
+    methodExit = 3;
+  }
+}
+```
+
+编译过后，我们便可以使用 javap 来查阅 Foo.test 方法的字节码。
+
+```
+$ javac Foo.java
+$ javap -p -v Foo
+Classfile ../Foo.class
+  Last modified ..; size 541 bytes
+  MD5 checksum 3828cdfbba56fea1da6c8d94fd13b20d
+  Compiled from "Foo.java"
+public class Foo
+  minor version: 0
+  major version: 54
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #7                          // Foo
+  super_class: #8                         // java/lang/Object
+  interfaces: 0, fields: 4, methods: 2, attributes: 1
+Constant pool:
+   #1 = Methodref          #8.#23         // java/lang/Object."<init>":()V
+   #2 = Fieldref           #7.#24         // Foo.tryBlock:I
+   #3 = Fieldref           #7.#25         // Foo.finallyBlock:I
+   #4 = Class              #26            // java/lang/Exception
+   #5 = Fieldref           #7.#27         // Foo.catchBlock:I
+   #6 = Fieldref           #7.#28         // Foo.methodExit:I
+   #7 = Class              #29            // Foo
+   #8 = Class              #30            // java/lang/Object
+   #9 = Utf8               tryBlock
+  #10 = Utf8               I
+  #11 = Utf8               catchBlock
+  #12 = Utf8               finallyBlock
+  #13 = Utf8               methodExit
+  #14 = Utf8               <init>
+  #15 = Utf8               ()V
+  #16 = Utf8               Code
+  #17 = Utf8               LineNumberTable
+  #18 = Utf8               test
+  #19 = Utf8               StackMapTable
+  #20 = Class              #31            // java/lang/Throwable
+  #21 = Utf8               SourceFile
+  #22 = Utf8               Foo.java
+  #23 = NameAndType        #14:#15        // "<init>":()V
+  #24 = NameAndType        #9:#10         // tryBlock:I
+  #25 = NameAndType        #12:#10        // finallyBlock:I
+  #26 = Utf8               java/lang/Exception
+  #27 = NameAndType        #11:#10        // catchBlock:I
+  #28 = NameAndType        #13:#10        // methodExit:I
+  #29 = Utf8               Foo
+  #30 = Utf8               java/lang/Object
+  #31 = Utf8               java/lang/Throwable
+{
+  private int tryBlock;
+    descriptor: I
+    flags: (0x0002) ACC_PRIVATE
+ 
+  private int catchBlock;
+    descriptor: I
+    flags: (0x0002) ACC_PRIVATE
+ 
+  private int finallyBlock;
+    descriptor: I
+    flags: (0x0002) ACC_PRIVATE
+ 
+  private int methodExit;
+    descriptor: I
+    flags: (0x0002) ACC_PRIVATE
+ 
+  public Foo();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 1: 0
+ 
+  public void test();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=3, args_size=1
+         0: aload_0
+         1: iconst_0
+         2: putfield      #2                  // Field tryBlock:I
+         5: aload_0
+         6: iconst_2
+         7: putfield      #3                  // Field finallyBlock:I
+        10: goto          35
+        13: astore_1
+        14: aload_0
+        15: iconst_1
+        16: putfield      #5                  // Field catchBlock:I
+        19: aload_0
+        20: iconst_2
+        21: putfield      #3                  // Field finallyBlock:I
+        24: goto          35
+        27: astore_2
+        28: aload_0
+        29: iconst_2
+        30: putfield      #3                  // Field finallyBlock:I
+        33: aload_2
+        34: athrow
+        35: aload_0
+        36: iconst_3
+        37: putfield      #6                  // Field methodExit:I
+        40: return
+      Exception table:
+         from    to  target type
+             0     5    13   Class java/lang/Exception
+             0     5    27   any
+            13    19    27   any
+      LineNumberTable:
+        line 9: 0
+        line 13: 5
+        line 14: 10
+        line 10: 13
+        line 11: 14
+        line 13: 19
+        line 14: 24
+        line 13: 27
+        line 14: 33
+        line 15: 35
+        line 16: 40
+      StackMapTable: number_of_entries = 3
+        frame_type = 77 /* same_locals_1_stack_item */
+          stack = [ class java/lang/Exception ]
+        frame_type = 77 /* same_locals_1_stack_item */
+          stack = [ class java/lang/Throwable ]
+        frame_type = 7 /* same */
+}
+SourceFile: "Foo.java"
+```
+
+#### 1. 基本信息，涵盖了原 class 文件的相关信息
+
+class 文件的版本号（minor version: 0，major version: 54），该类的访问权限（flags: (0x0021) ACC_PUBLIC, ACC_SUPER），该类（this_class: #7）以及父类（super_class: #8）的名字，所实现接口（interfaces: 0）、字段（fields: 4）、方法（methods: 2）以及属性（attributes: 1）的数目。
+
+```
+Classfile ../Foo.class
+  Last modified ..; size 541 bytes
+  MD5 checksum 3828cdfbba56fea1da6c8d94fd13b20d
+  Compiled from "Foo.java"
+public class Foo
+  minor version: 0
+  major version: 54
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #7                          // Foo
+  super_class: #8                         // java/lang/Object
+  interfaces: 0, fields: 4, methods: 2, attributes: 1
+```
+
+### 2. 常量池，用来存放各种常量以及符号引用
+
+常量池中的每一项都有一个对应的索引（如 #1），并且可能引用其他的常量池项（#1 = Methodref #8.#23）
+
+```
+Constant pool:
+   #1 = Methodref          #8.#23         // java/lang/Object."<init>":()V
+... 
+   #8 = Class              #30            // java/lang/Object
+...
+  #14 = Utf8               <init>
+  #15 = Utf8               ()V
+...
+  #23 = NameAndType        #14:#15        // "<init>":()V
+...
+  #30 = Utf8               java/lang/Object
+
+```
+
+举例来说，上图中的 1 号常量池项是一个指向 Object 类构造器的符号引用。它是由另外两个常量池项所构成。如果将它看成一个树结构的话，那么它的叶节点会是字符串常量，如下图所示。
+
+![image-20241004224835665](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20241004224835665.png)
+
+### 3. 字段区域，用来列举该类中的各个字段
+
+这里最主要的信息便是该字段的类型（descriptor: I）以及访问权限（flags: (0x0002) ACC_PRIVATE）。对于声明为 final 的静态字段而言，如果它是基本类型或者字符串类型，那么字段区域还将包括它的常量值。
+
+另外，Java 虚拟机同样使用了“描述符”（descriptor）来描述字段的类型。
+
+```
+  private int tryBlock;
+    descriptor: I
+    flags: (0x0002) ACC_PRIVATE
+```
+
+### 4. 方法区域，用来列举该类中的各个方法
+
+除了方法描述符以及访问权限之外，每个方法还包括最为重要的代码区域（Code:)。
+
+```
+public void test();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=3, args_size=1
+         0: aload_0
+...
+        10: goto          35
+...
+        34: athrow
+        35: aload_0
+...
+        40: return
+      Exception table:
+         from    to  target type
+             0     5    13   Class java/lang/Exception
+             0     5    27   any
+            13    19    27   any
+      LineNumberTable:
+        line 9: 0
+...
+        line 16: 40
+      StackMapTable: number_of_entries = 3
+        frame_type = 77 /* same_locals_1_stack_item */
+          stack = [ class java/lang/Exception ]
+```
+
+接下来则是该方法的字节码。每条字节码均标注了对应的偏移量（bytecode index，BCI），这是用来定位字节码的。比如说偏移量为 10 的跳转字节码 10: goto 35，将跳转至偏移量为 35 的字节码 35: aload_0。
+
+紧跟着的异常表（Exception table:）也会使用偏移量来定位每个异常处理器所监控的范围（由 from 到 to 的代码区域），以及异常处理器的起始位置（target）。除此之外，它还会声明所捕获的异常类型（type）。其中，any 指代任意异常类型。
+
+再接下来的行数表（LineNumberTable:）则是 Java 源程序到字节码偏移量的映射。如果你在编译时使用了 -g 参数（javac -g Foo.java），那么这里还将出现局部变量表（LocalVariableTable:），展示 Java 程序中每个局部变量的名字、类型以及作用域。
+
+行数表和局部变量表均属于调试信息。Java 虚拟机并不要求 class 文件必备这些信息。
+
+```
+ LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           14       5     1     e   Ljava/lang/Exception;
+            0      41     0  this   LFoo;
+```
+
+最后则是字节码操作数栈的映射表（StackMapTable: number_of_entries = 3）。该表描述的是字节码跳转后操作数栈的分布情况，一般被 Java 虚拟机用于验证所加载的类，以及即时编译相关的一些操作，正常情况下，你无须深入了解。
 
 ## 硬件视角
 
@@ -241,6 +504,176 @@ Java 虚拟机中的静态绑定指的是在解析时便能够直接识别目标
 
 > 由于对重载方法的区分在编译阶段已经完成，我们可以认为 Java 虚拟机不存在重载这一概念。因此，在某些文章中，重载也被称为静态绑定（static binding），或者编译时多态（compile-time polymorphism）；而重写则被称为动态绑定（dynamic binding）。这个说法在 Java 虚拟机语境下并非完全正确。这是因为某个类中的重载方法可能被它的子类所重写，因此 Java 编译器会将所有对非私有实例方法的调用编译为需要动态绑定的类型。
 
+Java 字节码中与调用相关的指令共有五种。
+
+1. invokestatic：用于调用静态方法。
+2. invokespecial：用于调用私有实例方法、构造器，以及使用 super 关键字调用父类的实例方法或构造器，和所实现接口的默认方法。
+3. invokevirtual：用于调用非私有实例方法。
+4. invokeinterface：用于调用接口方法。
+5. invokedynamic：用于调用动态方法。
+
+
+
+### eg：
+
+Java 的重写与 Java 虚拟机中的重写并不一致，但是编译器会通过生成桥接方法来弥补。
+
+```java
+interface Customer {
+  boolean isVIP();
+}
+ 
+class Merchant {
+  public Number actionPrice(double price, Customer customer) {
+      return 0;
+  }
+}
+ 
+class NaiveMerchant extends Merchant {
+  @Override
+  public Double actionPrice(double price, Customer customer) {
+      return 0.0;
+  }
+}
+```
+
+```
+//Merchant.class
+Classfile /home/qiuhb/Project/jvmtest/Merchant.class
+  Last modified Oct 4, 2024; size 349 bytes
+  MD5 checksum f8a40f596bfbc4c9d3142a5bc5a3e7b1
+  Compiled from "override.java"
+class Merchant
+  minor version: 0
+  major version: 52
+  flags: ACC_SUPER
+Constant pool:
+   #1 = Methodref          #4.#13         // java/lang/Object."<init>":()V
+   #2 = Methodref          #14.#15        // java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+   #3 = Class              #16            // Merchant
+   #4 = Class              #17            // java/lang/Object
+   #5 = Utf8               <init>
+   #6 = Utf8               ()V
+   #7 = Utf8               Code
+   #8 = Utf8               LineNumberTable
+   #9 = Utf8               actionPrice
+  #10 = Utf8               (DLCustomer;)Ljava/lang/Number;
+  #11 = Utf8               SourceFile
+  #12 = Utf8               override.java
+  #13 = NameAndType        #5:#6          // "<init>":()V
+  #14 = Class              #18            // java/lang/Integer
+  #15 = NameAndType        #19:#20        // valueOf:(I)Ljava/lang/Integer;
+  #16 = Utf8               Merchant
+  #17 = Utf8               java/lang/Object
+  #18 = Utf8               java/lang/Integer
+  #19 = Utf8               valueOf
+  #20 = Utf8               (I)Ljava/lang/Integer;
+{
+  Merchant();
+    descriptor: ()V
+    flags:
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 5: 0
+
+  public java.lang.Number actionPrice(double, Customer);
+    descriptor: (DLCustomer;)Ljava/lang/Number;
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=4, args_size=3
+         0: iconst_0
+         1: invokestatic  #2                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+         4: areturn
+      LineNumberTable:
+        line 7: 0
+}
+SourceFile: "override.java"
+```
+
+```
+//NaiveMerchant.class
+Classfile /home/qiuhb/Project/jvmtest/NaiveMerchant.class
+  Last modified Oct 4, 2024; size 433 bytes
+  MD5 checksum f30d2c69d3e0079a35ca554b31ca60af
+  Compiled from "override.java"
+class NaiveMerchant extends Merchant
+  minor version: 0
+  major version: 52
+  flags: ACC_SUPER
+Constant pool:
+   #1 = Methodref          #5.#15         // Merchant."<init>":()V
+   #2 = Methodref          #16.#17        // java/lang/Double.valueOf:(D)Ljava/lang/Double;
+   #3 = Methodref          #4.#18         // NaiveMerchant.actionPrice:(DLCustomer;)Ljava/lang/Double;
+   #4 = Class              #19            // NaiveMerchant
+   #5 = Class              #20            // Merchant
+   #6 = Utf8               <init>
+   #7 = Utf8               ()V
+   #8 = Utf8               Code
+   #9 = Utf8               LineNumberTable
+  #10 = Utf8               actionPrice
+  #11 = Utf8               (DLCustomer;)Ljava/lang/Double;
+  #12 = Utf8               (DLCustomer;)Ljava/lang/Number;
+  #13 = Utf8               SourceFile
+  #14 = Utf8               override.java
+  #15 = NameAndType        #6:#7          // "<init>":()V
+  #16 = Class              #21            // java/lang/Double
+  #17 = NameAndType        #22:#23        // valueOf:(D)Ljava/lang/Double;
+  #18 = NameAndType        #10:#11        // actionPrice:(DLCustomer;)Ljava/lang/Double;
+  #19 = Utf8               NaiveMerchant
+  #20 = Utf8               Merchant
+  #21 = Utf8               java/lang/Double
+  #22 = Utf8               valueOf
+  #23 = Utf8               (D)Ljava/lang/Double;
+{
+  NaiveMerchant();
+    descriptor: ()V
+    flags:
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method Merchant."<init>":()V
+         4: return
+      LineNumberTable:
+        line 11: 0
+
+  public java.lang.Double actionPrice(double, Customer);
+    descriptor: (DLCustomer;)Ljava/lang/Double;
+    flags: ACC_PUBLIC
+    Code:
+      stack=2, locals=4, args_size=3
+         0: dconst_0
+         1: invokestatic  #2                  // Method java/lang/Double.valueOf:(D)Ljava/lang/Double;
+         4: areturn
+      LineNumberTable:
+        line 14: 0
+
+  public java.lang.Number actionPrice(double, Customer);
+    descriptor: (DLCustomer;)Ljava/lang/Number;
+    flags: ACC_PUBLIC, ACC_BRIDGE, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=4, args_size=3
+         0: aload_0
+         1: dload_1
+         2: aload_3
+         3: invokevirtual #3                  // Method actionPrice:(DLCustomer;)Ljava/lang/Double;
+         6: areturn
+      LineNumberTable:
+        line 11: 0
+}
+SourceFile: "override.java"
+```
+
+Merchant类中actionPrice方法返回值类型为Number
+NaiveMerchant类中actionPrice方法返回值类型为Double
+
+为了保证重写语义, NaiveMerchant类生成的字节码中有两个参数类型相同返回值类型不同的actionPrice方法, 生成的桥接方法还有一个acc_synthetic标记，代表对程序不可见。因此javac不能直接选取那个方法。
+Method actionPrice:(DLCustomer;)Ljava/lang/Double;
+Method actionPrice:(DLCustomer;)Ljava/lang/Number; // 桥接到返回值为double的方法 flags: ACC_PUBLIC, ACC_BRIDGE, ACC_SYNTHETIC
+
 ### 符号引用
 
 在编译过程中，我们并不知道目标方法的具体内存地址。因此，Java 编译器会暂时用符号引用来表示该目标方法。这一符号引用包括目标方法所在的类或接口的名字，以及目标方法的方法名和方法描述符。
@@ -264,3 +697,219 @@ Java 虚拟机中的静态绑定指的是在解析时便能够直接识别目标
 3. 如果没有找到，则在 I 的超接口中搜索。这一步的搜索结果的要求与非接口符号引用步骤 3 的要求一致。
 
 经过上述的解析步骤之后，符号引用会被解析成实际引用。对于可以静态绑定的方法调用而言，实际引用是一个指向方法的指针。对于需要动态绑定的方法调用而言，实际引用则是一个方法表的索引。
+
+### 虚方法
+
+Java 里所有非私有实例方法调用都会被编译成 invokevirtual 指令，而接口方法调用都会被编译成 invokeinterface 指令。这两种指令，均属于 Java 虚拟机中的虚方法调用。
+
+在绝大多数情况下，Java 虚拟机需要根据调用者的动态类型，来确定虚方法调用的目标方法。这个过程我们称之为动态绑定。那么，相对于静态绑定的非虚方法调用来说，虚方法调用更加耗时。
+
+在 Java 虚拟机中，静态绑定包括用于调用静态方法的 invokestatic 指令，和用于调用构造器、私有实例方法以及超类非私有实例方法的 invokespecial 指令。如果虚方法调用指向一个标记为 final 的方法，那么 Java 虚拟机也可以静态绑定该虚方法调用的目标方法。
+
+Java 虚拟机中采取了一种用空间换取时间的策略来实现动态绑定。它为每个类生成一张方法表，用以快速定位目标方法。
+
+#### 方法表
+
+类加载机制的链接部分中的准备阶段，它除了为静态字段分配内存之外，还会构造与该类相关联的方法表。
+
+这些方法可能是具体的、可执行的方法，也可能是没有相应字节码的抽象方法。方法表满足两个特质：其一，子类方法表中包含父类方法表中的所有方法；其二，子类方法在方法表中的索引值，与它所重写的父类方法的索引值相同。
+
+我们知道，方法调用指令中的符号引用会在执行之前解析成实际引用。对于静态绑定的方法调用而言，实际引用将指向具体的目标方法。对于动态绑定的方法调用而言，实际引用则是方法表的索引值（实际上并不仅是索引值）。
+
+在执行过程中，Java 虚拟机将获取调用者的实际类型，并在该实际类型的虚方法表中，根据索引值获得目标方法。这个过程便是动态绑定。
+
+实际上，使用了方法表的动态绑定与静态绑定相比，仅仅多出几个内存解引用操作：访问栈上的调用者，读取调用者的动态类型，读取该类型的方法表，读取方法表中某个索引值所对应的目标方法。相对于创建并初始化 Java 栈帧来说，这几个内存解引用操作的开销简直可以忽略不计。
+
+上述优化的效果看上去十分美好，但实际上仅存在于解释执行中，或者即时编译代码的最坏情况中。这是因为即时编译还拥有另外两种性能更好的优化手段：内联缓存（inlining cache）和方法内联（method inlining）。下面我便来介绍第一种内联缓存。
+
+# 异常
+
+异常处理的两大组成要素是抛出异常和捕获异常。这两大要素共同实现程序控制流的非正常转移。
+
+抛出异常可分为显式和隐式两种。显式抛异常的主体是应用程序，它指的是在程序中使用“throw”关键字，手动将异常实例抛出。
+
+隐式抛异常的主体则是 Java 虚拟机，它指的是 Java 虚拟机在执行过程中，碰到无法继续执行的异常状态，自动抛出异常。
+
+## 异常分类
+
+在 Java 语言规范中，所有异常都是 Throwable 类或者其子类的实例。Throwable 有两大直接子类。第一个是 Error，涵盖程序不应捕获的异常。当程序触发 Error 时，它的执行状态已经无法恢复，需要中止线程甚至是中止虚拟机。第二子类则是 Exception，涵盖程序可能需要捕获并且处理的异常。
+
+Exception 有一个特殊的子类 RuntimeException，用来表示“程序虽然无法继续执行，但是还能抢救一下”的情况。前边提到的数组索引越界便是其中的一种。
+
+RuntimeException 和 Error 属于 Java 里的非检查异常（unchecked exception）。其他异常则属于检查异常（checked exception）。在 Java 语法中，所有的检查异常都需要程序显式地捕获，或者在方法声明中用 throws 关键字标注。通常情况下，程序中自定义的异常应为检查异常，以便最大化利用 Java 编译器的编译时检查。
+
+![image-20241004164736418](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20241004164736418.png)
+
+>异常实例的构造十分昂贵。这是由于在构造异常实例时，Java 虚拟机便需要生成该异常的栈轨迹（stack trace）。该操作会逐一访问当前线程的 Java 栈帧，并且记录下各种调试信息，包括栈帧所指向方法的名字，方法所在的类名、文件名，以及在代码中的第几行触发该异常。
+
+当然，在生成栈轨迹时，Java 虚拟机会忽略掉异常构造器以及填充栈帧的 Java 方法（Throwable.fillInStackTrace），直接从新建异常位置开始算起。此外，Java 虚拟机还会忽略标记为不可见的 Java 方法栈帧。
+
+## 异常表
+
+在编译生成的字节码中，每个方法都附带一个异常表。异常表中的每一个条目代表一个异常处理器，并且由 from 指针、to 指针、target 指针以及所捕获的异常类型构成。这些指针的值是字节码索引（bytecode index，bci），用以定位字节码。
+
+其中，from 指针和 to 指针标示了该异常处理器所监控的范围，例如 try 代码块所覆盖的范围。target 指针则指向异常处理器的起始位置，例如 catch 代码块的起始位置。
+
+当程序触发异常时，Java 虚拟机会从上至下遍历异常表中的所有条目。当触发异常的字节码的索引值在某个异常表条目的监控范围内，Java 虚拟机会判断所抛出的异常和该条目想要捕获的异常是否匹配。如果匹配，Java 虚拟机会将控制流转移至该条目 target 指针指向的字节码。
+
+如果遍历完所有异常表条目，Java 虚拟机仍未匹配到异常处理器，那么它会弹出当前方法对应的 Java 栈帧，并且在调用者（caller）中重复上述操作。在最坏情况下，Java 虚拟机需要遍历当前线程 Java 栈上所有方法的异常表。
+
+finally 代码块的编译比较复杂。当前版本 Java 编译器的做法，是复制 finally 代码块的内容，分别放在 try-catch 代码块所有正常执行路径以及异常执行路径的出口中。
+
+![image-20241004165629600](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20241004165629600.png)
+
+
+
+针对异常执行路径，Java 编译器会生成一个或多个异常表条目，监控整个 try-catch 代码块，并且捕获所有种类的异常（在 javap 中以 any 指代）。这些异常表条目的 target 指针将指向另一份复制的 finally 代码块。并且，在这个 finally 代码块的最后，Java 编译器会重新抛出所捕获的异常。
+
+
+
+# JVM如何实现反射
+
+方法的反射调用 Method.invoke代码
+
+```ja
+public final class Method extends Executable {
+  ...
+  public Object invoke(Object obj, Object... args) throws ... {
+    ... // 权限检查
+    MethodAccessor ma = methodAccessor;
+    if (ma == null) {
+      ma = acquireMethodAccessor();
+    }
+    return ma.invoke(obj, args);
+  }
+}
+```
+
+Method.invoke 的源代码实际上委派给 MethodAccessor 来处理。MethodAccessor 是一个接口，它有两个已有的具体实现：一个通过本地方法来实现反射调用，另一个则使用了委派模式。
+
+![8a22180d61207a9b411042e4f11f296](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures8a22180d61207a9b411042e4f11f296.jpg)
+
+## 本地实现
+
+每个 Method 实例的第一次反射调用都会生成一个委派实现，它所委派的具体实现便是一个本地实现。本地实现非常容易理解。当进入了 Java 虚拟机内部之后，我们便拥有了 Method 实例所指向方法的具体地址。这时候，反射调用无非就是将传入的参数准备好，然后调用进入目标方法。
+
+### eg:
+
+```
+// v0 版本
+import java.lang.reflect.Method;
+ 
+public class Test {
+  public static void target(int i) {
+    new Exception("#" + i).printStackTrace();
+  }
+ 
+  public static void main(String[] args) throws Exception {
+    Class<?> klass = Class.forName("Test");
+    Method method = klass.getMethod("target", int.class);
+    method.invoke(null, 0);
+  }
+}
+ 
+# 不同版本的输出略有不同，这里我使用了 Java 10。
+$ java Test
+java.lang.Exception: #0
+        at Test.target(Test.java:5)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl .invoke0(Native Method)
+ a      t java.base/jdk.internal.reflect.NativeMethodAccessorImpl. .invoke(NativeMethodAccessorImpl.java:62)
+ t       java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.i .invoke(DelegatingMethodAccessorImpl.java:43)
+        java.base/java.lang.reflect.Method.invoke(Method.java:564)
+  t        Test.main(Test.java:131
+```
+
+为了方便理解，我们可以打印一下反射调用到目标方法时的栈轨迹。在上面的 v0 版本代码中，我们获取了一个指向 Test.target 方法的 Method 对象，并且用它来进行反射调用。在 Test.target 中，我会打印出栈轨迹。
+
+可以看到，反射调用先是调用了 Method.invoke，然后进入委派实现（DelegatingMethodAccessorImpl），再然后进入本地实现（NativeMethodAccessorImpl），最后到达目标方法。
+
+> 本地实现要经过Java 到 C++ 再到 Java 的切换，为什么要使用本地实现
+>
+  Java 反射使用本地方法主要是出于以下几个原因：
+>
+  1. **性能优化**：
+> - 反射涉及频繁的元数据访问和动态类型检查，通过本地方法实现可以减少性能开销，尤其是在处理大量反射调用时。
+  2. **底层访问**：
+> - 某些反射操作需要直接与系统资源（如文件、网络、硬件等）交互，这通常只能通过本地代码实现，以获得更高的灵活性和效率。
+  3. **数据类型转换**：
+> - 在 Java 和本地代码之间传递复杂数据结构时，使用本地方法可以简化数据类型的转换过程，特别是在处理数组、字符串和对象时。
+  4. **利用已有库**：
+   - 许多底层功能和库是用 C/C++ 实现的，通过本地方法，Java 可以直接调用这些库，重用已有的功能。
+  5. **安全性**：
+   - Java 的安全模型要求对内存和资源的访问进行严格控制。使用本地方法时，JVM 可以对这些调用进行监控和管理，确保安全性。
+>
+通过使用本地方法，Java 反射能够实现更高的性能、灵活性和安全性，同时有效利用现有的底层资源和库。这种设计使得 Java 能够在提供高层抽象的同时，保留对底层系统的访问能力。
+
+## 动态实现
+
+Java 的反射调用机制还设立了另一种动态生成字节码的实现（下称动态实现），直接使用 invoke 指令来调用目标方法。之所以采用委派实现，便是为了能够在本地实现以及动态实现中切换。
+
+```java
+// 动态实现的伪代码，这里只列举了关键的调用逻辑，其实它还包括调用者检测、参数检测的字节码。
+package jdk.internal.reflect;
+ 
+public class GeneratedMethodAccessor1 extends ... {
+  @Overrides    
+  public Object invoke(Object obj, Object[] args) throws ... {
+    Test.target((int) args[0]);
+    return null;
+  }
+}
+```
+
+动态实现和本地实现相比，其运行效率要快上 20 倍 。这是因为动态实现无需经过 Java 到 C++ 再到 Java 的切换，但由于生成字节码十分耗时，仅调用一次的话，反而是本地实现要快上 3 到 4 倍 [3]。
+
+考虑到许多反射调用仅会执行一次，Java 虚拟机设置了一个阈值 15（可以通过 -Dsun.reflect.inflationThreshold= 来调整），当某个反射调用的调用次数在 15 之下时，采用本地实现；当达到 15 时，便开始动态生成字节码，并将委派实现的委派对象切换至动态实现，这个过程我们称之为 Inflation。
+
+### eg:
+
+为了观察这个过程，我将刚才的例子更改为下面的 v1 版本。它会将反射调用循环 20 次。
+
+```
+// v1 版本
+import java.lang.reflect.Method;
+ 
+public class Test {
+  public static void target(int i) {
+    new Exception("#" + i).printStackTrace();
+  }
+ 
+  public static void main(String[] args) throws Exception {
+    Class<?> klass = Class.forName("Test");
+    Method method = klass.getMethod("target", int.class);
+    for (int i = 0; i < 20; i++) {
+      method.invoke(null, i);
+    }
+  }
+}
+ 
+# 使用 -verbose:class 打印加载的类
+$ java -verbose:class Test
+...
+java.lang.Exception: #14
+        at Test.target(Test.java:5)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl .invoke0(Native Method)
+        at java.base/jdk.internal.reflect.NativeMethodAccessorImpl .invoke(NativeMethodAccessorImpl.java:62)
+        at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl .invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+        at Test.main(Test.java:12)
+[0.158s][info][class,load] ...
+...
+[0.160s][info][class,load] jdk.internal.reflect.GeneratedMethodAccessor1 source: __JVM_DefineClass__
+java.lang.Exception: #15
+       at Test.target(Test.java:5)
+       at java.base/jdk.internal.reflect.NativeMethodAccessorImpl .invoke0(Native Method)
+       at java.base/jdk.internal.reflect.NativeMethodAccessorImpl .invoke(NativeMethodAccessorImpl.java:62)
+       at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl .invoke(DelegatingMethodAccessorImpl.java:43)
+       at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+       at Test.main(Test.java:12)
+java.lang.Exception: #16
+       at Test.target(Test.java:5)
+       at jdk.internal.reflect.GeneratedMethodAccessor1 .invoke(Unknown Source)
+       at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl .invoke(DelegatingMethodAccessorImpl.java:43)
+       at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+       at Test.main(Test.java:12)
+...
+```
+
+可以看到，在第 15 次（从 0 开始数）反射调用时，我们便触发了动态实现的生成。这时候，Java 虚拟机额外加载了不少类。其中，最重要的当属 GeneratedMethodAccessor1（第 30 行）。并且，从第 16 次反射调用开始，我们便切换至这个刚刚生成的动态实现（第 40 行）。
