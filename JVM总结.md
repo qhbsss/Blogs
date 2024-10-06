@@ -1,7 +1,5 @@
 [TOC]
 
-
-
 ![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures414248014bf825dd610c3095eed75377.jpg)
 
 # JVM执行字节码
@@ -177,7 +175,7 @@ Constant pool:
 SourceFile: "Foo.java"
 ```
 
-#### 1. 基本信息，涵盖了原 class 文件的相关信息
+### 1. 基本信息，涵盖了原 class 文件的相关信息
 
 class 文件的版本号（minor version: 0，major version: 54），该类的访问权限（flags: (0x0021) ACC_PUBLIC, ACC_SUPER），该类（this_class: #7）以及父类（super_class: #8）的名字，所实现接口（interfaces: 0）、字段（fields: 4）、方法（methods: 2）以及属性（attributes: 1）的数目。
 
@@ -452,7 +450,7 @@ Java 语言的类型可以分为两大类：基本类型（primitive types）和
 
 # 方法调用过程
 
-# eg：
+## eg：
 
 ```java
 void invoke(Object obj, Object... args) { ... }
@@ -512,7 +510,11 @@ Java 字节码中与调用相关的指令共有五种。
 4. invokeinterface：用于调用接口方法。
 5. invokedynamic：用于调用动态方法。
 
-
+> eg: Lambda表达式
+>
+> 在 Java 8 中，Lambda 表达式也是借助 invokedynamic 来实现的。
+>
+> 在编译过程中，Java 编译器会对 Lambda 表达式进行解语法糖（desugar），生成一个方法来保存 Lambda 表达式的内容。该方法的参数列表不仅包含原本 Lambda 表达式的参数，还包含它所捕获的变量。
 
 ### eg：
 
@@ -913,3 +915,391 @@ java.lang.Exception: #16
 ```
 
 可以看到，在第 15 次（从 0 开始数）反射调用时，我们便触发了动态实现的生成。这时候，Java 虚拟机额外加载了不少类。其中，最重要的当属 GeneratedMethodAccessor1（第 30 行）。并且，从第 16 次反射调用开始，我们便切换至这个刚刚生成的动态实现（第 40 行）。
+
+# 虚拟机中的对象
+虚拟机在 Java 堆中对象分配、布局和访问的全过程。
+
+## 对象的创建
+
+在 Java 程序中，我们拥有多种新建对象的方式。除了最为常见的 new 语句之外，我们还可以通过反射机制、Object.clone 方法、反序列化以及 Unsafe.allocateInstance 方法来新建对象。
+
+其中，Object.clone 方法和反序列化通过直接复制已有的数据，来初始化新建对象的实例字段。Unsafe.allocateInstance 方法则没有初始化实例字段，而 new 语句和反射机制，则是通过调用构造器来初始化实例字段。
+
+### Step1:类加载检查
+
+虚拟机遇到一条 new 指令时，首先将去检查这个指令的参数是否能在常量池中定位到这个类的符号引用，并且检查这个符号引用代表的类是否已被加载过、解析和初始化过。如果没有，那必须先执行相应的类加载过程。
+
+### Step2:分配内存
+
+在**类加载检查**通过后，接下来虚拟机将为新生对象**分配内存**。对象所需的内存大小在类加载完成后便可确定，为对象分配空间的任务等同于把一块确定大小的内存从 Java 堆中划分出来。**分配方式**有 **“指针碰撞”** 和 **“空闲列表”** 两种，**选择哪种分配方式由 Java 堆是否规整决定，而 Java 堆是否规整又由所采用的垃圾收集器是否带有压缩整理功能决定**。
+
+**内存分配的两种方式** （补充内容，需要掌握）：
+
+- 指针碰撞：
+  - 适用场合：堆内存规整（即没有内存碎片）的情况下。
+  - 原理：用过的内存全部整合到一边，没有用过的内存放在另一边，中间有一个分界指针，只需要向着没用过的内存方向将该指针移动对象内存大小位置即可。
+  - 使用该分配方式的 GC 收集器：Serial, ParNew
+- 空闲列表：
+  - 适用场合：堆内存不规整的情况下。
+  - 原理：虚拟机会维护一个列表，该列表中会记录哪些内存块是可用的，在分配的时候，找一块儿足够大的内存块儿来划分给对象实例，最后更新列表记录。
+  - 使用该分配方式的 GC 收集器：CMS
+
+选择以上两种方式中的哪一种，取决于 Java 堆内存是否规整。而 Java 堆内存是否规整，取决于 GC 收集器的算法是"标记-清除"，还是"标记-整理"（也称作"标记-压缩"），值得注意的是，复制算法内存也是规整的。
+
+**内存分配并发问题（补充内容，需要掌握）**
+
+在创建对象的时候有一个很重要的问题，就是线程安全，因为在实际开发过程中，创建对象是很频繁的事情，作为虚拟机来说，必须要保证线程是安全的，通常来讲，虚拟机采用两种方式来保证线程安全：
+
+- **CAS+失败重试：** CAS 是乐观锁的一种实现方式。所谓乐观锁就是，每次不加锁而是假设没有冲突而去完成某项操作，如果因为冲突失败就重试，直到成功为止。**虚拟机采用 CAS 配上失败重试的方式保证更新操作的原子性。**
+- **TLAB：** 为每一个线程预先在 Eden 区分配一块儿内存，JVM 在给线程中的对象分配内存时，首先在 TLAB 分配，当对象大于 TLAB 中的剩余内存或 TLAB 的内存已用尽时，再采用上述的 CAS 进行内存分配
+
+### Step3:初始化零值
+
+内存分配完成后，虚拟机需要将分配到的内存空间都初始化为零值（不包括对象头），这一步操作保证了对象的实例字段在 Java 代码中可以不赋初始值就直接使用，程序能访问到这些字段的数据类型所对应的零值。
+
+### Step4:设置对象头
+
+初始化零值完成之后，**虚拟机要对对象进行必要的设置**，例如这个对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的 GC 分代年龄等信息。 **这些信息存放在对象头中。** 另外，根据虚拟机当前运行状态的不同，如是否启用偏向锁等，对象头会有不同的设置方式。
+
+> **对象头**
+>
+> 在 Java 虚拟机中，每个 Java 对象都有一个对象头（object header），这个由标记字段和类型指针所构成。其中，标记字段用以存储 Java 虚拟机有关该对象的运行数据，如哈希码、GC 信息以及锁信息，而类型指针则指向该对象的类。
+
+### Step5:执行 init 方法
+
+在上面工作都完成之后，从虚拟机的视角来看，一个新的对象已经产生了，但从 Java 程序的视角来看，对象创建才刚开始，`<init>` 方法还没有执行，所有的字段都还为零。所以一般来说，执行 new 指令之后会接着执行 `<init>` 方法，把对象按照程序员的意愿进行初始化，这样一个真正可用的对象才算完全产生出来。
+
+## 对象的内存布局
+
+在 Hotspot 虚拟机中，对象在内存中的布局可以分为 3 块区域：**对象头（Header）**、**实例数据（Instance Data）**和**对齐填充（Padding）**。
+
+对象头包括两部分信息：
+
+1. 标记字段（Mark Word）：用于存储对象自身的运行时数据， 如哈希码（HashCode）、GC 分代年龄、锁状态标志、线程持有的锁、偏向线程 ID、偏向时间戳等等。
+2. 类型指针（Klass Word）：对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。
+
+**实例数据部分是对象真正存储的有效信息**，也是在程序中所定义的各种类型的字段内容。
+
+**对齐填充部分不是必然存在的，也没有什么特别的含义，仅仅起占位作用。** 因为 Hotspot 虚拟机的自动内存管理系统要求对象起始地址必须是 8 字节的整数倍，换句话说就是对象的大小必须是 8 字节的整数倍。而对象头部分正好是 8 字节的倍数（1 倍或 2 倍），因此，当对象实例数据部分没有对齐时，就需要通过对齐填充来补全。
+
+## 对象的访问定位
+
+建立对象就是为了使用对象，我们的 Java 程序通过栈上的 reference 数据来操作堆上的具体对象。对象的访问方式由虚拟机实现而定，目前主流的访问方式有：**使用句柄**、**直接指针**。
+
+### 句柄
+
+如果使用句柄的话，那么 Java 堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与对象类型数据各自的具体地址信息。
+
+![对象的访问定位-使用句柄](https://oss.javaguide.cn/github/javaguide/java/jvm/access-location-of-object-handle.png)
+
+### 直接指针
+
+如果使用直接指针访问，reference 中存储的直接就是对象的地址。
+
+![对象的访问定位-直接指针](https://oss.javaguide.cn/github/javaguide/java/jvm/access-location-of-object-handle-direct-pointer.png)
+
+这两种对象访问方式各有优势。使用句柄来访问的最大好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改。使用直接指针访问方式最大的好处就是速度快，它节省了一次指针定位的时间开销。
+
+HotSpot 虚拟机主要使用的就是这种方式来进行对象访问。
+
+
+
+# JMM内存模型
+## 指令重排序
+为了提升执行速度/性能，计算机在执行程序代码的时候，会对指令进行重排序。
+什么是指令重排序？ 
+简单来说就是系统在执行代码的时候并不一定是按照你写的代码的顺序依次执行。
+常见的指令重排序有下面 2 种情况：
+1. 编译器优化重排：编译器（包括 JVM、JIT 编译器等）在不改变单线程程序语义的前提下，重新安排语句的执行顺序。
+2. 指令并行重排：现代处理器采用了指令级并行技术(Instruction-Level Parallelism，ILP)来将多条指令重叠执行。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。
+另外，内存系统也会有“重排序”，但又不是真正意义上的重排序。在 JMM 里表现为主存和本地内存的内容可能不一致，进而导致程序在多线程下执行可能出现问题。
+Java 源代码会经历 编译器优化重排 —> 指令并行重排 —> 内存系统重排 的过程，最终才变成操作系统可执行的指令序列。
+指令重排序可以保证串行语义一致，但是没有义务保证多线程间的语义也一致 ，所以在多线程下，指令重排序可能会导致一些问题。
+对于编译器优化重排和处理器的指令重排序（指令并行重排和内存系统重排都属于是处理器级别的指令重排序），处理该问题的方式不一样。
+1. 对于编译器，通过禁止特定类型的编译器重排序的方式来禁止重排序。
+2. 对于处理器，通过插入内存屏障（Memory Barrier，或有时叫做内存栅栏，Memory Fence）的方式来禁止特定类型的处理器重排序。
+>内存屏障（Memory Barrier，或有时叫做内存栅栏，Memory Fence）是一种 CPU 指令，用来禁止处理器指令发生重排序（像屏障一样），从而保障指令执行的有序性。另外，为了达到屏障的效果，它也会使处理器写入、读取值之前，将主内存的值写入高速缓存，清空无效队列，从而保障变量的可见性。
+
+## happens-before
+### 为什么需要 happens-before 原则？
+happens-before 原则的诞生是为了程序员和编译器、处理器之间的平衡。程序员追求的是易于理解和编程的强内存模型，遵守既定规则编码即可。编译器和处理器追求的是较少约束的弱内存模型，让它们尽己所能地去优化性能，让性能最大化。happens-before 原则的设计思想其实非常简单：
+- 为了对编译器和处理器的约束尽可能少，只要不改变程序的执行结果（单线程程序和正确执行的多线程程序），编译器和处理器怎么进行重排序优化都行。
+- 对于会改变程序执行结果的重排序，JMM 要求编译器和处理器必须禁止这种重排序。
+### happens-before 原则
+#### happens-before的定义
+- 如果一个操作 happens-before 另一个操作，那么第一个操作的执行结果将对第二个操作可见，并且第一个操作的执行顺序排在第二个操作之前。
+- 两个操作之间存在 happens-before 关系，并不意味着 Java 平台的具体实现必须要按照 happens-before 关系指定的顺序来执行。如果重排序之后的执行结果，与按 happens-before 关系来执行的结果一致，那么 JMM 也允许这样的重排序。
+#### happens-before 的规则
+1. **程序顺序规则**：一个线程内，按照代码顺序，书写在前面的操作 happens-before 于书写在后面的操作；
+2. **解锁规则**：解锁 happens-before 于加锁；
+3. **volatile 变量规则**：对一个 volatile 变量的写操作 happens-before 于后面对这个 volatile 变量的读操作。说白了就是对 volatile 变量的写操作的结果对于发生于其后的任何操作都是可见的。
+4. **传递规则**：如果 A happens-before B，且 B happens-before C，那么 A happens-before C；
+5. **线程启动规则**：Thread 对象的 `start()`方法 happens-before 于此线程的每一个动作。
+
+![happens-before 与 JMM 的关系](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesimage-20220731084604667.png)
+## 为什么需要JMM
+
+Java 是最早尝试提供内存模型的编程语言。
+
+### 1. 跨平台
+一般来说，编程语言也可以直接复用操作系统层面的内存模型。不过，不同的操作系统内存模型不同。如果直接复用操作系统层面的内存模型，就可能会导致同样一套代码换了一个操作系统就无法执行了。Java 语言是跨平台的，它需要自己提供一套内存模型以屏蔽系统差。
+### 2. 并发编程规范
+对于 Java 来说，你可以把 JMM 看作是 Java 定义的并发编程相关的一组规范，除了抽象了线程和主内存之间的关系之外，其还规定了从 Java 源代码到 CPU 可执行指令的这个转化过程要遵守哪些和并发相关的原则和规范，其主要目的是为了简化多线程编程，增强程序可移植性的。
+>为什么要遵守这些并发相关的原则和规范呢？ 这是因为并发编程下，像 CPU 多级缓存和指令重排这类设计可能会导致程序运行出现一些问题。就比如说我们上面提到的指令重排序就可能会让多线程程序的执行出现问题，为此，JMM 抽象了 happens-before 原则来解决这个指令重排序问题。
+
+## JMM 是如何抽象线程和主内存之间的关系？
+Java 内存模型（JMM） 抽象了线程和主内存之间的关系，就比如说线程之间的共享变量必须存储在主内存中。
+什么是主内存？什么是本地内存？
+
+1. 主内存：所有线程创建的实例对象都存放在主内存中，不管该实例对象是成员变量，还是局部变量，类信息、常量、静态变量都是放在主内存中。为了获取更好的运行速度，虚拟机及硬件系统可能会让工作内存优先存储于寄存器和高速缓存中。
+2. 本地内存：每个线程都有一个私有的本地内存，本地内存存储了该线程以读 / 写共享变量的副本。每个线程只能操作自己本地内存中的变量，无法直接访问其他线程的本地内存。如果线程间需要通信，必须通过主内存来进行。**本地内存是 JMM 抽象出来的一个概念，并不真实存在，它涵盖了缓存、写缓冲区、寄存器以及其他的硬件和编译器优化。**
+
+> Java 内存区域和 JMM 有何区别？
+这是一个比较常见的问题，很多初学者非常容易搞混。 **Java 内存区域和内存模型是完全不一样的两个东西**：
+- JVM 内存结构和 Java 虚拟机的运行时区域相关，定义了 JVM 在运行时如何分区存储程序数据，就比如说堆主要用于存放对象实例。
+- Java 内存模型和 Java 的并发编程相关，抽象了线程和主内存之间的关系就比如说线程之间的共享变量必须存储在主内存中，规定了从 Java 源代码到 CPU 可执行指令的这个转化过程要遵守哪些和并发相关的原则和规范，其主要目的是为了简化多线程编程，增强程序可移植性的。
+
+## Java 内存模型的底层实现
+Java 内存模型是通过内存屏障（memory barrier）来禁止重排序的。
+
+对于即时编译器来说，它会针对前面提到的每一个 happens-before 关系，向正在编译的目标方法中插入相应的读读、读写、写读以及写写内存屏障。
+
+这些内存屏障会限制即时编译器的重排序操作。以 volatile 字段访问为例，所插入的内存屏障将不允许 volatile 字段写操作之前的内存访问被重排序至其之后；也将不允许 volatile 字段读操作之后的内存访问被重排序至其之前。
+>即时编译器将根据具体的底层体系架构，将这些内存屏障替换成具体的 CPU 指令。以我们日常接触的 X86_64 架构来说，读读、读写以及写写内存屏障是空操作（no-op），只有写读内存屏障会被替换成具体指令. 在 X86_64 架构上，只有 volatile 字段写操作之后的写读内存屏障需要用具体指令来替代。该具体指令的效果，可以简单理解为强制刷新处理器的写缓存。
+写缓存是处理器用来加速内存存储效率的一项技术。
+在碰到内存写操作时，处理器并不会等待该指令结束，而是直接开始下一指令，并且依赖于写缓存将更改的数据同步至主内存（main memory）之中。
+强制刷新写缓存，将使得当前线程写入 volatile 字段的值（以及写缓存中已有的其他内存修改），同步至主内存之中。
+
+
+
+# Java语法糖
+
+Java 语法和 Java 字节码的差异之处都是通过 Java 编译器来协调的。
+
+语法糖的存在主要是方便开发人员使用。但其实， **Java 虚拟机并不支持这些语法糖。这些语法糖在编译阶段就会被还原成简单的基础语法结构，这个过程就是解语法糖。**
+
+Java 中最常用的语法糖主要有泛型、变长参数、条件编译、自动拆装箱、内部类等。
+
+## 泛型与类型擦除
+
+Java 程序里的泛型信息，在 Java 虚拟机里全部都丢失了。这么做主要是为了兼容引入泛型之前的代码。
+
+当然，并不是每一个泛型参数被擦除类型后都会变成 Object 类。对于限定了继承类的泛型参数，经过类型擦除后，所有的泛型参数都将变成所限定的继承类。也就是说，Java 编译器将选取该泛型所能指代的所有类中层次最高的那个，作为替换泛型的类。
+
+## 桥接方法
+
+泛型的类型擦除带来了不少问题。其中一个便是方法重写。
+
+### eg:
+
+```java
+class Merchant<T extends Customer> {
+  public double actionPrice(T customer) {
+    return 0.0d;
+  }
+}
+ 
+class VIPOnlyMerchant extends Merchant<VIP> {
+  @Override
+  public double actionPrice(VIP customer) {
+    return 0.0d;
+  }
+}
+```
+
+VIPOnlyMerchant 中的 actionPrice 方法是符合 Java 语言的方法重写的，毕竟都使用 @Override 来注解了。然而，经过类型擦除后，父类的方法描述符为 (LCustomer;)D，而子类的方法描述符为 (LVIP;)D。这显然不符合 Java 虚拟机关于方法重写的定义。
+
+为了保证编译而成的 Java 字节码能够保留重写的语义，Java 编译器额外添加了一个桥接方法。该桥接方法在字节码层面重写了父类的方法，并将调用子类的方法。
+
+```
+class VIPOnlyMerchant extends Merchant<VIP>
+...
+  public double actionPrice(VIP);
+    descriptor: (LVIP;)D
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+         0: dconst_0
+         1: dreturn
+ 
+  public double actionPrice(Customer);
+    descriptor: (LCustomer;)D
+    flags: (0x1041) ACC_PUBLIC, ACC_BRIDGE, ACC_SYNTHETIC
+    Code:
+         0: aload_0
+         1: aload_1
+         2: checkcast class VIP
+         5: invokevirtual actionPrice:(LVIP;)D
+         8: dreturn
+ 
+// 这个桥接方法等同于
+public double actionPrice(Customer customer) {
+  return actionPrice((VIP) customer);
+}
+```
+
+VIPOnlyMerchant 类将包含一个桥接方法 actionPrice(Customer)，它重写了父类的同名同方法描述符的方法。该桥接方法将传入的 Customer 参数强制转换为 VIP 类型，再调用原本的 actionPrice(VIP) 方法。
+
+当一个声明类型为 Merchant，实际类型为 VIPOnlyMerchant 的对象，调用 actionPrice 方法时，字节码里的符号引用指向的是 Merchant.actionPrice(Customer) 方法。Java 虚拟机将动态绑定至 VIPOnlyMerchant 类的桥接方法之中，并且调用其 actionPrice(VIP) 方法。
+## 自动装箱与拆箱
+自动装箱就是 Java 自动将原始类型值转换成对应的对象，比如将 int 的变量转换成 Integer 对象，这个过程叫做装箱，反之将 Integer 对象转换成 int 类型值，这个过程叫做拆箱。因为这里的装箱和拆箱是自动进行的非人为转换，所以就称作为自动装箱和拆箱。
+## lambda表达式
+Lambda 表达式不是匿名内部类的语法糖，但是他也是一个语法糖。实现方式其实是依赖了几个 JVM 底层提供的 lambda 相关 api。
+lambda 表达式的实现其实是依赖了一些底层的 api，在编译阶段，编译器会把 lambda 表达式进行解糖，转换成调用内部 api 的方式。
+### eg:
+```java
+public static void main(String... args) {
+    List<String> strList = ImmutableList.of("Hollis", "公众号：Hollis", "博客：www.hollischuang.com");
+
+    List HollisList = strList.stream().filter(string -> string.contains("Hollis")).collect(Collectors.toList());
+
+    HollisList.forEach( s -> { System.out.println(s); } );
+}
+```
+
+反编译后代码如下：
+
+```
+public static /* varargs */ void main(String ... args) {
+    ImmutableList strList = ImmutableList.of((Object)"Hollis", (Object)"\u516c\u4f17\u53f7\uff1aHollis", (Object)"\u535a\u5ba2\uff1awww.hollischuang.com");
+    List<Object> HollisList = strList.stream().filter((Predicate<String>)LambdaMetafactory.metafactory(null, null, null, (Ljava/lang/Object;)Z, lambda$main$0(java.lang.String ), (Ljava/lang/String;)Z)()).collect(Collectors.toList());
+    HollisList.forEach((Consumer<Object>)LambdaMetafactory.metafactory(null, null, null, (Ljava/lang/Object;)V, lambda$main$1(java.lang.Object ), (Ljava/lang/Object;)V)());
+}
+
+private static /* synthetic */ void lambda$main$1(Object s) {
+    System.out.println(s);
+}
+
+private static /* synthetic */ boolean lambda$main$0(String string) {
+    return string.contains("Hollis");
+}
+```
+
+两个 lambda 表达式分别调用了`lambda$main$1`和`lambda$main$0`两个方法。
+
+# 注解
+
+`Annotation` （注解） 是 Java5 开始引入的新特性，可以看作是一种特殊的注释，主要用于修饰类、方法或者变量，提供某些信息供程序在编译或者运行时使用。
+
+注解本质是一个继承了`Annotation` 的特殊接口：
+
+```java
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Override {
+
+}
+
+public interface Override extends Annotation{
+
+}
+```
+注解不会对代码有直接的影响，只是起到标记的作用，需要编写额外的代码去利用注解，否则注解一无所用。幸运的是，无论是框架还是java编译器已经提供了相应的注解处理代码。
+
+![img](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/60edd709edda490685dfa53e292e6325~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp)
+
+## 注解的解析方法
+注解相当于给某些代码贴了个标签。我们既**可以通过注解处理器在编译时解析这些标签，也可以在运行时通过反射解析这些标签**。解析后都会有一系列动作，这些动作就是对标签语义的诠释。
+
+注解只有被解析之后才会生效，常见的解析方法有两种：
+
+### 1. **编译期直接扫描**：
+编译器在编译 Java 代码的时候扫描对应的注解并处理，比如某个方法使用`@Override` 注解，编译器在编译的时候就会检测当前的方法是否重写了父类对应的方法。
+#### 注解处理器
+
+##### Java 编译器的工作流程
+
+![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures64e93f67c3b422afd90966bfe9aaf5b8.png)
+
+Java 源代码的编译过程可分为三个步骤：
+1. 将源文件解析为抽象语法树；
+
+2. 调用已注册的注解处理器；
+
+3. 生成字节码。
+
+如果在第 2 步调用注解处理器过程中生成了新的源文件，那么编译器将重复第 1、2 步，解析并且处理新生成的源文件。每次重复我们称之为一轮（Round）。
+
+所有的注解处理器类都需要实现接口Processor。该接口主要有四个重要方法。其中，init方法用来存放注解处理器的初始化代码。之所以不用构造器，是因为在 Java 编译器中，注解处理器的实例是通过反射 API 生成的。也正是因为使用反射 API，每个注解处理器类都需要定义一个无参数构造器。
+
+JDK 提供了一个实现Processor接口的抽象类AbstractProcessor。该抽象类实现了init、getSupportedAnnotationTypes和getSupportedSourceVersion方法。
+
+它的子类可以通过@SupportedAnnotationTypes和@SupportedSourceVersion注解来声明所支持的注解类型以及 Java 版本。
+
+### 2. **运行期通过反射处理**：
+像框架中自带的注解(比如 Spring 框架的 `@Value`、`@Component`)都是通过反射来进行处理的。
+
+java反射中与注解相关的API包括：
+
+1. 判断某个注解是否存在于Class、Field、Method、Constructor：Xxx.isAnnotationPresent(Class)
+2. 读取注解：Xxx.getAnnotation(Class)
+#### eg:
+自定义一个名为@IDAuthenticator的注解去验证Student类的学号，要求学号的长度必须为4，对不满足要求的学号抛出异常。
+首先我们定义注解：
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface IDAuthenticator {
+    int length() default 8;
+}
+```
+
+然后应用注解:
+
+```java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Student {
+    private  String name;
+    @IDAuthenticator(length = 4)
+    private String id;
+
+}
+```
+
+最后解析注解:
+
+```java
+public  void check(Student student) throws IllegalAccessException {
+    for(Field field:student.getClass().getDeclaredFields()){
+
+        if(field.isAnnotationPresent(IDAuthenticator.class)){
+            IDAuthenticator idAuthenticator = field.getAnnotation(IDAuthenticator.class);
+            field.setAccessible(true);
+            //只有id有@IDAuthenticator注解，
+            //也只要当field为id时@IDAuthenticator才不为空，才能满足判断条件，
+            // 体会，注解的本质是标签，起筛选作用
+            Object value=field.get(student);
+            if(value instanceof String){
+                String id=(String) value;
+                if(id.length()!=idAuthenticator.length()){
+                    throw  new  IllegalArgumentException("the length of "+field.getName()+" should be "+idAuthenticator.length());
+                }
+
+            }
+
+        }
+    }
+```
+
+测试
+
+```java
+@Test
+public void useAnnotation(){
+    Student student01 = new Student("小明", "20210122");
+    Student student02 = new Student("小军", "2021");
+    Student student03 = new Student("小花", "20210121");
+    
+    for(Student student:new Student[]{student01,student02,student03}){
+        try{
+            check(student);
+            System.out.println(" Student "+student+" checks ok ");
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            System.out.println(" Student "+student+" checks failed "+e);
+        }
+    }
+}
+```
+
+![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures9c42d2df2fcd49699cfaf6db52b18a43%7Etplv-k3u1fbpfcp-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp)
