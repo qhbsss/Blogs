@@ -1303,3 +1303,37 @@ public void useAnnotation(){
 ```
 
 ![img](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures9c42d2df2fcd49699cfaf6db52b18a43%7Etplv-k3u1fbpfcp-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp)
+
+
+
+# jar和war区别
+
+## jar包
+
+jar包是类的归档文件，与平台无关的文件格式，它允许将许多文件组合成一个压缩文件。JAR 文件格式以流行的 ZIP 文件格式为基础。但与 ZIP 文件不同的是，JAR 文件不仅用于压缩和发布，而且还用于部署和封装库、组件和插件程序，并可被像编译器和 JVM 这样的工具直接使用；
+
+jar包就是别人已经写好的一些类，然后对这些类进行打包。可以将这些jar包引入到你的项目中，可以直接使用这些jar包中的类和属性，这些jar包一般放在BOOT-INF文件夹的lib目录下。
+
+jar包里的com里放的就是class文件，配置文件，但是没有静态资源的文件（index.jsp），大多数 JAR 文件包含一个 META-INF 目录，它用于存储包和扩展的配置数据，如安全性和版本信息；
+
+> META-INF 相当于一个信息包，目录中的文件和目录获得 Java 2 平台的认可与解释，用来配置应用程序、扩展程序、类加载器和服务 manifest.mf 文件，在用 jar 打包时自动生成。
+>
+> mainfest.mf文件意为清单文件，manifest 文件中的每一行都是 key－value 对应的:属性名开头，接着是 “:” ，然后是属性值，每行最多72个字符，如果需要增加，可以在下一行续行，续行以空格开头，以空格开头的行都会被视为前一行的续行。
+>
+> eg:
+>
+> ```
+> Manifest-Version: 1.0
+> Built-By: Dxy
+> Created-By: IntelliJ IDEA
+> Build-Jdk: 1.8.0_144
+> ```
+
+## war包
+
+war包是JavaWeb程序打的包，war包里面包括写的代码编译成的class文件，依赖的包，配置文件，所有的网站页面，包括html，jsp等等。一个war包可以理解为是一个web项目，里面是项目的所有东西。
+
+war是一个可以直接运行的web模块，通常用于网站，打成包部署到容器中。以Tomcat来讲，将war包放置在其\webapps\目录下，然后启动Tomcat，这个包就会自动解压，就相当于发布了。
+
+war包中的文件按照一定目录结构来组织，和项目的文件结构保持一致。其根目录下包含有html和jsp文件，或者包含有这两种文件的目录。（META-INF和jar包作用一样）WEB-INF目录下含有一个web.xml文件和一个classes目录，web.xml是这个应用的配置文件，而classes目录下则包含编译好的servlet类和jsp，或者servlet所依赖的其他类（如JavaBean），通常这些所依赖的类也可以打包成jar包放在WEB-INF下的lib目录下。
+
