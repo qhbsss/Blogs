@@ -1,4 +1,9 @@
+[TOC]
+
+
+
 # ThreadLocal应用场景
+
 >项目中使用了ThreadLocal保存用户权限信息来进行鉴权，为什么要用ThreadLocal来存储，用一个变量不也可以吗？
 
 1. 每个线程内需要保存全局变量，可以让不同方法直接使用，避免参数传递的麻烦
@@ -116,4 +121,160 @@ ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
 `ThreadLocalMap`是`ThreadLocal`的静态内部类。
 
 ![ThreadLocal内部类](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures/thread-local-inner-class.png)
+
+
+
+# TheadLocal与线程复用
+
+## 场景
+
+项目中用ThreadLocal来记录用户登录信息，但是Tomcat或者Jetty容器都是线程复用的，如何防止被其他线程修改数据。
+
+## 解决方案
+
+在拦截器中每次主动调用remove方法清除线程中的历史数据
+
+# ThreadLocal如何在线程间传递
+
+## 场景
+
+项目中的登录方法中如果后续调用了其他线程，如何传递ThreadLocal中的数据
+
+## 解决方案
+
+我们使用`ThreadLocal`的时候，在异步场景下是无法给子线程共享父线程中创建的线程副本数据的。
+
+为了解决这个问题，JDK 中还有一个`InheritableThreadLocal`类，我们来看一个例子：
+
+```
+public class InheritableThreadLocalDemo {
+    public static void main(String[] args) {
+        ThreadLocal<String> ThreadLocal = new ThreadLocal<>();
+        ThreadLocal<String> inheritableThreadLocal = new InheritableThreadLocal<>();
+        ThreadLocal.set("父类数据:threadLocal");
+        inheritableThreadLocal.set("父类数据:inheritableThreadLocal");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("子线程获取父类ThreadLocal数据：" + ThreadLocal.get());
+                System.out.println("子线程获取父类inheritableThreadLocal数据：" + inheritableThreadLocal.get());
+            }
+        }).start();
+    }
+}
+```
+
+```
+子线程获取父类ThreadLocal数据：null
+子线程获取父类inheritableThreadLocal数据：父类数据:inheritableThreadLocal
+```
+
+实现原理是子线程是通过在父线程中通过调用`new Thread()`方法来创建子线程，`Thread#init`方法在`Thread`的构造方法中被调用。在`init`方法中拷贝父线程数据到子线程中：
+
+```
+private void init(ThreadGroup g, Runnable target, String name,
+                      long stackSize, AccessControlContext acc,
+                      boolean inheritThreadLocals) {
+    if (name == null) {
+        throw new NullPointerException("name cannot be null");
+    }
+
+    if (inheritThreadLocals && parent.inheritableThreadLocals != null)
+        this.inheritableThreadLocals =
+            ThreadLocal.createInheritedMap(parent.inheritableThreadLocals);
+    this.stackSize = stackSize;
+    tid = nextThreadID();
+}
+```
+
+## 场景
+
+如果是调用线程池，线程池是复用的逻辑，如何传递ThreadLocal数据
+
+## 解决方案
+
+`InheritableThreadLocal`仍然有缺陷，一般我们做异步化处理都是使用的线程池，而`InheritableThreadLocal`是在`new Thread`中的`init()`方法给赋值的，而线程池是线程复用的逻辑，所以这里会存在问题。
+
+阿里巴巴开源了一个`TransmittableThreadLocal`组件就可以解决这个问题
+
+### TTL原理
+
+#### 使用方法
+
+1. 增强Runnable或Callable
+
+	1. 使用TtlRunnable.get()或TtlCallable.get()
+	2. 提交线程池之后，在run()内取出变量
+
+2. 增强线程池
+
+	1. 使用TtlExecutors.getTtlExecutor()或getTtlExecutorService()、getTtlScheduledExecutorService()获取装饰后的线程池
+	2. 使用线程池提交普通任务
+	
+	3. 在run()方法内取出变量（任务子线程）
+
+装饰线程池其实本质也是装饰Runnable，只是将这个逻辑移到了ExecutorServiceTtlWrapper.submit()方法内，对所有提交的Runnable都进行包装：
+	  ![image-20200807095719400](https://i-blog.csdnimg.cn/blog_migrate/0a533342fcb84b208eca23d3ef83943b.png)
+
+#### 原理
+
+![9A0033F8-DCD4-4054-8E83-55511D5E52CC](https://i-blog.csdnimg.cn/blog_migrate/46895fede25a5bdebf4df3d1bbf13da2.png)
+
+根据TransmittableThreadLocal的使用流程，其核心逻辑可以分成三个部分：设置线程变量 -> 构建TtlRunnable -> 提交线程池运行
+
+##### 1.设置线程变量
+
+当调用`TransmittableThreadLocal.set()`设置变量值时，除了会通过调用`super.set()`（ThreadLocal）设置当前线程变量外，还会执行`addThisToHolder()`方法：
+
+![image-20200807103557739](https://i-blog.csdnimg.cn/blog_migrate/4447be3ac342cafa949dc094d2212478.png)
+
+- TransmittableThreadLocal内部维护了一个静态的线程变量holder，保存的是以TransmittableThreadLocal对象为Key的Map（这个map的值永远是null，也就是当做Set使用的）holder保存了当前线程下的所有TTL线程变量
+
+- 设值时向获取holder传入this，保存发起set()操作的TransmittableThreadLocal对象
+  
+
+##### 2. 构建TtlRunnable对象
+   构建TtlRunnable对象时，会保存原Runnable对象引用，用于后续run()方法中业务代码的执行。另外还会调TransmittableThreadLocal.Transmitter.capture()方法，缓存当前主线程的线程变量：
+
+![image-20200807111215487](https://i-blog.csdnimg.cn/blog_migrate/a5036538b6fc315c3058be1b5e0aa054.png)
+
+- 这里实际上就是对第一步在holder中保存的ThreadLocal对象进行遍历，保存其变量值
+- 此时原本通过ThreadLocal保存的和Thread绑定的线程变量，就复制了一份到TtlRunnable对象中了
+
+##### 3.在子线程中读取变量
+
+当TtlRunnable对象被提交到线程池执行时，调用`TtlRunnable.run()`：
+
+> 注意此时已处于任务子线程环境中
+
+![BC10853C-DF6B-45B5-9AEB-B90081D1EF6D](https://i-blog.csdnimg.cn/blog_migrate/9a96eaaaae6ad2f3fff2a8d440e5c3d9.png)
+
+这里会从Runnable对象取出缓存的线程变量captured，然后进行后续流程：
+
+#### (1)前序处理
+
+`TransmittableThreadLocal.Transmitter.replay()`：
+
+![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/47097b9ee6771b30137699a37b5c9a72.png)
+
+- 将缓存的父线程变量值设置到当前任务线程（子线程）的ThreadLocal内，并将父线程的线程变量备份
+
+#### (2)执行run()方法，读取变量值
+
+由于上一步已经将从父线程复制的线程变量都设置到当前子线程的ThreadLocal中，因此run()方法中直接通过ThreadLocal.get()即可读取继承自父线程的变量值。
+
+#### (3)后续处理
+
+`TransmittableThreadLocal.Transmitter.restore()`：
+
+![348D0F21-632E-48A2-B9F2-DC9AE10F2EF3](https://i-blog.csdnimg.cn/blog_migrate/8b9e81e5a303d8a3e0cc761ba8687a77.png)
+
+- 将run()执行前获取的备份，设置到当前线程中去，恢复run()执行过程中可能导致的变化，避免对后续复用此线程的任务产生影响
+
+
+
+从使用上来看，不管是修饰Runnable还是修饰线程池，本质都是将Runnable增强为TtlRunnable。
+
+而从实现线程变量传递的原理上来看，TTL做的实际上就是将原本与Thread绑定的线程变量，缓存一份到TtlRunnable对象中，在执行子线程任务前，将对象中缓存的变量值设置到子线程的ThreadLocal中以供run()方法的代码使用，然后执行完后，又恢复现场，保证不会对复用线程产生影响。
 
