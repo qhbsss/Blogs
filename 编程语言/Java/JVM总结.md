@@ -8,7 +8,7 @@
 
 从虚拟机视角来看，执行 Java 代码首先需要将它编译而成的 class 文件加载到 Java 虚拟机中。加载后的 Java 类会被存放于方法区（Method Area）中。实际运行时，虚拟机会执行方法区内的代码。
 
-如果你熟悉 X86 的话，你会发现这和段式内存管理中的代码段类似。而且，Java 虚拟机同样也在内存中划分出堆和栈来存储运行时数据。
+xxxxxxxxxx package kun.thread;​public class THread {    static C c=new C();    //flag用来标志子线程执行结束    static boolean flag=false;        public static void main(String []arg)    {                   c.setvalue(12);        System.out.println("子线程执行之前value的值是："+c.getvalue());            System.out.println("执行子线程");                            Thread mythread = new MyThread(c);        mythread.start();                //等待子线程执行结束        while(!flag);        System.out.println("子线程执行之后value的值是："+c.getvalue());        }   ​    public static void callback()        {            System.out.println("子线程执行结束");              flag=true;        }}​​class C{    private int value=0;    public int getvalue()    {        return value;    }    public void setvalue(int v)    {        this.value=v;    }}​​​class MyThread extends Thread{    public MyThread(C cc)    {        this.cc=cc;    }    private C cc;    @Override    public void run()     {        cc.setvalue(20);                    THread.callback();//很像C#的委托和事件    }}java
 
 不同的是，Java 虚拟机会将栈细分为面向 Java 方法的 Java 方法栈，面向本地方法（用 C++ 写的 native 方法）的本地方法栈，以及存放各个线程执行位置的 PC 寄存器。
 

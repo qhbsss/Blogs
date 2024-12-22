@@ -215,11 +215,11 @@ private void init(ThreadGroup g, Runnable target, String name,
 	3. 在run()方法内取出变量（任务子线程）
 
 装饰线程池其实本质也是装饰Runnable，只是将这个逻辑移到了ExecutorServiceTtlWrapper.submit()方法内，对所有提交的Runnable都进行包装：
-	  ![image-20200807095719400](https://i-blog.csdnimg.cn/blog_migrate/0a533342fcb84b208eca23d3ef83943b.png)
+	  ![image-20200807095719400](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures0a533342fcb84b208eca23d3ef83943b.png)
 
 #### 原理
 
-![9A0033F8-DCD4-4054-8E83-55511D5E52CC](https://i-blog.csdnimg.cn/blog_migrate/46895fede25a5bdebf4df3d1bbf13da2.png)
+![9A0033F8-DCD4-4054-8E83-55511D5E52CC](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures46895fede25a5bdebf4df3d1bbf13da2.png)
 
 根据TransmittableThreadLocal的使用流程，其核心逻辑可以分成三个部分：设置线程变量 -> 构建TtlRunnable -> 提交线程池运行
 
@@ -227,7 +227,7 @@ private void init(ThreadGroup g, Runnable target, String name,
 
 当调用`TransmittableThreadLocal.set()`设置变量值时，除了会通过调用`super.set()`（ThreadLocal）设置当前线程变量外，还会执行`addThisToHolder()`方法：
 
-![image-20200807103557739](https://i-blog.csdnimg.cn/blog_migrate/4447be3ac342cafa949dc094d2212478.png)
+![image-20200807103557739](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures4447be3ac342cafa949dc094d2212478.png)
 
 - TransmittableThreadLocal内部维护了一个静态的线程变量holder，保存的是以TransmittableThreadLocal对象为Key的Map（这个map的值永远是null，也就是当做Set使用的）holder保存了当前线程下的所有TTL线程变量
 
@@ -237,7 +237,7 @@ private void init(ThreadGroup g, Runnable target, String name,
 ##### 2. 构建TtlRunnable对象
    构建TtlRunnable对象时，会保存原Runnable对象引用，用于后续run()方法中业务代码的执行。另外还会调TransmittableThreadLocal.Transmitter.capture()方法，缓存当前主线程的线程变量：
 
-![image-20200807111215487](https://i-blog.csdnimg.cn/blog_migrate/a5036538b6fc315c3058be1b5e0aa054.png)
+![image-20200807111215487](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Picturesa5036538b6fc315c3058be1b5e0aa054.png)
 
 - 这里实际上就是对第一步在holder中保存的ThreadLocal对象进行遍历，保存其变量值
 - 此时原本通过ThreadLocal保存的和Thread绑定的线程变量，就复制了一份到TtlRunnable对象中了
@@ -248,7 +248,7 @@ private void init(ThreadGroup g, Runnable target, String name,
 
 > 注意此时已处于任务子线程环境中
 
-![BC10853C-DF6B-45B5-9AEB-B90081D1EF6D](https://i-blog.csdnimg.cn/blog_migrate/9a96eaaaae6ad2f3fff2a8d440e5c3d9.png)
+![BC10853C-DF6B-45B5-9AEB-B90081D1EF6D](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures9a96eaaaae6ad2f3fff2a8d440e5c3d9.png)
 
 这里会从Runnable对象取出缓存的线程变量captured，然后进行后续流程：
 
@@ -256,7 +256,7 @@ private void init(ThreadGroup g, Runnable target, String name,
 
 `TransmittableThreadLocal.Transmitter.replay()`：
 
-![在这里插入图片描述](https://i-blog.csdnimg.cn/blog_migrate/47097b9ee6771b30137699a37b5c9a72.png)
+![在这里插入图片描述](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures47097b9ee6771b30137699a37b5c9a72.png)
 
 - 将缓存的父线程变量值设置到当前任务线程（子线程）的ThreadLocal内，并将父线程的线程变量备份
 
@@ -268,7 +268,7 @@ private void init(ThreadGroup g, Runnable target, String name,
 
 `TransmittableThreadLocal.Transmitter.restore()`：
 
-![348D0F21-632E-48A2-B9F2-DC9AE10F2EF3](https://i-blog.csdnimg.cn/blog_migrate/8b9e81e5a303d8a3e0cc761ba8687a77.png)
+![348D0F21-632E-48A2-B9F2-DC9AE10F2EF3](https://raw.githubusercontent.com/qhbsss/Pictures/main/Blog_Pictures8b9e81e5a303d8a3e0cc761ba8687a77.png)
 
 - 将run()执行前获取的备份，设置到当前线程中去，恢复run()执行过程中可能导致的变化，避免对后续复用此线程的任务产生影响
 
