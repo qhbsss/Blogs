@@ -654,6 +654,12 @@ def func():
 decorator1(decorator2(decorator3(func)))
 ```
 
+> Python3.0之后加入新特性Decorators，以@为标记修饰function和class。有点类似c++的宏和java的注解。Decorators用以修饰约束function和class，分为带参数和不带参数，影响原有输出，例如类静态函数我们要表达的时候需要函数前面加上修饰@staticmethod或@classmethod
+>
+> 装饰器是一种语法糖，如下列代码所示，在函数上添加`@dec`相当于`func = dec(func)`。python 装饰器实现了23种设计模式之一的装饰器模式，在不修改原有函数的情况下，为函数代码的情况下为函数添加功能。
+>
+> 被装饰函数的返回值 作为参数传给闭包函数执行（这个闭包函数名前面加个@，就是装饰器），说白了装饰器就是一个闭包函数。
+
 # metaclass
 
 ## 1. 所有的 Python 的用户定义类，都是 type 这个类的实例。
