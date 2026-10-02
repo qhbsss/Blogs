@@ -1,0 +1,1527 @@
+---
+title: "Flink实时计算学习指南"
+source: "https://ata.atatech.org/articles/11020491629?spm=ata.23639746.0.0.39545f7e2hsZej"
+author:
+published:
+created: 2026-04-24
+description:
+tags:
+  - "clippings"
+---
+阿里健康
+
+粉丝 3影响力 152
+
+** 29
+
+** 45
+
+** 3
+
+** 原创文章
+
+内部资料
+
+**
+
+[曹亚龙(麟飞)](https://ata.atatech.org/users/11002148285)
+
+2025-10-24发表2025-10-25更新1.0k浏览
+
+** 朗读
+
+** 字号
+
+** 笔记
+
+** 分享 **
+
+因为团队正在组织数据湖仓一体实时架构升级专项，笔者梳理了Flink实时计算的相关知识。Flink作为实时架构重要的中间件之一，目前承担了集团大部分的实时数据处理。本文主要介绍Flink核心理论知识、实时流的读取与写入、Flink SQL、常见指标计算案例与性能调优方案，希望能作为实时计算入门指南帮助更多同学快速上手Flink。本文参考了公开学习视频、阿里云产品文档、团队内部文档、ATA文章等资料，在此表示感谢🙏。
+
+## 一、理论篇
+
+## 1.1 Flink介绍
+
+### 1.1.1 Flink是什么
+
+[Apache Flink](http://flink.apache.org/) 是一个框架和分布式处理引擎，可以对无界（有开始无结束，数据流来源无休止，必须持续及时处理，需有序）和有界（有开始和结束，可以拿到全部数据后批处理，无需有序）数据流（交易、日志、物联网和点击流等）进行有状态计算，流处理额外数据保存为一个“状态”进行持久化防止丢失，处理完每条数据后更新状态，例如实时曝光、订单量、支付UV等，持久化可选内存（速度快但可靠性差）与分布式系统（速度慢但可靠性高）。
+
+实时相比离线的区别：（1）数据形式：处理有序无界数据流（交易、日志、和点击流等）；（2）处理方式：分布式流处理（引申时间语义、窗口、Watermark机制）；（3）数据保障：有状态计算（引申状态管理和容错机制）
+
+为什么要做实时？数据实效性，支持实时决策响应（广告投放、实时推荐、“双11”大屏）。
+
+### 1.1.2 起源与发展
+
+Flink的起源：Flink起源于Apache软件基金会顶级项目Stratosphere，是为分布式、高性能、 随时可用以及准确的流处理应用程序打造的开源流处理框架，可以同时支持流计算和批计算。Stratosphere是由三所柏林的大学（柏林工业大学、柏林洪堡大学和哈索普拉特纳研究所）和欧洲一些其他大学在2010～2014年进行的研究项目，由柏林理工大学的教授沃克尔·马尔科（Volker Markl）领衔开发。2014年4月代码被复制捐赠给Apache软件基金会，成为Apache软件基金会孵化器项目，后来设计出Flink，在德语中Flink表示“快速、灵巧”，通过小松鼠图标表达寓意。
+
+![[Image 7.png]]
+
+Flink的发展：2014年8月，Flink第一个版本0.6发布，几位核心开发者创办Data Artisans公司；2014年12月，Flink项目完成孵化；2015年4月，Flink发布了里程碑式的重要版本0.9；2016年，阿里上线基于Flink搭建的实时计算平台，用于搜索和推荐两大场景；2019年1月，长期对Flink投入研发的阿里以9000万欧元的价格收购了Data Artisans公司；2019年8月，阿里将内部版本Blink开源合并入Flink1.9版本；2024年起，Blink逐步完成下线，实时业务已基本由VVP平台承接；目前，阿里Flink平台内部积累起来的状态数据，已经达到PB级别规模， 每天在平台上处理的数据量已经超过万亿条，在峰值期间可以承担每秒数亿次的访问，最典型的应用场景是阿里巴巴“双11”大屏。
+
+### 1.1.3 特性
+
+●
+
+高吞吐：支持百万级以上的数据处理。
+
+●
+
+低延迟：支持毫秒级实时数据处理与访问。
+
+●
+
+高精确：支持事件时间(Event Time，精确时间属性)、摄入时间(Ingestion Time，缓解数据乱序但无法保证数据按产生顺序处理)和处理时间(Processing Time，低延迟时间属性)，在时间属性上支持Watermark机制保证数据乱序时仍被正确处理。
+
+●
+
+高容错：状态管理机制防止状态在计算过程中因系统异常丢失；周期性分布式快照(Snapshot)技术Checkpoint实现状态持久化维护，即使在系统异常情况下也能保证结果准确性；支持版本升级运维时通过SavePoint保存快照到存储介质上，任务重启时直接恢复原有状态；精确一次的状态一致性保障数据不出现丢失（至多一次）和重复（至少一次）问题。
+
+●
+
+多场景：可连接到很多常用的存储系统，例如Kafka、Hive、JDBC、HDFS、Redis、Mysql以及阿里内部的TT、ODPS、Hologres、Lindorm、AnalyticDB等；可以运行在包括YARN、Mesos、Kubernetes等在内的多种资源管理框架上，还支持在裸机集群上独立部署；可以实现流批一体化处理。
+
+●
+
+高可用 ：支持故障快速恢复、动态扩展任务、以极少的停机时间连续多天运行。
+
+### 1.1.4 流处理优势
+
+<table><colgroup><col width="106"> <col width="108"> <col width="124"> <col width="103"> <col width="175"> <col width="68"> <col width="92"> <col width="189"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>流计算框架</p></td><td rowspan="1" colspan="1"><p>时间语义</p></td><td rowspan="1" colspan="1"><p>消息保障机制</p></td><td rowspan="1" colspan="1"><p>容错机制</p></td><td rowspan="1" colspan="1"><p>状态管理</p></td><td rowspan="1" colspan="1"><p>延迟</p></td><td rowspan="1" colspan="1"><p>吞吐量</p></td><td rowspan="1" colspan="1"><p>不足</p></td></tr><tr><td rowspan="1" colspan="1"><p>Storm</p></td><td rowspan="1" colspan="1"><p>处理时间</p></td><td rowspan="1" colspan="1"><p>至少一次</p></td><td rowspan="1" colspan="1"><p>Acker机制</p></td><td rowspan="1" colspan="1"><p>无</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>无法实现高吞吐，故障发生时无法保证准确性</p></td></tr><tr><td rowspan="1" colspan="1"><p>SparkStreaming</p></td><td rowspan="1" colspan="1"><p>处理时间</p></td><td rowspan="1" colspan="1"><p>精确一次</p></td><td rowspan="1" colspan="1"><p>基于RDD的检查点</p></td><td rowspan="1" colspan="1"><p>基于DStream（小批数据RDD的集合）</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>微批处理牺牲了低延迟和实时处理能力</p></td></tr><tr><td rowspan="1" colspan="1"><p>Flink</p></td><td rowspan="1" colspan="1"><p>事件时间、处理时间</p></td><td rowspan="1" colspan="1"><p>精确一次</p></td><td rowspan="1" colspan="1"><p>检查点</p></td><td rowspan="1" colspan="1"><p>基于算子</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>-</p></td></tr></tbody></table>
+
+### 1.1.5 行业应用
+
+<table><colgroup><col width="365"> <col width="434"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>行业</p></td><td rowspan="1" colspan="1"><p>应用任务</p></td></tr><tr><td rowspan="1" colspan="1"><p>电商和市场营销</p></td><td rowspan="1" colspan="1"><p>实时数据报表</p><p>广告投放</p><p>实时推荐</p></td></tr><tr><td rowspan="1" colspan="1"><p>物联网（IoT）</p></td><td rowspan="1" colspan="1"><p>传感器实时数据采集和显示</p><p>实时报警</p><p>交通运输业</p></td></tr><tr><td rowspan="1" colspan="1"><p>物流配送和服务业</p></td><td rowspan="1" colspan="1"><p>订单状态实时更新</p><p>通知消息推送</p></td></tr><tr><td rowspan="1" colspan="1"><p>银行和金融业</p></td><td rowspan="1" colspan="1"><p>实时结算和通知推送</p><p>实时检测异常行为</p></td></tr></tbody></table>
+
+### 1.1.6 API分层
+
+Flink提供了多层的API，由下到上、由复杂到简单、由表达能力丰富到简明、由具体到抽象分别是底层有状态流处理函数、核心的DataStream/DataSet API（封装了底层处理函数，提供了转换Transformations、连接Joins、聚合Aggregations、窗口Windows等通用模块，Flink1.12之后DataStream API通过参数设置的形式真正实现流批一体，DataSet API已经过时）、Table API（以表为中心的声明式领域专用语言，通过DataStream API支持Select、Join、Group By和Aggregate等操作）和Flink SQL（最高层语言），目前阿里VVP实时计算平台和Flink SQL已经封装得非常完善了，直接应用于业务，不再聚焦于底层技术，且可以处理大部分日常业务需求，所以API的使用很少了，如有兴趣可自己学习。
+
+![[Image 8.png]]
+
+### 1.1.7 系统架构
+
+![[Image 9.png]] ●
+
+作业管理器(JobManager)：Flink集群中任务管理和调度的核心，是控制应用执行的主进程，包含3个不同的组件：
+
+○
+
+JobMaster：JobManager中最核心的组件，负责处理单独的Job。多个Job可以同时运行在一个Flink集群中。在运行过程中，JobMaster会负责所有需要中央协调的操作，比如说CheckPoint的协调。
+
+○
+
+资源管理器(ResourceManager)：主要负责Slot资源的分配和管理，在Flink 集群中只有一个。任务槽(Slots)就是Flink集群中的资源调配单元，包含了机器用来执行计算的一组CPU和内存资源。每一个任务都需要分配到一个Slot上执行。
+
+○
+
+分发器(Dispatcher)：主要负责提供一个REST接口，用来提交应用，并且负责为每一个新提交的作业启动一个新的JobMaster 组件。Dispatcher也会启动一个Web UI，用来展示和监控作业执行的信息。Dispatcher在架构中并不是必需的，在不同的部署模式下可能会被忽略掉。
+
+●
+
+任务管理器(TaskManager)：用于数据流的具体计算。Flink集群中必须至少有一个TaskManager；每一个TaskManager都包含了一定数量的Task Slots。Slot的数量限制了TaskManager能够并行处理的任务数量。启动之后，TaskManager会向资源管理器注册它的Slots；收到资源管理器的指令后，TaskManager就会将一个或者多个槽位提供给JobMaster调用，JobMaster就可以分配任务来执行了。
+
+### 1.1.8 核心概念
+
+●
+
+并行度(Parallelism)
+
+![[Image 10.png]]
+
+当要处理的数据量非常大时，我们可以把一个算子操作，“复制”多份到多个节点，数据来了之后就可以到其中任意一个执行。这样一来，一个算子任务就被拆分成了多个并行的“子任务”（subtasks），再将它们分发到不同节点，这些子任务在不同的线程、不同的物理机或不同的容器中完全独立地执行。一个特定算子的子任务（subtask）的个数被称之为其并行度（parallelism）。一般情况下，一个流程序的并行度，可以认为就是其所有算子中最大的并行度。
+
+●
+
+算子间的数据传输
+
+一个数据流在算子之间传输数据的形式可以是一对一（one-to-one）的直通（forwarding）模式，也可以是打乱的重分区（redistributing）模式，具体是哪一种形式，取决于算子的种类。
+
+○
+
+一对一(One-to-one，forwarding)
+
+这种模式下，数据流维护着分区以及元素的顺序。source算子读取数据之后，可以直接发送给map算子做处理，它们之间不需要重新分区，也不需要调整数据的顺序。这就意味着map算子的子任务，看到的元素个数和顺序跟source 算子的子任务产生的完全一样，保证着“一对一”的关系。map、filter、flatMap等算子都是这种one-to-one的对应关系。
+
+○
+
+重分区(Redistributing)
+
+在这种模式下，数据流的分区会发生改变。比如map和后面的keyBy/window算子之间，以及keyBy/window算子和Sink算子之间，都是这样的关系。
+
+每一个算子的子任务，会根据数据传输的策略，把数据发送到不同的下游目标任务。这些传输方式都会引起重分区的过程。
+
+●
+
+合并算子链
+
+在Flink中，并行度相同的一对一（one to one）算子操作，可以直接链接在一起形成一个“大”的任务（task），这样原来的算子就成为了真正任务里的一部分。每个task会被一个线程执行。这样的技术被称为“算子链”（Operator Chain）。
+
+![[Image 11.png]]
+
+上图中Source和map之间满足了算子链的要求，所以可以直接合并在一起，形成了一个任务；因为并行度为2，所以合并后的任务也有两个并行子任务。这样，这个数据流图所表示的作业最终会有5个任务，由5个线程并行执行。
+
+将算子链接成task是非常有效的优化：可以减少线程之间的切换和基于缓存区的数据交换，在减少时延的同时提升吞吐量。Flink默认会按照算子链的原则进行链接合并，也可以通过设置禁用算子链。
+
+●
+
+任务槽(Task Slots)
+
+Flink中每一个TaskManager都是一个JVM进程，它可以启动多个独立的线程，来并行执行多个子任务（subtask）。很显然，TaskManager的计算资源是有限的，并行的任务越多，每个线程的资源就会越少。那一个TaskManager到底能并行处理多少个任务呢？为了控制并发量，我们需要在TaskManager上对每个任务运行所占用的资源做出明确的划分，这就是所谓的任务槽（task slots）。每个任务槽（task slot）其实表示了TaskManager拥有计算资源的一个固定大小的子集。这些资源就是用来独立执行一个子任务的。内存均分，在slot上执行一个子任务时，相当于划定内存“专款专用”，不需要再与其他任务竞争资源，槽数量可以进行设置。这里只是内存隔离，CPU没有隔离，一般槽数量设置为CPU核数，尽量避免CPU竞争。
+
+![[Image 12.png]]
+
+同一个slot上的不同算子子任务是同时执行的，同一个slot必须放不同的算子子任务避免资源竞争。默认情况下，Flink是允许子任务共享slot的。如果我们保持sink任务并行度为1不变，而作业提交时设置全局并行度为6，那么前两个任务节点就会各自有6个并行子任务，整个流处理程序则有13个子任务。如上图所示，只要属于同一个作业，那么对于不同任务节点（算子）的并行子任务，就可以放到同一个slot上执行。所以对于第一个任务节点source→map，它的6个并行子任务必须分到不同的slot上，而第二个任务节点keyBy/window/apply的并行子任务却可以和第一个任务节点共享slot。
+
+当我们将资源密集型和非密集型的任务同时放到一个slot中，它们就可以自行分配对资源占用的比例，从而保证最重的活平均分配给所有的TaskManager。slot共享另一个好处就是允许我们保存完整的作业管道。这样一来，即使某个TaskManager出现故障宕机，其他节点也可以完全不受影响，作业的任务可以继续执行。
+
+### 1.1.9 作业解析流程
+
+![[Image 13.png]] ●
+
+逻辑流图/作业图/执行图/物理流图
+
+逻辑流图（StreamGraph）→ 作业图（JobGraph）→ 执行图（ExecutionGraph）→ 物理图（Physical Graph）。
+
+![[Image 14.png]] ![[Image 15.png]] ○
+
+逻辑流图（StreamGraph）
+
+最初的DAG图，用来表示程序的拓扑结构。这一步一般在客户端完成。
+
+○
+
+作业图（JobGraph）
+
+StreamGraph经过优化后生成的就是作业图（JobGraph），这是提交给 JobManager 的数据结构，确定了当前作业中所有任务的划分。主要的优化为：将多个符合条件的节点链接在一起合并成一个任务节点，形成算子链，这样可以减少数据交换的消耗。JobGraph一般也是在客户端生成的，在作业提交时传递给JobMaster。
+
+○
+
+执行图（ExecutionGraph）
+
+JobMaster收到JobGraph后，会根据它来生成执行图（ExecutionGraph）。ExecutionGraph是JobGraph的并行化版本，是调度层最核心的数据结构。与JobGraph最大的区别就是按照并行度对并行子任务进行了拆分，并明确了任务间数据传输的方式。
+
+○
+
+物理图（Physical Graph）
+
+JobMaster生成执行图后，会将它分发给TaskManager；各个TaskManager会根据执行图部署任务，最终的物理执行过程也会形成一张“图”，一般就叫作物理图（Physical Graph）。这只是具体执行层面的图，并不是具体的数据结构。物理图主要就是在执行图的基础上，进一步确定数据存放的位置和收发的具体方式。有了物理图，TaskManager就可以对传递来的数据进行处理计算了。
+
+## 1.2 时间语义与窗口划分
+
+### 1.2.1 时间语义
+
+时间语义就是按照哪种时间来处理数据，分为事件时间、摄入时间和处理时间。
+
+●
+
+事件时间(Event Time)：数据产生的时间，目前应用广泛，符合实际。
+
+●
+
+摄入时间(Ingestion Time)：数据进入到Flink中的时间。
+
+●
+
+处理时间(Processing Time)：数据真正被Flink处理的时间。
+
+### 1.2.2 为什么要设置窗口
+
+批处理中需要统计一段时间范围内的数据，实时是一条数据来处理一条，应该怎么统计最近一段时间内的数据呢？引入窗口来划定时间范围，对时间段内数据进行统计处理，即将无界数据流的数据切割成有限的数据块，到达窗口结束时间就对块中收集的数据进行计算处理。Flink中窗口是动态创建的，有落在窗口内的数据事窗口才会创建，达到结束时间窗口关闭。
+
+![[Image 16.png]]
+
+### 1.2.3 窗口分类
+
+<table><colgroup><col width="151"> <col width="648"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>划分标准</p></td><td rowspan="1" colspan="1"><p>窗口类型</p></td></tr><tr><td rowspan="1" colspan="1"><p>驱动类型</p></td><td rowspan="1" colspan="1">1.<p>时间窗口：定点发车</p>2.<p>计数窗口：人齐发车</p></td></tr><tr><td rowspan="1" colspan="1"><p>分配数据规则</p></td><td rowspan="1" colspan="1">1.<p>滚动窗口：均匀切片，窗口间无重叠和间隔，首尾相接</p>2.<p>滑动窗口：窗口大小固定，有滑动步长概念，数据可能被分配到多个窗口</p><img src="https://oss-ata.alibaba.com/article/2025/10/09465fd5-c38f-450d-8318-cf6539612016"> 3.<p>会话窗口：基于时间定义，长度不固定，会话间隔超过阈值窗口关闭</p></td></tr></tbody></table>
+
+## 1.3 Watermark机制
+
+### 1.3.1 Watermark水位线理解
+
+通过新到的数据时间戳自定义逻辑时钟，衡量事件时间的进展，一般依据事件时间，计算较为准确，并且通过水位线机制可以处理数据乱序的问题。
+
+### 1.3.2 水位线生成原则
+
+<table><colgroup><col width="87"> <col width="712"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>流场景</p></td><td rowspan="1" colspan="1"><p>水位线生成原则</p></td></tr><tr><td rowspan="1" colspan="1"><p>有序流</p></td><td rowspan="1" colspan="1"><p>理想状态，数据按照生成的先后顺序进入流中，每条数据产生一条水位线；实际应用中数据间隔很短（几毫秒），一般周期性生成水位线。</p></td></tr><tr><td rowspan="1" colspan="1"><p>乱序流</p></td><td rowspan="1" colspan="1"><p>分布式系统因为网络传输延迟的不确定性，数据到达可能乱序。如果数据量小，到达数据的时间戳比水位线大，就推进，否则不推进；如果数据量大，可以周期性地生成水位线，只需要对周期内数据的时间戳取最大值生成水位线即可。对于迟到数据可以设置延迟时间，最大时间戳减去延迟时间作为水位线，延迟时间触发计算，早到的时间戳大于水位线的数据划分到下一个窗口参与计算，如果还有迟到数据可以放到侧输出流用于后续处理。</p></td></tr></tbody></table>
+
+延迟等待时间大可以保证准确性但是影响实时性，小了又会遗漏数据；如果追求速度可以考虑处理时间语义，理论上可以得到最低延迟，水位线其实就是对流处理中低延迟和结果正确性的权衡机制。
+
+### 1.3.3 水位线的传递
+
+上游任务处理完水位线、时钟改变之后，要把当前的水位线再次发出，广播给所有的下游子任务。而当一个任务接收到多个上游并行任务传递来的水位线时，应该以最小的那个作为当前任务的事件时钟。水位线在上下游任务之间的传递，非常巧妙地避免了分布式系统中没有统一时钟的问题，每个任务都以“处理完之前所有数据”为标准来确定自己的时钟。
+
+![[Image 17.png]]
+
+在多个上游并行任务中，如果有其中一个没有数据，由于当前Task是以最小的那个作为当前任务的事件时钟，就会导致当前Task的水位线无法推进，就可能导致窗口无法触发。这时候可以设置空闲等待时间，到时间就略过该上游任务。
+
+## 1.4 状态管理
+
+### 1.4.1 状态概述和分类
+
+Flink算子可以分为有状态和无状态两类，无状态算子不依赖其他数据，例如map、filter和flatMap算子，有状态的算子需要其他的数据例如状态来计算，聚合算子和窗口算子都属于有状态的算子。
+
+算子状态（Operator State）：一个算子任务会按照并行度分为多个并行子任务执行，而不同的子任务会占据不同的任务槽（task slot）。由于不同的slot在计算资源上是物理隔离的，所以Flink能管理的状态在并行任务间是无法共享的，每个状态只能针对当前子任务的实例有效。
+
+按键分区状态（Keyed State）：很多有状态的操作（比如聚合、窗口）都是要先做keyBy进行按键分区的。按键分区之后，任务所进行的所有计算都应该只针对当前key有效，所以状态也应该按照key彼此隔离。在这种情况下，状态的访问方式又会有所不同。
+
+状态生存时间(TTL)：状态会随着时间的推移逐渐增长，如果不加以限制，最终就会导致存储空间的耗尽。一个优化的思路是直接在代码中调用清除函数去清除状态，但是有时候我们的逻辑要求不能直接清除。这时就需要配置一个状态的“生存时间”(time-to-live，TTL)，当状态在内存中存在的时间超出这个值时，就将它清除。状态创建的时候，设置 失效时间 = 当前时间 + TTL；如果有对状态的访问和修改，我们可以再对失效时间进行更新；当清除条件被触发时，就可以判断状态是否失效、从而进行清除了。
+
+### 1.4.2 按键分区状态
+
+<table><colgroup><col width="227"> <col width="572"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>状态类型</p></td><td rowspan="1" colspan="1"><p>描述</p></td></tr><tr><td rowspan="1" colspan="1"><p>值状态(ValueState)</p></td><td rowspan="1" colspan="1"><p>状态保存一个值，例如求最大值，最新状态等。</p></td></tr><tr><td rowspan="1" colspan="1"><p>列表状态(ListState)</p></td><td rowspan="1" colspan="1"><p>状态保存多个数据的列表，例如求GMV排TOP3的商品。</p></td></tr><tr><td rowspan="1" colspan="1"><p>Map状态(MapState)</p></td><td rowspan="1" colspan="1"><p>状态保存一些键值对，可认为就是键值对列表，例如统计每个UV的购买量。</p></td></tr><tr><td rowspan="1" colspan="1"><h4>归约状态(Reducing State)</h4></td><td rowspan="1" colspan="1"><p>类似于值状态，不过需要对添加进来的所有数据进行归约，将归约聚合之后的值作为状态保存下来，例如计算每个商品的累计订单量。</p></td></tr><tr><td rowspan="1" colspan="1"><h4>聚合状态(Aggregating State)</h4></td><td rowspan="1" colspan="1"><p>类似于归约状态，用来保存添加进来的所有数据的聚合结果。与规约状态不同的是，聚合的状态类型可以跟添加进来的数据类型完全不同，使用更加灵活。例如计算每个商品的平均订单量。</p></td></tr></tbody></table>
+
+### 1.4.3 算子状态（Operator State）
+
+算子状态的实际应用场景不如Keyed State多，一般用在Source或Sink等与外部系统连接的算子上，或者完全没有key定义的场景。算子状态也支持不同的结构类型，主要有三种：ListState、UnionListState和BroadcastState。
+
+<table><colgroup><col width="268"> <col width="531"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>算子状态类型</p></td><td rowspan="1" colspan="1"><p>描述</p></td></tr><tr><td rowspan="1" colspan="1"><p>列表状态(ListState)</p></td><td rowspan="1" colspan="1"><p>与Keyed State中的ListState一样，将状态表示为一组数据的列表，区别在于，不会按键分别处理状态，所以每一个并行子任务上只会保留一个列表，也就是当前并行子任务上所有状态项的集合。列表中的状态项就是可以重新分配的最细粒度，彼此之间完全独立。例如，计算Map的数据个数。算子并行度缩放调整时，会收集列表状态的所有元素，然后通过轮询进行均匀分配，这种方式叫做“平均分割重组”(Even-split Redistribution)。</p></td></tr><tr><td rowspan="1" colspan="1"><h4>联合列表状态(UnionList State)</h4></td><td rowspan="1" colspan="1"><p>与ListState类似，联合列表状态也会将状态表示为一个列表。区别在于，算子并行度进行缩放调整时对于状态的分配方式不同，常规列表状态是轮询分配状态项，而联合列表状态的算子则会直接广播状态的完整列表。这样，并行度缩放之后的并行子任务就获取到了联合后完整的“大列表”，可以自行选择要使用的状态项和要丢弃的状态项。这种分配也叫作“联合重组”（Union Redistribution）。</p></td></tr><tr><td rowspan="1" colspan="1"><h4>广播状态(Broadcast State)</h4></td><td rowspan="1" colspan="1"><p>有时我们希望算子并行子任务都保持同一份“全局”状态，用来做统一的配置和规则设定。这时所有分区的所有数据都会访问到同一个状态，状态就像被“广播”到所有分区一样，这种特殊的算子状态，就叫作广播状态（BroadcastState），算子并行度调整时只需要复制或者删除，因为每个算子并行子任务状态都是一样的。</p></td></tr></tbody></table>
+
+### 1.4.4 状态后端(State Backends)
+
+在Flink中，状态的存储、访问以及维护，都是由一个可插拔的组件决定的，这个组件就叫作状态后端。状态后端主要负责管理本地状态的存储方式和位置。
+
+状态后端是一个“开箱即用”的组件，可以在不改变应用程序逻辑的情况下独立配置。Flink中提供了两类不同的状态后端，一种是“哈希表状态后端”（HashMapStateBackend），另一种是“内嵌RocksDB状态后端”（EmbeddedRocksDBStateBackend）。系统默认是是HashMapStateBackend。
+
+哈希表状态后端：把状态存放在内存里。具体实现上，哈希表状态后端在内部会直接把状态当作对象(objects)，保存在Taskmanager的JVM堆上。普通的状态，以及窗口中收集的数据和触发器，都会以键值对的形式存储起来，所以底层是一个哈希表(HashMap)，这种状态后端也因此得名。
+
+内嵌RocksDB状态后端：RocksDB是一种内嵌的key-value存储介质，可以把数据持久化到本地硬盘。配置后会将处理中的数据全部放入RocksDB数据库中，RocksDB默认存储在TaskManager的本地数据目录里。RocksDB的状态数据被存储为序列化的字节数组，读写操作需要序列化/反序列化，因此状态的访问性能要差一些。始终执行的是异步快照，所以不会因为保存检查点而阻塞数据的处理；而且它还提供了增量式保存检查点的机制，这在很多情况下可以大大提升保存效率。
+
+如何选择正确的状态后段：哈希表状态后端是内存计算，读写速度非常快；但是，状态的大小会受到集群可用内存的限制，如果应用的状态随着时间不停地增长，就会耗尽内存资源；而RocksDB是硬盘存储，所以可以根据可用的磁盘空间进行扩展，所以它非常适合于超级海量状态的存储。不过由于每个状态的读写都需要做序列化/反序列化，而且可能需要直接从磁盘读取数据，这就会导致性能的降低，平均读写性能要比哈希表状态后端慢一个数量级。
+
+## 1.5 容错机制
+
+### 1.5.1 检查点(Checkpoint)
+
+Flink完整的容错机制来存储状态以保障故障后的恢复，最重要的就是检查点，类似于写文档随时保存或做备份。
+
+#### 1.5.1.1 检查点的保存
+
+●
+
+周期性的触发备份，间隔可以设置，触发太频繁会浪费资源做检查点。
+
+●
+
+保存的时间点必须要求所有节点一致，我们应该在所有算子都恰好处理完一个相同的输入数据的时候，将它们的状态保存下来（即以最慢的算子为准）。这样做可以实现一个数据被所有算子完整地处理完，状态得到保存。如果出现故障，我们恢复到之前保存的状态，故障时正在处理的所有数据都需要重新处理；我们只需要让源（source）任务向数据源重新提交偏移量、请求重放数据就可以了。当然这需要源任务可以把偏移量作为算子状态保存下来，而且外部数据源能够重置偏移量；例如kafka。
+
+#### 1.5.1.2 从检查点恢复状态
+
+发生故障时要找到最新一次成功保存的检查点恢复状态。
+
+○
+
+故障重启后状态都会被清除，读取检查点重启状态；
+
+○
+
+重启偏移量，避免保存检查点到出现故障之间处理过的数据丢失。可以通过Source向外部数据源重新提交偏移量(offset)；
+
+○
+
+继续处理数据，重放保存检查点到故障之间的数据，保证既没有丢数据，也没有重复计算，实现分布式系统的“精准一次”（exactly-once）的状态一致性保证。
+
+#### 1.5.1.3 检查点算法
+
+在Flink中，采用了基于Chandy-Lamport算法的分布式快照，可以在不暂停整体流处理的前提下，将状态备份保存到检查点。
+
+##### 1.5.1.3.1 检查点分界线(Barrier)
+
+借鉴水位线的设计，在数据流中插入一个特殊的数据结构，专门用来表示触发检查点保存的时间点。收到保存检查点的指令后，Source任务可以在当前数据流中插入这个结构；之后的所有任务只要遇到它就开始对状态做持久化快照保存。这种特殊的数据形式，把一条流上的数据按照不同的检查点分隔开，所以就叫做检查点的“分界线”(Checkpoint Barrier)。
+
+![[Image 18.png]]
+
+##### 1.5.1.3.2 分布式快照算法（Barrier对齐的精准一次）
+
+Watermark指示的是“之前的数据全部到齐了”，而Barrier指示的是“之前所有数据的状态更改保存入当前检查点”：它们都是一个“截止时间”的标志。具体实现上，Flink使用了Chandy-Lamport算法的一种变体，被称为“异步分界线快照”算法。算法的核心就是两个原则：
+
+a.
+
+当上游任务向多个并行下游任务发送barrier时，需要广播出去；
+
+b.
+
+而当多个上游任务向同一个下游任务传递分界线时，需要在下游任务执行“分界线对齐”操作，也就是需要等到所有并行分区的barrier都到齐，才可以开始状态的保存。
+
+具体流程：
+
+（1）触发检查点：JobManager向Source发送Barrier；
+
+（2）Barrier发送：向下游广播发送；
+
+（3）Barrier对齐：下游需要收到上游所有并行度传递过来的Barrier才做自身状态的保存；
+
+（4）状态保存：有状态的算子将状态保存至持久化。
+
+（5）先处理缓存数据，然后正常继续处理
+
+完成检查点保存之后，任务就可以继续正常处理数据了。这时如果有等待分界线对齐时缓存的数据，需要先做处理；然后再按照顺序依次处理新到的数据。当JobManager收到所有任务成功保存状态的信息，就可以确认当前检查点成功保存。之后遇到故障就可以从这里恢复了。
+
+由于分界线对齐要求先到达的分区做缓存等待，一定程度上会影响处理的速度；当出现背压时，下游任务会堆积大量的缓冲数据，检查点可能需要很久才可以保存完毕。
+
+为了应对这种场景，Barrier对齐中提供了至少一次语义以及Flink 1.11之后提供了不对齐的检查点保存方式，可以将未处理的缓冲数据也保存进检查点。这样，当我们遇到一个分区barrier时就不需等待对齐，而是可以直接启动状态的保存了。
+
+##### 1.5.1.3.3 分布式快照算法（Barrier对齐的至少一次）
+
+![[Image 19.png]]
+
+sum1收到map2的barrier但是没收到map1的，这期间map2有新数据也会一同被计算，所以会保存到状态中，导致故障重启后会被再次计算。但是可以早点计算避免下游数据积压。
+
+##### 1.5.1.3.4 分布式快照算法（非Barrier对齐的精准一次）
+
+多存点数据，优点是barrier不用等待且不影响精准，缺点是增大了IO存储压力，因为状态和原本等待期间的数据都要存储。当最后一个barrier达到时，这个备份任务才会结束。
+
+![[Image 20.png]]
+
+在 1.15 之前，只有RocksDB 支持增量快照。不同于产生一个包含所有数据的全量备份，增量快照中只包含自上一次快照完成之后被修改的记录，因此可以显著减少快照完成的耗时。从 1.15 开始，不管hashmap还是rocksdb状态后端都可以通过开启Changelog实现通用的增量Checkpoint。
+
+### 5.2 保存点(Savepoint)
+
+除了检查点外，Flink还提供了另一个非常独特的镜像保存功能—保存点。它的原理和算法与检查点完全相同，只是多了一些额外的元数据。保存点与检查点最大的区别，就是触发的时机。检查点是由Flink自动管理的，定期创建，发生故障之后自动读取进行恢复，这是一个“自动存盘”的功能；而保存点不会自动创建，必须由用户明确地手动触发保存操作，所以就是“手动存盘”。
+
+保存点可以当作一个强大的运维工具来使用。我们可以在需要的时候创建一个保存点，然后停止应用，做一些处理调整之后再从保存点重启。它适用的具体场景有：
+
+●
+
+版本管理和归档存储
+
+●
+
+更新Flink版本
+
+●
+
+更新应用程序
+
+●
+
+调整并行度
+
+●
+
+暂停应用程序
+
+与检查点的区别就是想保存的时候存储保存点，检查点是周期存储的。
+
+### 5.3 状态一致性
+
+#### 5.3.1 一致性的概念和级别
+
+一致性其实就是结果的正确性，一般从数据丢失、数据重复来评估。流式计算本身就是一个一个来的，所以正常处理的过程中结果肯定是正确的；但在发生故障、需要恢复状态进行回滚时就需要更多的保障机制了。一般说来，状态一致性有三种级别：最多一次（At-Most-Once）、至少一次（At-Least-Once） 和精确一次（Exactly-Once） 。
+
+#### 5.3.2 端到端的状态一致性
+
+我们已经知道检查点可以保证Flink内部状态的一致性，而且可以做到精确一次。那是不是说，只要开启了检查点，发生故障进行恢复，结果就不会有任何问题呢？
+
+没那么简单。在实际应用中，一般要保证从用户的角度看来，最终消费的数据是正确的。而用户或者外部应用不会直接从Flink内部的状态读取数据，往往需要我们将处理结果写入外部存储中。这就要求我们不仅要考虑Flink内部数据的处理转换，还涉及到从外部数据源读取，以及写入外部持久化系统，整个应用处理流程从头到尾都应该是正确的。
+
+所以完整的流处理应用，应该包括了数据源、流处理器和外部存储系统三个部分。这个完整应用的一致性，就叫做“端到端(end-to-end)的状态一致性”，它取决于三个组件中最弱的那一环。
+
+#### 5.3.3 端到端精确一次(End-To-End exactly-Once)
+
+对于Flink内部来说，检查点机制可以保证故障恢复后数据不丢（在能够重放的前提下），并且只处理一次，所以已经可以做到exactly-once的一致性语义了。所以端到端一致性的关键点，就在于输入的数据源端和输出的外部存储端。
+
+![[Image 21.png]]
+
+##### 5.3.3.1 输入端保证
+
+输入端主要指的就是Flink读取的外部数据源。对于一些数据源来说，并不提供数据的缓冲或是持久化保存，数据被消费之后就彻底不存在了，例如socket文本流。对于这样的数据源，故障后我们即使通过检查点恢复之前的状态，可保存检查点之后到发生故障期间的数据已经不能重发了，这就会导致数据丢失。所以就只能保证at-most-once的一致性语义，相当于没有保证。
+
+想要在故障恢复后不丢数据，外部数据源就必须拥有重放数据的能力。常见的做法就是对数据进行持久化保存，并且可以重设数据的读取位置。一个最经典的应用就是Kafka。在Flink的Source任务中将数据读取的偏移量保存为状态，这样就可以在故障恢复时从检查点中读取出来，对数据源重置偏移量，重新获取数据。
+
+##### 5.3.3.2 输出端保证
+
+有了Flink的检查点机制，以及可重放数据的外部数据源，我们已经能做到at-least-once了。但是想要实现exactly-once却有更大的困难：数据有可能重复写入外部系统。
+
+因为检查点保存之后，继续到来的数据也会一一处理，任务的状态也会更新，最终通过Sink任务将计算结果输出到外部系统；只是状态改变还没有存到下一个检查点中。这时如果出现故障，这些数据都会重新来一遍，就计算了两次。我们知道对Flink内部状态来说，重复计算的动作是没有影响的，因为状态已经回滚，最终改变只会发生一次；但对于外部系统来说，已经写入的结果就是泼出去的水，已经无法收回了，再次执行写入就会把同一个数据写入两次。
+
+为了实现端到端exactly-once，我们还需要对外部存储系统、以及Sink连接器有额外的要求。能够保证exactly-once一致性的写入方式有两种：幂等写入和事务写入。
+
+1）幂等(Idempotent)写入
+
+所谓“幂等”操作，就是说一个操作可以重复执行很多次，但只导致一次结果更改。也就是说，后面再重复执行就不会对结果起作用了。这种方式主要的限制在于外部存储系统必须支持这样的幂等写入：比如Redis中键值存储，或者关系型数据库（如MySQL）中满足查询条件的更新操作。
+
+需要注意，对于幂等写入，遇到故障进行恢复时，有可能会出现短暂的不一致。因为保存点完成之后到发生故障之间的数据，其实已经写入了一遍，回滚的时候并不能消除它们。如果有一个外部应用读取写入的数据，可能会看到奇怪的现象：短时间内，结果会突然“跳回”到之前的某个值，然后“重播”一段之前的数据。不过当数据的重放逐渐超过发生故障的点的时候，最终的结果还是一致的。
+
+2）事务(Transactional)写入
+
+如果说幂等写入对应用场景限制太多，那么事务写入可以说是更一般化的保证一致性的方式。输出端最大的问题，就是写入到外部系统的数据难以撤回。而利用事务就可以实现对已写入数据的撤回。
+
+事务是应用程序中一系列严密的操作，所有操作必须成功完成，否则在每个操作中所作的所有更改都会被撤消。事务有四个基本特性：原子性、一致性、隔离性和持久性，这就是著名的ACID。
+
+在Flink流处理的结果写入外部系统时，如果能够构建一个事务，让写入操作可以随着检查点来提交和回滚，那么自然就可以解决重复写入的问题了。所以事务写入的基本思想就是：用一个事务来进行数据向外部系统的写入，这个事务是与检查点绑定在一起的。当Sink任务遇到barrier时，开始保存状态的同时就开启一个事务，接下来所有数据的写入都在这个事务中；待到当前检查点保存完毕时，将事务提交，所有写入的数据就真正可用了。如果中间过程出现故障，状态会回退到上一个检查点，而当前事务没有正常关闭，所以也会回滚，写入到外部的数据就被撤销了。
+
+具体来说，又有两种实现方式：预写日志（WAL）和两阶段提交（2PC）
+
+（1）预写日志(write-ahead-log，WAL)
+
+我们发现，事务提交是需要外部存储系统支持事务的，否则没有办法真正实现写入的回撤。那对于一般不支持事务的存储系统，能否实现事务写入呢？
+
+预写日志（WAL）就是一种非常简单的方式。具体步骤是：
+
+①先把结果数据作为日志（log）状态保存起来
+
+②进行检查点保存时，也会将这些结果数据一并做持久化存储
+
+③在收到检查点完成的通知时，将所有结果一次性写入外部系统。
+
+④在成功写入所有数据后，在内部再次确认相应的检查点，将确认信息也进行持久化保存。这才代表着检查点的真正完成。
+
+我们会发现，这种方式类似于检查点完成时做一个批处理，一次性的写入会带来一些性能上的问题；而优点就是比较简单，由于数据提前在状态后端中做了缓存，所以无论什么外部存储系统，理论上都能用这种方式一批搞定。
+
+需要注意的是，预写日志这种一批写入的方式，有可能会写入失败；所以在执行写入动作之后，必须等待发送成功的返回确认消息。在成功写入所有数据后，在内部再次确认相应的检查点，这才代表着检查点的真正完成。这里需要将确认信息也进行持久化保存，在故障恢复时，只有存在对应的确认信息，才能保证这批数据已经写入，可以恢复到对应的检查点位置。
+
+但这种“再次确认”的方式，也会有一些缺陷。如果我们的检查点已经成功保存、数据也成功地一批写入到了外部系统，但是最终保存确认信息时出现了故障，Flink最终还是会认为没有成功写入。于是发生故障时，不会使用这个检查点，而是需要回退到上一个；这样就会导致这批数据的重复写入。
+
+（2）两阶段提交(two-phase-commit，2PC)
+
+前面提到的各种实现exactly-once的方式，多少都有点缺陷；而更好的方法就是传说中的两阶段提交（2PC）。它的想法是分成两个阶段：先做“预提交”，等检查点完成之后再正式提交。这种提交方式是真正基于事务的，它需要外部系统提供事务支持。
+
+具体的实现步骤为：
+
+①当第一条数据到来时，或者收到检查点的分界线时，Sink任务都会启动一个事务。
+
+②接下来接收到的所有数据，都通过这个事务写入外部系统；这时由于事务没有提交，所以数据尽管写入了外部系统，但是不可用，是“预提交”的状态。
+
+③当Sink任务收到JobManager发来检查点完成的通知时，正式提交事务，写入的结果就真正可用了。
+
+当中间发生故障时，当前未提交的事务就会回滚，于是所有写入外部系统的数据也就实现了撤回。这种两阶段提交（2PC）的方式充分利用了Flink现有的检查点机制：分界线的到来，就标志着开始一个新事务；而收到来自JobManager的checkpoint成功的消息，就是提交事务的指令。每个结果数据的写入，依然是流式的，不再有预写日志时批处理的性能问题；最终提交时，也只需要额外发送一个确认信息。所以2PC协议不仅真正意义上实现了exactly-once，而且通过搭载Flink的检查点机制来实现事务，只给系统增加了很少的开销。
+
+不过两阶段提交虽然精巧，却对外部系统有很高的要求。这里将2PC对外部系统的要求列举如下：
+
+●
+
+外部系统必须提供事务支持，或者Sink任务必须能够模拟外部系统上的事务。
+
+●
+
+在检查点的间隔期间里，必须能够开启一个事务并接受数据写入。
+
+●
+
+在收到检查点完成的通知之前，事务必须是“等待提交”的状态。在故障恢复的情况下，这可能需要一些时间。如果这个时候外部系统关闭事务（例如超时了），那么未提交的数据就会丢失。
+
+●
+
+Sink任务必须能够在进程失败后恢复事务。
+
+●
+
+提交事务必须是幂等操作。也就是说，事务的重复提交应该是无效的。
+
+可见，2PC在实际应用同样会受到比较大的限制。具体在项目中的选型，最终还应该是一致性级别和处理性能的权衡考量。
+
+## 二、实践篇
+
+## 2.1 TT实践指南
+
+### 2.1.1 TT简介
+
+[TT](https://tt.alibaba-inc.com/datahub/overview) 是最重要的实时数据总线服务，支撑每年双11实时大屏数据分发，而且是最重要的离线同步ODPS服务，承担1/3的ODPS离线流量，详细内容可参考 [TT&DataHub集团文档](https://aliyuque.antfin.com/datahub/zxh6l2/wwbg7gkr58k3anmt) 。
+
+TT是TimeTunnel的缩写，是一个高效的、可靠的、可扩展的消息通信平台，可以总结为一个基于生产者、消费者和Topic模式的消息中间件（类似于Kafka消息队列，可做离线采集，也可做实事流处理），它的核心功能就是将生产者生成的数据，再分发给多个订阅的消费者。消息的数据持久化到了Hbase，可以在一定时间范围内回追订阅到历史数据。
+
+目前TT的消费是pull模式，由消费端主动去拉数据，异步缓存，消费者需要时才pull订阅相应topic数据，但客户端在commit put数据时会有一个缓存优化机制，只有达到一定的量，或者是到了超时时间（默认为30S，可配置）才会commit。
+
+TT主要是日志和数据库。日志是采集端为LogAgent。数据库的上游为DRC，DRC监控并解析binlog日志后再发送消息到TT，然后再由TT做订阅分发。
+
+特性可以总结为几下几点：
+
+●
+
+基于生产者、消费者和Topic模式的消息中间件
+
+●
+
+消息数据持久化至Hbase，一种高可用、分布式存储方案
+
+●
+
+多种订阅机制：订阅端自动负载均衡，N台机器能够平均消费一份数据；消费者自己把握消费策略
+
+●
+
+对于读写比例很高的Topic，能够做到读写分离，使消费不影响发送
+
+●
+
+支持订阅历史数据（目前为三天），随意移动offset，方便用户补数据
+
+●
+
+针对订阅有强大的属性过滤功能，用户只需关心自己需要的数据
+
+### 2.1.2 TT使用规范
+
+●
+
+新建Project
+
+目前仅公共的Project: `proj_tt_migrate` 支持LogAgent日志采集以及Shrek binlog同步。
+
+![[Image 22.png]] ●
+
+新建Topic
+
+点击新建Topic可以创建实时流，目前类型仅支持BLOB（非结构化，binlog db采集以及LogAgent日志采集均为该格式）和TUPLE类型（结构化，新建时需填写schema信息，用户SDK，Flink vvr作业写入，通过 `datahub connector` 支持schema读写）
+
+![[Image 23.png]]
+
+新建Topic之后，由于内存Cache原因，权限可能会不符合预期（比如看不了AccessKey，建不了采集点，Owner创建订阅也会走审批等），3-5分钟后，Cache刷新后即符合预期。
+
+●
+
+数据接入（创建级别Key用于数据写入，订阅级别Key用于数据读取），参考链接 [https://aliyuque.antfin.com/datahub/zxh6l2/qmqng8](https://aliyuque.antfin.com/datahub/zxh6l2/qmqng8)
+
+![[Image 24.png]] ●
+
+绑定云账号UID
+
+使用前需要首先绑定云账号，参见 [链接](https://yuque.antfin-inc.com/datahub/zxh6l2/wk2evy) ，云账号需要自己建立，其相当于是域账号的映射。服务端会根据用户访问的ak/sk获取到其对应的UID，这里会校验调用云账号sdk去校验访问ak的有效性。根据该UID查询其对应的域账号是否有某个资源的访问权限。
+
+Dataworks中odps离线表读取时需要个人的云账号AccessKeyID(accessId)和AccessKeySecret(accessKey)，获取方式如下，如果没有的话需要申请获取，个人注册云账号，到时候在Dataworks用户信息即可查看，同时也可以绑定TT。
+
+![[303b0063-6ce6-4a39-9ec1-eb3191f12638.png]] ●
+
+数据读取
+
+输入Topic的标签名称（方便自己识别，最好是AONE应用名，方便审批人查找）和描述创建即可，审批成功后会有对应的ID和Key，在Flink任务中输入到连接器配置信息中即可读取。
+
+![[Image 25.png]]
+
+## 2.2 VVP平台实践指南
+
+[VVP实时计算平台](https://vvp.alibaba-inc.com/web/nc41ljq/zh/#/workspaces/default/namespaces/alihealth-dw/dashboard) 可用来做实时开发，Flink SQL详细内容可参考 [阿里云Flink SQL](https://help.aliyun.com/zh/flink/realtime-flink/developer-reference/sql-development-references/?spm=a2c4g.11186623.help-menu-45029.d_4_2.661950e0s78Hdq&scm=20140722.H_185484._.OR_help-T_cn~zh-V_1) 。
+
+### 2.2.1 数据表读取/写入
+
+#### 2.2.1.1 Maxcompute
+
+Maxcompute的With配置和数据类型映射关系可参考 [Maxcompute连接器](https://help.aliyun.com/zh/flink/maxcompute-connector?spm=a2c4g.11186623.help-menu-45029.d_4_0_5.27d676b2cSufoC&scm=20140722.H_607380._.OR_help-T_cn~zh-V_1) 。
+
+Flink读取odps表
+
+![[Image 26.png]]
+
+增量表可以通过新增'startPartition' = 'yyyy=2018,MM=09,dd=05'设置开始读取的分区。
+
+accessId和acessKey最好使用公共云账号，否则读取别人的表报错提示没有下载权限。
+
+读取别人的odps表
+
+odps表写入
+
+一对一维表需要声明主键
+
+#### 2.2.1.2 Datahub/TT
+
+阿里云流数据处理平台DataHub是流式数据的处理平台，提供对流式数据的发布、订阅和分发功能，兼容Kafka协议，因此可以使用Kafka连接器（不包括Upsert Kafka）来访问DataHub。支持结果表和源表，运行模式支持批模式和流模式、不支持更新和删除目标Topic数据，只支持插入数据。
+
+读取TT
+
+写入TT
+
+![[46772cb8-694c-4072-88b3-b410320b02fa.png]]
+
+#### 2.2.1.3 AnalyticDB
+
+[云原生数据仓库AnalyticDB MySQL版3.0](https://help.aliyun.com/zh/analyticdb/analyticdb-for-mysql/product-overview/what-is-analyticdb-for-mysql#concept-n4h-2rr-vy) 是融合数据库、大数据技术于一体的云原生企业级数据仓库服务。AnalyticDB MySQL版支持高吞吐的数据实时增删改、低延时的实时分析和复杂ETL，兼容上下游生态工具，可用于构建企业级报表系统、数据仓库和数据服务引擎。支持源表、维表和结果表，支持流模式和批模式，只支持SQL的API，连接器和数据类型映射关系可参考 [ADB配置](https://help.aliyun.com/zh/flink/realtime-flink/developer-reference/analyticdb-for-mysql-v3-0-connector?spm=a2c4g.11186623.help-menu-45029.d_4_0_18.5d465257ntoiWu) 。
+
+ADB表读取写入
+
+#### 2.2.1.4 Hologres
+
+[实时数仓Hologres](https://help.aliyun.com/zh/hologres/product-overview/what-is-hologres#concept-1681168) 是阿里巴巴自主研发的一站式实时数仓引擎，支持海量数据实时写入、实时更新、实时加工、实时分析，支持标准 [SQL](https://www.aliyun.com/getting-started/what-is/what-is-sql) （兼容 [PostgreSQL](https://www.aliyun.com/getting-started/what-is/what-is-postgresql) 协议和语法，支持大部分PostgreSQL函数），支持PB级数据多维分析（ [OLAP](https://www.aliyun.com/getting-started/what-is/what-is-olap) ）与即席分析（Ad Hoc），支持高并发低延迟的在线数据服务（Serving），支持多种负载的细粒度隔离与企业级安全能力，与 [MaxCompute](https://help.aliyun.com/zh/maxcompute/product-overview/what-is-maxcompute) 、 [Flink](https://help.aliyun.com/zh/flink/realtime-flink/product-overview/what-is-alibaba-cloud-realtime-compute-for-apache-flink) 、 [DataWorks](https://help.aliyun.com/zh/dataworks/product-overview/what-is-dataworks) 深度融合，提供企业级离在线一体化全栈数仓解决方案。支持源表、维表和结果表，运行模式支持流模式和批模式，支持更新或删除结果表数据。具体with参数配置可参考 [Hologres配置](https://help.aliyun.com/zh/flink/realtime-flink/developer-reference/connector-options-in-the-with-clause-vvr-11-or-later?spm=a2c4g.11186623.help-menu-45029.d_4_0_3_0.1ad96a3dklCiWX) 。
+
+读取Hologres表（主键要和这里对齐）：
+
+![[Image 27.png]]
+
+读取Hologres数据
+
+写入Hologres表（需要事先建好Holo表）
+
+#### 2.2.1.5 TDDL
+
+TDDL临时表
+
+### 2.2.2 Flink SQL
+
+#### 2.2.2.1 动态表和持续查询
+
+当流中有新数据到来，初始的表中会插入一行；而基于这个表定义的SQL查询，就应该在之前的基础上更新结果。这样得到的表就会不断地动态变化，被称为“动态表”（Dynamic Tables）。动态表是Flink在Table API和SQL中的核心概念，它为流数据处理提供了表和SQL支持。
+
+动态表可以像静态的批处理表一样进行查询操作。由于数据在不断变化，因此基于它定义的SQL查询也不可能执行一次就得到最终结果。这样一来，我们对动态表的查询也就永远不会停止，一直在随着新数据的到来而继续执行。这样的查询就被称作“持续查询”（Continuous Query）。对动态表定义的查询操作，都是持续查询；而持续查询的结果也会是一个动态表。
+
+#### 2.2.2.2 流表转换
+
+通过一个只有插入操作（insert-only）的更新日志（changelog）流，来构建一个表。用户事件就对应动态表的插入操作。
+
+![[Image 28.png]] ![[Image 29.png]]
+
+将动态表转换为流：
+
+●
+
+仅追加（Append-only）流：流中的数据就是动态表新增的行
+
+●
+
+回撤（Retract）流：包含添加和撤回消息
+
+INSERT插入操作编码为add消息；DELETE删除操作编码为retract消息；而UPDATE更新操作则编码为被更改行的retract消息，和更新后行（新行）的add消息。这样，我们可以通过编码后的消息指明所有的增删改操作，一个动态表就可以转换为撤回流了。
+
+●
+
+更新插入（Upsert）流-看外部系统支不支持
+
+更新插入流中只包含两种类型的消息：更新插入（upsert）消息和删除（delete）消息。
+
+所谓的“upsert”其实是“update”和“insert”的合成词，所以对于更新插入流来说，INSERT插入操作和UPDATE更新操作，统一被编码为upsert消息；而DELETE删除操作则被编码为delete消息。
+
+![[Image 30.png]]
+
+#### 2.2.2.3 时间属性
+
+基于时间的操作需要定义相关的时间语义和时间数据来源的信息。所谓的时间属性，其实就是每个表结构的部分字段。一旦定义了时间属性，它就可以作为一个普通字段引用，并且可以在基于时间的操作中使用。时间属性的数据类型必须为TIMESTAMP，它的行为类似于常规时间戳，可以直接访问并且进行计算。按照时间语义的不同，可以把时间属性的定义分成事件时间（event time）和处理时间（processing time）两种情况。
+
+事件时间可以在创建表DDL中通过watermark语句来设置。WATERMARK FOR et AS et - INTERVAL '2' SECOND -- 设置等待时间，其中基于et设置了2秒的水位线延迟。
+
+TT实时DDL语句
+
+时间戳类型必须是 TIMESTAMP 或者TIMESTAMP\_LTZ 类型。但是时间戳一般都是秒或者是毫秒（BIGINT 类型）。处理时间则新增额外字段，pt AS PROCTIME()定义。
+
+#### 2.2.2.4 DDL特殊定义
+
+●
+
+计算列
+
+计算列是使用语法column\_name AS computed\_column\_expression生成的虚拟列。
+
+计算列就是拿已有的一些列经过一些自定义的运算生成的新列，在物理上并不存储在表中，只能读不能写。列的数据类型从给定的表达式自动派生，无需手动声明。
+
+计算列
+
+●
+
+主键
+
+主键约束表明表中的一列或一组列是唯一的，并且它们不包含NULL值。主键唯一地标识表中的一行，只支持 not enforced。
+
+主键例子
+
+●
+
+With语句（参数官网现查，不需要记）
+
+用于创建表的表属性，用于指定外部存储系统的元数据信息。配置属性时，表达式key1=val1的键和值都应该是字符串字面值。
+
+●
+
+Like语句
+
+用于基于现有表的定义创建表。此外，用户可以扩展原始表或排除表的某些部分。
+
+可以使用该子句重用(可能还会覆盖)某些连接器属性，或者向外部定义的表添加watermark。
+
+在create语句后面加上LIKE 表名，则会对该表进行扩展。
+
+Like语句例子
+
+●
+
+AS select\_statement（CTAS）
+
+在一个create-table-as-select (CTAS)语句中，还可以通过查询的结果创建和填充表。CTAS是使用单个命令创建数据并向表中插入数据的最简单、最快速的方法。
+
+CTAS例子
+
+#### 2.2.2.5 分组聚合（更新时回撤再输出新的结果）
+
+商品实时支付订单数
+
+![[Image 31.png]] ![[Image 32.png]]
+
+可以看到Flink默认采用的是回撤流形式。
+
+分组聚合-多维分析
+
+![[Image 33.png]]
+
+滚动窗口例子
+
+![[Image 34.png]]
+
+滑动窗口例子
+
+![[Image 35.png]]
+
+会话窗口例子
+
+![[Image 36.png]]
+
+没有输出，因为会话一直在继续，没有等待5秒钟还没有数据的情况发生，所以不输出结果。
+
+#### 2.2.2.6 窗口表值函数
+
+上述分组聚合方式已经过时，窗口表值函数（TVF）在支持时间语义的分组聚合上更好，优化更多。
+
+窗口表值函数用法示例
+
+#### 2.2.2.7 TopN和去重
+
+买卖家对+商品的最新支付时间3条记录
+
+![[Image 37.png]]
+
+Deduplication去重，也即上文介绍到的TopN 中 row\_number = 1 的场景，但是这里有一点不一样在于其排序字段一定是时间属性列，可以降序，不能是其他非时间属性的普通列。
+
+在 row\_number = 1 时，如果排序字段是普通列 planner 会翻译成 TopN 算子，如果是时间属性列 planner 会翻译成 Deduplication，这两者最终的执行算子是不一样的，Deduplication 相比 TopN 算子专门做了对应的优化，性能会有很大提升。
+
+deduplication去重示例
+
+#### 2.2.2.8 Join查询
+
+inner join示例
+
+![[Image 38.png]]
+
+left join示例
+
+![[Image 39.png]]
+
+full join示例
+
+![[Image 40.png]]
+
+interval join示例，注意关联条件写法
+
+![[Image 41.png]]
+
+Temporal join示例
+
+![[Image 42.png]]
+
+Lookup join示例
+
+![[Image 43.png]]
+
+Lateral Joins允许在FROM子句中指定子查询，针对外部查询的每一行执行此子查询，从而提高 SQL 查询的灵活性和性能，通常能够通过减少表扫描的次数来优化查询效率。然而，当内部查询复杂或处理的数据量较大时，此操作可能会导致性能下降。
+
+Lateral join示例
+
+![[Image 44.png]]
+
+#### 2.2.2.9 order by和limit
+
+order by示例
+
+limit示例
+
+SQL hints示例
+
+#### 2.2.2.10 集合操作
+
+集合操作
+
+#### 2.2.2.11 数据视图
+
+当业务逻辑比较复杂时，需要将多层嵌套写在DML语句中，但是这种方式定位问题比较困难。此时，可以通过定义数据视图的方式，将多层嵌套写在数据视图中，简化开发过程。视图的作用：逻辑解耦和模块化（复杂逻辑给视图，应用层只需调用）、可复用性（视图可被重复读而不用重写逻辑）、独立调试与测试等。
+
+数据视图定义写法
+
+#### 2.2.2.12 DML数据操作语句
+
+多个sink的情况
+
+BEGIN STATEMENT SET和END是支持Flink多次sink或者多次写入的语句。
+
+参考资料： [CTAS语句](https://help.aliyun.com/zh/flink/create-table-as-statement?spm=a2c4g.11186623.help-menu-45029.d_4_2_3_1.6d9720466eZp7U&scm=20140722.H_374303._.OR_help-T_cn~zh-V_1) [CDAS语句](https://help.aliyun.com/zh/flink/create-database-as-statement?spm=a2c4g.11186623.help-menu-45029.d_4_2_3_2.28d252b6qI0FC5&scm=20140722.H_374304._.OR_help-T_cn~zh-V_1)
+
+## 三、案例篇
+
+## 3.1 实时计算案例
+
+### 3.1.1 当天的累计支付用户数
+
+#### 3.1.1.1 需求和方案对比
+
+需求是运营同学关注平台促销活动的实时情况，用于监控活动效果并及时调优。
+
+#### 3.1.1.2 方案实现
+
+●
+
+数据源申请
+
+查找支付相关数据源，TT Schema通过VVP任务代码查看，任务名同表名。 [TT网址](https://tt.alibaba-inc.com/manager/apply) 申请TT订阅，拿到对应的ID和accesskey。
+
+●
+
+任务代码开发
+
+当天累计支付用户数
+
+在作业运维-作业探查查看运行结果。
+
+![[Image 45.png]]
+
+### 3.1.2 当天的小时累计支付用户数
+
+#### 3.1.2.1 需求描述
+
+大促场景下商家希望观察当天商品交易实时变化趋势，但是实时很难，只能累计到小时。
+
+![[Image 46.png]]
+
+#### 3.1.2.2 方案实现
+
+可以选出支付时间小于小时节点的数据进行hh级别聚合汇总。Flink不支持写LATERAL VIEW EXPLODE，只有离线支持。
+
+离线写法
+
+另一方面，在flink中写窗口函数计算会有问题，比如离线的写法（希望根据item\_id+hh开窗来计算rn，后续保留一条数据即可），在flink里这么写会报错（flink要求同一个select下的开窗必须相同，可参考官方文档 ）：
+
+实时不支持的离线写法
+
+解决方案：离线建小时tag表，实时关联离线膨胀取符合条件的数据。
+
+关联离线数据膨胀方法
+
+简化不用膨胀版：odps表可以构建「小时tag+大于等于该小时的后续时段」，这样不用每条数据膨胀24条后再过滤，直接关联即可，代码如下：
+
+简化不用膨胀版代码
+
+整体代码
+
+### 3.1.3 当天的支付转化率
+
+#### 3.1.3.1 需求和方案对比
+
+需求是运营同学关注平台促销活动的实时情况，用于监控活动效果并及时调优。
+
+支付转化率=支付UV/IPVUV，计算可以分为两步：计算出当日的支付UV和IPVUV（可以参考当天累计支付用户数），然后将两者关联起来计算支付转化率。
+
+#### 3.1.3.2 方案实现
+
+●
+
+创建Holo表，通过Holo-web界面创建数据表， [Holo平台地址](https://holoweb.dw.alibaba-inc.com/connect) 。
+
+Holo建表语句
+
+●
+
+统计支付用户数并局部写入Holo。
+
+统计支付用户数
+
+统计IPVUV
+
+●
+
+通过Hologres Web界面，编写SQL查询结果
+
+![[Image 47.png]]
+
+### 3.1.4 当天的剔退款GMV
+
+#### 3.1.4.1 需求和方案对比
+
+由于大促期间用户存在凑单行为会发生大量的退款，导致运营看到的GMV虚高影响决策，因此，需要统计剔退款GMV数据（当日支付且当日未退款的GMV）。
+
+#### 3.1.4.2 方案实现
+
+●
+
+Regular join方案
+
+多流关联实现剔退款GMV计算
+
+●
+
+Union all方案（打标区分是否退款订单，退款订单金额改为0，退款标签打标1；支付订单金额不变，退款标签打标0，两者Union all，退款标签取MAX，然后取MAX结果为0的订单）
+
+Union all实现剔退款GMV计算
+
+## 3.2 性能调优案例
+
+### 3.2.1 性能分析
+
+实时离线开发过程相似，但在性能分析&调优上相差很大。实时性能异常分析分三步：延迟判断、反压判断和原因定位。
+
+●
+
+延迟判断
+
+判断标准：作业的业务延迟>0秒，则说明任务存在延迟，业务延迟>=3分钟，则说明任务存在严重延迟。因为业务延迟反映的是SourceTask的延迟情况，下游的节点仍然被反压的情况，导致数据延迟更新。
+
+![[Image 48.png]] ●
+
+反压判断
+
+判断标准：某个节点的backpressued>=0%，则说明任务存在反压，某个节点的backpressued>=50%，则说明任务存在严重反压。backpressued最大的节点是被反压的起始节点，该节点直接下游中Busy最大的节点是性能瓶颈的节点。
+
+如图：ads\_jk\_zy\_trd\_ord\_cube\_ri任务中，节点299432和节点299456的\[ConstraintEnforcer\]是被反压的起始节点，节点299432和节点299456的\[Sink\]是性能瓶颈的节点。
+
+![[Image 49.png]] ●
+
+原因定位
+
+根据第二步中性能瓶颈节点的节点类型，常见异常原因可以分为三类：
+
+<table><colgroup><col width="497"> <col width="302"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>异常原因</p></td><td rowspan="1" colspan="1"><p>示例</p></td></tr><tr><td rowspan="1" colspan="1"><p>类型1：GROUP BY操作 引起的数据反压</p></td><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/10/1d3cde6f-26f4-46b0-ba83-a10c3dd5c97c"></td></tr><tr><td rowspan="1" colspan="1"><p>类型2：维表JOIN操作 引起的数据反压（Join节点）</p></td><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/10/d69d1bd1-09d9-4f12-a08c-908b0134d748"></td></tr><tr><td rowspan="1" colspan="1"><p>类型3：写出下游存储操作 引起的数据反压（Sink节点）</p></td><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/10/0cb19820-5698-41d1-b337-6c221bb453e5"></td></tr></tbody></table>
+
+### 3.2.2 性能调优
+
+#### 3.2.2.1 参数配置调优
+
+实时任务的调优过程分三步（按照先后顺序）：加优化参数，加并发加资源，SQL代码优化。没有加参数，上来加并发加资源是不对的！
+
+●
+
+作业参数优化
+
+○
+
+Group by优化
+
+■
+
+开启MiniBatch配置
+
+原理：通过缓存一定的数据后再触发处理，以减少对 state 的访问从而显著提升吞吐，以及减少输出数据量。
+
+MiniBatch设置（3.2及以上版本默认不开启）
+
+table.exec.mini-batch.enabled: 'true'
+
+table.exec.mini-batch.allow-latency: '5s'
+
+■
+
+开启local-agg配置（默认开启）
+
+原理：LocalGlobal优化即将原先的 Aggregate 分成Local+Global 两阶段聚合。第一阶段在上游节点本地攒一批数据进行聚合（localAgg），并输出这次微批的增量值（Accumulator），第二阶段再将收到的 Accumulator merge起来，得到最终的结果（globalAgg）。
+
+![[Image 50.png]] ■
+
+开启distinct-agg配置
+
+原理：PartialFinal 优化会将count distinct 自动打散，优化成两层聚合（增加按distinct key 取模的打散层），用户无需自己改写成两层聚合。LocalGlobal和 Partial-Final的原理对比请结合下图理解。（会消耗更多内存）
+
+![[Image 51.png]]
+
+distinct-agg配置
+
+○
+
+维表join优化
+
+■
+
+开启Cache配置
+
+原理：通过开启Cache配置将维表数据预加载到内存中，避免每次访问数据库系统，利用内存空间换取访问时间。（需要将维表 JOIN 的节点增加一些内存，增加的内存大小为远程表两倍的数据量，因为我们会异步 reload。）
+
+适用场景：JOIN的维表数据量较小，通常200万以下
+
+<table><colgroup><col width="80"> <col width="159"> <col width="281"> <col width="279"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>数据源</p></td><td rowspan="1" colspan="1"><p>参数</p></td><td rowspan="1" colspan="1"><p>注释说明</p></td><td rowspan="1" colspan="1"><p>备注</p></td></tr><tr><td rowspan="3" colspan="1"><p>ODPS</p></td><td rowspan="1" colspan="1"><p>cache</p></td><td rowspan="1" colspan="1"><p>缓存策略</p></td><td rowspan="1" colspan="1"><p>只能使用 "ALL"策略</p></td></tr><tr><td rowspan="1" colspan="1"><p>cacheSize</p></td><td rowspan="1" colspan="1"><p>缓存大小</p></td><td rowspan="1" colspan="1"><p>可以设置缓存大小，odps 默认 100000 行</p></td></tr><tr><td rowspan="1" colspan="1"><p>cacheTTLMs</p></td><td rowspan="1" colspan="1"><p>缓存超时时间，单位毫秒</p></td><td rowspan="1" colspan="1"><p>当选择 ALL 策略，则为缓存reload 的间隔时间，默认不重新加载。TTL过期之前， 新分区产生，不会刷新</p></td></tr></tbody></table>
+
+■
+
+开启PartitionedJoin配置
+
+原理：主表会在进行维表关联前，先按照 JoinKey 做 shuffle，而维表在每个并发上只缓存自己并发需要的数据
+
+适用场景：JOIN的维表数据量较大，通常200万以上 2000万以下
+
+开启PartitionedJoin配置
+
+SELECT /\*+ SHUFFLE\_HASH(dim\_jk\_zy\_mkt\_item) \*/ t1.visit\_time
+
+,t1.visitor\_id
+
+,t1.user\_nick
+
+,t1.user\_id
+
+from xxx
+
+■
+
+开启Async配置
+
+原理：通过引入异步模式并发地处理多个请求和回复，从而连续的请求之间不需要阻塞等待，一般维表使用热存储数据库（如HBASE、Hologres），并开启LRU缓存。
+
+适用场景：Cache和partitionedJoin均无法处理的场景，JOIN的维表数据量非常大，通常2000万以上。
+
+![[Image 52.png]]
+
+<table><colgroup><col width="267"> <col width="267"> <col width="265"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>参数</p></td><td rowspan="1" colspan="1"><p>注释说明</p></td><td rowspan="1" colspan="1"><p>备注</p></td></tr><tr><td rowspan="1" colspan="1"><p>async</p></td><td rowspan="1" colspan="1"><p>是否开启异步请求</p></td><td rowspan="1" colspan="1"><p>异步请求维表数据，能有更高的吞吐。默认 fasle</p></td></tr><tr><td rowspan="1" colspan="1"><p>asyncResultOrder</p></td><td rowspan="1" colspan="1"><p>异步结果顺序</p></td><td rowspan="1" colspan="1"><p>可填"unordered" 和 "ordered", 默认 "unordered"，具体见下文的[异步结果顺序]章节</p></td></tr><tr><td rowspan="1" colspan="1"><p>asyncTimeoutMs</p></td><td rowspan="1" colspan="1"><p>异步请求的超时时间，单位毫秒</p></td><td rowspan="1" colspan="1"><p>默认3分钟</p></td></tr><tr><td rowspan="1" colspan="1"><p>asyncCapacity</p></td><td rowspan="1" colspan="1"><p>异步请求的队列大小</p></td><td rowspan="1" colspan="1"><p>默认100</p></td></tr><tr><td rowspan="1" colspan="1"><p>asyncCallbackThreads</p></td><td rowspan="1" colspan="1"><p>可选，回调处理线程数</p></td><td rowspan="1" colspan="1"><p>回调类中的onComplete和onError默认会在线程池中处理，该线程池的大小默认为50</p></td></tr><tr><td rowspan="1" colspan="1"><p>asyncConnectionQueueMaxsize</p></td><td rowspan="1" colspan="1"><p>可选，最大请求发送数</p></td><td rowspan="1" colspan="1"><p>当等待某个服务器返回结果的请求数量达到该值时，异步请求调用也会被阻塞，以防止客户端自身OOM，默认100</p></td></tr><tr><td rowspan="1" colspan="1"><p>asyncCallbackQueueMaxsize</p></td><td rowspan="1" colspan="1"><p>可选，最大回调处理队列</p></td><td rowspan="1" colspan="1"><p>当等待回掉处理的请求达到该值时，异步请求调用也会被阻塞，以防止客户端自身OOM，默认500</p></td></tr></tbody></table>
+
+○
+
+写下游存储操作优化
+
+■
+
+下游参数配置
+
+原理：通过改变每次写入批次大小，提升吞吐，以及减少网络IO。
+
+<table><colgroup><col width="88"> <col width="148"> <col width="483"> <col width="80"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>下游存储</p></td><td rowspan="1" colspan="1"><p>参数</p></td><td rowspan="1" colspan="1"><p>说明</p></td><td rowspan="1" colspan="1"><p>文档</p></td></tr><tr><td rowspan="2" colspan="1"><p>TT</p></td><td rowspan="1" colspan="1"><p>batchSize</p></td><td rowspan="1" colspan="1"><p>单次写入批大小。可选，默认为 512000字节</p></td><td rowspan="1" colspan="1"><p><a href="https://yuque.antfin-inc.com/rtcompute/doc/dhp5mg#tgbqxu">链接</a></p></td></tr><tr><td rowspan="1" colspan="1"><p>flushInterval</p></td><td rowspan="1" colspan="1"><p>刷新时间间隔。可选，默认2000，单位毫秒</p></td><td rowspan="1" colspan="1"></td></tr><tr><td rowspan="3" colspan="1"><p>ADB3.0</p></td><td rowspan="1" colspan="1"><p>batchSize</p></td><td rowspan="1" colspan="1"><p>每次写的批次大小。可选，默认值1000行</p></td><td rowspan="1" colspan="1"><p><a href="https://yuque.antfin-inc.com/rtcompute/doc/raedvh">链接</a></p></td></tr><tr><td rowspan="1" colspan="1"><p>bufferSize</p></td><td rowspan="1" colspan="1"><p>去重的buffer大小，需要指定主键才生效。可选，默认值1000行</p></td><td rowspan="1" colspan="1"></td></tr><tr><td rowspan="1" colspan="1"><p>flushIntervalMs</p></td><td rowspan="1" colspan="1"><p>刷新时间间隔。可选，单位毫秒，默认值3000</p></td><td rowspan="1" colspan="1"></td></tr><tr><td rowspan="2" colspan="1"><p>ODPS</p></td><td rowspan="1" colspan="1"><p>flushIntervalMs</p></td><td rowspan="1" colspan="1"><p>缓冲区flush 间隔，单位毫秒。默认值是30000，即30秒。</p></td><td rowspan="1" colspan="1"><p><a href="https://yuque.antfin-inc.com/rtcompute/doc/ga3da3#170ee4fa">链接</a></p></td></tr><tr><td rowspan="1" colspan="1"><p>useStreamTunnel</p></td><td rowspan="1" colspan="1"><p>true：使用MaxCompute Stream Tunnel上传数据，效率相对高，但数据可能重复，设置TRUE可提高传输效率。</p><p>false（默认值）：使用MaxCompute Batch Tunnel上传数据，效率相低，数据重复概率相对低。</p></td><td rowspan="1" colspan="1"></td></tr><tr><td rowspan="1" colspan="1"><p>Holo</p></td><td rowspan="1" colspan="1"><p>无需配置</p></td><td rowspan="1" colspan="1"><p>异步写入机制</p></td><td rowspan="1" colspan="1"><p><a href="https://yuque.antfin-inc.com/rtcompute/doc/lmbaov#98f97a47">链接</a></p></td></tr></tbody></table>
+
+○
+
+读取上游存储优化
+
+原理：通过改变每次读取批次大小，提升吞吐，以及减少减少网络IO。
+
+<table><colgroup><col width="89"> <col width="141"> <col width="488"> <col width="81"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>上游存储</p></td><td rowspan="1" colspan="1"><p>参数</p></td><td rowspan="1" colspan="1"><p>说明</p></td><td rowspan="1" colspan="1"><p>文档</p></td></tr><tr><td rowspan="1" colspan="1"><p>TT</p></td><td rowspan="1" colspan="1"><p>maxFetchSize</p></td><td rowspan="1" colspan="1"><p>一次从TT服务器中取出消息的条数</p><p>默认10，TT规定最大不超过100, (2.2.2 开始支持)</p></td><td rowspan="1" colspan="1"><p>否</p></td></tr></tbody></table>
+
+●
+
+资源配置优化
+
+○
+
+提升任务节点的并发度
+
+原理：通过提升并行处理任务的数量，提升数据处理能力。但并发数并不是越多越好，如果太大可能导致任务启动错误。
+
+<table><colgroup><col width="185"> <col width="614"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>操作类型</p></td><td rowspan="1" colspan="1"><p>并发数（建议值）</p></td></tr><tr><td rowspan="1" colspan="1"><p>GROUP BY操作</p></td><td rowspan="1" colspan="1"><p>小于等于group by实际的分组数</p></td></tr><tr><td rowspan="1" colspan="1"><p>维表JOIN操作</p></td><td rowspan="1" colspan="1"><p>如果维表的数据量很小（10万以内），根据流表的数据量来确定并发数。参考范围：IPV RPS=150-250K/S，并发数设置 64</p><p>如果维表的数据量很大（百万级以上），可尝试提升任务的并发度，但不一定能解决</p></td></tr><tr><td rowspan="1" colspan="1"><p>写出下游存储操作</p></td><td rowspan="1" colspan="1"><p>如果下游是TT：小于等于TT的Partition个数的2~3倍</p></td></tr><tr><td rowspan="1" colspan="1"><p>读取上游存储操作</p></td><td rowspan="1" colspan="1"><p>如果上游是TT：小于等于TT的Partition个数的1倍</p></td></tr></tbody></table>
+
+![[Image 53.png]] ○
+
+提升任务节点的CU资源
+
+原理：通过提升节点的CPU数和Heap Memeroy的内存大小，提升数据处理能力。
+
+●
+
+core: CPU，默认 0.1，根据实际CPU使用配置（但最好能被1整除），一般建议0.25。
+
+●
+
+heap memory: 堆内存，默认 256MB，根据实际内存使用配置。
+
+●
+
+off-heap memory: jvm堆外内存，建议不要修改。
+
+![[Image 54.png]] ●
+
+SQL代码优化
+
+经过第一步、第二步的优化策略，如果仍然不能解决性能问题（延迟高、吞吐低），或者即使解决了性能问题但消耗了过多的计算资源，就需要去考虑从SQL代码本身进行优化，比如用户+商品粒度的预聚合操作、明细数据的union all操作等都会带来不必要的资源开销。
+
+#### 3.2.2.2 SQL代码调优
+
+●
+
+AGG with case when改写为AGG with filter（提升大量count distinct场景性能）
+
+计算各种维度的UV，例如全网UV、手机客户端UV、PC端UV等，一般离线会通过count(distinct case when)实现，蛋实时可以分析Filter参数，从而同一个字段计算不同case when条件下的count distinct能共享State，减少对State的读写操作，性能能够提升1倍。
+
+case when优化写法
+
+\-- 原始写法
+
+COUNT(distinct visitor\_id) as UV1, COUNT(distinct case when is\_wireless='Y' then visitor\_id else null end) as UV2
+
+\-- 优化写法
+
+COUNT(distinct visitor\_id) as UV1, COUNT(distinct visitor\_id) filter (where is\_wireless='Y') as UV2
+
+另外，对去重准确度不高（如流量数据在实时链路会存在作弊数据流入问题），可使用APPROX\_COUNT\_DISTINCT函数替代COUNT(DISTINCT xxx)。
+
+case when优化写法
+
+\-- 优化写法
+
+APPROX\_COUNT\_DISTINCT(visitor\_id) as UV1, APPROX\_COUNT\_DISTINCT(visitor\_id) filter (where is\_wireless='Y') as UV2
+
+●
+
+高效去重
+
+实时计算的源数据在部分场景中存在重复数据，去重成为了用户经常反馈的需求。举例：存在同一笔订单ID，在1min内，发送了5条数据 (由于status、attribute等字段内容发生变更)，如果没有去重逻辑，成交金额膨胀了5倍。为什么离线公共层可以进行数据去重，而实时却不能呢？因为实时消息流特性，目前TT只支持数据的不断insert，却没有merge过程。因此应基于不同的业务场景选择不同的代码处理方案。
+
+实时计算有保留第一条（Deduplicate Keep FirstRow，一般下游业务场景统计的字段不因属性变化而变化）和保留最后一条（Deduplicate Keep LastRow，回撤常见场景，一般上游系统属性不停变化，且下游统计维度或信息也需要同步进行更新）2种去重方案。
+
+实时计算保留第一条数据（统计订单金额，与属性字段无关）
+
+实时计算保留最后一条数据（订单区分归因口径场景，统计不同主播的当日成交金额，聚合Key）
+
+实时计算保留最后一条数据（订单区分归因口径场景，统计当天未退款金额，过滤Key）
+
+a.
+
+使用 `ROW_NUMBER()` 窗口函数来对数据根据时间属性列进行排序并标上排名。
+
+■
+
+当排序字段是Proctime列时，Flink就会按照系统时间去重，其每次运行的结果是不确定的。
+
+■
+
+当排序字段是Rowtime列时，Flink就会按照业务时间去重，其每次运行的结果是确定的。
+
+b.
+
+对排名进行过滤，只取第一条，达到了去重的目的。
+
+排序方向可以是按照时间列的顺序，也可以是倒序：
+
+■
+
+Deduplicate Keep FirstRow：顺序并取第一条行数据。
+
+■
+
+Deduplicate Keep LastRow：倒序并取第一条行数据。
+
+●
+
+双流Join场景
+
+业务场景：直播预售引导成交（宽口径：通过直播宝贝口袋的商品点击流 JOIN 淘系预售成交流）
+
+双流Join源代码逻辑
+
+select
+
+a.order\_id,
+
+...
+
+a.attributes, b.args -- 大字段
+
+from subpay\_ri a
+
+INNER JOIN tblive\_ipv\_ri b
+
+on a.user\_id=b.user\_id and a.item\_id=b.item\_id -- 商品ID和用户ID
+
+存在风险：
+
+○
+
+state太大，容易在大促期间促发性能问题，典型大字段：如输出日志args、交易attributes等。
+
+○
+
+数据膨胀：如2022双十一预售期，前10min中同一笔预售订单会平均下发7次，加上用户不断对直播商品进行访问，双流JOIN后数据量在前10min出现大量膨胀。
+
+建议代码写法：去除大字段，对于预售订单，在JOIN之前，进行去重处理，处理策略为优先减少数据量。
+
+优化代码
+
+●
+
+维表Join场景
+
+针对ODPS、Alihbase、Lindorm和Hologres不同数据源的维表优化配置方式可参考 [维表join场景](https://ata.atatech.org/articles/11020175602?spm=ata.23639746.0.0.4894192fQKRlel#NjQyOTk1) 。
+
+加载超大维表场景：当有ODPS表的量级达到亿级别，用默认的cache all对Flink算子的内存消耗太大，可以根据 join key 的 shuffle 策略，不同的并发根据join key的hash规则，只缓存hash规则后的维度数据。
+
+维表join优化代码
+
+数据倾斜问题：在log\_ri中，50%的数据都属于同一个商家，根据seller\_id进行hash，50%数据都下发到1个并发里，就会造成数据倾斜。解决参数： table.exec.skew-join.replicate-num: 4，可以使「相同key」数据也可以下发到4个并发里， 但只能作用在非Retraction消息。
+
+●
+
+ODPS分区维表更新场景
+
+ODPS分区维表更新时间一般在凌晨期间，按照Flink任务中每6h reload max\_pt最新分区，很可能出现 0点 ~ 6点 加载的是「前日」维度数据， 7点 ~ 23点 加载的是「昨日」维度数据。在要求强维度一致性场景下，此类情况将出现数据质量风险。
+
+建议方案：使用2pt维表，其核心思路为①odps维表「最新分区」存放 「T-1」 和 「T-2」 的数据②在实时任务中加载 最新分区， 但 「只取 T-2」 数据。该方案缺陷为维表变更后需要回刷历史分区（For Flink批作业）。
+
+![[Image 55.png]]
+
+ODPS分区维表更新
+
+●
+
+单业务域中间层构建场景
+
+在实时公共层开发初期，为下游ADS使用的便利性，一般在公共层中保留日志的args字段、交易的attributes字段，此操作导致扩展性高的同时读取TT成本大。因此，在明细层进行指标收口，对用到args的指标进行提前解析处理；同时对指标进行逻辑收口，取值打上0 or 1。这里区别于离线的mds/dws层的指标定义：因为实时尽量保障数据的及时性，会缩短架构上层次，因此对时效性要求高的场景不建议做实时dws层。
+
+大字段提前在DWD层解析
+
+●
+
+内置函数
+
+尽量使用内置函数，实时计算对内置函数主要进行了如下优化：
+
+○
+
+优化数据序列化和反序列化的耗时。
+
+○
+
+新增直接对字节单位进行操作的功能。
+
+内置函数例子：KEY VALUE函数使用单字符的分隔符性能更高；Like针对Startwith、EndWith、Contains和Equals做不同匹配，即'xxx%'、'%xxx'、'%xxx%'和'xxx'；慎用正则函数(REGEXP和REGEXP\_REPLACE)，在某些极端情况下可能会进入无限循环，导致作业阻塞。
+
+●
+
+SQL Hints
+
+数据倾斜场景修改执行计划，以及Join hints动态的优化Join，目前支持 [维表JOIN Hints](https://help.aliyun.com/zh/flink/realtime-flink/developer-reference/join-statements-for-dimension-tables#96897e8067cpf) 和 [双流JOIN hints](https://help.aliyun.com/zh/flink/dual-stream-join-statements#198c13b052x5w) 。
+
+●
+
+降低上下游性能压力
+
+参数配置可参考： [集团实时开发方法论](https://ata.atatech.org/articles/11020175602?spm=ata.23639746.0.0.4894192fQKRlel#YWYxZDc5)
+
+## 四、参考附录
+
+●
+
+Flink视频教学课程： [https://www.bilibili.com/video/BV1eg4y1V7AN/?spm\_id\_from=333.337.search-card.all.click&vd\_source=6918db54e8da6c4c40c0ab95bed11cfe](https://www.bilibili.com/video/BV1eg4y1V7AN/?spm_id_from=333.337.search-card.all.click&vd_source=6918db54e8da6c4c40c0ab95bed11cfe)
+
+●
+
+Flink简介： [https://ata.atatech.org/articles/11000248733?spm=ata.23639746.0.0.20785f7eOjIj4C&layout=%2Fvelocity%2Flayout%2Fblank.vm](https://ata.atatech.org/articles/11000248733?spm=ata.23639746.0.0.20785f7eOjIj4C&layout=%2Fvelocity%2Flayout%2Fblank.vm)
+
+●
+
+TT&DataHub集团内文档： [https://aliyuque.antfin.com/datahub/zxh6l2](https://aliyuque.antfin.com/datahub/zxh6l2)
+
+●
+
+●
+
+实时计算帮助文档（VVP+Flink）： [https://aliyuque.antfin.com/rtcompute/dldblv](https://aliyuque.antfin.com/rtcompute/dldblv)
+
+●
+
+集团实时开发方法论： [https://ata.atatech.org/articles/11020175602?spm=ata.23639746.0.0.4894192fQKRlel#YWYxZDc5](https://ata.atatech.org/articles/11020175602?spm=ata.23639746.0.0.4894192fQKRlel#YWYxZDc5)
+
+## 五、学习资料
+
+●
+
+[TDDL+TT+Blink+ODPS+Hologres+DataV/FBI/Sunfire实时监控预警大盘在高德商品的一次实践](https://ata.atatech.org/articles/11020082424?spm=ata.23639746.0.0.4894192fQKRlel)
+
+●
+
+[TDDL通过TT+Flink同步Holo（支持删除操作同步）](https://ata.atatech.org/articles/11020199251?spm=ata.23639746.0.0.4894192fQKRlel)
+
+●
+
+[TT+Flink+TDDL数据迁移](https://ata.atatech.org/articles/11000251862?spm=ata.23639746.0.0.4894192fQKRlel)
+
+●
+
+[淘宝数据平台—数据湖落地阶段总结](https://ata.atatech.org/articles/11020438848?utm_source=dingtalk&utm_medium=userShare&utm_campaign=080027)
+
+●
+
+[基于Flink+Hologres搭建实时数仓](https://help.aliyun.com/zh/flink/build-real-time-data-warehouse-based-on-flink-hologres?spm=a2c4g.11186623.help-menu-45029.d_3_0_3.5b4d7d48p5uk44&scm=20140722.H_2400416._.OR_help-T_cn~zh-V_1)
+
+●
+
+[Flink批处理调优指南](https://help.aliyun.com/zh/flink/flink-batch-tuning-guide?spm=a2c4g.11186623.help-menu-45029.d_3_0_13.20f26bc4wwbqyG&scm=20140722.H_2806101._.OR_help-T_cn~zh-V_1)
+
+●
+
+[实现淘宝母婴订单实时查询和实时大屏](https://help.aliyun.com/zh/flink/taobao-maternal-and-child-orders-real-time-query-and-real-time-large?spm=a2c4g.11186623.help-menu-45029.d_3_0_18.6a9a6c152EakPa&scm=20140722.H_2921942._.OR_help-T_cn~zh-V_1)
+
+END
+
+一、理论篇
+
+1.1 Flink介绍
+
+1.1.1 Flink是什么
+
+1.1.2 起源与发展
+
+1.1.3 特性
+
+1.1.4 流处理优势
+
+1.1.5 行业应用
+
+1.1.6 API分层
+
+1.1.7 系统架构
+
+1.1.8 核心概念
+
+1.1.9 作业解析流程
+
+1.2 时间语义与窗口划分
+
+1.2.1 时间语义
+
+1.2.2 为什么要设置窗口
+
+1.2.3 窗口分类
+
+1.3 Watermark机制
+
+1.3.1 Watermark水位线理解
+
+1.3.2 水位线生成原则
+
+1.3.3 水位线的传递
+
+1.4 状态管理
+
+1.4.1 状态概述和分类
+
+1.4.2 按键分区状态
+
+归约状态(Reducing State)
+
+聚合状态(Aggregating State)
+
+1.4.3 算子状态（Operator State）
+
+联合列表状态(UnionList State)
+
+广播状态(Broadcast State)
+
+1.4.4 状态后端(State Backends)
+
+1.5 容错机制
+
+1.5.1 检查点(Checkpoint)
+
+1.5.1.1 检查点的保存
+
+1.5.1.2 从检查点恢复状态
+
+1.5.1.3 检查点算法
+
+1.5.1.3.1 检查点分界线(Barrier)
+
+1.5.1.3.2 分布式快照算法（Barrier对齐的精准一次）
+
+1.5.1.3.3 分布式快照算法（Barrier对齐的至少一次）
+
+1.5.1.3.4 分布式快照算法（非Barrier对齐的精准一次）
+
+5.2 保存点(Savepoint)
+
+5.3 状态一致性
+
+5.3.1 一致性的概念和级别
+
+5.3.2 端到端的状态一致性
+
+5.3.3 端到端精确一次(End-To-End exactly-Once)
+
+5.3.3.1 输入端保证
+
+5.3.3.2 输出端保证
+
+二、实践篇
+
+2.1 TT实践指南
+
+2.1.1 TT简介
+
+2.1.2 TT使用规范
+
+2.2 VVP平台实践指南
+
+2.2.1 数据表读取/写入
+
+2.2.1.1 Maxcompute
+
+2.2.1.2 Datahub/TT
+
+2.2.1.3 AnalyticDB
+
+2.2.1.4 Hologres
+
+2.2.1.5 TDDL
+
+2.2.2 Flink SQL
+
+2.2.2.1 动态表和持续查询
+
+2.2.2.2 流表转换
+
+2.2.2.3 时间属性
+
+2.2.2.4 DDL特殊定义
+
+2.2.2.5 分组聚合（更新时回撤再输出新的结果）
+
+2.2.2.6 窗口表值函数
+
+2.2.2.7 TopN和去重
+
+2.2.2.8 Join查询
+
+2.2.2.9 order by和limit
+
+2.2.2.10 集合操作
+
+2.2.2.11 数据视图
+
+2.2.2.12 DML数据操作语句
+
+三、案例篇
+
+3.1 实时计算案例
+
+3.1.1 当天的累计支付用户数
+
+3.1.1.1 需求和方案对比
+
+3.1.1.2 方案实现
+
+3.1.2 当天的小时累计支付用户数
+
+3.1.2.1 需求描述
+
+3.1.2.2 方案实现
+
+3.1.3 当天的支付转化率
+
+3.1.3.1 需求和方案对比
+
+3.1.3.2 方案实现
+
+3.1.4 当天的剔退款GMV
+
+3.1.4.1 需求和方案对比
+
+3.1.4.2 方案实现
+
+3.2 性能调优案例
+
+3.2.1 性能分析
+
+3.2.2 性能调优
+
+3.2.2.1 参数配置调优
+
+3.2.2.2 SQL代码调优
+
+四、参考附录
+
+五、学习资料
+
+**
+
+**
+
+有什么问题，和我聊聊吧～
+
+**
+
+内部资料
+
+INTERNAL
+
+495838
