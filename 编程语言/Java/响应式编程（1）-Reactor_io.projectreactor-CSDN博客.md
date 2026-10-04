@@ -30,7 +30,7 @@ tags:
 
 在 Java 程序中使用 Reactor 库非常的简单，只需要通过 Maven 或 Gradle 来添加对 io.projectreactor:reactor-core 的依赖即可，下面是我这次演示引用的包。
 
-```java
+```xml
 <dependency>
     <groupId>io.projectreactor</groupId>
     <artifactId>reactor-core</artifactId>
@@ -42,8 +42,8 @@ tags:
     <version>3.2.3.RELEASE</version>
     <scope>test</scope>
 </dependency>
-java1234567891011
 ```
+java1234567891011
 
 ### 3、Flux 和 Mono
 
@@ -62,8 +62,8 @@ private static void simple() {
         Flux.interval(Duration.of(10, ChronoUnit.SECONDS)).subscribe(System.out::println);
         Flux.intervalMillis(1000).subscribe(System.out::println);
     }
-java123456789
 ```
+java123456789
 2. 使用 generate()方法生成 Flux 序列
 ```java
 private static void generate() {
@@ -84,8 +84,8 @@ private static void generate() {
             return list;
         }).subscribe(System.out::println);
     }
-java123456789101112131415161718
 ```
+java123456789101112131415161718
 3. create()方法
 ```java
 private static void create() {
@@ -97,8 +97,8 @@ private static void create() {
             sink.complete();
         }).subscribe(System.out::println);
     }
-java123456789
 ```
+java123456789
 
 ### 5、操作符
 
@@ -111,23 +111,23 @@ private static void buffer() {
         Flux.range(1, 10).bufferWhile(i -> i % 2 == 0).subscribe(System.out::println);
         Flux.range(1, 10).filter(i -> i % 2 == 0).subscribe(System.out::println);
     }
-java1234567
 ```
+java1234567
 2. filter 操作符使用示例
 ```java
 private static void filter() {
         Flux.range(1, 10).filter(i -> i % 2 == 0).subscribe(System.out::println);
     }
-java123
 ```
+java123
 3. window 操作符使用示例
 ```java
 private static void window() {
         Flux.range(1, 100).window(20).subscribe(System.out::println);
         Flux.intervalMillis(100).windowMillis(1001).take(2).toStream().forEach(System.out::println);
     }
-java1234
 ```
+java1234
 4. zipWith 操作符使用示例
 ```java
 private static void zipWith() {
@@ -138,8 +138,8 @@ private static void zipWith() {
                 .zipWith(Flux.just("c", "d"), (s1, s2) -> String.format("%s-%s", s1, s2))
                 .subscribe(System.out::println);
     }
-java12345678
 ```
+java12345678
 5. take 系列操作符使用示例
 ```java
 private static void take() {
@@ -148,16 +148,16 @@ private static void take() {
         Flux.range(1, 1000).takeWhile(i -> i < 10).subscribe(System.out::println);
         Flux.range(1, 1000).takeUntil(i -> i == 10).subscribe(System.out::println);
     }
-java123456
 ```
+java123456
 6. reduce 和 reduceWith 操作符使用示例
 ```java
 private static void reduce() {
         Flux.range(1, 100).reduce(Integer::sum).subscribe(System.out::println);
         Flux.range(1, 100).reduceWith(() -> 100, Integer::sum).subscribe(System.out::println);
     }
-java1234
 ```
+java1234
 7. merge 和 mergeSequential 操作符使用示例
 ```java
 Flux.merge(Flux.intervalMillis(0, 100).take(5), Flux.intervalMillis(50, 100).take(5))
@@ -166,8 +166,8 @@ Flux.merge(Flux.intervalMillis(0, 100).take(5), Flux.intervalMillis(50, 100).tak
         Flux.mergeSequential(Flux.intervalMillis(0, 10000).take(5), Flux.intervalMillis(50, 100).take(5))
                 .toStream()
                 .forEach(System.out::println);
-java123456
 ```
+java123456
 8. flatMap 操作符使用示例
 ```java
 private static void flatMap() {
@@ -180,8 +180,8 @@ private static void flatMap() {
                 .toStream()
                 .forEach(System.out::println);
     }
-java12345678910
 ```
+java12345678910
 9. concatMap 操作符使用示例
 ```java
 private static void concatMap() {
@@ -190,20 +190,20 @@ private static void concatMap() {
                 .toStream()
                 .forEach(System.out::println);
     }
-java123456
 ```
+java123456
 10. combineLatest 操作符使用示例
-```java
 private static void combineLatest() {
         Flux.combineLatest(
                 Arrays::toString,
+```java
                 Flux.intervalMillis(100).take(5),
                 Flux.intervalMillis(50, 10000).take(5)
         ).toStream().forEach(System.out::println);
         Flux.intervalMillis(100).take(1).toStream().forEach(System.out::println);
     }
-java12345678
 ```
+java12345678
 
 ### 6、消息处理
 
@@ -214,8 +214,8 @@ private static void subscribe() {
                 .concatWith(Mono.error(new IllegalStateException()))
                 .subscribe(System.out::println, System.err::println);
     }
-java12345
 ```
+java12345
 2. 出现错误时返回默认值
 ```java
 private static void onErrorReturn() {
@@ -224,8 +224,8 @@ private static void onErrorReturn() {
                 .onErrorReturn(0)
                 .subscribe(System.out::println);
     }
-java123456
 ```
+java123456
 3. 出现错误时使用另外的流
 ```java
 private static void switchOnError() {
@@ -234,8 +234,8 @@ private static void switchOnError() {
                 .switchOnError(Flux.just(1,3))
                 .subscribe(System.out::println);
     }
-java123456
 ```
+java123456
 4. 出现错误时根据异常类型来选择流
 ```java
 private static void onErrorResumeWith() {
@@ -248,11 +248,11 @@ private static void onErrorResumeWith() {
                         return Mono.just(-1);
                     }
                     return Mono.empty();
+```
                 })
                 .subscribe(System.out::println);
     }
 java12345678910111213
-```
 5. 使用 retry 操作符进行重试
 ```java
 private static void retry() {
@@ -261,8 +261,8 @@ private static void retry() {
                 .retry(1)
                 .subscribe(System.out::println,System.err::println);
     }
-java123456
 ```
+java123456
 
 ### 7、调度器
 
@@ -272,7 +272,9 @@ public static void main(String[] args) {
         Flux.create(sink -> {
             sink.next(Thread.currentThread().getName());
             sink.complete();
+```
         })
+```java
         .publishOn(Schedulers.single())
         .map(x -> String.format("[%s] %s", Thread.currentThread().getName(), x)).log()
         .publishOn(Schedulers.elastic())
@@ -281,8 +283,8 @@ public static void main(String[] args) {
         .toStream()
         .forEach(System.out::println);
     }
-java12345678910111213
 ```
+java12345678910111213
 
 ### 8、测试
 
@@ -295,8 +297,8 @@ public void simpleTest() {
                 .verifyComplete();
 
     }
-java1234567
 ```
+java1234567
 2. 操作测试时间
 ```java
 public void testWithTime() {
@@ -308,8 +310,8 @@ public void testWithTime() {
                 .expectNext(1L)
                 .verifyComplete();
     }
-java123456789
 ```
+java123456789
 3. 使用 TestPublisher 创建测试所用的流
 ```java
 public void withTestPublisher() {
@@ -323,8 +325,8 @@ public void withTestPublisher() {
                 .expectNext("b")
                 .expectComplete();
     }
-java1234567891011
 ```
+java1234567891011
 
 ### 9、调试
 
@@ -335,8 +337,8 @@ public static void main(String[] args) {
         Flux.just(1, 0).map(x -> 1 / x).checkpoint("test").log("wdh").subscribe(System.out::println);
 //        Flux.just(1, 0).map(x -> 1 / x).subscribe(System.out::println);
     }
-java12345
 ```
+java12345
 
 ### 10、日志记录
 
@@ -345,8 +347,8 @@ java12345
 public static void main(final String[] args) {
         Flux.range(1, 2).log("wangdehui").subscribe(System.out::println);
     }
-java123
 ```
+java123
 
 ### 11、“冷”与”热”序列
 
@@ -361,5 +363,5 @@ public static void main(String[] args) throws InterruptedException {
         Thread.sleep(5000);
         source.toStream().forEach(System.out::println);
     }
-java123456789
 ```
+java123456789

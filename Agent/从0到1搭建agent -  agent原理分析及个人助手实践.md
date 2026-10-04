@@ -8,69 +8,27 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-淘天集团
-
-勋章
-
-粉丝 37影响力 968
-
-** 32
-
-** 17
-
-** 6
-
-** 原创文章
-
-** AI辅助优化 30%
-
-发表到圈儿
-
-[闲鱼技术团队](https://ata.atatech.org/community/team/137) (首发)
-
-[ATA之家](https://ata.atatech.org/community/group/45)
-
-[互联网业界思考](https://ata.atatech.org/community/group/104)
-
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152)
-
-[淘宝买菜产技团队博客](https://ata.atatech.org/community/team/765)
-
-[成长集](https://ata.atatech.org/community/group/2203)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-**
-
-[占旭鹏(帆日)](https://ata.atatech.org/users/11001192288)
-
-5月17日发表5月17日更新226次浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
 ## 前言
 
 ai 发展越来越快，对于大部分人来说，想深入参与 llm 研究的机会很少，但是大家都有机会成为 agent 开发，低成本搭建一个agent，解决自己生产生活中的问题，下文对自己近期搭建 agent 相关的内容总结和大家分享，希望相互学习，共同进步。
 
 本文会分两部分介绍：
 
-1.
+1. 理论部分，会尽可能用通俗易懂的语言把 agent 发展历程上涉及到的技术均介绍一遍，篇幅比较长，让自己有全局体系化的认知。
 
-理论部分，会尽可能用通俗易懂的语言把 agent 发展历程上涉及到的技术均介绍一遍，篇幅比较长，让自己有全局体系化的认知。
-
-2.
-
-实践部分，把整个项目的各个模块方案和设计，用通俗易懂加代码结合的方式表述出来，让每个人都可以理解搭建自己的 agent。
+2. 实践部分，把整个项目的各个模块方案和设计，用通俗易懂加代码结合的方式表述出来，让每个人都可以理解搭建自己的 agent。
 
 以下个人认为本 agent 中的一些较好的设计，先列出来让大家知晓，避免文档过长避免浪费大家时间。
 
-<table><colgroup><col width="119"> <col width="174"> <col width="539"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>亮点设计</p></td><td rowspan="1" colspan="1"><p>详细描述</p></td><td rowspan="1" colspan="1"><p>截图示例</p></td></tr><tr><td rowspan="1" colspan="1"><p>越用越懂你的记忆系统</p></td><td rowspan="1" colspan="1"><p>1. 环境事实、用户偏好记录。</p><p>2. 会话动态压缩机制，保留最精准的信息。</p><p>3. 自总结沉淀用户维度 skill。</p></td><td rowspan="1" colspan="1"><p>示例：历史说过我喜欢英文风格，后续及时新开窗口或者过了很多天仍然记得我喜欢英文风格。</p><img src="https://oss-ata.alibaba.com/article/2026/05/d212ceba-a89d-42f0-b632-3c3af4ec90cc.png"> <img src="https://oss-ata.alibaba.com/article/2026/05/1c77a38b-df08-403b-80cb-065dba32e007.png"></td></tr><tr><td rowspan="1" colspan="1"><p>ReAct 模式下的 Plan 能力</p></td><td rowspan="1" colspan="1"><p>传统 agent loop 要么 react、要么 plan、要么 plan-react，均存在一些问题，项目巧妙设计了灵活切换的方案，让简单任务执行高效，复杂任务按计划执行。</p></td><td rowspan="1" colspan="1"><p>简单任务直接react</p><img src="https://oss-ata.alibaba.com/article/2026/05/43d9dcf2-2147-4e1f-8c33-2d5ce8d67e4a.png"><p>负责任务或者手动指定要规划，则会先规划再执行。</p><img src="https://oss-ata.alibaba.com/article/2026/05/c02e2353-d764-411c-ad3b-229331666ec5.png"></td></tr><tr><td rowspan="1" colspan="1"><p>全局渐进式加载设计</p></td><td rowspan="1" colspan="1"><p>agent 的能力均通过 skill 体现，以 skill 渐进式加载沉淀更多能力，function call & mcp 等能力依据 skill 加载后按需加载。</p></td><td rowspan="1" colspan="1"><p>加入奥格人群需要mcp工具，调用模型的tool工具中只含奥格人群工具，避免上下文过长或失焦。</p><img src="https://oss-ata.alibaba.com/article/2026/05/8d83ebc0-4a2c-4b5d-bc98-2da9420b0849.png"></td></tr><tr><td rowspan="1" colspan="1"><p>subagent 设计</p></td><td rowspan="1" colspan="1"><p>通过 subagent 隔离复杂任务的长上下文，并通过并行执行保证执行效率。</p></td><td rowspan="1" colspan="1"><p>子任务隔离执行，主任务汇总结果。</p><img src="https://oss-ata.alibaba.com/article/2026/05/18d5c29e-3b00-4d9d-a291-ea0225c8dad7.png"></td></tr><tr><td rowspan="1" colspan="1"><p>harness 容错设计</p></td><td rowspan="1" colspan="1"><p>模型调用异常、数据格式错误等等，各类异常自动恢复机制。安全防御设计。</p></td><td rowspan="1" colspan="1"><p>流程异常归类，不同异常不同的处理方式，让流程回到正轨等等。</p><img src="https://oss-ata.alibaba.com/article/2026/05/f1c70072-ca09-448e-aabe-4380b1265f3f.png"></td></tr></tbody></table>
+
+| 亮点设计               | 详细描述                                                                                     | 截图示例                                           |
+| ------------------ | ---------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 越用越懂你的记忆系统         | 1. 环境事实、用户偏好记录。 2. 会话动态压缩机制，保留最精准的信息。 3. 自总结沉淀用户维度 skill。                                | 示例：历史说过我喜欢英文风格，后续及时新开窗口或者过了很多天仍然记得我喜欢英文风格。     |
+| ReAct 模式下的 Plan 能力 | 传统 agent loop 要么 react、要么 plan、要么 plan-react，均存在一些问题，项目巧妙设计了灵活切换的方案，让简单任务执行高效，复杂任务按计划执行。 | 简单任务直接react 负责任务或者手动指定要规划，则会先规划再执行。            |
+| 全局渐进式加载设计          | agent 的能力均通过 skill 体现，以 skill 渐进式加载沉淀更多能力，function call & mcp 等能力依据 skill 加载后按需加载。       | 加入奥格人群需要mcp工具，调用模型的tool工具中只含奥格人群工具，避免上下文过长或失焦。 |
+| subagent 设计        | 通过 subagent 隔离复杂任务的长上下文，并通过并行执行保证执行效率。                                                   | 子任务隔离执行，主任务汇总结果。                               |
+| harness 容错设计       | 模型调用异常、数据格式错误等等，各类异常自动恢复机制。安全防御设计。                                                       | 流程异常归类，不同异常不同的处理方式，让流程回到正轨等等。                  |
+
 
 ## agent 理论
 
@@ -90,13 +48,9 @@ agent发展到现在经历了一系列变化，以下我根据我的理解按时
 
 但用了一段时间你会发现两个核心缺陷：
 
-●
+- 无记忆：你上一句刚说完"我叫张三"，如果不把这句话放在上下文里传给它，下一轮它完全不知道你是谁。每一次请求对 LLM 来说都是全新的。
 
-无记忆：你上一句刚说完"我叫张三"，如果不把这句话放在上下文里传给它，下一轮它完全不知道你是谁。每一次请求对 LLM 来说都是全新的。
-
-●
-
-知识静态：它的知识截止到训练日期，今天的天气、昨天的新闻、你们公司的内部 API 文档——这些它一概不知。
+- 知识静态：它的知识截止到训练日期，今天的天气、昨天的新闻、你们公司的内部 API 文档——这些它一概不知。
 
 这两个问题催生了后续记忆系统和 RAG 的出现。
 
@@ -116,47 +70,55 @@ LLM 的每一次 API 调用都是无状态的——模型本身不存储任何�
 
 最基础的做法是把历史消息放进 messages 数组：
 
-messages = \[
+messages = [
 
+```java
 {"role": "system", "content": "你是一个助手"},
-
 {"role": "user", "content": "我叫张三"},
-
 {"role": "assistant", "content": "你好张三！"},
-
 {"role": "user", "content": "我叫什么？"},
+```
 
-\]
+]
 
 \# LLM 此时能回答"你叫张三"
 
 但上下文窗口有上限（早期 4K tokens → 现在 128K-1M），聊多了装不下。业界的应对策略形成了一个由简到复杂的梯度：
 
-<table><colgroup><col width="129"> <col width="219"> <col width="216"> <col width="277"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>策略</p></td><td rowspan="1" colspan="1"><p>原理</p></td><td rowspan="1" colspan="1"><p>信息损失</p></td><td rowspan="1" colspan="1"><p>适用场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>滑动窗口</p></td><td rowspan="1" colspan="1"><p>只保留最近 N 条消息</p></td><td rowspan="1" colspan="1"><p>高（早期信息全丢）</p></td><td rowspan="1" colspan="1"><p>简单场景、token 预算紧张</p></td></tr><tr><td rowspan="1" colspan="1"><p>摘要压缩</p></td><td rowspan="1" colspan="1"><p>LLM 对历史消息生成摘要</p></td><td rowspan="1" colspan="1"><p>中（丢失细节保留要点）</p></td><td rowspan="1" colspan="1"><p>长对话场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>分层保护</p></td><td rowspan="1" colspan="1"><p>保留首尾消息，压缩中间</p></td><td rowspan="1" colspan="1"><p>中低（关键信息受保护）</p></td><td rowspan="1" colspan="1"><p>任务型对话</p></td></tr><tr><td rowspan="1" colspan="1"><p>结构化摘要</p></td><td rowspan="1" colspan="1"><p>按模板字段压缩</p></td><td rowspan="1" colspan="1"><p>低（保留结构化要素）</p></td><td rowspan="1" colspan="1"><p>复杂 agent 场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>虚拟分页</p></td><td rowspan="1" colspan="1"><p>模仿 OS 内存管理，按需换入换出</p></td><td rowspan="1" colspan="1"><p>极低（可随时检索回来）</p></td><td rowspan="1" colspan="1"><p>超长对话</p></td></tr></tbody></table>
+
+| 策略    | 原理                | 信息损失        | 适用场景            |
+| ----- | ----------------- | ----------- | --------------- |
+| 滑动窗口  | 只保留最近 N 条消息       | 高（早期信息全丢）   | 简单场景、token 预算紧张 |
+| 摘要压缩  | LLM 对历史消息生成摘要     | 中（丢失细节保留要点） | 长对话场景           |
+| 分层保护  | 保留首尾消息，压缩中间       | 中低（关键信息受保护） | 任务型对话           |
+| 结构化摘要 | 按模板字段压缩           | 低（保留结构化要素）  | 复杂 agent 场景     |
+| 虚拟分页  | 模仿 OS 内存管理，按需换入换出 | 极低（可随时检索回来） | 超长对话            |
+
 
 #### 长期记忆：跨会话持久化
 
 跨会话记忆需要将信息持久化到外部存储，在新会话开始时注入 system prompt。核心设计决策包括：
 
-1.
+1. 存什么 — 环境事实、用户偏好、行为反馈、参考资料（不同类型需要不同的更新策略）
 
-存什么 — 环境事实、用户偏好、行为反馈、参考资料（不同类型需要不同的更新策略）
+2. 何时存 — agent 主动写入 vs 系统自动提取
 
-2.
+3. 如何取 — 全量注入 vs 语义检索 vs LLM 判断相关性
 
-何时存 — agent 主动写入 vs 系统自动提取
-
-3.
-
-如何取 — 全量注入 vs 语义检索 vs LLM 判断相关性
-
-4.
-
-如何更新 — 新旧冲突处理、过期衰减机制
+4. 如何更新 — 新旧冲突处理、过期衰减机制
 
 ### 市场主流记忆方案对比
 
-<table><colgroup><col width="153"> <col width="125"> <col width="201"> <col width="183"> <col width="135"> <col width="148"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>方案</p></td><td rowspan="1" colspan="1"><p>架构</p></td><td rowspan="1" colspan="1"><p>存储方式</p></td><td rowspan="1" colspan="1"><p>检索方式</p></td><td rowspan="1" colspan="1"><p>自动化程度</p></td><td rowspan="1" colspan="1"><p>适用场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>Claude Code</p></td><td rowspan="1" colspan="1"><p>Markdown 文件系统</p></td><td rowspan="1" colspan="1"><p>分类文件（user/feedback/project/reference）</p></td><td rowspan="1" colspan="1"><p>全量注入 system prompt</p></td><td rowspan="1" colspan="1"><p>Agent 主动写入</p></td><td rowspan="1" colspan="1"><p>开发者工具</p></td></tr><tr><td rowspan="1" colspan="1"><p>ChatGPT Memory</p></td><td rowspan="1" colspan="1"><p>服务端数据库</p></td><td rowspan="1" colspan="1"><p>事实陈述句列表</p></td><td rowspan="1" colspan="1"><p>语义相关性选择注入</p></td><td rowspan="1" colspan="1"><p>全自动提取</p></td><td rowspan="1" colspan="1"><p>C端消费者产品</p></td></tr><tr><td rowspan="1" colspan="1"><p>MemGPT/Letta</p></td><td rowspan="1" colspan="1"><p>分层虚拟内存</p></td><td rowspan="1" colspan="1"><p>Core + Recall + Archival（内存+DB+向量）</p></td><td rowspan="1" colspan="1"><p>Agent 自主搜索</p></td><td rowspan="1" colspan="1"><p>Agent 自管理</p></td><td rowspan="1" colspan="1"><p>超长对话/复杂任务</p></td></tr><tr><td rowspan="1" colspan="1"><p>Mem0</p></td><td rowspan="1" colspan="1"><p>独立记忆服务</p></td><td rowspan="1" colspan="1"><p>向量DB + 图DB</p></td><td rowspan="1" colspan="1"><p>向量 + 图检索</p></td><td rowspan="1" colspan="1"><p>全自动提取+去重</p></td><td rowspan="1" colspan="1"><p>通用 AI 应用</p></td></tr><tr><td rowspan="1" colspan="1"><p>Zep</p></td><td rowspan="1" colspan="1"><p>独立记忆服务器</p></td><td rowspan="1" colspan="1"><p>向量 + 实体图 + 时序</p></td><td rowspan="1" colspan="1"><p>混合检索（语义+实体+时间）</p></td><td rowspan="1" colspan="1"><p>全自动（摘要+实体抽取）</p></td><td rowspan="1" colspan="1"><p>企业级应用</p></td></tr><tr><td rowspan="1" colspan="1"><p>LangGraph</p></td><td rowspan="1" colspan="1"><p>框架组件</p></td><td rowspan="1" colspan="1"><p>可配置多后端</p></td><td rowspan="1" colspan="1"><p>可配置（全量/检索/摘要）</p></td><td rowspan="1" colspan="1"><p>需编排</p></td><td rowspan="1" colspan="1"><p>框架开发</p></td></tr></tbody></table>
+
+| 方案             | 架构            | 存储方式                                  | 检索方式               | 自动化程度        | 适用场景      |
+| -------------- | ------------- | ------------------------------------- | ------------------ | ------------ | --------- |
+| Claude Code    | Markdown 文件系统 | 分类文件（user/feedback/project/reference） | 全量注入 system prompt | Agent 主动写入   | 开发者工具     |
+| ChatGPT Memory | 服务端数据库        | 事实陈述句列表                               | 语义相关性选择注入          | 全自动提取        | C端消费者产品   |
+| MemGPT/Letta   | 分层虚拟内存        | Core + Recall + Archival（内存+DB+向量）    | Agent 自主搜索         | Agent 自管理    | 超长对话/复杂任务 |
+| Mem0           | 独立记忆服务        | 向量DB + 图DB                            | 向量 + 图检索           | 全自动提取+去重     | 通用 AI 应用  |
+| Zep            | 独立记忆服务器       | 向量 + 实体图 + 时序                         | 混合检索（语义+实体+时间）     | 全自动（摘要+实体抽取） | 企业级应用     |
+| LangGraph      | 框架组件          | 可配置多后端                                | 可配置（全量/检索/摘要）      | 需编排          | 框架开发      |
+
 
 ### 记忆系统的高级设计
 
@@ -276,21 +238,21 @@ Agent:
 
 从记忆到技能的转化实际上是三个递进的学习层次：
 
-<table><colgroup><col width="111"> <col width="164"> <col width="121"> <col width="219"> <col width="242"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>层次</p></td><td rowspan="1" colspan="1"><p>能力</p></td><td rowspan="1" colspan="1"><p>类比</p></td><td rowspan="1" colspan="1"><p>Agent 实现</p></td><td rowspan="1" colspan="1"><p>示例</p></td></tr><tr><td rowspan="1" colspan="1"><p>L1: 记住事实</p></td><td rowspan="1" colspan="1"><p>记住用户说了什么</p></td><td rowspan="1" colspan="1"><p>新员工记笔记</p></td><td rowspan="1" colspan="1"><p>feedback/user 类型记忆</p></td><td rowspan="1" colspan="1"><p>"用户说过不要用 mock"</p></td></tr><tr><td rowspan="1" colspan="1"><p>L2: 总结规则</p></td><td rowspan="1" colspan="1"><p>从多次事实中提炼规律</p></td><td rowspan="1" colspan="1"><p>老员工总结经验</p></td><td rowspan="1" colspan="1"><p>记忆聚合 → 行为约束注入 system prompt</p></td><td rowspan="1" colspan="1"><p>"测试规范: 禁mock/真实DB/事务回滚"</p></td></tr><tr><td rowspan="1" colspan="1"><p>L3: 形成技能</p></td><td rowspan="1" colspan="1"><p>规则 + 流程 + 触发条件 = 自动化能力</p></td><td rowspan="1" colspan="1"><p>专家制定 SOP</p></td><td rowspan="1" colspan="1"><p>生成 SKILL.md（含 workflow + tools + references）</p></td><td rowspan="1" colspan="1"><p>完整的集成测试 Skill</p></td></tr></tbody></table>
+
+| 层次       | 能力                     | 类比       | Agent 实现                                     | 示例                      |
+| -------- | ---------------------- | -------- | -------------------------------------------- | ----------------------- |
+| L1: 记住事实 | 记住用户说了什么               | 新员工记笔记   | feedback/user 类型记忆                           | "用户说过不要用 mock"          |
+| L2: 总结规则 | 从多次事实中提炼规律             | 老员工总结经验  | 记忆聚合 → 行为约束注入 system prompt                  | "测试规范: 禁mock/真实DB/事务回滚" |
+| L3: 形成技能 | 规则 + 流程 + 触发条件 = 自动化能力 | 专家制定 SOP | 生成 SKILL.md（含 workflow + tools + references） | 完整的集成测试 Skill           |
+
 
 关键区别：
 
-●
+- L1（记忆）是被动的：只有被检索到才生效，而且可能因为语义不匹配而漏检
 
-L1（记忆）是被动的：只有被检索到才生效，而且可能因为语义不匹配而漏检
+- L2（规则）是半主动的：注入 system prompt 后每次都生效，但只是约束不是流程
 
-●
-
-L2（规则）是半主动的：注入 system prompt 后每次都生效，但只是约束不是流程
-
-●
-
-L3（技能）是全主动的：自动匹配触发条件 + 提供完整执行流程 + 按需加载工具
+- L3（技能）是全主动的：自动匹配触发条件 + 提供完整执行流程 + 按需加载工具
 
 ##### 具体示例：从纠正到技能的演化过程
 
@@ -306,7 +268,7 @@ Week 1 — 第一次纠正（L1: 记住事实）
 
 用户: 你给的代码变量名太长了，我们团队习惯短变量名
 
-Agent: \[写入 feedback 记忆\]
+Agent: [写入 feedback 记忆]
 
 → "用户团队偏好简短变量名。Why: 团队编码规范。
 
@@ -418,7 +380,15 @@ Week 2-3 — 多次纠正积累（L1 → L2: 总结规则）
 
 ### 记忆系统核心挑战与解决思路
 
-<table><colgroup><col width="132"> <col width="263"> <col width="411"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>挑战</p></td><td rowspan="1" colspan="1"><p>问题描述</p></td><td rowspan="1" colspan="1"><p>业界解决方案</p></td></tr><tr><td rowspan="1" colspan="1"><p>上下文占用</p></td><td rowspan="1" colspan="1"><p>记忆注入占 prompt 空间</p></td><td rowspan="1" colspan="1"><p>渐进式加载、选择性注入、摘要压缩</p></td></tr><tr><td rowspan="1" colspan="1"><p>相关性检索</p></td><td rowspan="1" colspan="1"><p>如何找到当前最相关的记忆</p></td><td rowspan="1" colspan="1"><p>Embedding 语义检索 + Reranking + 元数据过滤</p></td></tr><tr><td rowspan="1" colspan="1"><p>记忆过时</p></td><td rowspan="1" colspan="1"><p>用户偏好会变</p></td><td rowspan="1" colspan="1"><p>时间戳衰减、冲突检测更新、周期性验证</p></td></tr><tr><td rowspan="1" colspan="1"><p>矛盾处理</p></td><td rowspan="1" colspan="1"><p>新旧信息冲突</p></td><td rowspan="1" colspan="1"><p>Last-write-wins / LLM 仲裁 / 保留两者标记冲突</p></td></tr><tr><td rowspan="1" colspan="1"><p>安全威胁</p></td><td rowspan="1" colspan="1"><p>记忆注入攻击</p></td><td rowspan="1" colspan="1"><p>写入前安全扫描、敏感信息脱敏、审计日志</p></td></tr></tbody></table>
+
+| 挑战    | 问题描述            | 业界解决方案                              |
+| ----- | --------------- | ----------------------------------- |
+| 上下文占用 | 记忆注入占 prompt 空间 | 渐进式加载、选择性注入、摘要压缩                    |
+| 相关性检索 | 如何找到当前最相关的记忆    | Embedding 语义检索 + Reranking + 元数据过滤  |
+| 记忆过时  | 用户偏好会变          | 时间戳衰减、冲突检测更新、周期性验证                  |
+| 矛盾处理  | 新旧信息冲突          | Last-write-wins / LLM 仲裁 / 保留两者标记冲突 |
+| 安全威胁  | 记忆注入攻击          | 写入前安全扫描、敏感信息脱敏、审计日志                 |
+
 
 记忆系统的核心价值不在于"能存多少"，而在于"能否减少用户的重复表达"。对于个人助手场景，几千字符的有界文件记忆往往比复杂的向量检索系统更实用——这是一个反直觉但经过验证的结论。关键是：分类要清晰（环境事实/用户偏好/行为反馈各有不同的更新策略）、安全要前置（写入时扫描，而非读取时）、演进要有梯度（从记住事实 → 总结规则 → 沉淀为技能）。
 
@@ -440,33 +410,51 @@ RAG（Retrieval-Augmented Generation，检索增强生成）的核心思路是�
 
 分块质量直接决定检索效果——切得太大，检索精度下降；切得太小，上下文信息不完整。
 
-<table><colgroup><col width="92"> <col width="347"> <col width="187"> <col width="244"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>分块策略</p></td><td rowspan="1" colspan="1"><p>原理</p></td><td rowspan="1" colspan="1"><p>适用场景</p></td><td rowspan="1" colspan="1"><p>优缺点</p></td></tr><tr><td rowspan="1" colspan="1"><p>固定大小</p></td><td rowspan="1" colspan="1"><p>按字符/token 数切割，设 overlap</p></td><td rowspan="1" colspan="1"><p>快速原型、通用场景</p></td><td rowspan="1" colspan="1"><p>简单快速，但可能切断语义单元</p></td></tr><tr><td rowspan="1" colspan="1"><p>递归分割</p></td><td rowspan="1" colspan="1"><div>按分隔符层级递归（ <code>\n\n</code> → <code>\n</code> → <code>.</code> → 空格）</div></td><td rowspan="1" colspan="1"><p>通用，LangChain 默认方案</p></td><td rowspan="1" colspan="1"><p>比固定大小好，仍不语义感知</p></td></tr><tr><td rowspan="1" colspan="1"><p>语义分块</p></td><td rowspan="1" colspan="1"><p>计算相邻句子 embedding 相似度，相似度骤降处切割</p></td><td rowspan="1" colspan="1"><p>语义完整性要求高</p></td><td rowspan="1" colspan="1"><p>效果最好，但计算开销大</p></td></tr><tr><td rowspan="1" colspan="1"><p>结构感知</p></td><td rowspan="1" colspan="1"><p>按 Markdown 标题/HTML 标签/PDF 段落结构切割</p></td><td rowspan="1" colspan="1"><p>结构化文档</p></td><td rowspan="1" colspan="1"><p>保留层级关系，适配性好</p></td></tr><tr><td rowspan="1" colspan="1"><p>Agentic</p></td><td rowspan="1" colspan="1"><p>用 LLM 判断每句话属于哪个主题</p></td><td rowspan="1" colspan="1"><p>最高质量要求</p></td><td rowspan="1" colspan="1"><p>效果极佳，成本极高</p></td></tr></tbody></table>
+
+| 分块策略    | 原理                                  | 适用场景              | 优缺点            |
+| ------- | ----------------------------------- | ----------------- | -------------- |
+| 固定大小    | 按字符/token 数切割，设 overlap             | 快速原型、通用场景         | 简单快速，但可能切断语义单元 |
+| 递归分割    | 按分隔符层级递归（ `\n\n` → `\n` → `.` → 空格） | 通用，LangChain 默认方案 | 比固定大小好，仍不语义感知  |
+| 语义分块    | 计算相邻句子 embedding 相似度，相似度骤降处切割       | 语义完整性要求高          | 效果最好，但计算开销大    |
+| 结构感知    | 按 Markdown 标题/HTML 标签/PDF 段落结构切割    | 结构化文档             | 保留层级关系，适配性好    |
+| Agentic | 用 LLM 判断每句话属于哪个主题                   | 最高质量要求            | 效果极佳，成本极高      |
+
 
 生产经验：
 
-●
+- Chunk size 典型值：256-1024 tokens，overlap 10-20%
 
-Chunk size 典型值：256-1024 tokens，overlap 10-20%
+- 经验法则：chunk 越大上下文完整但检索精度降低；反之亦然
 
-●
-
-经验法则：chunk 越大上下文完整但检索精度降低；反之亦然
-
-●
-
-推荐方案：递归分割 + 元数据增强（保留标题层级、页码、文件路径）
+- 推荐方案：递归分割 + 元数据增强（保留标题层级、页码、文件路径）
 
 ### 环节二：向量化（Embedding）
 
 将文本转换为高维向量，使语义相近的文本在向量空间中距离相近。
 
-<table><colgroup><col width="199"> <col width="81"> <col width="114"> <col width="224"> <col width="202"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>模型</p></td><td rowspan="1" colspan="1"><p>维度</p></td><td rowspan="1" colspan="1"><p>多语言</p></td><td rowspan="1" colspan="1"><p>特点</p></td><td rowspan="1" colspan="1"><p>推荐场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>OpenAI text-embedding-3-small</p></td><td rowspan="1" colspan="1"><p>1536</p></td><td rowspan="1" colspan="1"><p>良好</p></td><td rowspan="1" colspan="1"><p>性价比最高 API 方案</p></td><td rowspan="1" colspan="1"><p>英文为主、快速接入</p></td></tr><tr><td rowspan="1" colspan="1"><p>BGE-M3 (BAAI)</p></td><td rowspan="1" colspan="1"><p>1024</p></td><td rowspan="1" colspan="1"><p>100+语言</p></td><td rowspan="1" colspan="1"><p>同时支持 dense/sparse/colbert</p></td><td rowspan="1" colspan="1"><p>中文场景首选，支持混合检索</p></td></tr><tr><td rowspan="1" colspan="1"><p>GTE-Qwen2 (阿里)</p></td><td rowspan="1" colspan="1"><p>多种</p></td><td rowspan="1" colspan="1"><p>中英</p></td><td rowspan="1" colspan="1"><p>中文表现极强</p></td><td rowspan="1" colspan="1"><p>阿里云生态、DashScope 集成</p></td></tr><tr><td rowspan="1" colspan="1"><p>Jina-embeddings-v3</p></td><td rowspan="1" colspan="1"><p>1024</p></td><td rowspan="1" colspan="1"><p>多语言</p></td><td rowspan="1" colspan="1"><p>支持 8K 长上下文</p></td><td rowspan="1" colspan="1"><p>长文档场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>Cohere embed-v3</p></td><td rowspan="1" colspan="1"><p>1024</p></td><td rowspan="1" colspan="1"><p>100+语言</p></td><td rowspan="1" colspan="1"><p>内置 search/classify 模式区分</p></td><td rowspan="1" colspan="1"><p>需要区分查询和文档 embedding</p></td></tr></tbody></table>
+
+| 模型                            | 维度   | 多语言    | 特点                        | 推荐场景                |
+| ----------------------------- | ---- | ------ | ------------------------- | ------------------- |
+| OpenAI text-embedding-3-small | 1536 | 良好     | 性价比最高 API 方案              | 英文为主、快速接入           |
+| BGE-M3 (BAAI)                 | 1024 | 100+语言 | 同时支持 dense/sparse/colbert | 中文场景首选，支持混合检索       |
+| GTE-Qwen2 (阿里)                | 多种   | 中英     | 中文表现极强                    | 阿里云生态、DashScope 集成  |
+| Jina-embeddings-v3            | 1024 | 多语言    | 支持 8K 长上下文                | 长文档场景               |
+| Cohere embed-v3               | 1024 | 100+语言 | 内置 search/classify 模式区分   | 需要区分查询和文档 embedding |
+
 
 选型建议：中文场景首选 BGE-M3 或 GTE-Qwen2（开源免费、中文效果极佳）；英文场景 OpenAI text-embedding-3-small 性价比最优。
 
 ### 环节三：向量存储
 
-<table><colgroup><col width="96"> <col width="150"> <col width="150"> <col width="201"> <col width="214"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>数据库</p></td><td rowspan="1" colspan="1"><p>类型</p></td><td rowspan="1" colspan="1"><p>数据规模</p></td><td rowspan="1" colspan="1"><p>核心优势</p></td><td rowspan="1" colspan="1"><p>适用场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>ChromaDB</p></td><td rowspan="1" colspan="1"><p>嵌入式</p></td><td rowspan="1" colspan="1"><p><百万</p></td><td rowspan="1" colspan="1"><p>零配置、嵌入应用</p></td><td rowspan="1" colspan="1"><p>原型开发、小规模</p></td></tr><tr><td rowspan="1" colspan="1"><p>pgvector</p></td><td rowspan="1" colspan="1"><p>PG扩展</p></td><td rowspan="1" colspan="1"><p><千万</p></td><td rowspan="1" colspan="1"><p>复用现有 PG 基础设施</p></td><td rowspan="1" colspan="1"><p>已有 PG、不想引入新组件</p></td></tr><tr><td rowspan="1" colspan="1"><p>Qdrant</p></td><td rowspan="1" colspan="1"><p>独立服务</p></td><td rowspan="1" colspan="1"><p>亿级</p></td><td rowspan="1" colspan="1"><p>Rust 高性能、灵活过滤</p></td><td rowspan="1" colspan="1"><p>高性能要求</p></td></tr><tr><td rowspan="1" colspan="1"><p>Milvus</p></td><td rowspan="1" colspan="1"><p>分布式</p></td><td rowspan="1" colspan="1"><p>百亿级</p></td><td rowspan="1" colspan="1"><p>GPU 加速、大规模</p></td><td rowspan="1" colspan="1"><p>企业级大规模场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>Pinecone</p></td><td rowspan="1" colspan="1"><p>全托管 SaaS</p></td><td rowspan="1" colspan="1"><p>十亿级</p></td><td rowspan="1" colspan="1"><p>Serverless、零运维</p></td><td rowspan="1" colspan="1"><p>不想运维基础设施</p></td></tr></tbody></table>
+
+| 数据库      | 类型       | 数据规模 | 核心优势           | 适用场景          |
+| -------- | -------- | ---- | -------------- | ------------- |
+| ChromaDB | 嵌入式      | <百万  | 零配置、嵌入应用       | 原型开发、小规模      |
+| pgvector | PG扩展     | <千万  | 复用现有 PG 基础设施   | 已有 PG、不想引入新组件 |
+| Qdrant   | 独立服务     | 亿级   | Rust 高性能、灵活过滤  | 高性能要求         |
+| Milvus   | 分布式      | 百亿级  | GPU 加速、大规模     | 企业级大规模场景      |
+| Pinecone | 全托管 SaaS | 十亿级  | Serverless、零运维 | 不想运维基础设施      |
+
 
 ### 环节四：检索优化
 
@@ -490,7 +478,14 @@ Bi-encoder（独立编码 query 和 doc）速度快但精度一般；Cross-encod
 
 查询变换（Query Transformation）
 
-<table><colgroup><col width="205"> <col width="243"> <col width="352"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>策略</p></td><td rowspan="1" colspan="1"><p>原理</p></td><td rowspan="1" colspan="1"><p>效果</p></td></tr><tr><td rowspan="1" colspan="1"><p>Query Rewriting</p></td><td rowspan="1" colspan="1"><p>LLM 改写查询使其更适合检索</p></td><td rowspan="1" colspan="1"><p>解决口语化查询的检索效果差</p></td></tr><tr><td rowspan="1" colspan="1"><p>Query Decomposition</p></td><td rowspan="1" colspan="1"><p>复杂问题拆成多个子查询</p></td><td rowspan="1" colspan="1"><p>解决多跳推理问题</p></td></tr><tr><td rowspan="1" colspan="1"><p>HyDE</p></td><td rowspan="1" colspan="1"><p>LLM 先生成"假设答案"，用假设答案的 embedding 检索</p></td><td rowspan="1" colspan="1"><p>缩小 query 和 document 的语义鸿沟</p></td></tr><tr><td rowspan="1" colspan="1"><p>Multi-query</p></td><td rowspan="1" colspan="1"><p>同一问题生成多种表述分别检索后合并</p></td><td rowspan="1" colspan="1"><p>提高召回率</p></td></tr></tbody></table>
+
+| 策略                  | 原理                                | 效果                        |
+| ------------------- | --------------------------------- | ------------------------- |
+| Query Rewriting     | LLM 改写查询使其更适合检索                   | 解决口语化查询的检索效果差             |
+| Query Decomposition | 复杂问题拆成多个子查询                       | 解决多跳推理问题                  |
+| HyDE                | LLM 先生成"假设答案"，用假设答案的 embedding 检索 | 缩小 query 和 document 的语义鸿沟 |
+| Multi-query         | 同一问题生成多种表述分别检索后合并                 | 提高召回率                     |
+
 
 ### 高级 RAG 模式
 
@@ -524,13 +519,28 @@ Agentic RAG：将 RAG 嵌入 Agent 循环，Agent 自主决定何时检索、检
 
 ### RAG 核心问题与解决方案
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="281"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>问题</p></td><td rowspan="1" colspan="1"><p>表现</p></td><td rowspan="1" colspan="1"><p>根因</p></td><td rowspan="1" colspan="1"><p>解决方案</p></td></tr><tr><td rowspan="1" colspan="1"><p>检索到了仍幻觉</p></td><td rowspan="1" colspan="1"><p>回答中包含检索文档中没有的信息</p></td><td rowspan="1" colspan="1"><p>LLM 生成时使用了"记忆"而非 context</p></td><td rowspan="1" colspan="1"><p>强化 prompt 约束 + 引用标注 + CRAG 验证</p></td></tr><tr><td rowspan="1" colspan="1"><p>检索不相关</p></td><td rowspan="1" colspan="1"><p>Top-K 结果与问题无关</p></td><td rowspan="1" colspan="1"><p>语义相似≠主题相关</p></td><td rowspan="1" colspan="1"><p>Hybrid search + re-rank + 元数据过滤</p></td></tr><tr><td rowspan="1" colspan="1"><p>Chunk 边界</p></td><td rowspan="1" colspan="1"><p>关键信息跨越两个 chunk</p></td><td rowspan="1" colspan="1"><p>切分位置不当</p></td><td rowspan="1" colspan="1"><p>overlap + Parent Document Retriever</p></td></tr><tr><td rowspan="1" colspan="1"><p>多文档推理</p></td><td rowspan="1" colspan="1"><p>答案需综合多文档</p></td><td rowspan="1" colspan="1"><p>单次检索只看单 chunk</p></td><td rowspan="1" colspan="1"><p>Multi-hop RAG + GraphRAG + MapReduce</p></td></tr><tr><td rowspan="1" colspan="1"><p>长尾查询</p></td><td rowspan="1" colspan="1"><p>罕见问题检索效果差</p></td><td rowspan="1" colspan="1"><p>训练数据中类似表述少</p></td><td rowspan="1" colspan="1"><p>Query 改写 + HyDE + Few-shot 示例</p></td></tr></tbody></table>
+
+| 问题       | 表现              | 根因                       | 解决方案                                 |
+| -------- | --------------- | ------------------------ | ------------------------------------ |
+| 检索到了仍幻觉  | 回答中包含检索文档中没有的信息 | LLM 生成时使用了"记忆"而非 context | 强化 prompt 约束 + 引用标注 + CRAG 验证        |
+| 检索不相关    | Top-K 结果与问题无关   | 语义相似≠主题相关                | Hybrid search + re-rank + 元数据过滤      |
+| Chunk 边界 | 关键信息跨越两个 chunk  | 切分位置不当                   | overlap + Parent Document Retriever  |
+| 多文档推理    | 答案需综合多文档        | 单次检索只看单 chunk            | Multi-hop RAG + GraphRAG + MapReduce |
+| 长尾查询     | 罕见问题检索效果差       | 训练数据中类似表述少               | Query 改写 + HyDE + Few-shot 示例        |
+
 
 ### RAG 评估体系（RAGAS 框架）
 
 生产中需要量化 RAG 效果，RAGAS 是目前最流行的评估框架：
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>指标</p></td><td rowspan="1" colspan="1"><p>评估对象</p></td><td rowspan="1" colspan="1"><p>含义</p></td><td rowspan="1" colspan="1"><p>计算思路</p></td></tr><tr><td rowspan="1" colspan="1"><p>Faithfulness</p></td><td rowspan="1" colspan="1"><p>生成质量</p></td><td rowspan="1" colspan="1"><p>回答忠实于检索内容的程度</p></td><td rowspan="1" colspan="1"><p>答案中每个 claim 是否有 context 支持</p></td></tr><tr><td rowspan="1" colspan="1"><p>Answer Relevancy</p></td><td rowspan="1" colspan="1"><p>生成质量</p></td><td rowspan="1" colspan="1"><p>是否真正在回答用户的问题</p></td><td rowspan="1" colspan="1"><p>答案与原始问题的相关性</p></td></tr><tr><td rowspan="1" colspan="1"><p>Context Precision</p></td><td rowspan="1" colspan="1"><p>检索质量</p></td><td rowspan="1" colspan="1"><p>检索结果中有多少是有用的</p></td><td rowspan="1" colspan="1"><p>Top-K 中相关文档的排名位置</p></td></tr><tr><td rowspan="1" colspan="1"><p>Context Recall</p></td><td rowspan="1" colspan="1"><p>检索质量</p></td><td rowspan="1" colspan="1"><p>是否检索到了所有必要信息</p></td><td rowspan="1" colspan="1"><p>ground truth 中的信息被检索到的比例</p></td></tr></tbody></table>
+
+| 指标                | 评估对象 | 含义           | 计算思路                       |
+| ----------------- | ---- | ------------ | -------------------------- |
+| Faithfulness      | 生成质量 | 回答忠实于检索内容的程度 | 答案中每个 claim 是否有 context 支持 |
+| Answer Relevancy  | 生成质量 | 是否真正在回答用户的问题 | 答案与原始问题的相关性                |
+| Context Precision | 检索质量 | 检索结果中有多少是有用的 | Top-K 中相关文档的排名位置           |
+| Context Recall    | 检索质量 | 是否检索到了所有必要信息 | ground truth 中的信息被检索到的比例   |
+
 
 ### 小结
 
@@ -540,7 +550,16 @@ RAG 极大地扩展了 LLM 的知识边界，让 agent 能回答私域知识问�
 
 ### 演进历程
 
-<table><colgroup><col width="170"> <col width="245"> <col width="463"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>时间</p></td><td rowspan="1" colspan="1"><p>里程碑</p></td><td rowspan="1" colspan="1"><p>关键能力</p></td></tr><tr><td rowspan="1" colspan="1"><p>2023.06</p></td><td rowspan="1" colspan="1"><p>OpenAI 引入 Function Calling</p></td><td rowspan="1" colspan="1"><p>单函数调用，模型输出函数名+参数 JSON</p></td></tr><tr><td rowspan="1" colspan="1"><p>2023.11</p></td><td rowspan="1" colspan="1"><p>Parallel Function Calling</p></td><td rowspan="1" colspan="1"><p>一次响应可并行调用多个函数</p></td></tr><tr><td rowspan="1" colspan="1"><p>2024.01</p></td><td rowspan="1" colspan="1"><p>各厂商跟进</p></td><td rowspan="1" colspan="1"><p>Anthropic Tool Use、Google Function Calling、通义千问</p></td></tr><tr><td rowspan="1" colspan="1"><p>2024.08</p></td><td rowspan="1" colspan="1"><p>Structured Outputs</p></td><td rowspan="1" colspan="1"><p>保证输出 100% 符合 JSON Schema</p></td></tr><tr><td rowspan="1" colspan="1"><p>2024.11</p></td><td rowspan="1" colspan="1"><p>MCP 发布（Anthropic）</p></td><td rowspan="1" colspan="1"><p>标准化工具协议，脱离具体 LLM 平台</p></td></tr><tr><td rowspan="1" colspan="1"><p>2025.03</p></td><td rowspan="1" colspan="1"><p>MCP Streamable HTTP</p></td><td rowspan="1" colspan="1"><p>新传输层，支持无状态服务器，替代 SSE</p></td></tr></tbody></table>
+
+| 时间      | 里程碑                        | 关键能力                                            |
+| ------- | -------------------------- | ----------------------------------------------- |
+| 2023.06 | OpenAI 引入 Function Calling | 单函数调用，模型输出函数名+参数 JSON                           |
+| 2023.11 | Parallel Function Calling  | 一次响应可并行调用多个函数                                   |
+| 2024.01 | 各厂商跟进                      | Anthropic Tool Use、Google Function Calling、通义千问 |
+| 2024.08 | Structured Outputs         | 保证输出 100% 符合 JSON Schema                        |
+| 2024.11 | MCP 发布（Anthropic）          | 标准化工具协议，脱离具体 LLM 平台                             |
+| 2025.03 | MCP Streamable HTTP        | 新传输层，支持无状态服务器，替代 SSE                            |
+
 
 ### Function Calling 原理
 
@@ -554,13 +573,13 @@ Function Calling 的本质是让 LLM 在"该调用工具时"输出结构化的�
 
 \# Step 1: 定义工具 schema
 
-tools = \[{
+tools = [{
 
 "type": "function",
 
 "function": {
 
-"name": "query\_weather",
+"name": "query_weather",
 
 "description": "查询指定城市的天气",
 
@@ -568,33 +587,35 @@ tools = \[{
 
 "type": "object",
 
+```java
 "properties": {
 
-"city": {"type": "string", "description": "城市名"}
+    "city": {"type": "string", "description": "城市名"}
 
 },
+```
 
-"required": \["city"\]
+"required": ["city"]
 
 }
 
 }
 
-}\]
+}]
 
 \# Step 2: LLM 返回的是工具调用指令，而非文本
 
-response = llm.chat(messages=\[{"role":"user","content":"杭州天气如何"}\], tools=tools)
+response = llm.chat(messages=[{"role":"user","content":"杭州天气如何"}], tools=tools)
 
-\# → tool\_calls: \[{"function": {"name":"query\_weather", "arguments":"{\\"city\\":\\"杭州\\"}"}}\]
+\# → tool_calls: [{"function": {"name":"query_weather", "arguments":"{\\"city\\":\\"杭州\\"}"}}]
 
 \# Step 3: 应用侧执行工具
 
-result = query\_weather(city="杭州") # "杭州今天25°C，多云"
+result = query_weather(city="杭州") # "杭州今天25°C，多云"
 
 \# Step 4: 工具结果回传，LLM 生成最终回答
 
-messages.append({"role":"tool", "content":result, "tool\_call\_id":"..."})
+messages.append({"role":"tool", "content":result, "tool_call_id":"..."})
 
 final = llm.chat(messages=messages, tools=tools)
 
@@ -642,55 +663,79 @@ Function Calling 让 LLM 有了"手脚"，但工具定义硬编码在应用中�
 
 └──────────┘ └──────────┘ └──────────┘
 
-●
+- Host：运行环境，管理多个 Client 实例的生命周期
 
-Host：运行环境，管理多个 Client 实例的生命周期
+- Client：维护与单个 Server 的 1:1 连接，处理协议协商和消息路由
 
-●
-
-Client：维护与单个 Server 的 1:1 连接，处理协议协商和消息路由
-
-●
-
-Server：工具提供方，暴露 capabilities（tools / resources / prompts）
+- Server：工具提供方，暴露 capabilities（tools / resources / prompts）
 
 协议层使用JSON-RPC 2.0，通俗易懂：
 
+```java
 // 请求: 列出可用工具
 
 {"jsonrpc":"2.0", "id":1, "method":"tools/list", "params":{}}
 
 // 响应: 返回工具列表
+```
 
-{"jsonrpc":"2.0", "id":1, "result":{"tools":\[
+{"jsonrpc":"2.0", "id":1, "result":{"tools":[
 
-{"name":"query\_logs", "description":"查询SLS日志", "inputSchema":{...}}
+{"name":"query_logs", "description":"查询SLS日志", "inputSchema":{...}}
 
-\]}}
+]}}
 
 // 请求: 调用工具
 
 {"jsonrpc":"2.0", "id":2, "method":"tools/call",
 
-"params":{"name":"query\_logs", "arguments":{"query":"ERROR", "timeRange":"1h"}}}
+```java
+"params":{"name":"query_logs", "arguments":{"query":"ERROR", "timeRange":"1h"}}}
 
 // 响应: 返回调用结果
 
-{"jsonrpc":"2.0", "id":2, "result":{"content":\[{"type":"text","text":"找到3条错误..."}\]}}
+{"jsonrpc":"2.0", "id":2, "result":{"content":[{"type":"text","text":"找到3条错误..."}]}}
+```
 
 MCP 除了 function calling 能力外，它提供了三类能力，方便agent使用：
 
-<table><colgroup><col width="250"> <col width="250"> <col width="395"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>能力</p></td><td rowspan="1" colspan="1"><p>说明</p></td><td rowspan="1" colspan="1"><p>对应操作</p></td></tr><tr><td rowspan="1" colspan="1"><p>Tools</p></td><td rowspan="1" colspan="1"><p>可执行的函数/操作</p></td><td rowspan="1" colspan="1"><div><code>tools/list</code>, <code>tools/call</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>Resources</p></td><td rowspan="1" colspan="1"><p>可读取的数据源（文件、数据库）</p></td><td rowspan="1" colspan="1"><div><code>resources/list</code>, <code>resources/read</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>Prompts</p></td><td rowspan="1" colspan="1"><p>预定义的 prompt 模板</p></td><td rowspan="1" colspan="1"><div><code>prompts/list</code>, <code>prompts/get</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>Sampling</p></td><td rowspan="1" colspan="1"><p>Server 反向调用 LLM（Server 需要 AI 能力时）</p></td><td rowspan="1" colspan="1"><div><code>sampling/createMessage</code></div></td></tr></tbody></table>
+
+| 能力        | 说明                                | 对应操作                               |
+| --------- | --------------------------------- | ---------------------------------- |
+| Tools     | 可执行的函数/操作                         | `tools/list`, `tools/call`         |
+| Resources | 可读取的数据源（文件、数据库）                   | `resources/list`, `resources/read` |
+| Prompts   | 预定义的 prompt 模板                    | `prompts/list`, `prompts/get`      |
+| Sampling  | Server 反向调用 LLM（Server 需要 AI 能力时） | `sampling/createMessage`           |
+
 
 ### Function Calling vs MCP：如何选择
 
-<table><colgroup><col width="134"> <col width="379"> <col width="335"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>维度</p></td><td rowspan="1" colspan="1"><p>Function Calling</p></td><td rowspan="1" colspan="1"><p>MCP</p></td></tr><tr><td rowspan="1" colspan="1"><p>标准化</p></td><td rowspan="1" colspan="1"><p>各厂商格式不同（OpenAI/Anthropic/通义各一套）</p></td><td rowspan="1" colspan="1"><p>统一协议标准</p></td></tr><tr><td rowspan="1" colspan="1"><p>工具发现</p></td><td rowspan="1" colspan="1"><p>硬编码在应用中</p></td><td rowspan="1" colspan="1"><div>动态 <code>tools/list</code> （运行时发现）</div></td></tr><tr><td rowspan="1" colspan="1"><p>可复用性</p></td><td rowspan="1" colspan="1"><p>换平台需改代码</p></td><td rowspan="1" colspan="1"><p>一个 Server 服务所有 Agent</p></td></tr><tr><td rowspan="1" colspan="1"><p>生态</p></td><td rowspan="1" colspan="1"><p>各厂商独立</p></td><td rowspan="1" colspan="1"><p>跨平台工具复用（写一次到处用）</p></td></tr><tr><td rowspan="1" colspan="1"><p>额外能力</p></td><td rowspan="1" colspan="1"><p>仅函数调用</p></td><td rowspan="1" colspan="1"><p>Resources + Prompts + Sampling</p></td></tr><tr><td rowspan="1" colspan="1"><p>部署复杂度</p></td><td rowspan="1" colspan="1"><p>无额外组件</p></td><td rowspan="1" colspan="1"><p>需要部署/维护 MCP Server</p></td></tr><tr><td rowspan="1" colspan="1"><p>成熟度</p></td><td rowspan="1" colspan="1"><p>2年+，稳定</p></td><td rowspan="1" colspan="1"><p>新标准（2024.11），快速演进</p></td></tr><tr><td rowspan="1" colspan="1"><p>适用场景</p></td><td rowspan="1" colspan="1"><p>简单应用、工具少且固定</p></td><td rowspan="1" colspan="1"><p>工具多、需要复用、多平台支持</p></td></tr></tbody></table>
+
+| 维度    | Function Calling                | MCP                            |
+| ----- | ------------------------------- | ------------------------------ |
+| 标准化   | 各厂商格式不同（OpenAI/Anthropic/通义各一套） | 统一协议标准                         |
+| 工具发现  | 硬编码在应用中                         | 动态 `tools/list` （运行时发现）        |
+| 可复用性  | 换平台需改代码                         | 一个 Server 服务所有 Agent           |
+| 生态    | 各厂商独立                           | 跨平台工具复用（写一次到处用）                |
+| 额外能力  | 仅函数调用                           | Resources + Prompts + Sampling |
+| 部署复杂度 | 无额外组件                           | 需要部署/维护 MCP Server             |
+| 成熟度   | 2年+，稳定                          | 新标准（2024.11），快速演进              |
+| 适用场景  | 简单应用、工具少且固定                     | 工具多、需要复用、多平台支持                 |
+
 
 实践建议：如果你的 agent 工具数量少于 5 个且只对接一个 LLM 平台，直接用 Function Calling；如果工具超过 10 个、需要跨平台复用、或者工具由不同团队提供，MCP 是更好的选择。
 
 ### 生产中的核心挑战
 
-<table><colgroup><col width="150"> <col width="381"> <col width="357"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>挑战</p></td><td rowspan="1" colspan="1"><p>问题</p></td><td rowspan="1" colspan="1"><p>解决方案</p></td></tr><tr><td rowspan="1" colspan="1"><p>工具选择准确性</p></td><td rowspan="1" colspan="1"><p>工具多时 LLM 选错工具</p></td><td rowspan="1" colspan="1"><p>渐进式加载（Skill 方案）、优化工具描述</p></td></tr><tr><td rowspan="1" colspan="1"><p>参数提取可靠性</p></td><td rowspan="1" colspan="1"><p>JSON 格式错误、缺必填字段</p></td><td rowspan="1" colspan="1"><p>Structured Outputs、参数修复、重试</p></td></tr><tr><td rowspan="1" colspan="1"><p>嵌套参数包装</p></td><td rowspan="1" colspan="1"><div>LLM 展平嵌套参数 <code>{query:...}</code> → <code>{request:{query:...}}</code></div></td><td rowspan="1" colspan="1"><p>自动包装检测（本项目方案）</p></td></tr><tr><td rowspan="1" colspan="1"><p>工具名拼写</p></td><td rowspan="1" colspan="1"><p>大小写/格式错误</p></td><td rowspan="1" colspan="1"><p>模糊匹配 + 自动修复（本项目方案）</p></td></tr><tr><td rowspan="1" colspan="1"><p>上下文占用</p></td><td rowspan="1" colspan="1"><p>几十个工具 schema 占满 prompt</p></td><td rowspan="1" colspan="1"><p>按需注入 + Skill 分级加载</p></td></tr></tbody></table>
+
+| 挑战      | 问题                                                 | 解决方案                       |
+| ------- | -------------------------------------------------- | -------------------------- |
+| 工具选择准确性 | 工具多时 LLM 选错工具                                      | 渐进式加载（Skill 方案）、优化工具描述     |
+| 参数提取可靠性 | JSON 格式错误、缺必填字段                                    | Structured Outputs、参数修复、重试 |
+| 嵌套参数包装  | LLM 展平嵌套参数 `{query:...}` → `{request:{query:...}}` | 自动包装检测（本项目方案）              |
+| 工具名拼写   | 大小写/格式错误                                           | 模糊匹配 + 自动修复（本项目方案）         |
+| 上下文占用   | 几十个工具 schema 占满 prompt                             | 按需注入 + Skill 分级加载          |
+
 
 ### 小结
 
@@ -708,11 +753,27 @@ Function Calling + MCP 让 LLM 从"只能说"变成"能做事"。但有了手脚
 
 学术界和工业界提出了多种 agent 循环范式，各有优劣：
 
-<table><colgroup><col width="187"> <col width="167"> <col width="517"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>范式</p></td><td rowspan="1" colspan="1"><p>核心思想</p></td><td rowspan="1" colspan="1"><p>示例及说明</p></td></tr><tr><td rowspan="1" colspan="1"><h4>ReAct（Reasoning + Acting）</h4></td><td rowspan="1" colspan="1"><p>让 LLM 交替进行推理（Thought）和行动（Action），每一步都基于上一步的观察结果决策。</p></td><td rowspan="1" colspan="1"><p>Thought 1: 用户想知道杭州天气。我需要调用天气查询工具。</p><p>Action 1: query_weather(city="杭州")</p><p>Observation 1: {"temp": 25, "condition": "多云"}</p><p>Thought 2: 已获取到天气数据。我可以直接回答用户了。</p><p>Answer: 杭州今天天气多云，气温25°C。</p><p>实现极简—— 一个 while 循环：</p><p>while not done:</p><p>response = llm.chat(messages, tools) # Think</p><p>if response.has_tool_calls:</p><p>results = execute(response.tool_calls) # Act</p><p>messages.append(results) # Observe</p><p>else:</p><p>return response.content # Done</p></td></tr><tr><td rowspan="1" colspan="1"><h4>Plan-then-Execute</h4></td><td rowspan="1" colspan="1"><p>先让 LLM 制定完整计划，再按步骤逐一执行。</p></td><td rowspan="1" colspan="1"><p>Phase 1 — Plan（规划阶段）:</p><p>┌─────────────────────────────────────────┐</p><p>│ 用户任务: "帮我分析这个项目的性能瓶颈" │</p><p>│ │</p><p>│ 计划: │</p><p>│ 1. 读取项目配置，了解技术栈 │</p><p>│ 2. 查看日志，定位高延迟接口 │</p><p>│ 3. 分析代码，识别 N+1 查询 │</p><p>│ 4. 生成优化建议报告 │</p><p>└─────────────────────────────────────────┘</p><p>Phase 2 — Execute（执行阶段）:</p><p>Step 1 → executor.run("读取配置") → 结果</p><p>Step 2 → executor.run("查看日志") → 结果</p><p>...</p></td></tr><tr><td rowspan="1" colspan="1"><h4>Plan-React 混合</h4></td><td rowspan="1" colspan="1"><p>先规划再执行，但执行过程中允许根据新发现动态调整计划。</p></td><td rowspan="1" colspan="1"><p>Plan → Execute Step 1 → 发现新信息 → Re-plan → Execute Step 2 →...</p></td></tr><tr><td rowspan="1" colspan="1"><h4>LATS（Language Agent Tree Search）</h4></td><td rowspan="1" colspan="1"><p>受蒙特卡洛树搜索（MCTS）启发，将 agent 决策建模为树搜索问题，探索多条执行路径。</p></td><td rowspan="1" colspan="1"><p>[Root: 用户任务]</p><p>/ | \</p><p>[方案A] [方案B] [方案C]</p><p>/ \ | |</p><p>[A1] [A2] [B1] [C1]</p><p>↑ ↑</p><p>score=0.8 score=0.3 ← 评估每个节点</p><p>选择最优路径执行，失败时回溯到其他分支重试</p></td></tr><tr><td rowspan="1" colspan="1"><h4>Reflexion（自反思模式）</h4></td><td rowspan="1" colspan="1"><p>Agent 失败后进行自我反思，将反思结论存入记忆，在下次尝试时利用经验教训。</p></td><td rowspan="1" colspan="1"><p>尝试1: 执行任务 → 失败</p><p>→ 反思: "失败原因是... 下次应该..."</p><p>→ 存入 memory</p><p>尝试2: 加载反思记忆 → 执行任务（基于经验改进）→ 成功/再次反思</p></td></tr></tbody></table>
+
+| 范式                               | 核心思想                                               | 示例及说明                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ReAct（Reasoning + Acting）        | 让 LLM 交替进行推理（Thought）和行动（Action），每一步都基于上一步的观察结果决策。 | Thought 1: 用户想知道杭州天气。我需要调用天气查询工具。 Action 1: query_weather(city="杭州") Observation 1: {"temp": 25, "condition": "多云"} Thought 2: 已获取到天气数据。我可以直接回答用户了。 Answer: 杭州今天天气多云，气温25°C。 实现极简—— 一个 while 循环： while not done: response = llm.chat(messages, tools) # Think if response.has_tool_calls: results = execute(response.tool_calls) # Act messages.append(results) # Observe else: return response.content # Done |
+| Plan-then-Execute                | 先让 LLM 制定完整计划，再按步骤逐一执行。                            | Phase 1 — Plan（规划阶段）: ┌─────────────────────────────────────────┐ │ 用户任务: "帮我分析这个项目的性能瓶颈" │ │ │ │ 计划: │ │ 1. 读取项目配置，了解技术栈 │ │ 2. 查看日志，定位高延迟接口 │ │ 3. 分析代码，识别 N+1 查询 │ │ 4. 生成优化建议报告 │ └─────────────────────────────────────────┘ Phase 2 — Execute（执行阶段）: Step 1 → executor.run("读取配置") → 结果 Step 2 → executor.run("查看日志") → 结果 ...                                                                           |
+| Plan-React 混合                    | 先规划再执行，但执行过程中允许根据新发现动态调整计划。                        | Plan → Execute Step 1 → 发现新信息 → Re-plan → Execute Step 2 →...                                                                                                                                                                                                                                                                                                                                                  |
+| LATS（Language Agent Tree Search） | 受蒙特卡洛树搜索（MCTS）启发，将 agent 决策建模为树搜索问题，探索多条执行路径。      | [Root: 用户任务] / \| \ [方案A] [方案B] [方案C] / \ \| \| [A1] [A2] [B1] [C1] ↑ ↑ score=0.8 score=0.3 ← 评估每个节点 选择最优路径执行，失败时回溯到其他分支重试                                                                                                                                                                                                                                                                                     |
+| Reflexion（自反思模式）                 | Agent 失败后进行自我反思，将反思结论存入记忆，在下次尝试时利用经验教训。            | 尝试1: 执行任务 → 失败 → 反思: "失败原因是... 下次应该..." → 存入 memory 尝试2: 加载反思记忆 → 执行任务（基于经验改进）→ 成功/再次反思                                                                                                                                                                                                                                                                                                                        |
+
 
 ### 范式综合对比
 
-<table><colgroup><col width="128"> <col width="93"> <col width="220"> <col width="211"> <col width="281"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>范式</p></td><td rowspan="1" colspan="1"><p>实现复杂度</p></td><td rowspan="1" colspan="1"><p>适用场景</p></td><td rowspan="1" colspan="1"><p>优势</p></td><td rowspan="1" colspan="1"><p>劣势</p></td></tr><tr><td rowspan="1" colspan="1"><p>ReAct</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>通用，简单到中等任务</p></td><td rowspan="1" colspan="1"><p>灵活、实现简单、可观测性好</p></td><td rowspan="1" colspan="1"><p>无全局规划，复杂任务易迷失</p></td></tr><tr><td rowspan="1" colspan="1"><p>Plan-Execute</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>步骤可预见的确定性任务</p></td><td rowspan="1" colspan="1"><p>全局规划合理，可展示计划</p></td><td rowspan="1" colspan="1"><p>不灵活，中间出错难调整</p></td></tr><tr><td rowspan="1" colspan="1"><p>Plan-React</p></td><td rowspan="1" colspan="1"><p>中高</p></td><td rowspan="1" colspan="1"><p>复杂但可拆解的任务</p></td><td rowspan="1" colspan="1"><p>兼顾规划和灵活性</p></td><td rowspan="1" colspan="1"><p>实现复杂，LLM 难维护计划</p></td></tr><tr><td rowspan="1" colspan="1"><p>LATS</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>数学/代码/需探索的任务</p></td><td rowspan="1" colspan="1"><p>可回溯，找到更优解</p></td><td rowspan="1" colspan="1"><p>Token 消耗极高，延迟高</p></td></tr><tr><td rowspan="1" colspan="1"><p>Reflexion</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>有明确成功标准的任务</p></td><td rowspan="1" colspan="1"><p>从失败中学习</p></td><td rowspan="1" colspan="1"><p>需多次尝试，成本高</p></td></tr></tbody></table>
+
+| 范式           | 实现复杂度 | 适用场景         | 优势            | 劣势             |
+| ------------ | ----- | ------------ | ------------- | -------------- |
+| ReAct        | 低     | 通用，简单到中等任务   | 灵活、实现简单、可观测性好 | 无全局规划，复杂任务易迷失  |
+| Plan-Execute | 中     | 步骤可预见的确定性任务  | 全局规划合理，可展示计划  | 不灵活，中间出错难调整    |
+| Plan-React   | 中高    | 复杂但可拆解的任务    | 兼顾规划和灵活性      | 实现复杂，LLM 难维护计划 |
+| LATS         | 高     | 数学/代码/需探索的任务 | 可回溯，找到更优解     | Token 消耗极高，延迟高 |
+| Reflexion    | 中     | 有明确成功标准的任务   | 从失败中学习        | 需多次尝试，成本高      |
+
 
 ### 生产中的最佳实践
 
@@ -758,13 +819,9 @@ Function Calling + MCP 让 LLM 从"只能说"变成"能做事"。但有了手脚
 
 工具数量增长带来两个核心矛盾：
 
-1.
+1. 上下文占用：50 个工具的 schema 可能占 50000 tokens，严重挤压有效上下文
 
-上下文占用：50 个工具的 schema 可能占 50000 tokens，严重挤压有效上下文
-
-2.
-
-选择困难：LLM 面对太多工具时，选择准确率显著下降
+2. 选择困难：LLM 面对太多工具时，选择准确率显著下降
 
 传统 Function Calling 的做法是把所有工具定义一股脑塞进 prompt——工具少时没问题，工具多了就崩了。
 
@@ -776,7 +833,13 @@ Skill 的核心设计灵感来自操作系统的按需加载（lazy loading）�
 
 ### Token 效率对比
 
-<table><colgroup><col width="250"> <col width="381"> <col width="250"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>方案</p></td><td rowspan="1" colspan="1"><p>50 个工具的 Token 消耗</p></td><td rowspan="1" colspan="1"><p>效率</p></td></tr><tr><td rowspan="1" colspan="1"><p>传统全量注入</p></td><td rowspan="1" colspan="1"><p>~50,000 tokens（每个工具 ~1000 tokens schema）</p></td><td rowspan="1" colspan="1"><p>1x</p></td></tr><tr><td rowspan="1" colspan="1"><p>Skill Advertise</p></td><td rowspan="1" colspan="1"><p>~5,000 tokens（每个 skill ~100 tokens 摘要）</p></td><td rowspan="1" colspan="1"><p>10x</p></td></tr><tr><td rowspan="1" colspan="1"><p>Skill Load 后</p></td><td rowspan="1" colspan="1"><p>+1,000~3,000 tokens（仅加载用到的 1-2 个 skill）</p></td><td rowspan="1" colspan="1"><p>按需</p></td></tr></tbody></table>
+
+| 方案              | 50 个工具的 Token 消耗                         | 效率  |
+| --------------- | ---------------------------------------- | --- |
+| 传统全量注入          | ~50,000 tokens（每个工具 ~1000 tokens schema） | 1x  |
+| Skill Advertise | ~5,000 tokens（每个 skill ~100 tokens 摘要）   | 10x |
+| Skill Load 后    | +1,000~3,000 tokens（仅加载用到的 1-2 个 skill）  | 按需  |
+
 
 关键洞察：大多数对话只会用到 1-2 个 skill，没必要让 LLM "看到"所有工具的完整定义。
 
@@ -796,7 +859,7 @@ skill/
 
 └── scripts/ # 可执行脚本
 
-└── parse\_trace.py # 日志解析工具
+└── parse_trace.py # 日志解析工具
 
 这种设计的价值：LLM 不是在"猜"怎么用工具，而是在"按手册操作"——就像给新员工一份 SOP 文档，而不是只告诉他工具箱在哪里。
 
@@ -804,13 +867,28 @@ skill/
 
 ### 单 Agent 的三大困境
 
-<table><colgroup><col width="250"> <col width="263"> <col width="549"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>困境</p></td><td rowspan="1" colspan="1"><p>表现</p></td><td rowspan="1" colspan="1"><p>根因</p></td></tr><tr><td rowspan="1" colspan="1"><p>上下文膨胀</p></td><td rowspan="1" colspan="1"><p>对话越长越容易"忘事"</p></td><td rowspan="1" colspan="1"><p>即使压缩，信息损失也不可逆</p></td></tr><tr><td rowspan="1" colspan="1"><p>注意力分散</p></td><td rowspan="1" colspan="1"><p>复杂任务容易"跑偏"</p></td><td rowspan="1" colspan="1"><p>一个 system prompt 难兼顾所有场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>串行瓶颈</p></td><td rowspan="1" colspan="1"><p>多步骤任务耗时长</p></td><td rowspan="1" colspan="1"><p>独立子任务只能排队执行</p></td></tr></tbody></table>
+
+| 困境    | 表现          | 根因                       |
+| ----- | ----------- | ------------------------ |
+| 上下文膨胀 | 对话越长越容易"忘事" | 即使压缩，信息损失也不可逆            |
+| 注意力分散 | 复杂任务容易"跑偏"  | 一个 system prompt 难兼顾所有场景 |
+| 串行瓶颈  | 多步骤任务耗时长    | 独立子任务只能排队执行              |
+
 
 ### Multi-Agent 架构模式
 
 要理解 Multi-Agent 为什么会有多种模式，先想一个类比：人类团队协作也不止一种方式。
 
-<table><colgroup><col width="390"> <col width="300"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>场景</p></td><td rowspan="1" colspan="1"><p>协作模式</p></td></tr><tr><td rowspan="1" colspan="1"><p>老板分配任务给员工</p></td><td rowspan="1" colspan="1"><p>主从委托</p></td></tr><tr><td rowspan="1" colspan="1"><p>流水线上一道工序传给下一道</p></td><td rowspan="1" colspan="1"><p>接力传递</p></td></tr><tr><td rowspan="1" colspan="1"><p>多人头脑风暴讨论</p></td><td rowspan="1" colspan="1"><p>对等讨论</p></td></tr><tr><td rowspan="1" colspan="1"><p>部门经理各管一摊，有事才协调</p></td><td rowspan="1" colspan="1"><p>层级分治</p></td></tr><tr><td rowspan="1" colspan="1"><p>专家会诊，轮流发表意见后投票</p></td><td rowspan="1" colspan="1"><p>竞争投票</p></td></tr><tr><td rowspan="1" colspan="1"><p>导师带徒弟，做完了师傅审核</p></td><td rowspan="1" colspan="1"><p>评估反馈</p></td></tr></tbody></table>
+
+| 场景             | 协作模式 |
+| -------------- | ---- |
+| 老板分配任务给员工      | 主从委托 |
+| 流水线上一道工序传给下一道  | 接力传递 |
+| 多人头脑风暴讨论       | 对等讨论 |
+| 部门经理各管一摊，有事才协调 | 层级分治 |
+| 专家会诊，轮流发表意见后投票 | 竞争投票 |
+| 导师带徒弟，做完了师傅审核  | 评估反馈 |
+
 
 业界的 Multi-Agent 模式很多，以下对多种逐一深入分析。
 
@@ -1028,11 +1106,16 @@ Agent 4 (测试验证): 读取代码 → 编写并运行测试 → 输出测试�
 
 问题: "我们的登录系统应该用 Session 还是 JWT？"
 
+```java
+
+```
+
 Agent A (安全专家): "Session 更安全，服务端控制力强，可以即时撤销"
 
 Agent B (架构师): "JWT 无状态，适合微服务分布式架构，扩展性好"
 
 Agent C (产品经理): "我们现在单体应用，但半年后要拆微服务"
+
 
 第2轮:
 
@@ -1216,11 +1299,16 @@ CEO Agent: 拆为三大模块
 
 问题: "这段代码的 bug 在哪里？"
 
+```java
+
+```
+
 Agent A (逐行分析策略): "第15行的空指针检查缺失"
 
 Agent B (执行追踪策略): "第15行 user 可能为 null，会崩"
 
 Agent C (模式匹配策略): "第23行的循环边界有 off-by-one"
+
 
 Judge: A 和 B 都指向第15行，高置信度 → 输出 "第15行空指针问题"
 
@@ -1394,7 +1482,7 @@ Critic: "很好，结构清晰、内容完整、表达生动"
 
 └─────────────────────────────────────────────────────────────────┘
 
-代表产品：Anthropic Claude 的 tool\_use routing、各大厂的智能客服（先分类再转专家）、本项目的 Skill advertise→load 本质上也是一种路由
+代表产品：Anthropic Claude 的 tool_use routing、各大厂的智能客服（先分类再转专家）、本项目的 Skill advertise→load 本质上也是一种路由
 
 典型场景示例：
 
@@ -1420,7 +1508,17 @@ Coding Agent: 加载代码编辑工具 → 修改代码 → 运行测试 → 提
 
 ### 七种模式综合对比
 
-<table><colgroup><col width="107"> <col width="107"> <col width="149"> <col width="80"> <col width="107"> <col width="107"> <col width="252"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>模式</p></td><td rowspan="1" colspan="1"><p>并行性</p></td><td rowspan="1" colspan="1"><p>通信开销</p></td><td rowspan="1" colspan="1"><p>实现复杂度</p></td><td rowspan="1" colspan="1"><p>输出质量</p></td><td rowspan="1" colspan="1"><p>Token 成本</p></td><td rowspan="1" colspan="1"><p>最佳场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>主从委托</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>低（单次分发+收集）</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>取决于子 Agent</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>可拆解的独立子任务</p></td></tr><tr><td rowspan="1" colspan="1"><p>接力传递</p></td><td rowspan="1" colspan="1"><p>无</p></td><td rowspan="1" colspan="1"><p>中（逐步传递）</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>有顺序依赖的流水线</p></td></tr><tr><td rowspan="1" colspan="1"><p>对等讨论</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>高（多轮对话）</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>高（多角度）</p></td><td rowspan="1" colspan="1"><p>极高</p></td><td rowspan="1" colspan="1"><p>决策/方案选择</p></td></tr><tr><td rowspan="1" colspan="1"><p>层级分治</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>高（多层传递）</p></td><td rowspan="1" colspan="1"><p>极高</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>超大型工程项目</p></td></tr><tr><td rowspan="1" colspan="1"><p>竞争选优</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>低（各自独立）</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>极高（投票/选优）</p></td><td rowspan="1" colspan="1"><p>高（N倍）</p></td><td rowspan="1" colspan="1"><p>高可靠性要求</p></td></tr><tr><td rowspan="1" colspan="1"><p>评估反馈</p></td><td rowspan="1" colspan="1"><p>无</p></td><td rowspan="1" colspan="1"><p>中（多轮迭代）</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>高（逐步提升）</p></td><td rowspan="1" colspan="1"><p>中高</p></td><td rowspan="1" colspan="1"><p>创作/生成类任务</p></td></tr><tr><td rowspan="1" colspan="1"><p>动态路由</p></td><td rowspan="1" colspan="1"><p>无（单路由）</p></td><td rowspan="1" colspan="1"><p>极低</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>取决于专家</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>意图明确可分类</p></td></tr></tbody></table>
+
+| 模式   | 并行性    | 通信开销       | 实现复杂度 | 输出质量       | Token 成本 | 最佳场景      |
+| ---- | ------ | ---------- | ----- | ---------- | -------- | --------- |
+| 主从委托 | 高      | 低（单次分发+收集） | 中     | 取决于子 Agent | 中        | 可拆解的独立子任务 |
+| 接力传递 | 无      | 中（逐步传递）    | 低     | 中          | 低        | 有顺序依赖的流水线 |
+| 对等讨论 | 低      | 高（多轮对话）    | 高     | 高（多角度）     | 极高       | 决策/方案选择   |
+| 层级分治 | 高      | 高（多层传递）    | 极高    | 高          | 高        | 超大型工程项目   |
+| 竞争选优 | 高      | 低（各自独立）    | 中     | 极高（投票/选优）  | 高（N倍）    | 高可靠性要求    |
+| 评估反馈 | 无      | 中（多轮迭代）    | 中     | 高（逐步提升）    | 中高       | 创作/生成类任务  |
+| 动态路由 | 无（单路由） | 极低         | 低     | 取决于专家      | 低        | 意图明确可分类   |
+
 
 ### 生产中的组合使用
 
@@ -1470,11 +1568,28 @@ Claude Code Multi-Agent 组合:
 
 ### 核心收益
 
-<table><colgroup><col width="188"> <col width="276"> <col width="351"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>收益</p></td><td rowspan="1" colspan="1"><p>原理</p></td><td rowspan="1" colspan="1"><p>效果</p></td></tr><tr><td rowspan="1" colspan="1"><p>上下文隔离</p></td><td rowspan="1" colspan="1"><p>每个子 agent 独立上下文窗口</p></td><td rowspan="1" colspan="1"><p>主 agent 只看到任务+结果，不被中间过程污染</p></td></tr><tr><td rowspan="1" colspan="1"><p>并行执行</p></td><td rowspan="1" colspan="1"><p>独立子任务同时运行</p></td><td rowspan="1" colspan="1"><p>3 个 20s 的子任务 → 并行只需 20s 而非 60s</p></td></tr><tr><td rowspan="1" colspan="1"><p>失败隔离</p></td><td rowspan="1" colspan="1"><p>子 agent 失败不影响其他</p></td><td rowspan="1" colspan="1"><p>可基于部分成功的结果给出答案</p></td></tr><tr><td rowspan="1" colspan="1"><p>专家化</p></td><td rowspan="1" colspan="1"><p>不同子 agent 用不同的 system prompt</p></td><td rowspan="1" colspan="1"><p>搜索专家/代码专家/数据专家各司其职</p></td></tr><tr><td rowspan="1" colspan="1"><p>质量提升</p></td><td rowspan="1" colspan="1"><p>多 Agent 交叉验证</p></td><td rowspan="1" colspan="1"><p>减少单 Agent 的幻觉和遗漏</p></td></tr></tbody></table>
+
+| 收益    | 原理                           | 效果                             |
+| ----- | ---------------------------- | ------------------------------ |
+| 上下文隔离 | 每个子 agent 独立上下文窗口            | 主 agent 只看到任务+结果，不被中间过程污染      |
+| 并行执行  | 独立子任务同时运行                    | 3 个 20s 的子任务 → 并行只需 20s 而非 60s |
+| 失败隔离  | 子 agent 失败不影响其他              | 可基于部分成功的结果给出答案                 |
+| 专家化   | 不同子 agent 用不同的 system prompt | 搜索专家/代码专家/数据专家各司其职             |
+| 质量提升  | 多 Agent 交叉验证                 | 减少单 Agent 的幻觉和遗漏               |
+
 
 ### 关键设计挑战
 
-<table><colgroup><col width="122"> <col width="300"> <col width="387"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>挑战</p></td><td rowspan="1" colspan="1"><p>描述</p></td><td rowspan="1" colspan="1"><p>解决思路</p></td></tr><tr><td rowspan="1" colspan="1"><p>任务拆解粒度</p></td><td rowspan="1" colspan="1"><p>拆太细增加通信开销，拆太粗失去并行意义</p></td><td rowspan="1" colspan="1"><p>依赖 LLM 判断 + 经验阈值（3-5个子任务为宜）</p></td></tr><tr><td rowspan="1" colspan="1"><p>结果聚合</p></td><td rowspan="1" colspan="1"><p>多个子 agent 结果如何合并为连贯回答</p></td><td rowspan="1" colspan="1"><p>主 agent 做综合推理 / 结构化合并模板</p></td></tr><tr><td rowspan="1" colspan="1"><p>资源控制</p></td><td rowspan="1" colspan="1"><p>防止子 agent 无限膨胀（递归创建子 Agent）</p></td><td rowspan="1" colspan="1"><p>并发数限制 + 超时 + 深度限制 + 工具权限收窄</p></td></tr><tr><td rowspan="1" colspan="1"><p>状态一致性</p></td><td rowspan="1" colspan="1"><p>子 agent 之间需要共享信息时怎么办</p></td><td rowspan="1" colspan="1"><p>通过主 agent 转发 / 共享工具注册表 / 共享内存区</p></td></tr><tr><td rowspan="1" colspan="1"><p>错误传播</p></td><td rowspan="1" colspan="1"><p>一个 Agent 的错误输出被下游 Agent 放大</p></td><td rowspan="1" colspan="1"><p>每步输出验证 + 错误时回退重试 + 置信度传递</p></td></tr><tr><td rowspan="1" colspan="1"><p>成本控制</p></td><td rowspan="1" colspan="1"><p>多 Agent 的 Token 消耗是单 Agent 的数倍</p></td><td rowspan="1" colspan="1"><p>按需使用（简单任务不拆分）+ 弱模型做 Router/Worker</p></td></tr></tbody></table>
+
+| 挑战     | 描述                             | 解决思路                              |
+| ------ | ------------------------------ | --------------------------------- |
+| 任务拆解粒度 | 拆太细增加通信开销，拆太粗失去并行意义            | 依赖 LLM 判断 + 经验阈值（3-5个子任务为宜）       |
+| 结果聚合   | 多个子 agent 结果如何合并为连贯回答          | 主 agent 做综合推理 / 结构化合并模板           |
+| 资源控制   | 防止子 agent 无限膨胀（递归创建子 Agent）    | 并发数限制 + 超时 + 深度限制 + 工具权限收窄        |
+| 状态一致性  | 子 agent 之间需要共享信息时怎么办           | 通过主 agent 转发 / 共享工具注册表 / 共享内存区    |
+| 错误传播   | 一个 Agent 的错误输出被下游 Agent 放大     | 每步输出验证 + 错误时回退重试 + 置信度传递          |
+| 成本控制   | 多 Agent 的 Token 消耗是单 Agent 的数倍 | 按需使用（简单任务不拆分）+ 弱模型做 Router/Worker |
+
 
 ## Harness：让 Agent 稳定运行
 
@@ -1484,7 +1599,21 @@ Harness（直译"挽具/安全带"）在 Agent 领域特指：包裹在 Agent �
 
 这个概念在 2024-2025 年随着 Agent 从 Demo 走向生产而被正式提出。代表性开源项目：
 
-<table><colgroup><col width="134"> <col width="139"> <col width="396"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>项目</p></td><td rowspan="1" colspan="1"><p>组织</p></td><td rowspan="1" colspan="1"><p>定位</p></td><td rowspan="1" colspan="1"><p>GitHub Stars</p></td></tr><tr><td rowspan="1" colspan="1"><p>DeerFlow</p></td><td rowspan="1" colspan="1"><p>ByteDance</p></td><td rowspan="1" colspan="1"><p>"Super agent harness" — 编排子 Agent + 记忆 + 沙箱</p></td><td rowspan="1" colspan="1"><p>68k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>DeepAgents</p></td><td rowspan="1" colspan="1"><p>LangChain</p></td><td rowspan="1" colspan="1"><p>"Batteries-included agent harness" — 文件系统/子Agent/上下文/记忆</p></td><td rowspan="1" colspan="1"><p>23k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>SWE-agent</p></td><td rowspan="1" colspan="1"><p>Princeton NLP</p></td><td rowspan="1" colspan="1"><p>代码修复 Agent + YAML 驱动的可配置 harness</p></td><td rowspan="1" colspan="1"><p>19k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>Parlant</p></td><td rowspan="1" colspan="1"><p>Emcie</p></td><td rowspan="1" colspan="1"><p>"Interaction control harness" — 上下文工程 + 行为治理</p></td><td rowspan="1" colspan="1"><p>18k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>OpenHarness</p></td><td rowspan="1" colspan="1"><p>HKUDS (港大)</p></td><td rowspan="1" colspan="1"><p>"One command to launch all agent harnesses" — CLI agent 通用运行时</p></td><td rowspan="1" colspan="1"><p>12k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>Hive</p></td><td rowspan="1" colspan="1"><p>Aden</p></td><td rowspan="1" colspan="1"><p>"Multi-Agent Harness for Production" — 状态管理 + 故障恢复</p></td><td rowspan="1" colspan="1"><p>10k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>desloppify</p></td><td rowspan="1" colspan="1"><p>peteromallet</p></td><td rowspan="1" colspan="1"><p>Agent harness for code quality — 扫描/修复循环 + 防作弊评分</p></td><td rowspan="1" colspan="1"><p>3k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>CascadeFlow</p></td><td rowspan="1" colspan="1"><p>Lemony AI</p></td><td rowspan="1" colspan="1"><p>"Runtime Intelligence Layer" — 成本/延迟/质量实时优化</p></td><td rowspan="1" colspan="1"><p>2k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>Harmonist</p></td><td rowspan="1" colspan="1"><p>GammaLab</p></td><td rowspan="1" colspan="1"><p>协议强制执行作为机械门控 (186 agents, 0 运行时依赖)</p></td><td rowspan="1" colspan="1"><p>2k+</p></td></tr><tr><td rowspan="1" colspan="1"><p>saifctl</p></td><td rowspan="1" colspan="1"><p>Safe AI Factory</p></td><td rowspan="1" colspan="1"><p>"Safety harness" — 收敛循环 + Gate/Reviewer/Holdout 三验证</p></td><td rowspan="1" colspan="1"><p>新兴</p></td></tr><tr><td rowspan="1" colspan="1"><p>avakill</p></td><td rowspan="1" colspan="1"><p>log-bell</p></td><td rowspan="1" colspan="1"><p>"Safety firewall" — 在工具执行前拦截并执行 YAML 策略</p></td><td rowspan="1" colspan="1"><p>新兴</p></td></tr></tbody></table>
+
+| 项目          | 组织              | 定位                                                            | GitHub Stars |
+| ----------- | --------------- | ------------------------------------------------------------- | ------------ |
+| DeerFlow    | ByteDance       | "Super agent harness" — 编排子 Agent + 记忆 + 沙箱                   | 68k+         |
+| DeepAgents  | LangChain       | "Batteries-included agent harness" — 文件系统/子Agent/上下文/记忆       | 23k+         |
+| SWE-agent   | Princeton NLP   | 代码修复 Agent + YAML 驱动的可配置 harness                              | 19k+         |
+| Parlant     | Emcie           | "Interaction control harness" — 上下文工程 + 行为治理                  | 18k+         |
+| OpenHarness | HKUDS (港大)      | "One command to launch all agent harnesses" — CLI agent 通用运行时 | 12k+         |
+| Hive        | Aden            | "Multi-Agent Harness for Production" — 状态管理 + 故障恢复            | 10k+         |
+| desloppify  | peteromallet    | Agent harness for code quality — 扫描/修复循环 + 防作弊评分              | 3k+          |
+| CascadeFlow | Lemony AI       | "Runtime Intelligence Layer" — 成本/延迟/质量实时优化                   | 2k+          |
+| Harmonist   | GammaLab        | 协议强制执行作为机械门控 (186 agents, 0 运行时依赖)                            | 2k+          |
+| saifctl     | Safe AI Factory | "Safety harness" — 收敛循环 + Gate/Reviewer/Holdout 三验证           | 新兴           |
+| avakill     | log-bell        | "Safety firewall" — 在工具执行前拦截并执行 YAML 策略                       | 新兴           |
+
 
 可以看到一个明确趋势：Harness 正在成为 Agent 架构中与 Agent Loop 平级的一等公民。如果 Agent Loop 是"大脑"，Harness 就是"免疫系统 + 骨骼 + 皮肤"。
 
@@ -1574,7 +1703,7 @@ Harness是一个统一的运行时壳，所有非核心决策逻辑的运行时�
 
 import random
 
-def exponential\_backoff\_with\_jitter(attempt: int, base: float = 1.0) -> float:
+def exponential_backoff_with_jitter(attempt: int, base: float = 1.0) -> float:
 
 """
 
@@ -1582,17 +1711,17 @@ def exponential\_backoff\_with\_jitter(attempt: int, base: float = 1.0) -> float
 
 """
 
-exponential = base \* (2 \*\* attempt) # 1s, 2s, 4s, 8s...
+exponential = base * (2 ** attempt) # 1s, 2s, 4s, 8s...
 
-jitter = random.uniform(0, exponential \* 0.5) # 0~50% 随机偏移
+jitter = random.uniform(0, exponential * 0.5) # 0~50% 随机偏移
 
 return min(exponential + jitter, 60.0) # 上限 60s
 
 \# AWS 推荐的 "Full Jitter" 变体 — 更激进的分散
 
-def full\_jitter(attempt: int, base: float = 1.0, cap: float = 60.0) -> float:
+def full_jitter(attempt: int, base: float = 1.0, cap: float = 60.0) -> float:
 
-return random.uniform(0, min(cap, base \* (2 \*\* attempt)))
+return random.uniform(0, min(cap, base * (2 ** attempt)))
 
 真实案例：Anthropic 官方 SDK 内置 2 次自动重试 + 指数退避；OpenAI SDK 默认重试 `429` / `500` / `503` 错误。这些都是 Harness 的最小实现。
 
@@ -1640,7 +1769,14 @@ Parlant 将这个概念提升到了框架设计核心——"getting the right co
 
 各阶段策略对比：
 
-<table><colgroup><col width="150"> <col width="150"> <col width="150"> <col width="150"> <col width="309"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>阶段</p></td><td rowspan="1" colspan="1"><p>触发条件</p></td><td rowspan="1" colspan="1"><p>操作</p></td><td rowspan="1" colspan="1"><p>信息损失</p></td><td rowspan="1" colspan="1"><p>代表实现</p></td></tr><tr><td rowspan="1" colspan="1"><p>阶段1: 预警</p></td><td rowspan="1" colspan="1"><p>60% 窗口</p></td><td rowspan="1" colspan="1"><p>标记冗余区域，准备压缩</p></td><td rowspan="1" colspan="1"><p>无</p></td><td rowspan="1" colspan="1"><p>Claude Code auto-compact</p></td></tr><tr><td rowspan="1" colspan="1"><p>阶段2: 压缩</p></td><td rowspan="1" colspan="1"><p>70% 窗口</p></td><td rowspan="1" colspan="1"><p>LLM 生成结构化摘要替换早期消息</p></td><td rowspan="1" colspan="1"><p>低</p></td><td rowspan="1" colspan="1"><p>LangChain ConversationSummaryMemory</p></td></tr><tr><td rowspan="1" colspan="1"><p>阶段3: 截断</p></td><td rowspan="1" colspan="1"><p>80% 窗口</p></td><td rowspan="1" colspan="1"><p>工具返回只保留摘要，删除原始内容</p></td><td rowspan="1" colspan="1"><p>中</p></td><td rowspan="1" colspan="1"><p>OpenHarness context trim</p></td></tr><tr><td rowspan="1" colspan="1"><p>阶段4: 紧急</p></td><td rowspan="1" colspan="1"><p>90% 窗口</p></td><td rowspan="1" colspan="1"><p>仅保留 system prompt + 最近 3 轮</p></td><td rowspan="1" colspan="1"><p>高</p></td><td rowspan="1" colspan="1"><p>SWE-agent window reset</p></td></tr></tbody></table>
+
+| 阶段      | 触发条件   | 操作                         | 信息损失 | 代表实现                                |
+| ------- | ------ | -------------------------- | ---- | ----------------------------------- |
+| 阶段1: 预警 | 60% 窗口 | 标记冗余区域，准备压缩                | 无    | Claude Code auto-compact            |
+| 阶段2: 压缩 | 70% 窗口 | LLM 生成结构化摘要替换早期消息          | 低    | LangChain ConversationSummaryMemory |
+| 阶段3: 截断 | 80% 窗口 | 工具返回只保留摘要，删除原始内容           | 中    | OpenHarness context trim            |
+| 阶段4: 紧急 | 90% 窗口 | 仅保留 system prompt + 最近 3 轮 | 高    | SWE-agent window reset              |
+
 
 Parlant 的创新方法：不同于被动压缩，Parlant 主动做上下文窄化 (Context Narrowing) ——根据当前对话轮次的主题，只注入相关的规则、知识和工具描述，从源头控制 token 消耗。这是从"事后压缩"到"事前精选"的范式转变。
 
@@ -1736,7 +1872,7 @@ Agent 调用外部工具是最大的风险点——因为工具操作有副作�
 
 │ • JSON Schema • 白名单/黑名单 • 大小写归一化 │
 
-│ • 必填参数 • 路径范围限制 • camelCase→snake\_case │
+│ • 必填参数 • 路径范围限制 • camelCase→snake_case │
 
 │ • 类型转换 • 危险操作需审批 • 模糊匹配 (Levenshtein) │
 
@@ -1794,7 +1930,7 @@ match:
 
 tool: "bash"
 
-args\_contains: \["rm -rf", "dd if=", "mkfs"\]
+args_contains: ["rm -rf", "dd if=", "mkfs"]
 
 action: deny
 
@@ -1804,13 +1940,13 @@ message: "Destructive file operation blocked"
 
 match:
 
-tool: "fetch\_url"
+tool: "fetch_url"
 
-args\_match:
+args_match:
 
-url: "^(?!https://(api\\\\.github\\\\.com|.\*\\\\.internal)).\*"
+url: "^(?!https://(api\\\\.github\\\\.com|.*\\\\.internal)).*"
 
-action: ask\_user
+action: ask_user
 
 message: "Agent wants to access external URL: {url}"
 
@@ -1874,7 +2010,16 @@ Agent 面临独特且严峻的安全威胁——间接提示注入 (Indirect Pro
 
 防护策略矩阵：
 
-<table><colgroup><col width="167"> <col width="240"> <col width="200"> <col width="270"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>威胁</p></td><td rowspan="1" colspan="1"><p>检测方法</p></td><td rowspan="1" colspan="1"><p>防护位置</p></td><td rowspan="1" colspan="1"><p>代表方案</p></td></tr><tr><td rowspan="1" colspan="1"><p>间接提示注入</p></td><td rowspan="1" colspan="1"><p>模式匹配 + 语义分类器</p></td><td rowspan="1" colspan="1"><p>工具返回后、送入 LLM 前</p></td><td rowspan="1" colspan="1"><p>Anthropic Constitutional AI</p></td></tr><tr><td rowspan="1" colspan="1"><p>凭证泄漏</p></td><td rowspan="1" colspan="1"><p>正则 (API Key/Token 模式)</p></td><td rowspan="1" colspan="1"><p>输出流过滤</p></td><td rowspan="1" colspan="1"><p>OpenHarness output scrubber</p></td></tr><tr><td rowspan="1" colspan="1"><p>路径穿越</p></td><td rowspan="1" colspan="1"><p>路径规范化 + 白名单</p></td><td rowspan="1" colspan="1"><p>文件操作工具前</p></td><td rowspan="1" colspan="1"><p>SWE-agent chroot</p></td></tr><tr><td rowspan="1" colspan="1"><p>命令注入</p></td><td rowspan="1" colspan="1"><p>Shell 元字符检测</p></td><td rowspan="1" colspan="1"><p>Bash 工具参数清洗</p></td><td rowspan="1" colspan="1"><p>DeerFlow sandbox mode</p></td></tr><tr><td rowspan="1" colspan="1"><p>记忆投毒</p></td><td rowspan="1" colspan="1"><p>内容可信度评估</p></td><td rowspan="1" colspan="1"><p>Memory write 前</p></td><td rowspan="1" colspan="1"><p>Claude Code memory validation</p></td></tr><tr><td rowspan="1" colspan="1"><p>System Prompt 泄漏</p></td><td rowspan="1" colspan="1"><p>输出标签检测 + 围栏去除</p></td><td rowspan="1" colspan="1"><p>流式输出管线</p></td><td rowspan="1" colspan="1"><p>Parlant response filtering</p></td></tr></tbody></table>
+
+| 威胁               | 检测方法                  | 防护位置           | 代表方案                          |
+| ---------------- | --------------------- | -------------- | ----------------------------- |
+| 间接提示注入           | 模式匹配 + 语义分类器          | 工具返回后、送入 LLM 前 | Anthropic Constitutional AI   |
+| 凭证泄漏             | 正则 (API Key/Token 模式) | 输出流过滤          | OpenHarness output scrubber   |
+| 路径穿越             | 路径规范化 + 白名单           | 文件操作工具前        | SWE-agent chroot              |
+| 命令注入             | Shell 元字符检测           | Bash 工具参数清洗    | DeerFlow sandbox mode         |
+| 记忆投毒             | 内容可信度评估               | Memory write 前 | Claude Code memory validation |
+| System Prompt 泄漏 | 输出标签检测 + 围栏去除         | 流式输出管线         | Parlant response filtering    |
+
 
 深层防御原则：安全不能只靠一层。业界最佳实践是 Defense in Depth——输入、处理、输出三层各设独立检测，任何一层失守，后面的层仍能拦截。
 
@@ -1936,7 +2081,17 @@ DeerFlow 同时支持 LangSmith 和 Langfuse 两种追踪后端，体现了可�
 
 从上述开源实践中可以提炼出 7 条核心设计原则：
 
-<table><colgroup><col width="166"> <col width="295"> <col width="348"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>原则</p></td><td rowspan="1" colspan="1"><p>含义</p></td><td rowspan="1" colspan="1"><p>反面教材</p></td></tr><tr><td rowspan="1" colspan="1"><p>分类先于处理</p></td><td rowspan="1" colspan="1"><p>必须先诊断错误类型，才能选正确策略</p></td><td rowspan="1" colspan="1"><p>所有错误一律重试 3 次</p></td></tr><tr><td rowspan="1" colspan="1"><p>渐进式降级</p></td><td rowspan="1" colspan="1"><p>从温和到激进，逐级响应</p></td><td rowspan="1" colspan="1"><p>token 超限直接清空历史</p></td></tr><tr><td rowspan="1" colspan="1"><p>静默优先</p></td><td rowspan="1" colspan="1"><p>能内部恢复的异常不暴露给用户</p></td><td rowspan="1" colspan="1"><p>每次 retry 都弹 toast</p></td></tr><tr><td rowspan="1" colspan="1"><p>预算有限</p></td><td rowspan="1" colspan="1"><p>任何自动恢复都必须有上限</p></td><td rowspan="1" colspan="1"><p>无限重试直到成功</p></td></tr><tr><td rowspan="1" colspan="1"><p>可观测</p></td><td rowspan="1" colspan="1"><p>静默≠无记录，所有操作必须可审计</p></td><td rowspan="1" colspan="1"><p>静默吞掉异常无日志</p></td></tr><tr><td rowspan="1" colspan="1"><p>最小权限</p></td><td rowspan="1" colspan="1"><p>工具权限按需授予，危险操作需审批</p></td><td rowspan="1" colspan="1"><p>所有工具默认全权执行</p></td></tr><tr><td rowspan="1" colspan="1"><p>声明式策略</p></td><td rowspan="1" colspan="1"><p>安全规则外置为配置，非硬编码</p></td><td rowspan="1" colspan="1"><p>每个安全检查写死在代码里</p></td></tr></tbody></table>
+
+| 原则     | 含义                | 反面教材              |
+| ------ | ----------------- | ----------------- |
+| 分类先于处理 | 必须先诊断错误类型，才能选正确策略 | 所有错误一律重试 3 次      |
+| 渐进式降级  | 从温和到激进，逐级响应       | token 超限直接清空历史    |
+| 静默优先   | 能内部恢复的异常不暴露给用户    | 每次 retry 都弹 toast |
+| 预算有限   | 任何自动恢复都必须有上限      | 无限重试直到成功          |
+| 可观测    | 静默≠无记录，所有操作必须可审计  | 静默吞掉异常无日志         |
+| 最小权限   | 工具权限按需授予，危险操作需审批  | 所有工具默认全权执行        |
+| 声明式策略  | 安全规则外置为配置，非硬编码    | 每个安全检查写死在代码里      |
+
 
 ### Harness 的演进趋势
 
@@ -1958,7 +2113,14 @@ Harness 是 Agent 从"能跑"到"能用"的关键分水岭。一个没有 Harnes
 
 常见场景对比：
 
-<table><colgroup><col width="250"> <col width="279"> <col width="331"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>场景</p></td><td rowspan="1" colspan="1"><p>服务端 Agent（传统）</p></td><td rowspan="1" colspan="1"><p>Claw Agent（本地）</p></td></tr><tr><td rowspan="1" colspan="1"><p>"帮我修复这个 bug"</p></td><td rowspan="1" colspan="1"><p>"你需要在第 15 行改成..." → 用户手动改</p></td><td rowspan="1" colspan="1"><p>直接编辑文件 → 运行测试 → 确认修复</p></td></tr><tr><td rowspan="1" colspan="1"><p>"帮我部署到测试环境"</p></td><td rowspan="1" colspan="1"><p>"执行以下命令:..." → 用户复制粘贴</p></td><td rowspan="1" colspan="1"><p>直接执行 docker build → push → deploy</p></td></tr><tr><td rowspan="1" colspan="1"><p>"帮我创建一个 PR"</p></td><td rowspan="1" colspan="1"><p>"去 GitHub 创建 PR，标题是..." → 用户操作</p></td><td rowspan="1" colspan="1"><p>git add → commit → push → gh pr create</p></td></tr><tr><td rowspan="1" colspan="1"><p>"帮我查个 bug 原因"</p></td><td rowspan="1" colspan="1"><p>"可能是XX问题" → 用户自己去看日志</p></td><td rowspan="1" colspan="1"><p>grep 日志 → 读代码 → 定位根因 → 给出结论</p></td></tr></tbody></table>
+
+| 场景            | 服务端 Agent（传统）                  | Claw Agent（本地）                         |
+| ------------- | ------------------------------ | -------------------------------------- |
+| "帮我修复这个 bug"  | "你需要在第 15 行改成..." → 用户手动改      | 直接编辑文件 → 运行测试 → 确认修复                   |
+| "帮我部署到测试环境"   | "执行以下命令:..." → 用户复制粘贴          | 直接执行 docker build → push → deploy      |
+| "帮我创建一个 PR"   | "去 GitHub 创建 PR，标题是..." → 用户操作 | git add → commit → push → gh pr create |
+| "帮我查个 bug 原因" | "可能是XX问题" → 用户自己去看日志           | grep 日志 → 读代码 → 定位根因 → 给出结论            |
+
 
 关键差异：Claw Agent 消除了"告诉用户怎么做"和"用户实际执行"之间的断层——它直接动手做，形成完整的"决策-执行-验证"闭环。
 
@@ -1968,17 +2130,11 @@ Harness 是 Agent 从"能跑"到"能用"的关键分水岭。一个没有 Harnes
 
 回顾整条技术线，本质上是在解决三个递进的问题：
 
-1.
+1. LLM 知道什么（知识 → 记忆 + RAG 扩展）
 
-LLM 知道什么（知识 → 记忆 + RAG 扩展）
+2. LLM 能做什么（能力 → function call + MCP + skill）
 
-2.
-
-LLM 能做什么（能力 → function call + MCP + skill）
-
-3.
-
-LLM 怎么做得好（质量 → agent loop + multi agent + harness）
+3. LLM 怎么做得好（质量 → agent loop + multi agent + harness）
 
 这三层问题不是一次性解决的，而是随着实践不断暴露出新痛点，再催生新方案。下面进入实践部分，看看这些理论在项目中是怎么落地的。
 
@@ -2058,7 +2214,7 @@ LLM 怎么做得好（质量 → agent loop + multi agent + harness）
 
 │ │ ★ THINK: 调用 LLM │ │
 
-│ │ \_api\_call\_with\_retry(messages, tools) │ │
+│ │ _api_call_with_retry(messages, tools) │ │
 
 │ │ │ │
 
@@ -2086,13 +2242,13 @@ class AgentLoop:
 
 def run(self, messages, tools) -> Generator:
 
-budget = IterationBudget(self.\_max\_iterations) # 保障①: 迭代预算
+budget = IterationBudget(self._max_iterations) # 保障①: 迭代预算
 
 while budget.consume():
 
 \# 保障②: 可中断
 
-if self.\_interrupt\_requested:
+if self._interrupt_requested:
 
 yield {"type": "interrupted"}
 
@@ -2100,25 +2256,25 @@ return
 
 \# 保障③: 上下文压缩
 
-messages = self.\_check\_and\_compress(messages)
+messages = self._check_and_compress(messages)
 
 \# 记忆预取注入
 
-prefetch\_context = self.\_memory.prefetch\_all(user\_query)
+prefetch_context = self._memory.prefetch_all(user_query)
 
 #...注入 <memory-context> 围栏
 
 \# THINK: 调用 LLM（保障④: 错误分类+重试）
 
-response = yield from self.\_api\_call\_with\_retry(messages, tools)
+response = yield from self._api_call_with_retry(messages, tools)
 
 \# 保障⑤: 空响应防护
 
-if not content and not tool\_calls:
+if not content and not tool_calls:
 
-consecutive\_empty += 1
+consecutive_empty += 1
 
-if consecutive\_empty >= 2:
+if consecutive_empty >= 2:
 
 yield {"type": "error", "message": "LLM 连续返回空响应"}
 
@@ -2128,19 +2284,28 @@ continue
 
 \# ACT: 执行工具调用（保障⑥: 名称/参数修复）
 
-if tool\_calls:
+if tool_calls:
 
-yield from self.\_dispatcher.execute\_tool\_calls(tool\_calls, messages)
+yield from self._dispatcher.execute_tool_calls(tool_calls, messages)
 
 continue
 
 \# DONE: 无工具调用 → 最终回答
 
-yield {"type": "final\_answer", "content": content}
+yield {"type": "final_answer", "content": content}
 
 ### 保障及触发条件
 
-<table><colgroup><col width="103"> <col width="196"> <col width="150"> <col width="201"> <col width="237"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>保障</p></td><td rowspan="1" colspan="1"><p>模块</p></td><td rowspan="1" colspan="1"><p>触发条件</p></td><td rowspan="1" colspan="1"><p>行为</p></td><td rowspan="1" colspan="1"><p>代码位置</p></td></tr><tr><td rowspan="1" colspan="1"><p>① 迭代预算</p></td><td rowspan="1" colspan="1"><div><code>IterationBudget</code></div></td><td rowspan="1" colspan="1"><p>达到上限（默认90轮）</p></td><td rowspan="1" colspan="1"><p>生成工作摘要 → 优雅退出</p></td><td rowspan="1" colspan="1"><div><code>loop.py</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>② 可中断</p></td><td rowspan="1" colspan="1"><div><code>_interrupt_requested</code></div></td><td rowspan="1" colspan="1"><p>外部线程设置标志</p></td><td rowspan="1" colspan="1"><p>保存记忆 → 立即退出</p></td><td rowspan="1" colspan="1"><div><code>loop.py</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>③ 上下文压缩</p></td><td rowspan="1" colspan="1"><div><code>ContextCompressor</code></div></td><td rowspan="1" colspan="1"><p>token ≥ 75% 窗口</p></td><td rowspan="1" colspan="1"><p>三步压缩 + 三级降级</p></td><td rowspan="1" colspan="1"><div><code>context_compressor.py</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>④ 错误重试</p></td><td rowspan="1" colspan="1"><div><code>ErrorClassifier</code> + <code>jittered_backoff</code></div></td><td rowspan="1" colspan="1"><p>API 异常</p></td><td rowspan="1" colspan="1"><p>分类 → 重试/压缩/终止</p></td><td rowspan="1" colspan="1"><div><code>error_classifier.py</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>⑤ 空响应防护</p></td><td rowspan="1" colspan="1"><p>连续计数器</p></td><td rowspan="1" colspan="1"><p>连续2次空</p></td><td rowspan="1" colspan="1"><p>注入提示引导 → 超限终止</p></td><td rowspan="1" colspan="1"><div><code>loop.py</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>⑥ 工具修复</p></td><td rowspan="1" colspan="1"><div><code>ToolDispatcher</code></div></td><td rowspan="1" colspan="1"><p>工具名/参数错误</p></td><td rowspan="1" colspan="1"><p>模糊匹配修复 → 重新调用</p></td><td rowspan="1" colspan="1"><div><code>tool_dispatcher.py</code></div></td></tr></tbody></table>
+
+| 保障      | 模块                                     | 触发条件           | 行为            | 代码位置                    |
+| ------- | -------------------------------------- | -------------- | ------------- | ----------------------- |
+| ① 迭代预算  | `IterationBudget`                      | 达到上限（默认90轮）    | 生成工作摘要 → 优雅退出 | `loop.py`               |
+| ② 可中断   | `_interrupt_requested`                 | 外部线程设置标志       | 保存记忆 → 立即退出   | `loop.py`               |
+| ③ 上下文压缩 | `ContextCompressor`                    | token ≥ 75% 窗口 | 三步压缩 + 三级降级   | `context_compressor.py` |
+| ④ 错误重试  | `ErrorClassifier` + `jittered_backoff` | API 异常         | 分类 → 重试/压缩/终止 | `error_classifier.py`   |
+| ⑤ 空响应防护 | 连续计数器                                  | 连续2次空          | 注入提示引导 → 超限终止 | `loop.py`               |
+| ⑥ 工具修复  | `ToolDispatcher`                       | 工具名/参数错误       | 模糊匹配修复 → 重新调用 | `tool_dispatcher.py`    |
+
 
 ---
 
@@ -2150,7 +2315,7 @@ yield {"type": "final\_answer", "content": content}
 
 #### 压缩的触发时机
 
-当 prompt token 达到 context\_length \* 75% 时触发压缩，为什么是 75% 而不是 90%?因为要给 LLM 的回复留空间（completion tokens 也占窗口），加上压缩本身也会调用 LLM（也需要 token），所以要预留 25% 余量。
+当 prompt token 达到 context_length * 75% 时触发压缩，为什么是 75% 而不是 90%?因为要给 LLM 的回复留空间（completion tokens 也占窗口），加上压缩本身也会调用 LLM（也需要 token），所以要预留 25% 余量。
 
 #### 压缩的流程
 
@@ -2162,7 +2327,7 @@ yield {"type": "final\_answer", "content": content}
 
 │ │
 
-│ 输入: \[msg\_0, msg\_1, msg\_2,..., msg\_N\] (N 可能 > 100) │
+│ 输入: [msg_0, msg_1, msg_2,..., msg_N] (N 可能 > 100) │
 
 │ │
 
@@ -2198,17 +2363,17 @@ yield {"type": "final\_answer", "content": content}
 
 │ │ Before: {"role":"tool", "content":"<3000字的文件内容>"} │ │
 
-│ │ After: {"role":"tool", "content":"\[read\_file\] config.py │ │
+│ │ After: {"role":"tool", "content":"[read_file] config.py │ │
 
 │ │ from line 1 (3,000 chars)"} │ │
 
 │ │ │ │
 
-│ │ Before: {"tool\_calls":\[{..."arguments":"{\\"content\\":\\"<2000字>\\"│ │
+│ │ Before: {"tool_calls":[{..."arguments":"{\\"content\\":\\"<2000字>\\"│ │
 
-│ │ After: {"tool\_calls":\[{..."arguments":"{\\"content\\":\\"<前200字> │ │
+│ │ After: {"tool_calls":[{..."arguments":"{\\"content\\":\\"<前200字> │ │
 
-│ │...\[truncated\]\\"}" │ │
+│ │...[truncated]\\"}" │ │
 
 │ └──────────────────────────────────────────────────────────────────┘ │
 
@@ -2232,9 +2397,9 @@ yield {"type": "final\_answer", "content": content}
 
 这是压缩中最有技巧的部分——不同工具的输出需要不同的摘要策略，这样可以让模型更好的理解：
 
-\# agent/context\_compressor.py — 工具输出智能摘要
+\# agent/context_compressor.py — 工具输出智能摘要
 
-def \_summarize\_tool\_result(tool\_name: str, tool\_args: str, tool\_content: str) -> str:
+def _summarize_tool_result(tool_name: str, tool_args: str, tool_content: str) -> str:
 
 """为工具调用结果生成信息丰富的单行摘要。
 
@@ -2242,11 +2407,11 @@ def \_summarize\_tool\_result(tool\_name: str, tool\_args: str, tool\_content: s
 
 \- terminal: 开发者最关心"执行了什么命令"和"退出码是什么"
 
-\- read\_file: 关心"读了哪个文件的哪一段"
+\- read_file: 关心"读了哪个文件的哪一段"
 
-\- write\_file: 关心"写了哪个文件，写了多少行"
+\- write_file: 关心"写了哪个文件，写了多少行"
 
-\- search\_files: 关心"搜了什么模式，匹配了几条"
+\- search_files: 关心"搜了什么模式，匹配了几条"
 
 这些信息足以让 LLM 在摘要中回忆起"之前做了什么"，
 
@@ -2256,49 +2421,51 @@ def \_summarize\_tool\_result(tool\_name: str, tool\_args: str, tool\_content: s
 
 try:
 
-args = json.loads(tool\_args) if tool\_args else {}
+args = json.loads(tool_args) if tool_args else {}
 
 except (json.JSONDecodeError, TypeError):
 
 args = {}
 
-content = tool\_content or ""
+content = tool_content or ""
 
-content\_len = len(content)
+content_len = len(content)
 
-line\_count = content.count("\\n") + 1 if content.strip() else 0
+line_count = content.count("\\n") + 1 if content.strip() else 0
 
 \# terminal: 提取命令和退出码
 
-if tool\_name == "terminal":
+```java
+if tool_name == "terminal":
 
 cmd = args.get("command", "")
 
 if len(cmd) > 80:
+```
 
-cmd = cmd\[:77\] + "..." # 长命令截断
+cmd = cmd[:77] + "..." # 长命令截断
 
-\# 从输出中正则提取 exit\_code
+\# 从输出中正则提取 exit_code
 
-exit\_match = re.search(r'"exit\_code"\\s\*:\\s\*(-?\\d+)', content)
+exit_match = re.search(r'"exit_code"\\s*:\\s*(-?\\d+)', content)
 
-exit\_code = exit\_match.group(1) if exit\_match else "?"
+exit_code = exit_match.group(1) if exit_match else "?"
 
-return f"\[terminal\] ran \`{cmd}\` -> exit {exit\_code}, {line\_count} lines output"
+return f"[terminal] ran \`{cmd}\` -> exit {exit_code}, {line_count} lines output"
 
-\# 示例: \[terminal\] ran \`pytest tests/\` -> exit 1, 42 lines output
+\# 示例: [terminal] ran \`pytest tests/\` -> exit 1, 42 lines output
 
-\# read\_file: 提取路径和偏移量
+\# read_file: 提取路径和偏移量
 
-if tool\_name == "read\_file":
+if tool_name == "read_file":
 
 #### LLM 驱动的结构化摘要
 
 Step 3 是压缩的核心——调用 LLM 将修剪后的消息"浓缩"为一段结构化摘要：
 
-\# agent/context\_compressor.py — LLM 摘要生成
+\# agent/context_compressor.py — LLM 摘要生成
 
-def \_generate\_llm\_summary(self, pruned\_middle, previous\_summary, focus\_topic) -> str:
+def _generate_llm_summary(self, pruned_middle, previous_summary, focus_topic) -> str:
 
 """使用 LLM 生成高质量结构化摘要。
 
@@ -2308,13 +2475,13 @@ def \_generate\_llm\_summary(self, pruned\_middle, previous\_summary, focus\_top
 
 生成的摘要信息密度远高于机械截断。
 
-双重保险: LLM 失败时回退到基于规则的简单摘要（\_build\_structured\_summary）。
+双重保险: LLM 失败时回退到基于规则的简单摘要（_build_structured_summary）。
 
 """
 
 \# 准备 summarizer 的 system 指令
 
-system\_instruction = (
+system_instruction = (
 
 "You are a summarization agent creating a context checkpoint. "
 
@@ -2328,25 +2495,24 @@ system\_instruction = (
 
 \# 安全: 绝对不能在摘要中保留密钥
 
-"NEVER include API keys, tokens, passwords — replace with \[REDACTED\]."
+"NEVER include API keys, tokens, passwords — replace with [REDACTED]."
 
 )
 
 \# 将待压缩的消息序列化为文本
 
-conversation\_lines = \[\]
+conversation_lines = []
 
-total\_chars = 0
+total_chars = 0
 
-max\_total\_chars = 15000 # 约 3750 tokens，给 summarizer 留足够的输出空间
+max_total_chars = 15000 # 约 3750 tokens，给 summarizer 留足够的输出空间
 
-for msg in pruned\_middle:
-
+```java
+for msg in pruned_middle:
 role = msg.get("role", "unknown")
-
 content = msg.get("content", "")
-
 if isinstance(content, list):
+```
 
 \# 多模态内容: 只提取文本部分
 
@@ -2362,9 +2528,9 @@ if content:
 
 如果标准压缩后 token 仍然超限（比如单轮工具输出就有 80K token），就需要更激进的降级，提高压缩力度：
 
-\# agent/context\_compressor.py — 三级降级
+\# agent/context_compressor.py — 三级降级
 
-def compress\_with\_fallback(self, messages, todo\_store=None,...) -> list:
+def compress_with_fallback(self, messages, todo_store=None,...) -> list:
 
 """带降级的压缩 — 确保无论如何都能把 token 压到阈值以下。
 
@@ -2380,13 +2546,12 @@ def compress\_with\_fallback(self, messages, todo\_store=None,...) -> list:
 
 \# 第一次尝试: 标准压缩
 
+```java
 result = self.compress(messages)
-
-result\_tokens = sum(\_estimate\_message\_tokens(m) for m in result)
-
-if result\_tokens < self.threshold\_tokens:
-
-return self.\_inject\_todo\_state(result, todo\_store)
+result_tokens = sum(_estimate_message_tokens(m) for m in result)
+if result_tokens < self.threshold_tokens:
+return self._inject_todo_state(result, todo_store)
+```
 
 \# ---- 降级① ----
 
@@ -2394,19 +2559,21 @@ return self.\_inject\_todo\_state(result, todo\_store)
 
 \# 代价: LLM 丢失了一些近期上下文，可能会重复之前做过的事
 
-original\_protect\_last = self.protect\_last\_n
+original_protect_last = self.protect_last_n
 
-self.protect\_last\_n = min(3, self.protect\_last\_n)
+self.protect_last_n = min(3, self.protect_last_n)
 
 result = self.compress(messages)
 
-self.protect\_last\_n = original\_protect\_last # 恢复原值
+self.protect_last_n = original_protect_last # 恢复原值
 
-result\_tokens = sum(\_estimate\_message\_tokens(m) for m in result)
+```java
+result_tokens = sum(_estimate_message_tokens(m) for m in result)
 
-if result\_tokens < self.threshold\_tokens:
+if result_tokens < self.threshold_tokens:
 
-return self.\_inject\_todo\_state(result, todo\_store)
+return self._inject_todo_state(result, todo_store)
+```
 
 \# ---- 降级② ----
 
@@ -2414,15 +2581,15 @@ return self.\_inject\_todo\_state(result, todo\_store)
 
 \# 代价: 早期的工具执行记录完全丢失
 
-filtered = \[\]
+filtered = []
 
-removed\_count = 0
+removed_count = 0
 
 for msg in result:
 
-if msg.get("role") == "tool" and removed\_count < 10:
+if msg.get("role") == "tool" and removed_count < 10:
 
-removed\_count += 1
+removed_count += 1
 
 continue # 跳过（删除）
 
@@ -2430,19 +2597,21 @@ continue # 跳过（删除）
 
 一个容易忽视但很重要的细节——如果消息本身就很长（比如单条 system prompt 占了 60% 窗口），那么反复压缩也压不下来。防抖机制避免浪费 LLM 调用：
 
-\# agent/context\_compressor.py — 压缩防抖
+\# agent/context_compressor.py — 压缩防抖
 
 def compress(self, messages,...):
 
-before\_tokens = sum(\_estimate\_message\_tokens(m) for m in messages)
+before_tokens = sum(_estimate_message_tokens(m) for m in messages)
 
 \# 防抖检查: 最近几次压缩的平均节省率
 
-if self.\_recent\_savings:
+```java
+if self._recent_savings:
 
-avg\_saving = sum(self.\_recent\_savings) / len(self.\_recent\_savings)
+avg_saving = sum(self._recent_savings) / len(self._recent_savings)
 
-if avg\_saving < COMPRESSION\_DEBOUNCE\_THRESHOLD: # 默认 0.1 (10%)
+if avg_saving < COMPRESSION_DEBOUNCE_THRESHOLD: # 默认 0.1 (10%)
+```
 
 \# 平均每次压缩只能节省不到 10%，说明已经压无可压
 
@@ -2454,17 +2623,17 @@ return messages
 
 \# 记录本次压缩的节省比例（用于后续防抖判断）
 
-after\_tokens = sum(\_estimate\_message\_tokens(m) for m in result)
+after_tokens = sum(_estimate_message_tokens(m) for m in result)
 
-if before\_tokens > 0:
+if before_tokens > 0:
 
-saving\_ratio = (before\_tokens - after\_tokens) / before\_tokens
+saving_ratio = (before_tokens - after_tokens) / before_tokens
 
-self.\_recent\_savings.append(saving\_ratio)
+self._recent_savings.append(saving_ratio)
 
-if len(self.\_recent\_savings) > 5:
+if len(self._recent_savings) > 5:
 
-self.\_recent\_savings.pop(0) # 只保留最近 5 次记录
+self._recent_savings.pop(0) # 只保留最近 5 次记录
 
 return result
 
@@ -2474,9 +2643,9 @@ return result
 
 解决方案：压缩完成后，把未完成的 todo 状态作为新消息注入回去：
 
-\# agent/context\_compressor.py — Todo 状态注入
+\# agent/context_compressor.py — Todo 状态注入
 
-def \_inject\_todo\_state(self, messages, todo\_store):
+def _inject_todo_state(self, messages, todo_store):
 
 """在压缩完成后注入未完成的 todo 任务状态。
 
@@ -2490,33 +2659,31 @@ def \_inject\_todo\_state(self, messages, todo\_store):
 
 """
 
-if todo\_store is None:
-
+```java
+if todo_store is None:
 return messages
-
-injection\_text = todo\_store.format\_for\_injection()
-
-if injection\_text:
+injection_text = todo_store.format_for_injection()
+if injection_text:
+```
 
 \# 示例输出:
 
-\# \[Your active task list was preserved across context compression\]
+\# [Your active task list was preserved across context compression]
 
-\# - \[>\] 1. 重写 Harness 理论模块 (in\_progress)
+\# - [>] 1. 重写 Harness 理论模块 (in_progress)
 
-\# - \[ \] 2. 重写 Claw 理论模块 (pending)
+\# - [ ] 2. 重写 Claw 理论模块 (pending)
 
-todo\_message = {"role": "user", "content": injection\_text}
+todo_message = {"role": "user", "content": injection_text}
 
 \# 插入位置: 在尾部保护消息之前
 
-system\_count = sum(1 for m in messages if m.get("role") == "system")
-
-insert\_pos = max(system\_count, len(messages) - self.protect\_last\_n)
-
-messages.insert(insert\_pos, todo\_message)
-
+```java
+system_count = sum(1 for m in messages if m.get("role") == "system")
+insert_pos = max(system_count, len(messages) - self.protect_last_n)
+messages.insert(insert_pos, todo_message)
 return messages
+```
 
 ---
 
@@ -2528,9 +2695,15 @@ API 错误不能一律"重试 3 次"——限流错误需要的是等待，认�
 
 生产场景需要对每一种错误标记出来，如下代码所示，然后对错误进行归类，判断后续应该如何重试。
 
-<table><colgroup><col width="221"> <col width="568"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>错误归类</p></td><td rowspan="1" colspan="1"><p>描述</p></td></tr><tr><td rowspan="1" colspan="1"><p>可重试成功</p></td><td rowspan="1" colspan="1"><p>例如网络抖动、超时等，这种情况可以直接重试成功。</p></td></tr><tr><td rowspan="1" colspan="1"><p>需要修改信息可重试成功</p></td><td rowspan="1" colspan="1"><p>比如数据超长、服务器过载等等，数据超长可以压缩后重试，服务器过载可以切换模型重试。</p></td></tr><tr><td rowspan="1" colspan="1"><p>永远无法成功</p></td><td rowspan="1" colspan="1"><p>比如认证错误，这种需要用户调整完配置才行，否则永远无法成功。</p></td></tr></tbody></table>
 
-\# agent/error\_classifier.py —
+| 错误归类        | 描述                                        |
+| ----------- | ----------------------------------------- |
+| 可重试成功       | 例如网络抖动、超时等，这种情况可以直接重试成功。                  |
+| 需要修改信息可重试成功 | 比如数据超长、服务器过载等等，数据超长可以压缩后重试，服务器过载可以切换模型重试。 |
+| 永远无法成功      | 比如认证错误，这种需要用户调整完配置才行，否则永远无法成功。            |
+
+
+\# agent/error_classifier.py —
 
 class FailoverReason(enum.Enum):
 
@@ -2538,45 +2711,45 @@ class FailoverReason(enum.Enum):
 
 auth = "auth" # 临时认证错误 → 换凭证
 
-auth\_permanent = "auth\_permanent" # 永久认证错误 → 终止
+auth_permanent = "auth_permanent" # 永久认证错误 → 终止
 
 billing = "billing" # 账单耗尽 → 终止
 
-rate\_limit = "rate\_limit" # 限流 → 等待后重试
+rate_limit = "rate_limit" # 限流 → 等待后重试
 
 overloaded = "overloaded" # 服务过载 → 切换提供商
 
-server\_error = "server\_error" # 服务器错误 → 重试
+server_error = "server_error" # 服务器错误 → 重试
 
 timeout = "timeout" # 超时 → 重试
 
-context\_overflow = "context\_overflow" # 上下文溢出 → 压缩
+context_overflow = "context_overflow" # 上下文溢出 → 压缩
 
-model\_not\_found = "model\_not\_found" # 模型不存在 → 终止
+model_not_found = "model_not_found" # 模型不存在 → 终止
 
-format\_error = "format\_error" # 请求格式错误 → 终止
+format_error = "format_error" # 请求格式错误 → 终止
 
-#... 还有 image\_too\_large, thinking\_signature 等
+#... 还有 image_too_large, thinking_signature 等
 
 """错误匹配方式:
 
 Layer 1: HTTP 状态码 (最可靠)
 
-429 → rate\_limit, 402 → billing, 401/403 → auth,
+429 → rate_limit, 402 → billing, 401/403 → auth,
 
-500/502 → server\_error, 503/529 → overloaded
+500/502 → server_error, 503/529 → overloaded
 
 400 → 进一步检查消息内容（可能是上下文溢出）
 
 Layer 2: 错误消息模式匹配 (状态码不可用时)
 
-"context length" / "too many tokens" → context\_overflow
+"context length" / "too many tokens" → context_overflow
 
-"rate limit" / "throttled" → rate\_limit
+"rate limit" / "throttled" → rate_limit
 
 "invalid api key" → auth
 
-包含中文模式: "超过最大长度" → context\_overflow
+包含中文模式: "超过最大长度" → context_overflow
 
 包含云厂商特定模式: "rate increased too quickly" (阿里云限流)
 
@@ -2592,23 +2765,23 @@ ReadTimeout / ConnectError / SSLError → timeout
 
 如下代码所示，在发生异常时，会对异常进行归类，并根据不同类别的异常做不同的后续处理：
 
-\# agent/loop.py — \_api\_call\_with\_retry 方法
+\# agent/loop.py — _api_call_with_retry 方法
 
-def \_api\_call\_with\_retry(self, messages, tools, current\_error\_streak):
+def _api_call_with_retry(self, messages, tools, current_error_streak):
 
 """LLM 调用 + 错误处理 — 循环中最关键的方法。"""
 
 try:
 
-\# 根据是否有流式回调，选择 chat\_stream 或 chat
+\# 根据是否有流式回调，选择 chat_stream 或 chat
 
-if self.\_stream.has\_callback:
+if self._stream.has_callback:
 
-response = self.\_llm.chat\_stream(
+response = self._llm.chat_stream(
 
 messages=messages,
 
-callback=self.\_stream.feed, # 流式 chunk 回调
+callback=self._stream.feed, # 流式 chunk 回调
 
 tools=tools,
 
@@ -2616,49 +2789,58 @@ tools=tools,
 
 else:
 
-response = self.\_llm.chat(messages=messages, tools=tools)
+response = self._llm.chat(messages=messages, tools=tools)
 
 return response
 
-except Exception as api\_error:
+except Exception as api_error:
 
 \# 第一步: 分类错误
 
-classified = classify\_error(api\_error, provider=self.\_llm.platform\_name)
+classified = classify_error(api_error, provider=self._llm.platform_name)
 
 \# 第二步: 根据分类选择恢复策略
 
-if classified.should\_compress:
+if classified.should_compress:
 
 \# 上下文溢出 → 不是重试，而是压缩后重新发送
 
-compressed = self.\_compressor.compress\_with\_fallback(
+compressed = self._compressor.compress_with_fallback(
 
-messages, todo\_store=self.\_todo\_store
+messages, todo_store=self._todo_store
 
 )
 
+```java
 messages.clear()
-
 messages.extend(compressed)
-
 yield {"type": "error", "message": "上下文过大，已自动压缩，正在重试..."}
-
 return None # 返回 None 让主循环重试
-
 if classified.retryable:
+```
 
 \# 瞬态/限流错误 → 等待后重试
 
-delay = jittered\_backoff(
+delay = jittered_backoff(
 
-current\_error\_streak + 1,
+current_error_streak + 1,
 
-base\_delay=RETRY\_BASE\_DELAY, # 默认 5s
+base_delay=RETRY_BASE_DELAY, # 默认 5s
 
 线上部分场景示例：
 
-<table><colgroup><col width="187"> <col width="260"> <col width="183"> <col width="195"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>场景</p></td><td rowspan="1" colspan="1"><p>错误信号</p></td><td rowspan="1" colspan="1"><p>分类结果</p></td><td rowspan="1" colspan="1"><p>恢复动作</p></td></tr><tr><td rowspan="1" colspan="1"><p>OpenAI 限流</p></td><td rowspan="1" colspan="1"><div><code>429 Too Many Requests</code></div></td><td rowspan="1" colspan="1"><div><code>rate_limit</code></div></td><td rowspan="1" colspan="1"><p>等待 + 退避重试</p></td></tr><tr><td rowspan="1" colspan="1"><p>对话太长</p></td><td rowspan="1" colspan="1"><div><code>400 "context length exceeded"</code></div></td><td rowspan="1" colspan="1"><div><code>context_overflow</code></div></td><td rowspan="1" colspan="1"><p>压缩后重试</p></td></tr><tr><td rowspan="1" colspan="1"><p>API Key 过期</p></td><td rowspan="1" colspan="1"><div><code>401 Unauthorized</code></div></td><td rowspan="1" colspan="1"><div><code>auth</code></div></td><td rowspan="1" colspan="1"><p>终止 + 提示用户换 Key</p></td></tr><tr><td rowspan="1" colspan="1"><p>阿里云 DashScope 限流</p></td><td rowspan="1" colspan="1"><div><code>"rate increased too quickly"</code></div></td><td rowspan="1" colspan="1"><div><code>rate_limit</code></div></td><td rowspan="1" colspan="1"><p>等待 + 退避重试</p></td></tr><tr><td rowspan="1" colspan="1"><p>Anthropic 过载</p></td><td rowspan="1" colspan="1"><div><code>529 Overloaded</code></div></td><td rowspan="1" colspan="1"><div><code>overloaded</code></div></td><td rowspan="1" colspan="1"><p>重试 + 可切换提供商</p></td></tr><tr><td rowspan="1" colspan="1"><p>网络断连</p></td><td rowspan="1" colspan="1"><div><code>ConnectionResetError</code></div></td><td rowspan="1" colspan="1"><div><code>timeout</code></div></td><td rowspan="1" colspan="1"><p>退避重试</p></td></tr><tr><td rowspan="1" colspan="1"><p>vLLM 本地推理超限</p></td><td rowspan="1" colspan="1"><div><code>"exceeds the max_model_len"</code></div></td><td rowspan="1" colspan="1"><div><code>context_overflow</code></div></td><td rowspan="1" colspan="1"><p>压缩后重试</p></td></tr><tr><td rowspan="1" colspan="1"><p>模型名拼错</p></td><td rowspan="1" colspan="1"><div><code>404 "model not found"</code></div></td><td rowspan="1" colspan="1"><div><code>model_not_found</code></div></td><td rowspan="1" colspan="1"><p>终止 + 报告</p></td></tr></tbody></table>
+
+| 场景               | 错误信号                            | 分类结果               | 恢复动作           |
+| ---------------- | ------------------------------- | ------------------ | -------------- |
+| OpenAI 限流        | `429 Too Many Requests`         | `rate_limit`       | 等待 + 退避重试      |
+| 对话太长             | `400 "context length exceeded"` | `context_overflow` | 压缩后重试          |
+| API Key 过期       | `401 Unauthorized`              | `auth`             | 终止 + 提示用户换 Key |
+| 阿里云 DashScope 限流 | `"rate increased too quickly"`  | `rate_limit`       | 等待 + 退避重试      |
+| Anthropic 过载     | `529 Overloaded`                | `overloaded`       | 重试 + 可切换提供商    |
+| 网络断连             | `ConnectionResetError`          | `timeout`          | 退避重试           |
+| vLLM 本地推理超限      | `"exceeds the max_model_len"`   | `context_overflow` | 压缩后重试          |
+| 模型名拼错            | `404 "model not found"`         | `model_not_found`  | 终止 + 报告        |
+
 
 ## 记忆模块
 
@@ -2666,15 +2848,21 @@ base\_delay=RETRY\_BASE\_DELAY, # 默认 5s
 
 记忆模块主要包含如下三部分设计。
 
-<table><colgroup><col width="249"> <col width="600"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>模块</p></td><td rowspan="1" colspan="1"><p>介绍</p></td></tr><tr><td rowspan="1" colspan="1"><p>记忆预取注入 (每轮对话前)</p></td><td rowspan="1" colspan="1"><p>将相关记忆以 <memory-context> 围栏注入 messages，流式输出时自动过滤围栏标签，防止回传给用户。</p></td></tr><tr><td rowspan="1" colspan="1"><p>跨会话长期记忆 (持久化文件)</p></td><td rowspan="1" colspan="1"><p>分三个模块分别存不同维度长期记忆，并按需取用：</p>●<p>MEMORY.md (2200字符) — 环境事实、项目约定</p>●<p>USER.md (1375字符) — 用户画像、偏好</p>●<p>db（不限字数）— 会话历史</p></td></tr><tr><td rowspan="1" colspan="1"><p>会话内短期记忆 (messages 数组)</p></td><td rowspan="1" colspan="1"><p>用户会话记忆，超过 75% 上下文窗口触发压缩 ，尽可能都知道短期记忆但不能影响用户体验。</p></td></tr></tbody></table>
+
+| 模块                    | 介绍                                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| 记忆预取注入 (每轮对话前)        | 将相关记忆以 围栏注入 messages，流式输出时自动过滤围栏标签，防止回传给用户。                                                         |
+| 跨会话长期记忆 (持久化文件)       | 分三个模块分别存不同维度长期记忆，并按需取用：● MEMORY.md (2200字符) — 环境事实、项目约定● USER.md (1375字符) — 用户画像、偏好● db（不限字数）— 会话历史 |
+| 会话内短期记忆 (messages 数组) | 用户会话记忆，超过 75% 上下文窗口触发压缩 ，尽可能都知道短期记忆但不能影响用户体验。                                                       |
+
 
 ### 用户画像沉淀
 
 LLM 在对话中识别到值得持久化的信息时，主动调用 `memory` 工具写入。Schema 的 description 中详细说明了何时该保存、保存什么：
 
-\# agent/memory\_manager.py — memory 工具定义
+\# agent/memory_manager.py — memory 工具定义
 
-def create\_memory\_tool\_schema() -> Dict:
+def create_memory_tool_schema() -> Dict:
 
 return {
 
@@ -2708,9 +2896,9 @@ return {
 
 "- 'memory': your notes (environment facts, project conventions)\\n\\n"
 
-"ACTIONS: add, replace (old\_text identifies target), "
+"ACTIONS: add, replace (old_text identifies target), "
 
-"remove (old\_text identifies target).\\n\\n"
+"remove (old_text identifies target).\\n\\n"
 
 "SKIP: trivial info, easily re-discovered facts, raw data dumps."
 
@@ -2726,7 +2914,7 @@ return {
 
 "type": "string",
 
-"enum": \["add", "replace", "remove"\],
+"enum": ["add", "replace", "remove"],
 
 },
 
@@ -2734,7 +2922,7 @@ return {
 
 "type": "string",
 
-"enum": \["memory", "user"\],
+"enum": ["memory", "user"],
 
 },
 
@@ -2744,7 +2932,7 @@ return {
 
 这里是具体的实现逻辑，画像的具体规则交给模型去总结，总结结束后，对进行安全扫码，安全扫码后保存。
 
-def handle\_tool\_call(self, tool\_name: str, args: Dict) -> str:
+def handle_tool_call(self, tool_name: str, args: Dict) -> str:
 
 """处理内存工具调用（add/replace/remove）。返回 JSON 字符串。"""
 
@@ -2752,59 +2940,51 @@ action = args.get("action", "")
 
 target = args.get("target", "memory")
 
-store = self.memory\_store if target == "memory" else self.user\_store
+store = self.memory_store if target == "memory" else self.user_store
 
+```java
 if target not in ("memory", "user"):
 
-return json.dumps({"success": False, "error": f"Invalid target '{target}'. Use 'memory' or 'user'."}, ensure\_ascii=False)
+return json.dumps({"success": False, "error": f"Invalid target '{target}'. Use 'memory' or 'user'."}, ensure_ascii=False)
 
-logger.info("\[FileMemoryProvider\] tool\_call: action=%s, target=%s", action, target)
+logger.info("[FileMemoryProvider] tool_call: action=%s, target=%s", action, target)
+```
 
 \# 安全扫描
 
+```java
 if action in ("add", "replace"):
-
 content = args.get("content", "")
-
-threats = scan\_context\_threats(content)
-
+threats = scan_context_threats(content)
 if threats:
-
-threat\_list = ", ".join(threats)
-
-logger.warning("\[FileMemoryProvider\] 安全拦截: %s", threat\_list)
-
-return json.dumps({"success": False, "error": f"Blocked: content matches threat pattern ({threat\_list})."}, ensure\_ascii=False)
+threat_list = ", ".join(threats)
+logger.warning("[FileMemoryProvider] 安全拦截: %s", threat_list)
+return json.dumps({"success": False, "error": f"Blocked: content matches threat pattern ({threat_list})."}, ensure_ascii=False)
+```
 
 \# 追加画像
 
+```java
 if action == "add":
-
 content = args.get("content", "")
-
 if not content:
-
-return json.dumps({"success": False, "error": "Content is required for 'add' action."}, ensure\_ascii=False)
-
+return json.dumps({"success": False, "error": "Content is required for 'add' action."}, ensure_ascii=False)
 result = store.add(content)
-
 if result.get("success"):
-
-self.\_notify\_memory\_write(action, target, content)
-
-return json.dumps(result, ensure\_ascii=False)
+self._notify_memory_write(action, target, content)
+return json.dumps(result, ensure_ascii=False)
+```
 
 \# 覆盖画像
 
 elif action == "replace":
 
-old\_text = args.get("old\_text", "")
-
+```java
+old_text = args.get("old_text", "")
 content = args.get("content", "")
-
-if not old\_text:
-
-return json.dumps({"success": False, "error": "old\_text is required for 'replace' action."}, ensure\_ascii=False)
+if not old_text:
+return json.dumps({"success": False, "error": "old_text is required for 'replace' action."}, ensure_ascii=False)
+```
 
 ### 记忆围栏：防止记忆被输出
 
@@ -2816,69 +2996,66 @@ return json.dumps({"success": False, "error": "old\_text is required for 'replac
 
 \# 1. 移除上一轮的围栏消息（避免累积）
 
-messages = \[msg for msg in messages if not msg.get("\_is\_memory\_fence")\]
+messages = [msg for msg in messages if not msg.get("_is_memory_fence")]
 
 \# 2. 提取用户最近的查询
 
-user\_query = ""
+user_query = ""
 
 for msg in reversed(messages):
 
 if msg.get("role") == "user":
 
-user\_query = msg.get("content", "") if isinstance(msg.get("content"), str) else ""
+user_query = msg.get("content", "") if isinstance(msg.get("content"), str) else ""
 
 break
 
 \# 3. 预取并注入
 
-if user\_query:
-
-prefetch\_context = self.\_memory.prefetch\_all(user\_query, session\_id=self.\_session\_id)
-
-memory\_block = build\_memory\_context\_block(prefetch\_context)
-
-if memory\_block:
-
+```java
+if user_query:
+prefetch_context = self._memory.prefetch_all(user_query, session_id=self._session_id)
+memory_block = build_memory_context_block(prefetch_context)
+if memory_block:
 messages.append({
-
 "role": "user",
-
-"content": memory\_block,
-
-"\_is\_memory\_fence": True # 标记为围栏消息，压缩前会被移除
+"content": memory_block,
+"_is_memory_fence": True # 标记为围栏消息，压缩前会被移除
 
 })
 
+```
 #### 围栏构建与清洗
 
 预取的记忆被包装在 `<memory-context>` 围栏中，告诉 LLM 这是记忆上下文而非用户消息：
 
-\# agent/memory\_manager.py — 围栏构建
+\# agent/memory_manager.py — 围栏构建
 
-def build\_memory\_context\_block(raw\_context: str) -> str:
+def build_memory_context_block(raw_context: str) -> str:
 
 """将预取的记忆包装在围栏块中。"""
 
-if not raw\_context or not raw\_context.strip():
+if not raw_context or not raw_context.strip():
 
 return ""
 
-clean = sanitize\_context(raw\_context) # 先清洗：剥离可能被嵌套的围栏标签
+clean = sanitize_context(raw_context) # 先清洗：剥离可能被嵌套的围栏标签
 
+```java
 if not clean:
 
 return ""
 
 return (
+```
 
 "<memory-context>\\n"
 
-"\[System note: The following is recalled memory context, "
+"[System note: The following is recalled memory context, "
 
 "NOT new user input. Treat as authoritative reference data — "
 
-"this is the agent's persistent memory and should inform all responses.\]\\n\\n"
+"this is the agent's persistent memory and should inform all responses.]\\n\\n"
 
 f"{clean}\\n"
 
@@ -2890,7 +3067,7 @@ f"{clean}\\n"
 
 LLM 的流式输出可能包含 `<memory-context>` 标签——如果直接展示给用户，内部记忆就泄漏了。 `StreamingContextScrubber` 是一个有状态的流式文本清理器，能处理跨 delta 边界的标签：
 
-\# agent/memory\_manager.py — 流式清洗器
+\# agent/memory_manager.py — 流式清洗器
 
 class StreamingContextScrubber:
 
@@ -2904,53 +3081,53 @@ delta2: "-context>secret data</memory-context> visible text"
 
 """
 
-\_OPEN\_TAG = "<memory-context>"
+_OPEN_TAG = "<memory-context>"
 
-\_CLOSE\_TAG = "</memory-context>"
+_CLOSE_TAG = "</memory-context>"
 
-def \_\_init\_\_(self):
+def __init__(self):
 
-self.\_in\_span: bool = False # 是否正在围栏内部
+self._in_span: bool = False # 是否正在围栏内部
 
-self.\_buf: str = "" # 缓冲区（处理跨 delta 的部分标签）
+self._buf: str = "" # 缓冲区（处理跨 delta 的部分标签）
 
 def feed(self, text: str) -> str:
 
 """返回 text 清理后的可见部分。"""
 
-self.\_buf += text
+self._buf += text
 
-output\_parts = \[\]
+output_parts = []
 
-while self.\_buf:
+while self._buf:
 
-if self.\_in\_span:
+if self._in_span:
 
 \# 在围栏内部：吞掉所有内容直到找到关闭标签
 
-close\_idx = self.\_buf.find(self.\_CLOSE\_TAG)
+close_idx = self._buf.find(self._CLOSE_TAG)
 
-if close\_idx == -1:
+if close_idx == -1:
 
 \# 关闭标签可能还没到，保留尾部缓冲防止截断标签
 
-if len(self.\_buf) > len(self.\_CLOSE\_TAG):
+if len(self._buf) > len(self._CLOSE_TAG):
 
-self.\_buf = self.\_buf\[-(len(self.\_CLOSE\_TAG) - 1):\]
+self._buf = self._buf[-(len(self._CLOSE_TAG) - 1):]
 
 break
 
 \# 找到关闭标签：跳过围栏内容
 
-self.\_buf = self.\_buf\[close\_idx + len(self.\_CLOSE\_TAG):\]
+self._buf = self._buf[close_idx + len(self._CLOSE_TAG):]
 
-self.\_in\_span = False
+self._in_span = False
 
 else:
 
 \# 在围栏外部：正常输出
 
-open\_idx = self.\_buf.find(self.\_OPEN\_TAG)
+open_idx = self._buf.find(self._OPEN_TAG)
 
 为什么需要缓冲区：流式传输中每个 delta 可能只有几个字符。标签 `<memory-context>` 有 16 个字符，完全可能被拆分到多个 delta 中。缓冲区确保在收到足够字符之前不会误输出标签的一部分。
 
@@ -2966,23 +3143,21 @@ open\_idx = self.\_buf.find(self.\_OPEN\_TAG)
 
 def register(
 
+```java
 self,
-
 name: str,
-
-schema: Dict\[str, Any\],
-
+schema: Dict[str, Any],
 handler: Callable,
+```
 
-\*,
+*,
 
-check\_fn: Optional\[Callable\[\[\], bool\]\] = None,
-
-is\_async: bool = False,
-
+```java
+check_fn: Optional[Callable[[], bool]] = None,
+is_async: bool = False,
 toolset: str = "",
-
 description: str = "",
+```
 
 ) -> None:
 
@@ -2996,9 +3171,9 @@ schema: JSON Schema 定义
 
 handler: 执行函数
 
-check\_fn: 可用性检查函数（可选）
+check_fn: 可用性检查函数（可选）
 
-is\_async: handler 是否为异步函数
+is_async: handler 是否为异步函数
 
 toolset: 所属工具集
 
@@ -3006,13 +3181,13 @@ description: 工具描述
 
 """
 
-with self.\_lock:
+with self._lock:
 
-if name in self.\_tools:
+if name in self._tools:
 
-logger.info(f"\[Registry\] 覆盖已有工具: {name}")
+logger.info(f"[Registry] 覆盖已有工具: {name}")
 
-self.\_tools\[name\] = ToolEntry(
+self._tools[name] = ToolEntry(
 
 name=name,
 
@@ -3020,9 +3195,9 @@ schema=schema,
 
 handler=handler,
 
-check\_fn=check\_fn,
+check_fn=check_fn,
 
-is\_async=is\_async,
+is_async=is_async,
 
 toolset=toolset,
 
@@ -3030,23 +3205,25 @@ description=description,
 
 )
 
-self.\_generation += 1
+self._generation += 1
 
-logger.info(f"\[Registry\] 注册工具: {name} (generation={self.\_generation})")
+logger.info(f"[Registry] 注册工具: {name} (generation={self._generation})")
 
-比如加载skill的方法注册，如下所示，重点关注schema和\_handle\_load\_skill。
+比如加载skill的方法注册，如下所示，重点关注schema和_handle_load_skill。
 
-\# load\_skill — 始终注册
+\# load_skill — 始终注册
 
-def \_handle\_load\_skill(\*\*kwargs):
+def _handle_load_skill(**kwargs):
 
-skill\_name = kwargs.get("skill\_name", "")
+```java
+skill_name = kwargs.get("skill_name", "")
 
-return self.loader.load\_skill(skill\_name)
+return self.loader.load_skill(skill_name)
 
 registry.register(
+```
 
-name="load\_skill",
+name="load_skill",
 
 schema={
 
@@ -3054,7 +3231,7 @@ schema={
 
 "function": {
 
-"name": "load\_skill",
+"name": "load_skill",
 
 "description": (
 
@@ -3070,7 +3247,7 @@ schema={
 
 "properties": {
 
-"skill\_name": {
+"skill_name": {
 
 "type": "string",
 
@@ -3080,17 +3257,19 @@ schema={
 
 },
 
-"required": \["skill\_name"\],
+"required": ["skill_name"],
 
+```java
 },
 
 },
 
 },
+```
 
-handler=\_handle\_load\_skill,
+handler=_handle_load_skill,
 
-toolset=SKILLS\_TOOLSET,
+toolset=SKILLS_TOOLSET,
 
 description="Load full instructions of a skill",
 
@@ -3098,129 +3277,125 @@ description="Load full instructions of a skill",
 
 回调代码示例：
 
-先从注册器中调用get\_tool拿到工具，然后调用handler方法执行工具
+先从注册器中调用get_tool拿到工具，然后调用handler方法执行工具
 
-def \_dispatch(self, tool\_name: str, arguments: Dict\[str, Any\]) -> str:
+def _dispatch(self, tool_name: str, arguments: Dict[str, Any]) -> str:
 
 \# 获取工具详情
 
-tool\_entry = registry.get\_tool(tool\_name)
+tool_entry = registry.get_tool(tool_name)
 
-if tool\_entry is None:
+if tool_entry is None:
 
 \## 修复工具
 
-repaired = self.\_repair\_tool\_name(tool\_name)
-
+```java
+repaired = self._repair_tool_name(tool_name)
 if repaired:
+logger.info(f"[ToolDispatcher] 工具名修复: '{tool_name}' → '{repaired}'")
+tool_entry = registry.get_tool(repaired)
+```
 
-logger.info(f"\[ToolDispatcher\] 工具名修复: '{tool\_name}' → '{repaired}'")
+tool_name = repaired
 
-tool\_entry = registry.get\_tool(repaired)
+```java
+if tool_entry is None:
 
-tool\_name = repaired
+available = ", ".join(registry.list_tools())
 
-if tool\_entry is None:
-
-available = ", ".join(registry.list\_tools())
-
-return f"工具 '{tool\_name}' 未找到。可用工具: {available}"
+return f"工具 '{tool_name}' 未找到。可用工具: {available}"
+```
 
 try:
 
 \# 执行工具
 
-if tool\_entry.is\_async:
+if tool_entry.is_async:
 
-from utils.async\_bridge import run\_async
+from utils.async_bridge import run_async
 
-result = run\_async(tool\_entry.handler(\*\*execution\_args))
+result = run_async(tool_entry.handler(**execution_args))
 
 else:
 
-result = tool\_entry.handler(\*\*execution\_args)
+result = tool_entry.handler(**execution_args)
 
-result\_str = str(result) if result is not None else "工具执行完成（无输出）"
+result_str = str(result) if result is not None else "工具执行完成（无输出）"
 
 logger.warning(
 
-f"\[ToolDispatcher\] Tool '{tool\_name}' returned: "
+f"[ToolDispatcher] Tool '{tool_name}' returned: "
 
-f"result\_length={len(result\_str)}, result\_preview='{result\_str\[:300\]}'"
-
-)
-
-return result\_str
-
-except Exception as tool\_err:
-
-error\_msg = (
-
-f"工具 '{tool\_name}' 执行失败: "
-
-f"{type(tool\_err).\_\_name\_\_}: {tool\_err}"
+f"result_length={len(result_str)}, result_preview='{result_str[:300]}'"
 
 )
 
-logger.error(f"\[ToolDispatcher\] {error\_msg}")
+return result_str
 
-return error\_msg
+except Exception as tool_err:
+
+error_msg = (
+
+f"工具 '{tool_name}' 执行失败: "
+
+f"{type(tool_err).__name__}: {tool_err}"
+
+)
+
+logger.error(f"[ToolDispatcher] {error_msg}")
+
+return error_msg
 
 ### mcp工具按需注入
 
 如下代码所示，可以看到，在进行skill加载的时候，会获取skill对应的tools，然后冲mcp工具集合中找到工具并加载到调用大模型的工具列表中。
 
-\# agent/loop.py — load\_skill 触发 MCP 工具注入
+\# agent/loop.py — load_skill 触发 MCP 工具注入
 
-if tc\_name == "load\_skill":
+```java
+if tc_name == "load_skill":
+skill_name = raw_args.get("skill_name", "")
+if skill_name:
+self._dispatcher.inject_skill_mcp_tools(skill_name, tools)
+```
 
-skill\_name = raw\_args.get("skill\_name", "")
+\# agent/tool_dispatcher.py — 注入逻辑（去重后 append）
 
-if skill\_name:
-
-self.\_dispatcher.inject\_skill\_mcp\_tools(skill\_name, tools)
-
-\# agent/tool\_dispatcher.py — 注入逻辑（去重后 append）
-
-def inject\_skill\_mcp\_tools(self, skill\_name: str, tools: List\[Dict\]) -> None:
+def inject_skill_mcp_tools(self, skill_name: str, tools: List[Dict]) -> None:
 
 """将指定 skill 声明的 MCP 工具 schema 注入到 tools 列表。"""
 
-if not self.\_skill\_service:
+if not self._skill_service:
 
 return
 
 try:
 
-mcp\_tool\_defs = self.\_skill\_service.get\_mcp\_tool\_definitions\_for\_skill(skill\_name)
+mcp_tool_defs = self._skill_service.get_mcp_tool_definitions_for_skill(skill_name)
 
-if not mcp\_tool\_defs:
+if not mcp_tool_defs:
 
 return
 
 \# 去重：已经在 tools 列表中的工具不重复注入
 
-existing\_names = {t.get("function", {}).get("name", "") for t in tools}
+existing_names = {t.get("function", {}).get("name", "") for t in tools}
 
-injected = \[\]
+injected = []
 
-for tool\_def in mcp\_tool\_defs:
-
-tool\_func\_name = tool\_def.get("function", {}).get("name", "")
-
-if tool\_func\_name and tool\_func\_name not in existing\_names:
-
-tools.append(tool\_def)
-
-injected.append(tool\_func\_name)
-
+```java
+for tool_def in mcp_tool_defs:
+tool_func_name = tool_def.get("function", {}).get("name", "")
+if tool_func_name and tool_func_name not in existing_names:
+tools.append(tool_def)
+injected.append(tool_func_name)
 if injected:
-
-logger.info(f"按需注入 MCP 工具 for skill '{skill\_name}': {injected}")
+logger.info(f"按需注入 MCP 工具 for skill '{skill_name}': {injected}")
+```
 
 except Exception as exc:
 
-logger.warning(f"注入 MCP 工具失败 for skill '{skill\_name}': {exc}")
+logger.warning(f"注入 MCP 工具失败 for skill '{skill_name}': {exc}")
 
 ### 异常自动修复
 
@@ -3228,19 +3403,19 @@ logger.warning(f"注入 MCP 工具失败 for skill '{skill\_name}': {exc}")
 
 LLM 返回的工具参数经常有格式问题——缺失右括号、surrogate 字符、尾随逗号。 `repair_tool_arguments` 尝试多种策略修复：
 
-\# agent/tool\_dispatcher.py — 参数 JSON 修复
+\# agent/tool_dispatcher.py — 参数 JSON 修复
 
-def repair\_tool\_arguments(raw\_arguments: str) -> dict:
+def repair_tool_arguments(raw_arguments: str) -> dict:
 
 """修复 LLM 返回的工具调用参数 JSON。"""
 
-if not raw\_arguments or not raw\_arguments.strip():
+if not raw_arguments or not raw_arguments.strip():
 
 return {}
 
 \# 策略 1: 清理 surrogate 字符（LLM 有时生成无效 Unicode）
 
-cleaned = raw\_arguments.encode("utf-8", errors="replace").decode("utf-8")
+cleaned = raw_arguments.encode("utf-8", errors="replace").decode("utf-8")
 
 try:
 
@@ -3252,19 +3427,18 @@ pass
 
 \# 策略 2: 补全缺失的右括号
 
+```java
 stripped = cleaned.strip()
+open_braces = stripped.count("{") - stripped.count("}")
+open_brackets = stripped.count("[") - stripped.count("]")
+if open_braces > 0:
+```
 
-open\_braces = stripped.count("{") - stripped.count("}")
+stripped += "}" * open_braces
 
-open\_brackets = stripped.count("\[") - stripped.count("\]")
+if open_brackets > 0:
 
-if open\_braces > 0:
-
-stripped += "}" \* open\_braces
-
-if open\_brackets > 0:
-
-stripped += "\]" \* open\_brackets
+stripped += "]" * open_brackets
 
 try:
 
@@ -3278,17 +3452,17 @@ pass
 
 \# {"key": "value",} ← 删掉最后的逗号
 
-last\_comma = stripped.rfind(",")
+last_comma = stripped.rfind(",")
 
-if last\_comma > 0:
+if last_comma > 0:
 
-candidate = stripped\[:last\_comma\]
+candidate = stripped[:last_comma]
 
-open\_b = candidate.count("{") - candidate.count("}")
+open_b = candidate.count("{") - candidate.count("}")
 
-if open\_b > 0:
+if open_b > 0:
 
-candidate += "}" \* open\_b
+candidate += "}" * open_b
 
 try:
 
@@ -3296,149 +3470,141 @@ MCP 参数自动包装
 
 部分 MCP 工具的 inputSchema 有嵌套包装（如 `{request: {query: ...}}` ），LLM 常常展平为 `{query: ...}` 。系统自动检测并包装：
 
-\# tools/mcp\_service.py — 检测展平参数，自动包装
+\# tools/mcp_service.py — 检测展平参数，自动包装
 
-def \_normalize\_mcp\_arguments(arguments: dict, input\_schema: dict) -> dict:
+def _normalize_mcp_arguments(arguments: dict, input_schema: dict) -> dict:
 
-properties = input\_schema.get("properties", {})
-
+```java
+properties = input_schema.get("properties", {})
 if len(properties)!= 1:
-
 return arguments
-
-wrapper\_key = next(iter(properties))
-
-if properties\[wrapper\_key\].get("type")!= "object":
-
+wrapper_key = next(iter(properties))
+if properties[wrapper_key].get("type")!= "object":
 return arguments
-
-inner\_props = properties\[wrapper\_key\].get("properties", {})
-
-if any(k in inner\_props for k in arguments):
-
-return {wrapper\_key: arguments} # 自动包装
-
+inner_props = properties[wrapper_key].get("properties", {})
+if any(k in inner_props for k in arguments):
+return {wrapper_key: arguments} # 自动包装
 return arguments
+```
 
 工具名模糊修复
 
-LLM 返回的工具名可能拼错（大小写、camelCase/snake\_case 混用、多余后缀）。系统尝试多种变换后做模糊匹配：
+LLM 返回的工具名可能拼错（大小写、camelCase/snake_case 混用、多余后缀）。系统尝试多种变换后做模糊匹配：
 
-\# agent/tool\_dispatcher.py — 多策略工具名修复
+\# agent/tool_dispatcher.py — 多策略工具名修复
 
-def \_repair\_tool\_name(self, tool\_name: str) -> Optional\[str\]:
+def _repair_tool_name(self, tool_name: str) -> Optional[str]:
 
 """尝试修复 LLM 返回的异常工具名称。"""
 
-valid\_names = registry.list\_tools()
+```python
+valid_names = registry.list_tools()
 
-def \_normalize(name): return name.lower().replace("-", "\_").replace(" ", "\_")
+def _normalize(name): return name.lower().replace("-", "_").replace(" ", "_")
 
-def \_camel\_to\_snake(name): return re.sub(r"(?<!^)(?=\[A-Z\])", "\_", name).lower()
+def _camel_to_snake(name): return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+```
 
-def \_strip\_tool\_suffix(name):
+def _strip_tool_suffix(name):
 
+```java
 lower = name.lower()
-
-for suffix in ("\_tool", "-tool", "tool"):
-
+for suffix in ("_tool", "-tool", "tool"):
 if lower.endswith(suffix):
-
-return name\[:-len(suffix)\].rstrip("\_-")
-
+return name[:-len(suffix)].rstrip("_-")
 return None
+```
 
 \# 策略 1: 直接小写匹配
 
-lowered = tool\_name.lower()
+lowered = tool_name.lower()
 
-if lowered in valid\_names: return lowered
+if lowered in valid_names: return lowered
 
-\# 策略 2: 标准化（替换 - 和空格为 \_）
+\# 策略 2: 标准化（替换 - 和空格为 _）
 
-normalized = \_normalize(tool\_name)
+normalized = _normalize(tool_name)
 
-if normalized in valid\_names: return normalized
+if normalized in valid_names: return normalized
 
 \# 策略 3: 生成候选集（交叉组合所有变换）
 
-candidates = {tool\_name, lowered, normalized, \_camel\_to\_snake(tool\_name)}
-
-for \_ in range(2): # 两轮扩展
-
+```java
+candidates = {tool_name, lowered, normalized, _camel_to_snake(tool_name)}
+for _ in range(2): # 两轮扩展
 extra = set()
-
 for candidate in candidates:
-
-stripped = \_strip\_tool\_suffix(candidate)
-
+stripped = _strip_tool_suffix(candidate)
 if stripped:
-
 extra.add(stripped)
-
-extra.add(\_normalize(stripped))
-
-extra.add(\_camel\_to\_snake(stripped))
+extra.add(_normalize(stripped))
+extra.add(_camel_to_snake(stripped))
+```
 
 candidates |= extra
 
 for candidate in candidates:
 
-if candidate and candidate in valid\_names:
+if candidate and candidate in valid_names:
 
 实际修复案例：
 
-<table><colgroup><col width="250"> <col width="250"> <col width="250"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>LLM 返回</p></td><td rowspan="1" colspan="1"><p>实际工具名</p></td><td rowspan="1" colspan="1"><p>修复策略</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>QueryWeather</code></div></td><td rowspan="1" colspan="1"><div><code>query_weather</code></div></td><td rowspan="1" colspan="1"><p>camelToSnake</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>QUERY_WEATHER</code></div></td><td rowspan="1" colspan="1"><div><code>query_weather</code></div></td><td rowspan="1" colspan="1"><p>小写</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>query_weather_tool</code></div></td><td rowspan="1" colspan="1"><div><code>query_weather</code></div></td><td rowspan="1" colspan="1"><p>strip_tool_suffix</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>qeury_weather</code></div></td><td rowspan="1" colspan="1"><div><code>query_weather</code></div></td><td rowspan="1" colspan="1"><p>difflib 模糊匹配</p></td></tr></tbody></table>
+
+| LLM 返回               | 实际工具名           | 修复策略              |
+| -------------------- | --------------- | ----------------- |
+| `QueryWeather`       | `query_weather` | camelToSnake      |
+| `QUERY_WEATHER`      | `query_weather` | 小写                |
+| `query_weather_tool` | `query_weather` | strip_tool_suffix |
+| `qeury_weather`      | `query_weather` | difflib 模糊匹配      |
+
 
 ### 进度预览：给用户可读的执行状态
 
 工具执行过程中，ToolDispatcher 会生成可读的进度预览，通过 callback 推送到前端，让用户感知到调用 什么工具：
 
-\# agent/tool\_dispatcher.py — 工具进度预览
+\# agent/tool_dispatcher.py — 工具进度预览
 
-def \_build\_tool\_preview(self, tool\_name: str, arguments: Dict) -> str:
+def _build_tool_preview(self, tool_name: str, arguments: Dict) -> str:
 
-if tool\_name == "delegate\_task":
+if tool_name == "delegate_task":
 
-goal = arguments.get("goal", "")\[:40\]
+goal = arguments.get("goal", "")[:40]
 
 return f"正在委托子代理执行 — {goal}"
 
-if tool\_name == "memory":
+if tool_name == "memory":
 
-action\_desc = {"add": "正在写入", "replace": "正在更新"}.get(
+action_desc = {"add": "正在写入", "replace": "正在更新"}.get(
 
+```java
 arguments.get("action", ""), "正在操作")
-
-return f"{action\_desc}记忆 {arguments.get('target', '')}"
-
-if tool\_name == "todo":
-
+return f"{action_desc}记忆 {arguments.get('target', '')}"
+if tool_name == "todo":
 todos = arguments.get("todos")
-
 return f"正在更新 {len(todos)} 个任务" if todos else "正在读取任务列表"
+```
 
 \# 搜索类工具：展示搜索关键词
 
-search\_tools = {
+search_tools = {
 
 "searchDocChunk": ("query", "正在搜索文档"),
 
-"web\_search": ("query", "正在搜索网页"),
+"web_search": ("query", "正在搜索网页"),
 
 }
 
-if tool\_name in search\_tools:
+if tool_name in search_tools:
 
-key, desc = search\_tools\[tool\_name\]
+key, desc = search_tools[tool_name]
 
-value = str(arguments.get(key, ""))\[:30\]
+value = str(arguments.get(key, ""))[:30]
 
 return f"{desc} — {value}" if value else desc
 
 \# 通用兜底
 
-return f"正在调用 {tool\_name}"
+return f"正在调用 {tool_name}"
 
 ## SubAgent 设计
 
@@ -3446,7 +3612,7 @@ return f"正在调用 {tool\_name}"
 
 ### 流程示意
 
-主 Agent 调用 delegate\_task(goal, context, role)
+主 Agent 调用 delegate_task(goal, context, role)
 
 │
 
@@ -3454,7 +3620,7 @@ return f"正在调用 {tool\_name}"
 
 ┌─────────────────────────────────────────────────────────────┐
 
-│ delegate\_task │
+│ delegate_task │
 
 │ │
 
@@ -3492,15 +3658,15 @@ return f"正在调用 {tool\_name}"
 
 │ {goal, success, {goal, success, │
 
-│ final\_answer, final\_answer, │
+│ final_answer, final_answer, │
 
-│ tool\_calls\_count, tool\_calls\_count, │
+│ tool_calls_count, tool_calls_count, │
 
-│ iterations\_used, iterations\_used, │
+│ iterations_used, iterations_used, │
 
-│ tokens\_used, tokens\_used, │
+│ tokens_used, tokens_used, │
 
-│ duration\_seconds} duration\_seconds} │
+│ duration_seconds} duration_seconds} │
 
 └──────────────────────┬──────────────────────────────────────┘
 
@@ -3516,7 +3682,7 @@ return f"正在调用 {tool\_name}"
 
 \# agent/delegate.py — 工具定义
 
-def create\_delegate\_tool\_schema() -> Dict\[str, Any\]:
+def create_delegate_tool_schema() -> Dict[str, Any]:
 
 return {
 
@@ -3524,7 +3690,7 @@ return {
 
 "function": {
 
-"name": "delegate\_task",
+"name": "delegate_task",
 
 "description": (
 
@@ -3562,7 +3728,7 @@ return {
 
 "type": "string",
 
-"enum": \["leaf", "orchestrator"\],
+"enum": ["leaf", "orchestrator"],
 
 "description": "leaf 不能再委托，orchestrator 可继续委托",
 
@@ -3572,13 +3738,15 @@ return {
 
 },
 
-"required": \["goal", "context"\],
+"required": ["goal", "context"],
 
+```java
 },
 
 },
 
 }
+```
 
 ### 子 Agent 执行流程
 
@@ -3586,11 +3754,11 @@ return {
 
 \# agent/delegate.py — 子 Agent 创建逻辑
 
-def \_run\_child\_agent(self, goal, context, parent\_llm, role,
+def _run_child_agent(self, goal, context, parent_llm, role,
 
-enabled\_toolsets, disabled\_toolsets,
+enabled_toolsets, disabled_toolsets,
 
-max\_iterations, current\_depth) -> DelegateResult:
+max_iterations, current_depth) -> DelegateResult:
 
 \# 延迟导入避免循环依赖（delegate.py ↔ agent.py 互相引用）
 
@@ -3600,51 +3768,49 @@ from agent.agent import IdleAgent
 
 \# 合并固有限制 + 父 agent 传递的黑名单
 
-child\_disabled\_toolsets = list(DELEGATE\_BLOCKED\_TOOLSETS)
-
-if disabled\_toolsets:
-
-for ts in disabled\_toolsets:
-
-if ts not in child\_disabled\_toolsets:
-
-child\_disabled\_toolsets.append(ts)
+```java
+child_disabled_toolsets = list(DELEGATE_BLOCKED_TOOLSETS)
+if disabled_toolsets:
+for ts in disabled_toolsets:
+if ts not in child_disabled_toolsets:
+child_disabled_toolsets.append(ts)
+```
 
 \# ── 构建被禁用的工具名称列表 ──
 
-blocked\_tools = list(DELEGATE\_BLOCKED\_TOOLS) # \["memory", "clarify"\]
+blocked_tools = list(DELEGATE_BLOCKED_TOOLS) # ["memory", "clarify"]
 
 if role == "leaf":
 
-blocked\_tools.append("delegate\_task") # leaf 不能再委托
+blocked_tools.append("delegate_task") # leaf 不能再委托
 
 \# ── 构建子 agent 身份提示词 ──
 
-\# 作为 custom\_identity 传入，让 build\_system\_prompt 正常流程运行
+\# 作为 custom_identity 传入，让 build_system_prompt 正常流程运行
 
-\# 这样 skill 索引会由 prompt\_builder 自动注入
+\# 这样 skill 索引会由 prompt_builder 自动注入
 
-child\_identity = (
+child_identity = (
 
 f"你是一个子代理，负责完成以下特定任务。\\n\\n"
 
-f"{DELEGATE\_EXECUTION\_DISCIPLINE}\\n\\n" # 执行纪律
+f"{DELEGATE_EXECUTION_DISCIPLINE}\\n\\n" # 执行纪律
 
 f"## 任务目标\\n{goal}\\n\\n"
 
 f"## 上下文\\n{context}\\n\\n"
 
-f"{DELEGATE\_WORK\_BOUNDARIES}\\n\\n" # 工作边界
+f"{DELEGATE_WORK_BOUNDARIES}\\n\\n" # 工作边界
 
-f"{DELEGATE\_RESULT\_FORMAT}\\n\\n" # 结果格式要求
+f"{DELEGATE_RESULT_FORMAT}\\n\\n" # 结果格式要求
 
 f"## 技术约束\\n"
 
 f"- 角色: {role}\\n"
 
-f"- 最大迭代次数: {max\_iterations}\\n"
+f"- 最大迭代次数: {max_iterations}\\n"
 
-f"- 禁止使用的工具: {', '.join(blocked\_tools)}\\n"
+f"- 禁止使用的工具: {', '.join(blocked_tools)}\\n"
 
 f"- 完成任务后立即给出最终回答\\n"
 
@@ -3662,17 +3828,17 @@ goal: str # 子任务目标
 
 success: bool # 是否成功完成
 
-final\_answer: str = "" # 子 agent 的最终回答
+final_answer: str = "" # 子 agent 的最终回答
 
-error: Optional\[str\] = None # 失败时的错误信息
+error: Optional[str] = None # 失败时的错误信息
 
-tool\_calls\_count: int = 0 # 使用了多少次工具
+tool_calls_count: int = 0 # 使用了多少次工具
 
-iterations\_used: int = 0 # 消耗了多少次迭代
+iterations_used: int = 0 # 消耗了多少次迭代
 
-tokens\_used: int = 0 # 消耗了多少 token
+tokens_used: int = 0 # 消耗了多少 token
 
-duration\_seconds: float = 0.0 # 耗时（秒）
+duration_seconds: float = 0.0 # 耗时（秒）
 
 为什么要记录这些指标：主 Agent 需要这些信息来判断子任务的质量。如果一个子 Agent 用了 50 次迭代（预算耗尽）但声称成功，主 Agent 应该怀疑结果的完整性。这些指标也会展示在结果摘要中，帮助用户了解执行效率。
 
@@ -3680,7 +3846,14 @@ duration\_seconds: float = 0.0 # 耗时（秒）
 
 防止子agent无限扩展占用太多资源，主要从如下四个维度控制：
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="343"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>控制维度</p></td><td rowspan="1" colspan="1"><p>默认值</p></td><td rowspan="1" colspan="1"><p>目的</p></td><td rowspan="1" colspan="1"><p>实现方式</p></td></tr><tr><td rowspan="1" colspan="1"><p>并发控制</p></td><td rowspan="1" colspan="1"><p>最多 3 个子 agent</p></td><td rowspan="1" colspan="1"><p>防止 API 并发耗尽</p></td><td rowspan="1" colspan="1"><div><code>ThreadPoolExecutor(max_workers=3)</code> + <code>_active_count</code> 计数器</div></td></tr><tr><td rowspan="1" colspan="1"><p>迭代预算</p></td><td rowspan="1" colspan="1"><p>子 agent 独立 50 次</p></td><td rowspan="1" colspan="1"><p>不消耗主 agent 配额</p></td><td rowspan="1" colspan="1"><div>独立的 <code>IterationBudget</code> 实例</div></td></tr><tr><td rowspan="1" colspan="1"><p>超时保护</p></td><td rowspan="1" colspan="1"><p>600 秒后强制取消</p></td><td rowspan="1" colspan="1"><p>防止子任务挂死</p></td><td rowspan="1" colspan="1"><div><code>future.result(timeout=600)</code> + <code>FuturesTimeoutError</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>深度限制</p></td><td rowspan="1" colspan="1"><p>最多 1 层委托</p></td><td rowspan="1" colspan="1"><p>防止无限嵌套</p></td><td rowspan="1" colspan="1"><div><code>current_depth >= max_depth</code> 时强制 <code>role="leaf"</code></div></td></tr></tbody></table>
+
+| 控制维度 | 默认值             | 目的            | 实现方式                                                      |
+| ---- | --------------- | ------------- | --------------------------------------------------------- |
+| 并发控制 | 最多 3 个子 agent   | 防止 API 并发耗尽   | `ThreadPoolExecutor(max_workers=3)` + `_active_count` 计数器 |
+| 迭代预算 | 子 agent 独立 50 次 | 不消耗主 agent 配额 | 独立的 `IterationBudget` 实例                                  |
+| 超时保护 | 600 秒后强制取消      | 防止子任务挂死       | `future.result(timeout=600)` + `FuturesTimeoutError`      |
+| 深度限制 | 最多 1 层委托        | 防止无限嵌套        | `current_depth >= max_depth` 时强制 `role="leaf"`            |
+
 
 ### 主子agent权限隔离
 
@@ -3692,7 +3865,7 @@ duration\_seconds: float = 0.0 # 耗时（秒）
 
 │ │
 
-│ 可用: delegate\_task, memory, clarify, load\_skill, MCP 工具, │
+│ 可用: delegate_task, memory, clarify, load_skill, MCP 工具, │
 
 │ todo, 所有内置工具... │
 
@@ -3704,7 +3877,7 @@ duration\_seconds: float = 0.0 # 耗时（秒）
 
 │ │ │ │
 
-│ │ ✗ delegate\_task — 防止递归委托 │ │
+│ │ ✗ delegate_task — 防止递归委托 │ │
 
 │ │ ✗ memory — 防止修改全局持久状态 │ │
 
@@ -3712,9 +3885,9 @@ duration\_seconds: float = 0.0 # 耗时（秒）
 
 │ │ │ │
 
-│ │ ✓ load\_skill — 通过全局 registry 继承 │ │
+│ │ ✓ load_skill — 通过全局 registry 继承 │ │
 
-│ │ ✓ MCP 工具 — 通过 enabled\_toolsets 继承 │ │
+│ │ ✓ MCP 工具 — 通过 enabled_toolsets 继承 │ │
 
 │ │ ✓ todo — 独立的 TodoStore 实例 │ │
 
@@ -3744,7 +3917,7 @@ duration\_seconds: float = 0.0 # 耗时（秒）
 
 │ │
 
-│ 简单任务: Think → Act(query\_weather) → Answer │
+│ 简单任务: Think → Act(query_weather) → Answer │
 
 │ │
 
@@ -3768,9 +3941,9 @@ duration\_seconds: float = 0.0 # 耗时（秒）
 
 todo 的行为规范完全写在工具 description 中，不污染 system prompt，又可以按需进行规划：
 
-\# tools/todo\_tool.py — 工具 schema + handler
+\# tools/todo_tool.py — 工具 schema + handler
 
-TODO\_SCHEMA = {
+TODO_SCHEMA = {
 
 "type": "function",
 
@@ -3796,9 +3969,9 @@ TODO\_SCHEMA = {
 
 "- merge=true: update existing items by id, add new ones\\n\\n"
 
-"Each item: {id, content, status: pending|in\_progress|completed|cancelled}\\n"
+"Each item: {id, content, status: pending|in_progress|completed|cancelled}\\n"
 
-"List order is priority. Only ONE item in\_progress at a time.\\n"
+"List order is priority. Only ONE item in_progress at a time.\\n"
 
 "Mark items completed immediately when done."
 
@@ -3820,35 +3993,30 @@ TODO\_SCHEMA = {
 
 "type": "object",
 
+```java
 "properties": {
 
-"id": {"type": "string"},
+    "id": {"type": "string"},
 
-"content": {"type": "string"},
-
+    "content": {"type": "string"},
 "status": {"type": "string",
-
-"enum": \["pending", "in\_progress",
-
-"completed", "cancelled"\]},
-
+"enum": ["pending", "in_progress",
+"completed", "cancelled"]},
 },
-
-"required": \["id", "content", "status"\],
-
+"required": ["id", "content", "status"],
 },
-
+```
 为什么每次返回完整列表：LLM 没有"记住上次工具调用结果"的可靠能力。如果只返回 diff（"任务 3 已完成"），LLM 很容易忘记其他任务的状态。返回完整列表虽然多用些 tokens，但保证 LLM 在做下一步决策时有全局视角。
 
 ### 纯内存保存任务进度
 
 Todo 的存储设计刻意选择了最简单的方案——纯内存 `list[dict]` ，不需要数据库，不需要文件 IO：
 
-\# tools/todo\_tool.py — TodoStore 核心实现
+\# tools/todo_tool.py — TodoStore 核心实现
 
 \# 合法的任务状态值
 
-VALID\_STATUSES = {"pending", "in\_progress", "completed", "cancelled"}
+VALID_STATUSES = {"pending", "in_progress", "completed", "cancelled"}
 
 class TodoStore:
 
@@ -3860,13 +4028,13 @@ class TodoStore:
 
 \- content: 任务描述
 
-\- status: pending | in\_progress | completed | cancelled
+\- status: pending | in_progress | completed | cancelled
 
 """
 
-def \_\_init\_\_(self):
+def __init__(self):
 
-self.\_items: List\[Dict\[str, str\]\] = \[\]
+self._items: List[Dict[str, str]] = []
 
 为什么是纯内存而不是持久化：Todo 是会话级的——这次对话的任务计划，下次对话不需要。持久化到数据库只会增加复杂度，而且 todo 的状态已经通过 `format_for_injection()` 在上下文压缩时保留了。
 
@@ -3874,9 +4042,9 @@ self.\_items: List\[Dict\[str, str\]\] = \[\]
 
 这是 todo 工具最关键的设计——通过 `merge` 参数支持两种写入语义：
 
-\# tools/todo\_tool.py — 写入逻辑
+\# tools/todo_tool.py — 写入逻辑
 
-def write(self, todos: List\[Dict\[str, Any\]\], merge: bool = False) -> List\[Dict\[str, str\]\]:
+def write(self, todos: List[Dict[str, Any]], merge: bool = False) -> List[Dict[str, str]]:
 
 """写入任务列表。返回写入后的完整列表。"""
 
@@ -3886,7 +4054,7 @@ if not merge:
 
 \# 场景：创建新计划、发现新情况需要推翻重来
 
-self.\_items = \[self.\_validate(t) for t in self.\_dedupe\_by\_id(todos)\]
+self._items = [self._validate(t) for t in self._dedupe_by_id(todos)]
 
 else:
 
@@ -3894,55 +4062,51 @@ else:
 
 \# 场景：完成一步后更新状态，或发现需要追加新步骤
 
-existing = {item\["id"\]: item for item in self.\_items}
-
-for raw\_todo in self.\_dedupe\_by\_id(todos):
-
-item\_id = str(raw\_todo.get("id", "")).strip()
-
-if not item\_id:
+```java
+existing = {item["id"]: item for item in self._items}
+for raw_todo in self._dedupe_by_id(todos):
+item_id = str(raw_todo.get("id", "")).strip()
+if not item_id:
+```
 
 continue
 
-if item\_id in existing:
+if item_id in existing:
 
 \# 只更新 LLM 实际提供的字段（不会意外覆盖其他字段）
 
-if "content" in raw\_todo and raw\_todo\["content"\]:
+```java
+if "content" in raw_todo and raw_todo["content"]:
+existing[item_id]["content"] = str(raw_todo["content"]).strip()
+if "status" in raw_todo and raw_todo["status"]:
+status = str(raw_todo["status"]).strip().lower()
+if status in VALID_STATUSES:
+```
 
-existing\[item\_id\]\["content"\] = str(raw\_todo\["content"\]).strip()
-
-if "status" in raw\_todo and raw\_todo\["status"\]:
-
-status = str(raw\_todo\["status"\]).strip().lower()
-
-if status in VALID\_STATUSES:
-
-existing\[item\_id\]\["status"\] = status
+existing[item_id]["status"] = status
 
 else:
 
 \# 新项——完整验证后追加到末尾
 
-validated = self.\_validate(raw\_todo)
+validated = self._validate(raw_todo)
 
-existing\[validated\["id"\]\] = validated
+existing[validated["id"]] = validated
 
-self.\_items.append(validated)
+self._items.append(validated)
 
 \# 重建列表保持原始顺序
 
 seen: set = set()
 
-rebuilt: List\[Dict\[str, str\]\] = \[\]
+rebuilt: List[Dict[str, str]] = []
 
-for item in self.\_items:
-
-current = existing.get(item\["id"\], item)
-
-if current\["id"\] not in seen:
-
+```java
+for item in self._items:
+current = existing.get(item["id"], item)
+if current["id"] not in seen:
 rebuilt.append(current)
+```
 
 为什么需要 `_dedupe_by_id` ：LLM 有时会在同一个工具调用中发送重复的 id（比如先创建一个任务，然后在同一批次中又更新它的状态）。去重保留最后一个，确保意图得到正确执行。
 
@@ -3950,23 +4114,23 @@ rebuilt.append(current)
 
 TodoStore 是每个 Agent 实例私有的，通过 ToolDispatcher 在运行时注入：
 
-\# agent/tool\_dispatcher.py — store 注入
+\# agent/tool_dispatcher.py — store 注入
 
-def \_dispatch(self, tool\_name: str, arguments: Dict\[str, Any\]) -> str:
+def _dispatch(self, tool_name: str, arguments: Dict[str, Any]) -> str:
 
 #...
 
-if tool\_name == "todo":
+if tool_name == "todo":
 
 \# 将 Agent 实例的私有 TodoStore 注入到 handler 参数中
 
-execution\_args = {\*\*arguments, "store": self.\_todo\_store}
+execution_args = {**arguments, "store": self._todo_store}
 
 else:
 
-execution\_args = arguments
+execution_args = arguments
 
-result = tool\_entry.handler(\*\*execution\_args)
+result = tool_entry.handler(**execution_args)
 
 为什么不用全局单例：如果用全局 TodoStore，主 Agent 和子 Agent 会共享任务列表——子 Agent 完成的任务会影响主 Agent 的计划。每个 Agent 实例持有独立的 TodoStore，实现计划隔离。
 
@@ -3974,85 +4138,82 @@ result = tool\_entry.handler(\*\*execution\_args)
 
 上下文压缩后，未完成的 todo 会被自动注入回 messages。这是确保长任务不会因为 context 管理而"失忆"的关键：
 
-\# tools/todo\_tool.py — 确保计划在压缩后不丢失
+\# tools/todo_tool.py — 确保计划在压缩后不丢失
 
-def format\_for\_injection(self) -> Optional\[str\]:
+def format_for_injection(self) -> Optional[str]:
 
 """渲染任务列表用于上下文压缩后注入。
 
-仅输出 pending 和 in\_progress 的任务——
+仅输出 pending 和 in_progress 的任务——
 
 已完成和已取消的任务会导致 LLM 在压缩后误以为需要重做。
 
 """
 
-if not self.\_items:
+```java
+if not self._items:
 
 return None
 
 markers = {
-
-"completed": "\[x\]",
-
-"in\_progress": "\[>\]",
-
-"pending": "\[ \]",
-
-"cancelled": "\[~\]",
-
+"completed": "[x]",
+"in_progress": "[>]",
+"pending": "[ ]",
+"cancelled": "[~]",
 }
+```
+active_items = [
 
-active\_items = \[
+item for item in self._items
 
-item for item in self.\_items
+if item["status"] in ("pending", "in_progress")
 
-if item\["status"\] in ("pending", "in\_progress")
+]
 
-\]
-
-if not active\_items:
+if not active_items:
 
 return None # 全部完成，不需要注入
 
-lines = \["\[Your active task list was preserved across context compression\]"\]
+lines = ["[Your active task list was preserved across context compression]"]
 
-for item in active\_items:
-
-marker = markers.get(item\["status"\], "\[?\]")
-
-lines.append(f"- {marker} {item\['id'\]}. {item\['content'\]} ({item\['status'\]})")
-
+```java
+for item in active_items:
+marker = markers.get(item["status"], "[?]")
+lines.append(f"- {marker} {item['id']}. {item['content']} ({item['status']})")
 return "\\n".join(lines)
+```
 
 注入时机在 `context_compressor.py` 的 `_inject_todo_state()` 中：
 
-\# agent/context\_compressor.py — 压缩后自动注入 todo 状态
+\# agent/context_compressor.py — 压缩后自动注入 todo 状态
 
-def \_inject\_todo\_state(self, messages: List\[Dict\], todo\_store) -> None:
+def _inject_todo_state(self, messages: List[Dict], todo_store) -> None:
 
 """将未完成的 todo 注入压缩后的 messages。"""
 
-if todo\_store is None:
+if todo_store is None:
 
 return
 
-injection = todo\_store.format\_for\_injection()
+```java
+injection = todo_store.format_for_injection()
 
 if injection:
 
 messages.append({"role": "user", "content": injection})
+```
 
 ### 中断历史任务回复
 
 如果用户的会话被恢复（比如从持久化的消息历史重新加载），TodoStore 需要从历史中恢复状态：
 
-\# agent/tool\_dispatcher.py — 从对话历史恢复 todo 状态
+\# agent/tool_dispatcher.py — 从对话历史恢复 todo 状态
 
-def hydrate\_todo\_store(self, messages: List\[Dict\[str, Any\]\]) -> None:
+def hydrate_todo_store(self, messages: List[Dict[str, Any]]) -> None:
 
 """从对话历史恢复 TodoStore 状态。"""
 
-if self.\_todo\_store.has\_items():
+if self._todo_store.has_items():
 
 return # 已有内容，不覆盖
 
@@ -4072,15 +4233,13 @@ continue
 
 try:
 
+```java
 data = json.loads(content)
-
 todos = data.get("todos")
-
 if isinstance(todos, list):
-
-self.\_todo\_store.write(todos, merge=False)
-
+self._todo_store.write(todos, merge=False)
 return # 找到最近的状态即可
+```
 
 except (json.JSONDecodeError, TypeError, KeyError):
 
@@ -4092,7 +4251,14 @@ continue
 
 采用如下方案有如下优势，对比传统各种agent方案均较优。
 
-<table><colgroup><col width="208"> <col width="250"> <col width="438"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>优势</p></td><td rowspan="1" colspan="1"><p>传统方案</p></td><td rowspan="1" colspan="1"><p>本项目方案</p></td></tr><tr><td rowspan="1" colspan="1"><p>简单任务</p></td><td rowspan="1" colspan="1"><p>也要走 Plan 阶段（浪费）</p></td><td rowspan="1" colspan="1"><p>直接 ReAct 执行，零开销</p></td></tr><tr><td rowspan="1" colspan="1"><p>循环逻辑</p></td><td rowspan="1" colspan="1"><p>需要两套（ReAct loop + Plan loop）</p></td><td rowspan="1" colspan="1"><p>只有一套 ReAct loop</p></td></tr><tr><td rowspan="1" colspan="1"><p>计划调整</p></td><td rowspan="1" colspan="1"><p>需要专门的 re-plan 触发机制</p></td><td rowspan="1" colspan="1"><div><code>todo(merge=False)</code> 随时替换</div></td></tr><tr><td rowspan="1" colspan="1"><p>压缩存活</p></td><td rowspan="1" colspan="1"><p>计划可能被压缩丢失</p></td><td rowspan="1" colspan="1"><div><code>format_for_injection()</code> 自动注入</div></td></tr></tbody></table>
+
+| 优势   | 传统方案                         | 本项目方案                         |
+| ---- | ---------------------------- | ----------------------------- |
+| 简单任务 | 也要走 Plan 阶段（浪费）              | 直接 ReAct 执行，零开销               |
+| 循环逻辑 | 需要两套（ReAct loop + Plan loop） | 只有一套 ReAct loop               |
+| 计划调整 | 需要专门的 re-plan 触发机制           | `todo(merge=False)` 随时替换      |
+| 压缩存活 | 计划可能被压缩丢失                    | `format_for_injection()` 自动注入 |
+
 
 ## Skill 设计
 
@@ -4104,17 +4270,11 @@ continue
 
 一个 agent 可能有 50+ 个工具，如果全部注入 LLM 的 tools 列表：
 
-●
+- context 膨胀：每个工具 schema 约 200-500 tokens，50 个工具就占 10K-25K tokens
 
-context 膨胀：每个工具 schema 约 200-500 tokens，50 个工具就占 10K-25K tokens
+- 选择困难：工具越多，LLM 选对的概率越低（实测超过 20 个工具后准确率明显下降）
 
-●
-
-选择困难：工具越多，LLM 选对的概率越低（实测超过 20 个工具后准确率明显下降）
-
-●
-
-指令冲突：不同场景的操作规范混在一起，LLM 容易串台
+- 指令冲突：不同场景的操作规范混在一起，LLM 容易串台
 
 Skill 的解决思路是：把工具+指令+资源打包成一个"能力包"，按需加载。LLM 平时只看到"这里有 N 个能力可用"（每个约 100 tokens），选中后才展开完整指令和工具。
 
@@ -4130,7 +4290,7 @@ skill/ # skill 根目录
 
 ├── scripts/ # 可选：可执行 Python 脚本
 
-│ └── parse\_trace.py
+│ └── parse_trace.py
 
 ├── references/ # 可选：参考文档（按需加载）
 
@@ -4148,13 +4308,13 @@ description: >
 
 tools:
 
-\- query\_sls\_logs # 声明需要的全局 MCP 工具
+\- query_sls_logs # 声明需要的全局 MCP 工具
 
 metadata:
 
-max\_rounds: 10 # skill 内 ReAct 最大轮次
+max_rounds: 10 # skill 内 ReAct 最大轮次
 
-mcp\_servers: # skill 专属 MCP 服务器（非共享）
+mcp_servers: # skill 专属 MCP 服务器（非共享）
 
 \- name: sls
 
@@ -4168,7 +4328,7 @@ url: https://mcp-sls.example.com/sse
 
 1\. 收集查询信息（时间范围、关键词、traceId）
 
-2\. 调用 query\_sls\_logs 查询日志
+2\. 调用 query_sls_logs 查询日志
 
 3\. 加载 references/error-patterns.md 匹配历史错误模式
 
@@ -4186,13 +4346,13 @@ url: https://mcp-sls.example.com/sse
 
 ### Skill 解析：从文件到对象
 
-\# skill/skills\_loader.py — Skill 类：SKILL.md 的运行时表示
+\# skill/skills_loader.py — Skill 类：SKILL.md 的运行时表示
 
 class Skill:
 
 """一个已解析的 Skill。"""
 
-def \_\_init\_\_(self, directory: str, metadata: dict, instructions: str):
+def __init__(self, directory: str, metadata: dict, instructions: str):
 
 self.directory = directory
 
@@ -4206,35 +4366,35 @@ self.instructions = instructions # SKILL.md 的 Markdown body 部分
 
 \# skill 级 MCP 服务器配置
 
-self.mcp\_servers: list\[dict\] = metadata.get("mcp\_servers", \[\])
+self.mcp_servers: list[dict] = metadata.get("mcp_servers", [])
 
 \# skill 级 ReAct 最大轮次（嵌套在 metadata.metadata 中）
 
-self.max\_rounds: int | None = None
+self.max_rounds: int | None = None
 
-meta\_sub = metadata.get("metadata")
-
-if isinstance(meta\_sub, dict):
-
-raw = meta\_sub.get("max\_rounds")
-
+```java
+meta_sub = metadata.get("metadata")
+if isinstance(meta_sub, dict):
+raw = meta_sub.get("max_rounds")
 if raw is not None:
-
-self.max\_rounds = int(raw)
+self.max_rounds = int(raw)
+```
 
 \# SKILL.md 解析：分离 YAML frontmatter 和 Markdown body
 
 @staticmethod
 
-def \_parse\_skill\_md(filepath: str) -> tuple\[dict, str\]:
+def _parse_skill_md(filepath: str) -> tuple[dict, str]:
 
 with open(filepath, "r", encoding="utf-8") as file:
 
+```java
 content = file.read()
 
 if not content.startswith("---"):
 
 return {}, content
+```
 
 parts = content.split("---", 2) # 按 "---" 分割为三段
 
@@ -4242,11 +4402,11 @@ if len(parts) < 3:
 
 return {}, content
 
-frontmatter\_text = parts\[1\].strip() # 中间段是 YAML
+frontmatter_text = parts[1].strip() # 中间段是 YAML
 
-instructions = parts\[2\].strip() # 最后段是 Markdown
+instructions = parts[2].strip() # 最后段是 Markdown
 
-metadata = yaml.safe\_load(frontmatter\_text) or {}
+metadata = yaml.safe_load(frontmatter_text) or {}
 
 return metadata, instructions
 
@@ -4272,7 +4432,7 @@ return metadata, instructions
 
 │ └───────────────────────────────┬────────────────────────────┘ │
 
-│ │ LLM 判断匹配 → load\_skill() │
+│ │ LLM 判断匹配 → load_skill() │
 
 │ 阶段 2: Load (按需) ▼ │
 
@@ -4280,7 +4440,7 @@ return metadata, instructions
 
 │ │ 返回完整 SKILL.md body (操作手册) │ │
 
-│ │ 触发 MCP 工具注入 (inject\_skill\_mcp\_tools) │ │
+│ │ 触发 MCP 工具注入 (inject_skill_mcp_tools) │ │
 
 │ │ 开销: 500-2000 tokens（仅在需要时） │ │
 
@@ -4292,7 +4452,7 @@ return metadata, instructions
 
 │ ┌────────────────────────────────────────────────────────────┐ │
 
-│ │ read\_skill\_resource("references/error-patterns.md") │ │
+│ │ read_skill_resource("references/error-patterns.md") │ │
 
 │ │ 含路径穿越安全检查 (os.path.realpath 比较) │ │
 
@@ -4304,7 +4464,7 @@ return metadata, instructions
 
 │ ┌────────────────────────────────────────────────────────────┐ │
 
-│ │ run\_skill\_script("scripts/parse\_trace.py", args=\[...\]) │ │
+│ │ run_skill_script("scripts/parse_trace.py", args=[...]) │ │
 
 │ │ subprocess + 30s 超时 + cwd=skill.directory │ │
 
@@ -4312,65 +4472,64 @@ return metadata, instructions
 
 └──────────────────────────────────────────────────────────────────────┘
 
-\# skill/skills\_loader.py — 四阶段完整实现
+\# skill/skills_loader.py — 四阶段完整实现
 
 class SkillsLoader:
 
-def \_\_init\_\_(self, skills\_dirs: list\[str\]):
+def __init__(self, skills_dirs: list[str]):
 
-self.skills\_dirs = skills\_dirs
+self.skills_dirs = skills_dirs
 
-self.skills: dict\[str, Skill\] = {}
+self.skills: dict[str, Skill] = {}
 
-self.\_discover\_skills() # 构造时立即执行阶段 1
+self._discover_skills() # 构造时立即执行阶段 1
 
 \# ═══ 阶段 1: Advertise — 启动时扫描，只提取 name + description ═══
 
-def \_discover\_skills(self):
+def _discover_skills(self):
 
 """扫描所有 skill 目录，解析 SKILL.md 的 frontmatter。"""
 
-for skills\_dir in self.skills\_dirs:
+for skills_dir in self.skills_dirs:
 
-if not os.path.isdir(skills\_dir):
+if not os.path.isdir(skills_dir):
 
 continue
 
-for entry in sorted(os.listdir(skills\_dir)):
-
-skill\_path = os.path.join(skills\_dir, entry)
-
-skill\_md\_path = os.path.join(skill\_path, "SKILL.md")
-
-if not os.path.isdir(skill\_path) or not os.path.isfile(skill\_md\_path):
+```java
+for entry in sorted(os.listdir(skills_dir)):
+skill_path = os.path.join(skills_dir, entry)
+skill_md_path = os.path.join(skill_path, "SKILL.md")
+if not os.path.isdir(skill_path) or not os.path.isfile(skill_md_path):
+```
 
 continue # 没有 SKILL.md 的目录不是 skill
 
 try:
 
-metadata, instructions = self.\_parse\_skill\_md(skill\_md\_path)
+metadata, instructions = self._parse_skill_md(skill_md_path)
 
-skill = Skill(directory=skill\_path, metadata=metadata,
+skill = Skill(directory=skill_path, metadata=metadata,
 
 instructions=instructions)
 
-self.skills\[skill.name\] = skill
+self.skills[skill.name] = skill
 
 except Exception as error:
 
-logging.error(f"\[Skills\] Failed to parse {skill\_md\_path}: {error}")
+logging.error(f"[Skills] Failed to parse {skill_md_path}: {error}")
 
-def get\_advertise\_prompt(self) -> str:
+def get_advertise_prompt(self) -> str:
 
 """生成注入 system prompt 的 skill 摘要（~100 tokens/skill）。"""
 
-lines = \["## Available Skills", "",
+lines = ["## Available Skills", "",
 
 "The following skills are available. When a user's request matches "
 
-"a skill's description, use the \`load\_skill\` tool to load its full "
+"a skill's description, use the \`load_skill\` tool to load its full "
 
-"instructions before proceeding.", ""\]
+"instructions before proceeding.", ""]
 
 for skill in self.skills.values():
 
@@ -4380,41 +4539,41 @@ for skill in self.skills.values():
 
 Skill 系统的工具注册不是"一股脑全注册"，而是按能力有无条件注册——如果没有任何 skill 包含脚本，就不注册 `run_skill_script` 工具，避免给 LLM 无用选项：
 
-\# skill/skill\_service.py — 条件注册的关键逻辑
+\# skill/skill_service.py — 条件注册的关键逻辑
 
 class SkillService:
 
-def register\_tools\_to\_registry(self) -> None:
+def register_tools_to_registry(self) -> None:
 
-\# load\_skill — 始终注册（只要有 skill 就需要加载能力）
+\# load_skill — 始终注册（只要有 skill 就需要加载能力）
 
-registry.register(name="load\_skill", handler=\_handle\_load\_skill,
+registry.register(name="load_skill", handler=_handle_load_skill,
 
-toolset=SKILLS\_TOOLSET,...)
+toolset=SKILLS_TOOLSET,...)
 
-\# read\_skill\_resource — 仅当存在含资源文件的 skill 时注册
+\# read_skill_resource — 仅当存在含资源文件的 skill 时注册
 
-has\_resources = any(
+has_resources = any(
 
-self.loader.has\_resources(name) for name in self.loader.skills
-
-)
-
-if has\_resources:
-
-registry.register(name="read\_skill\_resource",...)
-
-\# run\_skill\_script — 仅当存在含脚本的 skill 时注册
-
-has\_scripts = any(
-
-self.loader.has\_scripts(name) for name in self.loader.skills
+self.loader.has_resources(name) for name in self.loader.skills
 
 )
 
-if has\_scripts:
+if has_resources:
 
-registry.register(name="run\_skill\_script",...)
+registry.register(name="read_skill_resource",...)
+
+\# run_skill_script — 仅当存在含脚本的 skill 时注册
+
+has_scripts = any(
+
+self.loader.has_scripts(name) for name in self.loader.skills
+
+)
+
+if has_scripts:
+
+registry.register(name="run_skill_script",...)
 
 为什么条件注册而不是全部注册：每个注册的工具都会出现在 LLM 的 tools 列表中占用 tokens。如果系统中没有任何 skill 包含脚本， `run_skill_script` 这个工具定义就是纯浪费（约 200 tokens）。条件注册确保 LLM 看到的每个工具都是实际可用的。
 
@@ -4422,23 +4581,23 @@ registry.register(name="run\_skill\_script",...)
 
 如下代码示例可以看到，会根据skill中的内容，判断是否需要加载以及按需加载执行脚本工具、加载资源工具、mcp工具等：
 
-\# skill/skill\_service.py — 四源工具组装
+\# skill/skill_service.py — 四源工具组装
 
-def get\_all\_tools\_for\_skill(self, skill\_name: str) -> list\[dict\]:
+def get_all_tools_for_skill(self, skill_name: str) -> list[dict]:
 
 """构建 skill 的完整工具列表。"""
 
-tools = \[\]
+tools = []
 
-\# ── 来源 1: scoped 原生工具 - run\_script ──
+\# ── 来源 1: scoped 原生工具 - run_script ──
 
 \# 只有当 skill 目录下有 scripts/ 子目录时才提供
 
-if self.loader.has\_scripts(skill\_name):
+if self.loader.has_scripts(skill_name):
 
-scripts = self.loader.list\_scripts(skill\_name) # 列出可用脚本
+scripts = self.loader.list_scripts(skill_name) # 列出可用脚本
 
-scripts\_desc = ", ".join(scripts) if scripts else "scripts/ 目录下的脚本"
+scripts_desc = ", ".join(scripts) if scripts else "scripts/ 目录下的脚本"
 
 tools.append({
 
@@ -4446,9 +4605,9 @@ tools.append({
 
 "function": {
 
-"name": "run\_script", # scoped 命名（不含 skill\_name 参数）
+"name": "run_script", # scoped 命名（不含 skill_name 参数）
 
-"description": f"执行当前 skill 内置的 Python 脚本。可用脚本：{scripts\_desc}",
+"description": f"执行当前 skill 内置的 Python 脚本。可用脚本：{scripts_desc}",
 
 \# 把可用脚本列表写入 description，帮助 LLM 选择正确的脚本
 
@@ -4458,13 +4617,13 @@ tools.append({
 
 })
 
-\# ── 来源 2: scoped 原生工具 - read\_resource ──
+\# ── 来源 2: scoped 原生工具 - read_resource ──
 
-if self.loader.has\_resources(skill\_name):
+if self.loader.has_resources(skill_name):
 
-resources = self.loader.list\_resources(skill\_name)
+resources = self.loader.list_resources(skill_name)
 
-resources\_desc = ", ".join(resources) if resources else "references/ 下的文件"
+resources_desc = ", ".join(resources) if resources else "references/ 下的文件"
 
 tools.append({
 
@@ -4472,9 +4631,9 @@ tools.append({
 
 "function": {
 
-"name": "read\_resource",
+"name": "read_resource",
 
-"description": f"读取当前 skill 的参考文档。可用资源：{resources\_desc}",
+"description": f"读取当前 skill 的参考文档。可用资源：{resources_desc}",
 
 "parameters": {...},
 
@@ -4484,51 +4643,55 @@ tools.append({
 
 \# ── 来源 3: 全局 MCP 工具（SKILL.md 的 tools: 字段引用）──
 
-\# 从 SKILL.md 的 tools: \[query\_sls\_logs\] 字段读取工具名
+\# 从 SKILL.md 的 tools: [query_sls_logs] 字段读取工具名
 
 ### skill调用工具逻辑
 
 当 skill 执行期间 LLM 发起工具调用时， `dispatch_tool_call` 按优先级路由到正确的后端：
 
-\# skill/skill\_service.py — 统一分发路由
+\# skill/skill_service.py — 统一分发路由
 
-def dispatch\_tool\_call(self, skill\_name: str, tool\_name: str, arguments: dict) -> str:
+def dispatch_tool_call(self, skill_name: str, tool_name: str, arguments: dict) -> str:
 
 """统一分发工具调用到正确的后端。"""
 
-\# 优先级 1: scoped 原生工具 - run\_script
+\# 优先级 1: scoped 原生工具 - run_script
 
-if tool\_name == "run\_script":
+```java
+if tool_name == "run_script":
 
-return self.loader.run\_skill\_script(
+return self.loader.run_skill_script(
 
-skill\_name, arguments.get("script\_path", ""), arguments.get("args"))
+skill_name, arguments.get("script_path", ""), arguments.get("args"))
+```
 
-\# 优先级 2: scoped 原生工具 - read\_resource
+\# 优先级 2: scoped 原生工具 - read_resource
 
-if tool\_name == "read\_resource":
+```java
+if tool_name == "read_resource":
 
-return self.loader.read\_skill\_resource(
+return self.loader.read_skill_resource(
 
-skill\_name, arguments.get("resource\_path", ""))
+skill_name, arguments.get("resource_path", ""))
+```
 
 \# 优先级 3: skill 专属 MCP 工具
 
 \# 检查该工具是否属于当前 skill 的专属 MCP 服务器
 
-if tool\_name in self.\_skill\_tool\_to\_client:
+if tool_name in self._skill_tool_to_client:
 
-owner\_skill, client = self.\_skill\_tool\_to\_client\[tool\_name\]
+owner_skill, client = self._skill_tool_to_client[tool_name]
 
-if owner\_skill == skill\_name: # 确认工具归属正确
+if owner_skill == skill_name: # 确认工具归属正确
 
-return run\_async(client.call\_tool(tool\_name, arguments))
+return run_async(client.call_tool(tool_name, arguments))
 
 \# 优先级 4: 全局 MCP 工具（兜底）
 
-return self.mcp\_service.call\_tool(tool\_name, arguments)
+return self.mcp_service.call_tool(tool_name, arguments)
 
-为什么 scoped 优先级最高：scoped 原生工具（run\_script、read\_resource）是 skill 自带的，不依赖外部服务，执行最快且最可靠。如果全局 MCP 恰好有同名工具，scoped 版本应该优先，因为它是 skill 作者特意为这个场景定制的。
+为什么 scoped 优先级最高：scoped 原生工具（run_script、read_resource）是 skill 自带的，不依赖外部服务，执行最快且最可靠。如果全局 MCP 恰好有同名工具，scoped 版本应该优先，因为它是 skill 作者特意为这个场景定制的。
 
 ### 端到端流程：一次 Skill 调用的完整生命周期
 
@@ -4544,21 +4707,21 @@ LLM 看到 system prompt 中的 skill 摘要:
 
 │
 
-▼ LLM 判断匹配 → 调用 load\_skill("log-diagnosis")
+▼ LLM 判断匹配 → 调用 load_skill("log-diagnosis")
 
 │
 
 ▼ 返回完整 SKILL.md body（工作流程、输出格式、边界处理...）
 
-│ 同时触发 inject\_skill\_mcp\_tools → query\_sls\_logs 注入 LLM tools 列表
+│ 同时触发 inject_skill_mcp_tools → query_sls_logs 注入 LLM tools 列表
 
 │
 
 ▼ LLM 按 SKILL.md 中的工作流程执行:
 
-│ 1. 调用 query\_sls\_logs(time\_range="昨天", keyword="ERROR")
+│ 1. 调用 query_sls_logs(time_range="昨天", keyword="ERROR")
 
-│ 2. 调用 read\_resource("references/error-patterns.md")
+│ 2. 调用 read_resource("references/error-patterns.md")
 
 │ 3. 综合分析 → 输出结构化诊断报告
 
@@ -4574,300 +4737,6 @@ Agent 不像传统的 Java 工程——写完、测完、上线，就算交付�
 
 这意味着两件事：
 
-1.
+1. 观测比开发更重要。建立完善的可观测体系（轨迹录制、成功率统计、badcase 自动归因），然后结合真实业务场景持续挖掘退化 case、持续打磨 prompt 和容错逻辑——这不是上线后的"维护"，而是 agent 工程的常态。
 
-观测比开发更重要。建立完善的可观测体系（轨迹录制、成功率统计、badcase 自动归因），然后结合真实业务场景持续挖掘退化 case、持续打磨 prompt 和容错逻辑——这不是上线后的"维护"，而是 agent 工程的常态。
-
-2.
-
-保持对前沿方案的敏感度。这个领域半年一个代际，一个好的架构思路（比如渐进式加载、结构化压缩）往往比堆人力调参有效 10 倍。与其闷头优化旧方案，不如花 20% 的时间看看社区在做什么。
-
-END
-
-前言
-
-agent 理论
-
-起：从时间线看各项技术由来
-
-大模型出现：万能百科全书
-
-记忆出现：让对话连续
-
-问题本质
-
-记忆体系分类
-
-短期记忆：上下文窗口管理
-
-长期记忆：跨会话持久化
-
-市场主流记忆方案对比
-
-记忆系统的高级设计
-
-从记忆到用户画像
-
-从记忆到技能生成（Memory → Skill）
-
-完整转化链路
-
-递进式学习转化
-
-具体示例：从纠正到技能的演化过程
-
-技能转化方式：自动or主动
-
-记忆系统核心挑战与解决思路
-
-RAG 出现：解决信息滞后/缺少业务知识
-
-核心原理
-
-环节一：文档分块（Chunking）
-
-环节二：向量化（Embedding）
-
-环节三：向量存储
-
-环节四：检索优化
-
-高级 RAG 模式
-
-RAG 核心问题与解决方案
-
-RAG 评估体系（RAGAS 框架）
-
-小结
-
-Function Call & MCP 出现：从"说"到"做"
-
-演进历程
-
-Function Calling 原理
-
-MCP 深度解析
-
-Function Calling vs MCP：如何选择
-
-生产中的核心挑战
-
-小结
-
-Agent 出现：开始完成完整任务
-
-Agent 的本质
-
-主流循环范式对比
-
-ReAct（Reasoning + Acting）
-
-Plan-then-Execute
-
-Plan-React 混合
-
-LATS（Language Agent Tree Search）
-
-Reflexion（自反思模式）
-
-范式综合对比
-
-生产中的最佳实践
-
-引出下一个问题
-
-Skill 出现：精准执行任务
-
-问题本质
-
-渐进式加载（Progressive Disclosure）
-
-Token 效率对比
-
-Skill = SOP + 工具 + 资源
-
-Multi-Agent 出现：专家协作，并行探索
-
-单 Agent 的三大困境
-
-Multi-Agent 架构模式
-
-模式一：主从委托（Orchestrator-Worker）
-
-模式二：接力传递（Sequential / Pipeline）
-
-模式三：对等讨论（Peer Discussion / Debate）
-
-模式四：层级分治（Hierarchical / Manager-of-Managers）
-
-模式五：竞争选优（Competition / Voting）
-
-模式六：评估反馈（Generator-Critic / Self-Refinement）
-
-模式七：动态路由（Router / Dispatch）
-
-七种模式综合对比
-
-生产中的组合使用
-
-核心收益
-
-关键设计挑战
-
-Harness：让 Agent 稳定运行
-
-什么是 Agent Harness
-
-为什么需要 Harness —— 从裸奔到防护
-
-Harness 的定位
-
-Harness 的核心子系统
-
-子系统 1：错误分类与恢复
-
-子系统 2：上下文工程 (Context Engineering)
-
-子系统 3：迭代控制 (Iteration Control)
-
-子系统 4：工具治理 (Tool Governance)
-
-子系统 5：安全防护 (Security)
-
-子系统 6：可观测性 (Observability)
-
-Harness 设计原则
-
-Harness 的演进趋势
-
-小结
-
-Claw 出现：每个人的私人秘书
-
-止：终点未到，变化依旧
-
-Agent 实践
-
-项目总览
-
-一句话定位
-
-系统架构
-
-核心 Loop 设计
-
-loop流程
-
-保障及触发条件
-
-上下文压缩详细设计
-
-压缩的触发时机
-
-压缩的流程
-
-工具输出修剪的代码实现
-
-LLM 驱动的结构化摘要
-
-降级策略：解决压缩失败问题
-
-防抖机制
-
-执行计划重新注入，防止被压缩
-
-错误分类与重试详细设计
-
-错误细分归类
-
-分类后的错误具体使用代码示例
-
-记忆模块
-
-概述
-
-用户画像沉淀
-
-记忆围栏：防止记忆被输出
-
-记忆预取注入
-
-围栏构建与清洗
-
-StreamingContextScrubber：防止围栏泄漏
-
-工具模块
-
-通用性抽象设计
-
-工具注册执行流程
-
-mcp工具按需注入
-
-异常自动修复
-
-进度预览：给用户可读的执行状态
-
-SubAgent 设计
-
-流程示意
-
-子agent定义示意
-
-子 Agent 执行流程
-
-子agent资源控制
-
-主子agent权限隔离
-
-ReAct 模式下的 Plan 能力
-
-设计思路：Plan 即工具
-
-todo 工具 Schema：行为规范嵌入 description
-
-纯内存保存任务进度
-
-两种写入模式：替换 vs 合并
-
-store 注入机制
-
-压缩后计划存活机制
-
-中断历史任务回复
-
-设计优势
-
-Skill 设计
-
-核心问题：为什么需要 Skill 系统
-
-SKILL.md 标准（如何定义一个 Skill）
-
-Skill 解析：从文件到对象
-
-四阶段渐进式加载：完整实现
-
-工具注册：条件注册策略
-
-skill工具按需加载
-
-skill调用工具逻辑
-
-端到端流程：一次 Skill 调用的完整生命周期
-
-最后
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+2. 保持对前沿方案的敏感度。这个领域半年一个代际，一个好的架构思路（比如渐进式加载、结构化压缩）往往比堆人力调参有效 10 倍。与其闷头优化旧方案，不如花 20% 的时间看看社区在做什么。

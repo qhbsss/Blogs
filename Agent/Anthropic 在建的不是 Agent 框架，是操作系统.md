@@ -10,31 +10,15 @@ tags:
 ---
 十眠
 
-** 73
 
-** 55
 
-** 5
 
-**
 
-**
 
-[泮圣伟(十眠)](https://ata.atatech.org/users/11000620412)
 
-5月6日发表5月6日更新1.4k浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
-
-** 分享 **
-
-朗读文章45:54
-
-**
 
 > 从 Firecracker 逆向工程到 Agent OS 设计哲学
 
@@ -56,7 +40,7 @@ Managed Agents 沙箱解剖：Firecracker microVM 内部结构
 
 先说 Bitter Lesson 为什么重要。
 
-Anthropic 的工程博客里藏着一个不太起眼的技术细节 \[1\]：Claude Sonnet 4.5 会在感知到上下文窗口极限时过早结束任务，团队内部称之为"context anxiety"。工程师在 Harness 里加了 context resets 来修补。但当他们在 Opus 4.5 上使用同一个 Harness 时，这个行为消失了。那些 resets 变成了多余的负担（原文用词：dead weight）。
+Anthropic 的工程博客里藏着一个不太起眼的技术细节 [1]：Claude Sonnet 4.5 会在感知到上下文窗口极限时过早结束任务，团队内部称之为"context anxiety"。工程师在 Harness 里加了 context resets 来修补。但当他们在 Opus 4.5 上使用同一个 Harness 时，这个行为消失了。那些 resets 变成了多余的负担（原文用词：dead weight）。
 
 这就是 Sutton 核心论点的具体体现：利用大规模计算的方法，总是最终战胜利用人类知识编码的方法。翻译成 Agent 的语言—— **你为模型的局限性写的每一行补偿代码，都会在模型变强的那一天变成技术债。而模型变强的速度，比你还技术债的速度快得多。**
 
@@ -68,11 +52,11 @@ Bitter Lesson：每一行 harness 代码的保质期都在缩短
 
 当然，并非所有框架编排都在补偿模型缺陷。权限控制、审计日志、数据验证，这些是业务逻辑层的需求，无论模型多强都不会消失。我说的是那些专门为模型局限性而存在的编排：chain 是因为模型不能一步到位，role 是因为模型不能多角色切换，task tree 是因为模型不能自主规划。
 
-Anthropic 的工程博客在开头以超链接的形式暗引了 Bitter Lesson \[4\]，然后得出了一个关键的设计决策。用我的话概括： **不要建一个 harness，建一个 meta-harness，对接口有主见，对实现不做假设。** Anthropic 在另一篇关于 Agent harness 最佳实践的文章 \[7\] 中也讨论了类似的思路：harness 的价值在于让 Agent 聚焦核心能力，而好的 harness 应当随着模型进步而简化。
+Anthropic 的工程博客在开头以超链接的形式暗引了 Bitter Lesson [4]，然后得出了一个关键的设计决策。用我的话概括： **不要建一个 harness，建一个 meta-harness，对接口有主见，对实现不做假设。** Anthropic 在另一篇关于 Agent harness 最佳实践的文章 [7] 中也讨论了类似的思路：harness 的价值在于让 Agent 聚焦核心能力，而好的 harness 应当随着模型进步而简化。
 
 他们把这个理念具体化为：Managed Agents 不假设任何特定的 harness 实现，包括他们自己当前的。他们知道 Claude Code 的 Harness 是好的，但他们也知道它终将被更好的实现替代。所以他们选择赌接口的稳定性，而不是赌当前实现的正确性。
 
-博客引述了 Eric Raymond 在《Unix 编程艺术》\[5\] 中讨论的一个经典命题（以下是 Anthropic 博客中的原文表述）：
+博客引述了 Eric Raymond 在《Unix 编程艺术》[5] 中讨论的一个经典命题（以下是 Anthropic 博客中的原文表述）：
 
 > "How to design a system for programs as yet unthought of."（如何为尚未被构想出来的程序设计系统。）
 
@@ -82,31 +66,26 @@ Anthropic 的工程博客在开头以超链接的形式暗引了 Bitter Lesson \
 
 ## 拆开沙箱：PID 1 是 Rust，内核是 Firecracker
 
-以下分析基于一份公开的逆向工程研究 \[3\]。入口是一个"Claude Code"Remote 的 Session，但发现的是 Managed Agents 平台的通用基础设施。
+以下分析基于一份公开的逆向工程研究 [3]。入口是一个"Claude Code"Remote 的 Session，但发现的是 Managed Agents 平台的通用基础设施。
 
 ### PID 1 不是 systemd
 
 第一步，看看内核说了什么：
 
-```bash
 $ dmesg | grep -i FIRECK
 # ACPI 表 OEM ID 均为 "FIRECK"
-```
 
 这是一个 **Firecracker microVM** ，AWS 开源的轻量级虚拟化技术，每个 VM 的内存开销只有几 MB，启动时间在 125 毫秒以内。
 
 然后看看 PID 1 是谁：
 
-```bash
 $ cat /proc/1/cmdline
 /process_api --firecracker-init --addr 0.0.0.0:2024 --max-ws-buffer-size 32768 --block-local-connections
-```
 
 PID 1 不是 systemd，不是 init，是一个叫 `process_api` 的 **Rust 二进制** 。它做了 init 进程该做的所有事情：挂载 /proc、/sys、/dev，初始化 cgroups 和网络。然后监听端口 2024 的 WebSocket，等待外部指令。
 
-在同一个 VM 里，还有一个 Go 编写的 `environment-manager` ，负责更高层的编排：Git 凭证代理、MCP 服务器管理、部署流程。这个二进制的符号表没有被剥离，甚至保留了 debug\_info，于是它的完整内部包结构被恢复了出来：
+在同一个 VM 里，还有一个 Go 编写的 `environment-manager` ，负责更高层的编排：Git 凭证代理、MCP 服务器管理、部署流程。这个二进制的符号表没有被剥离，甚至保留了 debug_info，于是它的完整内部包结构被恢复了出来：
 
-```
 internal/
 ├── claude/           # Claude Code 进程管理
 ├── envtype/
@@ -123,12 +102,11 @@ internal/
 │   └── actions/
 │       ├── deploy/   # 部署
 │       └── snapshot/ # 状态快照
-```
 
 构建元数据显示它依赖 `github.com/anthropics/anthropic/api-go` at `(devel)` ，从 Anthropic 的 monorepo 直接构建。包结构中的 `envtype/anthropic/` 和 `envtype/byoc/` 直接对应 Managed Agents 的两种部署模式。也就是说，逆向工程的入口虽然是一个"Claude Code"的 Session，但发现的是 **Managed Agents 平台的通用基础设施** 。
 
-为什么上述 Claude Code 都加了引号？因为 Managed Agents 平台中的 Agent Loop 其实是独立于 Claude Code 的 Agent 服务。我们发现它还没支持压缩，并且主子 Agent 的实现与 Claude Code 也不一致。（实际测试中，Managed Agents 的 Agent 在上下文超过 1M token 后会直接报错，而不是像 Claude Code 那样触发压缩。）  
-![](redirect_2.webp)  
+为什么上述 Claude Code 都加了引号？因为 Managed Agents 平台中的 Agent Loop 其实是独立于 Claude Code 的 Agent 服务。我们发现它还没支持压缩，并且主子 Agent 的实现与 Claude Code 也不一致。（实际测试中，Managed Agents 的 Agent 在上下文超过 1M token 后会直接报错，而不是像 Claude Code 那样触发压缩。）
+![](redirect_2.webp)
 这个差异值得多想一层。Claude Code 做了 context compaction，因为它是面向用户的产品，session 可以持续几小时，上下文必然会爆。Compaction 是一个 UX 妥协：丢失一部分上下文信息，换取 session 继续运行。但 compaction 说白了就是一个关于"模型上下文窗口不够用"的工程补偿。上下文窗口从 4K 到 8K 到 32K 到 200K 到 1M，按这个趋势，10M 甚至更大只是时间问题。到那时，compaction 本身就成了 dead weight，和 Sonnet 4.5 的 context anxiety resets 一样。
 
 Managed Agents 选择不做 compaction，直接在 1M 处报错，看起来像是"没做完"。但从 meta-harness 的框架来理解这个选择：不把关于模型局限性的假设烧进平台层。如果某个 harness（比如 Claude Code 的）需要 compaction，那是 harness 自己的事情，平台不替你做这个决定。
@@ -151,20 +129,18 @@ Anthropic 在做同样的事：用一个极简的接口屏蔽了底层的全部�
 
 ### 快照恢复：TTFT 优化的秘密
 
-Anthropic 博客报告了显著的性能提升 \[1\]：解耦后 p50 TTFT 降低约 60%，p95 降低超过 90%。但博客没有解释具体是怎么做到的。逆向工程给出了答案： **Firecracker microVM 快照恢复** 。比"推迟创建容器"复杂得多，是虚拟机级别的冻结-恢复-热替换。
+Anthropic 博客报告了显著的性能提升 [1]：解耦后 p50 TTFT 降低约 60%，p95 降低超过 90%。但博客没有解释具体是怎么做到的。逆向工程给出了答案： **Firecracker microVM 快照恢复** 。比"推迟创建容器"复杂得多，是虚拟机级别的冻结-恢复-热替换。
 
 VM 的 dmesg 时间线里有一个关键的跳跃：
 
-```
 [  30.731516] Run /process_api as init process
                     ~~~ 48.5 小时间隔 ~~~
 [174695.927758] virtio_blk: [vdc] new size: 24848 sectors
 [174695.953952] random: crng reseeded due to virtual machine fork
-```
 
 时间从 30 秒跳到了 174695 秒（48.5 小时后），中间的空白是 VM 被冻结为快照的时间。然后 VM 从快照恢复，块设备被热替换为新的后端。每个 Session 拿到自己的 rootfs（Ubuntu 24.04 的 ext4 分区）、Claude Code 程序（squashfs 只读分区）、和环境运行器（squashfs 只读分区）。
 
-完整的机制是：一次性创建模板 VM， `process_api` 作为 PID 1 完成基础初始化后发出 SNAPSTART\_READY 信号；Firecracker 拍摄完整 VM 快照（内存、CPU 寄存器、设备状态全部冻结）；每个新 Session 从快照恢复（几乎瞬时，因为内核和 init 已经在内存中）；块设备在恢复时被替换为该 Session 的专用后端； `process_api` 唤醒后检测到 VM fork，丢弃页缓存，重挂文件系统，启动 `environment-manager` 。
+完整的机制是：一次性创建模板 VM， `process_api` 作为 PID 1 完成基础初始化后发出 SNAPSTART_READY 信号；Firecracker 拍摄完整 VM 快照（内存、CPU 寄存器、设备状态全部冻结）；每个新 Session 从快照恢复（几乎瞬时，因为内核和 init 已经在内存中）；块设备在恢复时被替换为该 Session 的专用后端； `process_api` 唤醒后检测到 VM fork，丢弃页缓存，重挂文件系统，启动 `environment-manager` 。
 
 ext4 分区的 mount count = 11，说明同一个 rootfs 模板至少被 11 个不同的 Session 复用过。内核级的 `init_on_free=1` 确保释放的内存页被清零，防止 Session 间数据泄露。CRNG 在 VM fork 时自动重新播种，防止密码学状态复用。
 
@@ -179,7 +155,7 @@ Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、�
 逆向工程揭示了一个最能说明问题的发现：同一套 `process_api` + `environment-manager` 基础设施，通过不同的启动配置，支撑了 Managed Agents 平台上三种截然不同的产品形态。
 
 - CCR（Claude Code Remote），标准的代码开发环境。项目源是用户的 GitHub 仓库，通过 git proxy 注入凭证，通过内置 Stop hook 检查 git push 状态和未提交更改。
-- Baku，claude.ai 上的 Web 应用构建器（内部代号）。项目源是预装的 Vite 模板。内置 Supabase MCP 服务器（6 个工具：provision\_database、execute\_query、apply\_migration...），自动配置数据库，部署目标是 Anthropic 自己的内部平台 Antspace。Stop hook 检查 Vite dev server 错误和 TypeScript 类型错误，如果检查失败，Claude 收到反馈并继续修复，而不是停下来。
+- Baku，claude.ai 上的 Web 应用构建器（内部代号）。项目源是预装的 Vite 模板。内置 Supabase MCP 服务器（6 个工具：provision_database、execute_query、apply_migration...），自动配置数据库，部署目标是 Anthropic 自己的内部平台 Antspace。Stop hook 检查 Vite dev server 错误和 TypeScript 类型错误，如果检查失败，Claude 收到反馈并继续修复，而不是停下来。
 - BYOC（Bring Your Own Cloud），客户在自己的云环境中运行 Hands，Brain 仍在 Anthropic 侧。环境主动轮询工作： `POST /v1/environments/{id}/work/poll` ，确认后执行，通过 WebSocket tunnel 报告结果。这个 long-polling 模式是"many brains, many hands"架构的协议桥梁——客户侧的 Hands 完全自治，只通过 poll 接口与 Anthropic 侧的 Brain 建立松耦合连接。Brain 不需要知道 Hands 在哪里、怎么运行，只需要知道有人在 poll 工作。
 
 三个产品，同一个 Managed Agents 基础设施。唯一的区别是启动时的一个 JSON 配置 `environment_type` 字段的值。
@@ -203,15 +179,15 @@ Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、�
 | **init 进程（PID 1）** | `process_api` （Rust 二进制） | 逆向：字面上就是 PID 1，挂载 fs、初始化 cgroups |
 | **硬件虚拟化** | Firecracker microVM | 逆向：ACPI OEM ID = "FIRECK"，完整 VM 隔离 |
 | **系统调用（ `read()` ）** | `execute(name, input) -> string` | 博客 + 逆向：近 20 种 WebSocket 消息的极简封装 |
-| **进程状态机** | Session 生命周期：rescheduling -> running <-> idle -> terminated | API 文档 \[2\]：结构同构于 OS 进程状态 |
-| **文件系统** | Session 事件日志（append-only，支持 `lseek` + `read` 语义） | API 文档 \[2\]： `getEvents()` 支持位置切片 |
+| **进程状态机** | Session 生命周期：rescheduling -> running <-> idle -> terminated | API 文档 [2]：结构同构于 OS 进程状态 |
+| **文件系统** | Session 事件日志（append-only，支持 `lseek` + `read` 语义） | API 文档 [2]： `getEvents()` 支持位置切片 |
 | **页面置换 / 虚拟内存** | Context Compaction（概念对应成立，当前平台将决策权留给 harness） | 博客 + 逆向：harness 层可选实现 |
 | **分环保护（Ring 0/3）** | 多层安全：VM 隔离 -> cgroup -> 凭证代理 -> JWT -> token 擦除 | 逆向：5 层 defense in depth |
-| **网络 Socket** | MCP 协议（发现 -> 描述 -> 调用） | API 文档 \[2\]：类似地址解析 -> 协商 -> 传输 |
-| **包管理器（apt/npm）** | Skills API（版本管理、从 /mnt/skills 加载 zip） | 逆向 + API \[2\]：semver 管理、预打包能力注入 |
-| **Keychain / Credential Manager** | Vault（OAuth 凭证，write-only，平台代理注入） | API 文档 \[2\]：应用不直接接触凭证 |
+| **网络 Socket** | MCP 协议（发现 -> 描述 -> 调用） | API 文档 [2]：类似地址解析 -> 协商 -> 传输 |
+| **包管理器（apt/npm）** | Skills API（版本管理、从 /mnt/skills 加载 zip） | 逆向 + API [2]：semver 管理、预打包能力注入 |
+| **Keychain / Credential Manager** | Vault（OAuth 凭证，write-only，平台代理注入） | API 文档 [2]：应用不直接接触凭证 |
 | **信号处理（SIGTERM -> SIGKILL）** | Stop Hook（自动质量检查 -> 递归守卫防无限循环） | 逆向：Baku 的三项检查 + 第二次失败允许停止 |
-| **网络文件系统（NFS）** | FUSE 挂载外部存储（含 vfs\_cache\_mode、backend\_cache\_ttl） | 逆向：用户态文件系统协议挂载远程存储 |
+| **网络文件系统（NFS）** | FUSE 挂载外部存储（含 vfs_cache_mode、backend_cache_ttl） | 逆向：用户态文件系统协议挂载远程存储 |
 
 这些映射是 Managed Agents 透出的工程事实，不是后贴的类比。
 
@@ -223,15 +199,11 @@ Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、�
 
 **第二重身份：Session 是进程。** Managed Agents API 定义了 Session 的生命周期状态机：
 
-```
 rescheduling -> running <-> idle -> terminated
-```
 
 对比操作系统的进程状态：
 
-```
 new -> ready -> running <-> waiting -> terminated
-```
 
 两者有明显的结构相似性。 `rescheduling` 对应"可恢复的中断后重新调度"，比 OS 的 `ready` 更丰富，因为它包含了 Agent 特有的"从错误中恢复上下文"的语义； `running` 就是 `running` （正在执行）； `idle` 对应 `waiting` （等待外部输入）； `terminated` 就是 `terminated` （不可逆终止）。甚至 `running <-> idle` 的双向转换，Agent 执行到需要用户确认时进入 idle，用户回应后回到 running，也对应了进程在 running 和 waiting 之间的切换。映射不是一一对应的（Agent 的 `rescheduling` 比 OS 的 `ready` 多了恢复语义），但结构同构性是清晰的。
 
@@ -245,7 +217,7 @@ Anthropic 把它们合二为一了。Session 既是状态的持久存储（事�
 
 ## Brain-Hands 分离是三维优化
 
-到目前为止，我一直在从"是什么"的角度拆解 Managed Agents。现在切换到"为什么"。Brain-Hands 分离是一个在安全、速度、成本三个维度上同时做优化的设计决策。Anthropic 在"Building effective agents"\[6\] 中讨论了 Agent 设计的一般原则，而 Managed Agents 的具体实现把这些原则推到了极致。
+到目前为止，我一直在从"是什么"的角度拆解 Managed Agents。现在切换到"为什么"。Brain-Hands 分离是一个在安全、速度、成本三个维度上同时做优化的设计决策。Anthropic 在"Building effective agents"[6] 中讨论了 Agent 设计的一般原则，而 Managed Agents 的具体实现把这些原则推到了极致。
 
 ![Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略](redirect_5.webp)
 
@@ -287,9 +259,9 @@ Brain-Hands 分离让一种更精细的策略成为可能：按 tool call 类型
 
 速度优化的另一面就是成本优化。如果每个 Session 都需要一个完整的 Firecracker VM，那成本结构是固定的，不管 Agent 用不用沙箱，VM 的内存和 CPU 都在那里消耗着。
 
-按需路由彻底改变了成本模型。一个只做 web\_search + MCP 调用的 Session，完全不需要分配 VM 资源。只有真正需要代码执行的 Session 才拉起沙箱，而且沙箱可以在工具调用完成后回收。类似 EC2（固定分配）到 Lambda（按调用计费）的转变，只不过这次是在 Agent 基础设施层面。
+按需路由彻底改变了成本模型。一个只做 web_search + MCP 调用的 Session，完全不需要分配 VM 资源。只有真正需要代码执行的 Session 才拉起沙箱，而且沙箱可以在工具调用完成后回收。类似 EC2（固定分配）到 Lambda（按调用计费）的转变，只不过这次是在 Agent 基础设施层面。
 
-Anthropic 工程博客指出 \[1\]，Brain 和 Hands 解耦后容器的大部分时间都在空闲。换个角度看，这其实是一个经济学问题。假设容器大部分时间在等待 Brain 推理（推理是计算密集但不在容器里发生的），那你在为空闲的内存和 CPU 付费。解耦之后，容器可以在空闲时被回收或释放给其他 Session，资源利用率大幅提升。
+Anthropic 工程博客指出 [1]，Brain 和 Hands 解耦后容器的大部分时间都在空闲。换个角度看，这其实是一个经济学问题。假设容器大部分时间在等待 Brain 推理（推理是计算密集但不在容器里发生的），那你在为空闲的内存和 CPU 付费。解耦之后，容器可以在空闲时被回收或释放给其他 Session，资源利用率大幅提升。
 
 Brain-Hands 分离之所以是一个好的架构决策，在于它同时带来了安全、速度、成本等多方面好处。协议隔离提升了安全性，按需路由提升了速度，空闲回收降低了成本。所以我倾向于把 Brain-Hands 分离看作一个设计原则，而非实现细节。 **它更接近于 Agent 基础设施的"用户态/内核态"分离原则。** 操作系统设计中用户态/内核态分离同时服务于安全、性能、资源管理，因为它是正确的抽象层级划分。
 
@@ -311,7 +283,7 @@ Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三�
 
 如果 Anthropic 有意愿将这些数据用于模型训练（这是合理但未经证实的推测），那这就构成了一套完整的、结构化的正反馈经验，而且是自动产生的。
 
-每个 Session 记录了：Brain 做了什么决策（tool\_use 事件）、环境给了什么反馈（tool\_result 事件）、Session 最终的完成状态（正常结束、被用户中断、还是出错终止）、过程中消耗了多少资源（token 用量和 Session 轮次数）。这些要素和 Reinforcement Learning 的基本框架高度吻合：状态（上下文）、动作（tool call）、奖励信号（执行结果 + 完成状态）、轨迹（完整 Session 历史）。不过从"结构上可以用"到"实际在用"还有距离，数据质量、隐私合规、奖励信号的噪声等问题都需要解决。但架构层面的准备是显而易见的。
+每个 Session 记录了：Brain 做了什么决策（tool_use 事件）、环境给了什么反馈（tool_result 事件）、Session 最终的完成状态（正常结束、被用户中断、还是出错终止）、过程中消耗了多少资源（token 用量和 Session 轮次数）。这些要素和 Reinforcement Learning 的基本框架高度吻合：状态（上下文）、动作（tool call）、奖励信号（执行结果 + 完成状态）、轨迹（完整 Session 历史）。不过从"结构上可以用"到"实际在用"还有距离，数据质量、隐私合规、奖励信号的噪声等问题都需要解决。但架构层面的准备是显而易见的。
 
 需要指出的是，Anthropic 的 API Terms of Service 明确声明 API 输入输出默认不用于模型训练（用户可 opt-in）。所以即使架构上完全具备这个能力，实际操作方式可能是：仅对 opt-in 用户或内部 dogfood 数据启用训练管线，或通过匿名化+聚合的方式提取模式而非直接使用原始 Session。 **架构准备好了飞轮的可能性，ToS 和隐私合规决定了飞轮实际转多快。**
 
@@ -319,11 +291,11 @@ Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三�
 
 这是关键的一步：如果 Brain 和 Hands 在同一个进程里，你要复现一个 Session 的行为数据，就必须实际启动沙箱、实际执行工具、实际等待结果。这个过程很慢（每个 Session 可能几分钟到几小时），而且很贵（每个复现都需要 VM 资源）。
 
-**Brain-Hands 分离之后，Brain 不依赖真实的 Hands。** 你可以用模拟的工具结果（从历史 Session 中提取的 tool\_result）来喂给 Brain，让它在不启动任何 VM 的情况下"经历"成千上万个 Session。这正是 offline RL / 合成反馈的价值所在，训练成本从"每个 Session 需要一个 VM"降到"每个 Session 只需要存储的事件日志"。
+**Brain-Hands 分离之后，Brain 不依赖真实的 Hands。** 你可以用模拟的工具结果（从历史 Session 中提取的 tool_result）来喂给 Brain，让它在不启动任何 VM 的情况下"经历"成千上万个 Session。这正是 offline RL / 合成反馈的价值所在，训练成本从"每个 Session 需要一个 VM"降到"每个 Session 只需要存储的事件日志"。
 
 而且因为事件协议是标准化的，不同产品（CCR、Baku、BYOC）产生的数据格式完全一致。Brain 不关心数据来自哪个 Hands 实现。一个在 Baku 上构建 Web 应用的 Session，和一个在 CCR 上做代码重构的 Session，产生的执行数据都可以被同一个训练管线消费。
 
-Anthropic 博客指出 \[1\]，Managed Agents 平台的目标是 matching Claude's intelligence over time。我倾向于认为这句话有另一层含义：被动"匹配"之外，还有主动"驱动"模型进步的意图。
+Anthropic 博客指出 [1]，Managed Agents 平台的目标是 matching Claude's intelligence over time。我倾向于认为这句话有另一层含义：被动"匹配"之外，还有主动"驱动"模型进步的意图。
 
 ### Bitter Lesson 的自我加速
 
@@ -344,7 +316,7 @@ Anthropic 博客指出 \[1\]，Managed Agents 平台的目标是 matching Claude
 
 这可能是 Brain-Hands 分离最深层的战略意义。速度和安全是工程收益，成本结构是经济收益，训练数据供给是飞轮收益。三层叠在一起，才是全貌。
 
-当然，我无法确认 Anthropic 内部是否真的在用 Session 数据做后训练，他们没有公开说过。但架构本身已经为此做好了准备：标准化的事件日志、结构化的 tool\_use/tool\_result 对、Session 级别的成功/失败信号、Brain 和 Hands 的协议解耦。 **如果他们没有在这样做，那他们浪费了自己最好的架构决策。**
+当然，我无法确认 Anthropic 内部是否真的在用 Session 数据做后训练，他们没有公开说过。但架构本身已经为此做好了准备：标准化的事件日志、结构化的 tool_use/tool_result 对、Session 级别的成功/失败信号、Brain 和 Hands 的协议解耦。 **如果他们没有在这样做，那他们浪费了自己最好的架构决策。**
 
 ## 你的 Agent 框架是应用层，不是平台层
 
@@ -366,7 +338,7 @@ OS 层则不同。 `execute(name, input) -> string` 不编码关于模型能力�
 
 但 `execute()` 也有自己的假设：它假设 Agent 与环境的交互是离散的工具调用，输入输出是字符串。如果未来出现某种连续状态交互的范式，这个接口也会过时。但相比"模型不能多步推理"这种短命假设，"Agent 通过工具与环境交互"这个假设显然更基础、更持久。抽象层级的差异决定了保质期的差异。
 
-Anthropic 博客指出 \[1\]，Managed Agents 可以容纳各种 harness 实现，随着 Claude 智能的提升而匹配。Claude Code 的 Harness 是一个优秀的用户态应用。但 Managed Agents 的设计目标是：当 Claude Code 的 Harness 过时的那一天（而那一天一定会来），基础设施不需要任何改变。
+Anthropic 博客指出 [1]，Managed Agents 可以容纳各种 harness 实现，随着 Claude 智能的提升而匹配。Claude Code 的 Harness 是一个优秀的用户态应用。但 Managed Agents 的设计目标是：当 Claude Code 的 Harness 过时的那一天（而那一天一定会来），基础设施不需要任何改变。
 
 ## Agent API 的野心：让 Model API 成为实现细节
 
@@ -380,7 +352,7 @@ Anthropic 博客指出 \[1\]，Managed Agents 可以容纳各种 harness 实现�
 
 ### Model API 是 TCP，Agent API 是 HTTP
 
-今天，大多数 AI 应用开发者的默认接口是 Model API（Messages API）。你发送一组 messages，指定 temperature 和 max\_tokens，处理 tool\_use 的 JSON 格式，自己管理上下文窗口，自己写重试逻辑，自己做状态持久化。这很像早期的 TCP socket 编程：你有完全的控制权，但你也承担全部的复杂性。
+今天，大多数 AI 应用开发者的默认接口是 Model API（Messages API）。你发送一组 messages，指定 temperature 和 max_tokens，处理 tool_use 的 JSON 格式，自己管理上下文窗口，自己写重试逻辑，自己做状态持久化。这很像早期的 TCP socket 编程：你有完全的控制权，但你也承担全部的复杂性。
 
 Agent API 做的事情是：你定义一个 Agent（工具集、权限策略、Skill 配置），创建一个 Session，然后描述你要它做什么。平台帮你管 Agent Loop（推理-工具调用循环）、管 Session 生命周期（rescheduling、idle、terminated）、管上下文（Session 事件日志）、管安全（Permission Policy、Vault 凭证代理）、管执行环境（Firecracker VM、快照恢复）。
 
@@ -394,7 +366,7 @@ HTTP 对 TCP 做的就是这件事。HTTP 没有消灭 TCP，今天做高频交�
 
 Anthropic 之外的几家也在往同一个方向走：
 
-OpenAI \[8\]：Completions API -> Chat Completions -> Assistants API（2026 年 8 月废弃）-> Responses API（内置 web search、code interpreter、file search）。Assistants API 的废弃特别值得注意，它说明 OpenAI 在重新校准抽象层级，方向是把更多能力内置到平台层。
+OpenAI [8]：Completions API -> Chat Completions -> Assistants API（2026 年 8 月废弃）-> Responses API（内置 web search、code interpreter、file search）。Assistants API 的废弃特别值得注意，它说明 OpenAI 在重新校准抽象层级，方向是把更多能力内置到平台层。
 
 Google：Model API -> Vertex AI Agent Builder（含 Agent Development Kit），三层架构 Build/Runtime/Govern，把 Agent 生命周期管理做成平台能力。
 
@@ -489,57 +461,3 @@ Agent 开发者自检：三个关键问题
 5. Anthropic Engineering, *"Building effective agents"*. [链接](https://www.anthropic.com/engineering/building-effective-agents)
 6. Anthropic Engineering, *"Effective harnesses for long-running agents"*. [链接](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 7. OpenAI, *"New tools for building agents"*, March 2025. [链接](https://openai.com/index/new-tools-for-building-agents/)
-
-END
-
-每一行 harness 代码都是一个会过期的赌注
-
-拆开沙箱：PID 1 是 Rust，内核是 Firecracker
-
-PID 1 不是 systemd
-
-execute() 的真面目：近 20 种 WebSocket 消息
-
-快照恢复：TTFT 优化的秘密
-
-同一基础设施，三个完全不同的"应用程序"
-
-一张完整的 OS 映射表
-
-Session 的双重身份：为什么文件系统和进程不需要分开
-
-Brain-Hands 分离是三维优化
-
-安全：你的 Agent 框架可能在同一个进程里跑 Brain 和 Hands
-
-速度：大量 tool call 根本不需要沙箱
-
-成本：从"每 Session 一个 VM"到"按需分配"
-
-在调用过程中加速自进化飞轮
-
-每一次工具调用都是一条正反馈数据
-
-分离使大规模离线自进化成为可能
-
-Bitter Lesson 的自我加速
-
-你的 Agent 框架是应用层，不是平台层
-
-Agent API 的野心：让 Model API 成为实现细节
-
-Model API 是 TCP，Agent API 是 HTTP
-
-行业在集体往上走
-
-Bitter Lesson 的第二层推论
-
-回到 Bitter Lesson
-
-给 Agent 开发者的三个自检问题
-
-内部资料
-
-INTERNAL
-
-495838

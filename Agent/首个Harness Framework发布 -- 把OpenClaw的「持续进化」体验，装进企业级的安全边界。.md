@@ -12,10 +12,6 @@ tags:
 
 云智能集团
 
-勋章
-
-粉丝 0影响力 64
-
 __ 18
 
 __ 8
@@ -30,10 +26,6 @@ __
 
 ## MaaS-DeepAgent：基于 AgentScope Harness 的分布式智能体框架
 
-[付强(哲也)](https://ata.atatech.org/users/11000733960)
-
-5月28日发表5月28日更新160次浏览
-
 __ 朗读
 
 __ 字号
@@ -42,8 +34,6 @@ __ 笔记
 
 __ 分享 __
 
-朗读文章12:55
-
 Powered by 通义语音合成
 
 通义语音合成
@@ -51,7 +41,7 @@ Powered by 通义语音合成
 __
 
 > **推荐阅读**
-> 
+>
 > - [ADK-DeepAgent：面向分布式环境的通用智能体框架](https://ata.atatech.org/articles/11020532914?spm=ata.21736010.0.0.37027536FeKfQM) — DeepAgent 原始设计与核心原理
 > - [首个 Harness Framework 发布](https://ata.atatech.org/articles/11020626959?spm=ata.21736010.0.0.37027536FeKfQM) — AgentScope Harness 设计理念与框架能力
 
@@ -88,7 +78,6 @@ DeepAgent · 基于 AgentScope Harness 的五层技术架构
 
 继承与组合关系：
 
-```
 ReActAgent (推理内核, Project Reactor 非阻塞)
     ↑ 组合持有 (delegate)
 HarnessAgent (薄包装: bindRuntimeContext + forceCompactAndRetry)
@@ -96,7 +85,6 @@ HarnessAgent (薄包装: bindRuntimeContext + forceCompactAndRetry)
 DeepAgentBuilder (能力注入: APaaS + Store + Skill + Prompt + Hook)
     ↑ 工厂入口
 DeepAgents.from(HarnessAgent.Builder)
-```
 
 ### 2.2 DeepAgent 提供了什么
 
@@ -271,7 +259,6 @@ DeepAgent 面向 **长周期、分布式部署的复杂任务** ：通过文件�
 
 ### 5.3 引入依赖
 
-```xml
 
     com.aliyun.maas
     maas-agentscope-extension-deep-agent
@@ -280,7 +267,6 @@ DeepAgent 面向 **长周期、分布式部署的复杂任务** ：通过文件�
     io.agentscope
     agentscope-harness
     ${agentscope-version}
-```
 
 ### 5.4 完整构建模板
 
@@ -304,7 +290,9 @@ HarnessAgent agent = DeepAgents.from(
         // .subagent(subagentSpec)                   // 可选
         // .toolkit(customToolkit)                   // 可选
         // .hook(customHook)                         // 可选
+```
     )
+```java
     // ── DeepAgent 专属配置 ──
     .workspace(workspace)                            // 推荐，从 classpath resources/workspace 加载
     .apaas(ApaasSandboxConfig.pre(bizType, ak))      // APaaS 沙箱模式必填
@@ -346,53 +334,3 @@ Mass-AgentScope 交流群
 ![[ed42dd35-ba48-4170-ad8a-e56a442b2b67.jpg|一起定义 AI 的下一个主场]]
 
 一起定义 AI 的下一个主场
-
-END
-
-一、背景与定位
-
-二、架构全景与框架优势
-
-2.1 五层架构
-
-2.2 DeepAgent 提供了什么
-
-三、核心设计决策
-
-决策一：组合式构建，不侵入推理循环
-
-决策二：Filesystem 双形态——隔离粒度按需选择
-
-四、核心能力详解
-
-4.1 APaaS 沙箱执行
-
-4.2 分布式存储与隔离
-
-4.3 Prompt 引擎
-
-4.4 Skill 系统
-
-五、接入指南
-
-5.1 什么场景选 DeepAgent
-
-5.2 前置条件
-
-5.3 引入依赖
-
-5.4 完整构建模板
-
-5.5 答疑与交流
-
-六、招聘彩蛋
-
-有什么问题，和我聊聊吧～
-
-__
-
-内部资料
-
-INTERNAL
-
-495838

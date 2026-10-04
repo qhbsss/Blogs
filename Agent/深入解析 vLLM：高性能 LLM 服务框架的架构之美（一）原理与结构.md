@@ -10,52 +10,23 @@ tags:
 ---
 ATH事业群-通义实验室
 
-勋章
 
-粉丝 121影响力 1.4k
 
-** 118
 
-** 239
 
-** 5
 
-** 原创文章
-
-** 内部资料
-
-发表到圈儿
-
-[达摩院语音工程团队](https://ata.atatech.org/community/team/757) (首发)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-**
-
-[杨贤(临景)](https://ata.atatech.org/users/11000899730)
 
 发表更新4.0k浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章31:14
-
-**
 
 | 修改内容 | 时间 |
 | --- | --- |
 | 2.4.1处理请求的流程，引用更好的流程图 | 2025.02.11 |
 | 首发 | 2025.02.08 |
-
-[【头条文章🔥🔥🔥】 深入解析 vLLM：高性能 LLM 服务框架的架构之美（一）原理与结构](https://ata.atatech.org/articles/11020371653)  
-[【头条文章🔥🔥🔥】深入解析 vLLM：高性能 LLM 服务框架的架构之美（二）调度管理](https://ata.atatech.org/articles/11020369333)  
-[【头条文章🔥🔥🔥】深入解析 vLLM：高性能 LLM 服务框架的架构之美（三）模型推理](https://ata.atatech.org/articles/11020386445)
 
 ## 1\. vLLM 整体代码架构
 
@@ -97,7 +68,7 @@ CacheEngine 专注于缓存策略的实现。它通过智能的缓存机制，�
 
 ### 1.3 系统架构与工作流程
 
-vLLM 的系统架构采用了模块化设计，各个组件之间通过清晰的接口进行交互。下面这张架构图展示了各个核心组件及其关系：  
+vLLM 的系统架构采用了模块化设计，各个组件之间通过清晰的接口进行交互。下面这张架构图展示了各个核心组件及其关系：
 ![[Image 27.jpg|B0lniS]]
 
 当用户发起一个推理请求时，整个处理流程是这样的：首先，请求会经由 Engine 接收和解析。Engine 会对请求进行初步处理，包括参数验证、格式转换等。这就像是前台接待员，确保所有进入系统的请求都是规范的。
@@ -122,20 +93,20 @@ CacheEngine 则在整个过程中不断优化性能。它会智能地缓存一�
 
 ![[Image 28.jpg|xL0fCE]]
 
-如上图所示，vLLM 的初始化过程包括模型加载、模型参数初始化、KV Cache 预分配等关键步骤。  
+如上图所示，vLLM 的初始化过程包括模型加载、模型参数初始化、KV Cache 预分配等关键步骤。
 vLLM需要初始化并加载模型权重，支持从HF Hub加载模型，也支持从本地加载模型。在加载过程中，vLLM将模型权重加载到GPU中，以便后续推理在GPU运行。
 
 #### 2.2 估计KV Cache的物理块数量
 
 ![[Image 29.jpg|qIQ4Mt]]
 
-在模型部署的初始化阶段，vLLM 会通过一个模拟实验步骤来决定 GPU 和 CPU 上可以分配的 KV cache 物理块数量，确保后续推理时的内存分配不会导致显存溢出。这个步骤在 vLLM 中被称为 determine\_num\_available\_blocks。
+在模型部署的初始化阶段，vLLM 会通过一个模拟实验步骤来决定 GPU 和 CPU 上可以分配的 KV cache 物理块数量，确保后续推理时的内存分配不会导致显存溢出。这个步骤在 vLLM 中被称为 determine_num_available_blocks。
 
 首先，在启动 LLMEngine 时，系统会进行一个 “假数据模拟” 来测量模型的内存使用情况。它通过构造假数据并执行一次模拟前向推理，来观察 GPU 上模型运行时的峰值内存需求。在这次前向推理中，系统不使用 KV cache，而是单纯地模拟模型推理所需的基本内存。这种方式可以帮助确定整个推理过程会占用多少显存，从而为后续的内存分配提供依据。
 
 在完成内存需求的测量后，vLLM 会使用测得的内存数据来计算可分配给 KV cache 的显存总量。具体来说，分配给 KV cache 的显存等于 GPU 总显存减去在不使用 KV cache 时推理所占用的显存（包括模型本身和推理过程中的中间数据）。这样可以确保显存分配合理，不会因为内存不足而导致 OOM（Out Of Memory）错误。
 
-接下来，通过计算显存中可以分配的物理块数量，vLLM 会确定 GPU 上可以使用的 KV cache 数量。物理块的大小由用户定义，包括多个参数，例如 block\_size、num\_heads、head\_size、num\_layers 以及数据类型的大小（如 fp16 对应的字节数是 2）。计算公式会依据这些参数来估算单个物理块的大小，然后根据剩余显存估算出可以分配的物理块总数。
+接下来，通过计算显存中可以分配的物理块数量，vLLM 会确定 GPU 上可以使用的 KV cache 数量。物理块的大小由用户定义，包括多个参数，例如 block_size、num_heads、head_size、num_layers 以及数据类型的大小（如 fp16 对应的字节数是 2）。计算公式会依据这些参数来估算单个物理块的大小，然后根据剩余显存估算出可以分配的物理块总数。
 
 #### 2.3 预分配 KV Cache
 
@@ -156,23 +127,23 @@ vLLM需要初始化并加载模型权重，支持从HF Hub加载模型，也支�
 **异步流程**
 
 1. `API-Server` 接受请求：当用户发送请求时， `API` 服务器首先会接收到这些请求并解析其中的参数。这些参数告诉系统后续进行什么样的处理。
-2. 生成请求参数(async\_args)： `API-Server` 会根据请求参数生成一个 `async_args` 对象，它包含了请求的详细信息，比如模型 ID、输入文本、推理参数等。
+2. 生成请求参数(async_args)： `API-Server` 会根据请求参数生成一个 `async_args` 对象，它包含了请求的详细信息，比如模型 ID、输入文本、推理参数等。
 3. 请求加入队列：请求加入队列后，会等待调度器调度。
 4. 引擎主循环开始(`run_engine_loop`)：在异步流程中，引擎主循环会不断从队列中获取请求，并进行处理。
 5. 处理请求(`get_new_and_abort_requests`)：在处理过程中，系统会检查新的请求以及是否有请求被终止，确保每个请求被及时处理。
 6. 执行推理步骤(`engine_step`): engine 开始处理请求，决定哪个请求可以执行。
 7. 异步步骤完成(`add_request_async`): 将请求传递到 LLMEngine
-8. 请求加入调度(`add_seq_group`): 将请求包装为 seq\_group 对象，并加入调度器
+8. 请求加入调度(`add_seq_group`): 将请求包装为 seq_group 对象，并加入调度器
 9. 返回调度结果(`sche_output`): 调度执行，对 waiting,running, swapped 队列中的请求进行调度，返回调度结果，等待模型推理。
 10. 单步推理(`step_async`): 模型推理，生成一个step 的输出结果。
 11. 引擎推理(`engine_step`): 引擎推理，处理请求，生成一个step 的输出结果。
-12. 模型推理(`execute_model_req`): model\_executor 执行推理，生成一个step 的输出结果。
-13. 结果返回(`return_output`): 将结果返回给 AsyncLLMEngine，包装为 request\_output 对象。
+12. 模型推理(`execute_model_req`): model_executor 执行推理，生成一个step 的输出结果。
+13. 结果返回(`return_output`): 将结果返回给 AsyncLLMEngine，包装为 request_output 对象。
 14. 返回结果(`return_output_async`): 回抛结果
 15. 流式输出(`stream_output`): 流式输出结果
 16. 请求完成(`request_done`): 请求完成，流式将结果返回API-Server。
 
-**同步流程**  
+**同步流程**
 同步流程相对简单，主要是在执行过程中直接返回结果：
 
 1. 初始化(`init`): 同步流程开始时，系统会初始化所有必要的参数和资源。
@@ -220,7 +191,7 @@ vLLM需要初始化并加载模型权重，支持从HF Hub加载模型，也支�
 
 ### 3.1 Tokenization 处理
 
-Tokenization 是输入预处理的第一道关卡。vLLM 使用与原始语言模型相同的分词器，将输入文本转换为模型可以理解的 token 序列。主要实现在 `vllm/engine/llm_engine.py` 和 `vllm/engine/tokenizer.py` 中。  
+Tokenization 是输入预处理的第一道关卡。vLLM 使用与原始语言模型相同的分词器，将输入文本转换为模型可以理解的 token 序列。主要实现在 `vllm/engine/llm_engine.py` 和 `vllm/engine/tokenizer.py` 中。
 ![[Image 34.jpg|xVh4L6]]
 
 这个过程包含几个关键步骤：
@@ -246,12 +217,12 @@ vLLM 支持灵活的 prompt 模板系统，帮助用户更好地构造输入。�
 3. 资源评估：预估处理该输入所需的计算资源和内存需求，为后续调度做准备。(实现在 `vllm/engine/llm_engine.py` 中的 `add_request` 方法)
 4. 缓存优化：分析输入是否能够利用已有的 KV Cache，提前进行优化决策。(实现在 `vllm/core/block_manager.py` 中)
 
-### 3.4 深入解析 add\_request
+### 3.4 深入解析 add_request
 
-接下来我们将深入分析 LLMEngine 的请求处理流程。通过 LLMEngine.add\_request 方法接收到的请求会经过一系列预处理、调度、执行和输出处理步骤。
+接下来我们将深入分析 LLMEngine 的请求处理流程。通过 LLMEngine.add_request 方法接收到的请求会经过一系列预处理、调度、执行和输出处理步骤。
 
-```python
 def add_request(
+```java
     self,
     request_id: str,
     prompt: Optional[PromptType] = None,
@@ -261,6 +232,7 @@ def add_request(
     trace_headers: Optional[Mapping[str, str]] = None,
     prompt_adapter_request: Optional[PromptAdapterRequest] = None,
     priority: int = 0,
+```
     *,
     inputs: Optional[PromptType] = None,  # DEPRECATED
 ) -> None:
@@ -307,31 +279,31 @@ Example:
     >>> # continue the request processing
     >>> ...
 """
-```
 
-首先，add\_request 方法接受了多个参数，其中关键的参数包括：
+首先，add_request 方法接受了多个参数，其中关键的参数包括：
 
-- request\_id：每个请求的唯一标识符，用于跟踪和调度。
+- request_id：每个请求的唯一标识符，用于跟踪和调度。
 - prompt：请求的提示词，通常是用户输入的自然语言文本，定义了生成任务的起点。
 - params：这是生成任务的参数，可能是 SamplingParams（采样生成参数）或者 PoolingParams（池化生成参数），这将影响生成的策略，比如温度、采样方法等。
-- arrival\_time：请求到达的时间，用于统计和分析请求的延迟。
-- lora\_request：用于处理 LoRA 模型的特定请求，如果模型使用了 LoRA 技术。
-- trace\_headers：用于跟踪请求的元数据，通常用于日志记录和调试。
-- prompt\_adapter\_request：用于处理提示适配器的特定请求，如果模型使用了提示适配器。
+- arrival_time：请求到达的时间，用于统计和分析请求的延迟。
+- lora_request：用于处理 LoRA 模型的特定请求，如果模型使用了 LoRA 技术。
+- trace_headers：用于跟踪请求的元数据，通常用于日志记录和调试。
+- prompt_adapter_request：用于处理提示适配器的特定请求，如果模型使用了提示适配器。
 - priority：请求的优先级，用于调度器决定请求的执行顺序。
 - inputs：这是一个可选参数，用于兼容旧版本，通常可以忽略。
 
 #### 3.4.1 preprocess 入口
 
-在 LLMEngine 中，当我们使用 add\_request 方法添加一个请求时，系统首先会调用 InputPreprocessor 对输入进行预处理，这一过程确保用户的输入被模型正确处理。InputPreprocessor 类负责解析和处理不同类型的输入（包括文本、tokens 等），并将其转换为模型可以使用的标准化格式。
+在 LLMEngine 中，当我们使用 add_request 方法添加一个请求时，系统首先会调用 InputPreprocessor 对输入进行预处理，这一过程确保用户的输入被模型正确处理。InputPreprocessor 类负责解析和处理不同类型的输入（包括文本、tokens 等），并将其转换为模型可以使用的标准化格式。
 
-```python
 def preprocess(
+```java
     self,
     prompt: PromptType,
     request_id: str,
     lora_request: Optional[LoRARequest] = None,
     prompt_adapter_request: Optional[PromptAdapterRequest] = None,
+```
 ) -> ProcessorInputs:
     """Preprocess the input prompt."""
     if self.model_config.is_encoder_decoder:
@@ -353,19 +325,19 @@ def preprocess(
         lora_request=lora_request,
         prompt_adapter_request=prompt_adapter_request,
     )
-```
 
-对于 encoder-decoder 模型，输入需要分为 encoder prompt 和 decoder prompt，每一部分都需要分别进行处理。\_process\_encoder\_decoder\_prompt 是专门为 encoder-decoder 模型设计的，它能够处理同时包含编码器和解码器的 prompt。
+对于 encoder-decoder 模型，输入需要分为 encoder prompt 和 decoder prompt，每一部分都需要分别进行处理。_process_encoder_decoder_prompt 是专门为 encoder-decoder 模型设计的，它能够处理同时包含编码器和解码器的 prompt。
 
-现在我们只考虑 decoder-only 模型，对于 decoder-only 模型，输入处理相对简单，仅需要处理单一的解码器 prompt。\_process\_decoder\_only\_prompt 的逻辑如下：
+现在我们只考虑 decoder-only 模型，对于 decoder-only 模型，输入处理相对简单，仅需要处理单一的解码器 prompt。_process_decoder_only_prompt 的逻辑如下：
 
-```python
 def _process_decoder_only_prompt(
+```java
     self,
     prompt: SingletonPrompt,
     request_id: str,
     lora_request: Optional[LoRARequest] = None,
     prompt_adapter_request: Optional[PromptAdapterRequest] = None,
+```
 ) -> DecoderOnlyInputs:
     """
     For decoder-only models:
@@ -374,8 +346,6 @@ def _process_decoder_only_prompt(
     Arguments:
 
     * prompt: input prompt
-    * request_id
-    * lora_request
     * prompt_adapter_request
 
     Returns:
@@ -393,23 +363,22 @@ def _process_decoder_only_prompt(
         prompt_comps,
         prompt_adapter_request=prompt_adapter_request,
     )
-```
 
 `_prompt_to_llm_inputs` 方法负责将输入的 `prompt` 转换为模型可以理解的格式。它根据 `prompt` 的类型（字符串、tokens 或文本）进行不同的处理。
 
-```python
 def _prompt_to_llm_inputs(
+```java
         self,
         prompt: SingletonPrompt,
         request_id: str,
         lora_request: Optional[LoRARequest] = None,
+```
     ) -> SingletonInputs:
         """
         Extract the singleton inputs from a prompt.
 
         Arguments:
 
-        * request_id
         * prompt: single encoder or decoder input prompt
         * lora_request: this is only valid for decoder prompts
 
@@ -436,6 +405,7 @@ def _prompt_to_llm_inputs(
             tokens_content = parsed["content"]
 
             prompt_token_ids = tokens_content["prompt_token_ids"]
+```java
             token_type_ids = tokens_content.get("token_type_ids")
             multi_modal_data = tokens_content.get("multi_modal_data")
             mm_processor_kwargs = tokens_content.get("mm_processor_kwargs")
@@ -445,6 +415,7 @@ def _prompt_to_llm_inputs(
                     prompt_token_ids,
                     multi_modal_data,
                     mm_processor_kwargs,
+```
                     lora_request=lora_request,
                 )
 
@@ -460,6 +431,7 @@ def _prompt_to_llm_inputs(
             text_content = parsed["content"]
 
             prompt_text = text_content["prompt"]
+```java
             multi_modal_data = text_content.get("multi_modal_data")
             mm_processor_kwargs = text_content.get("mm_processor_kwargs")
 
@@ -468,6 +440,7 @@ def _prompt_to_llm_inputs(
                     prompt_text,
                     multi_modal_data,
                     mm_processor_kwargs,
+```
                     lora_request=lora_request,
                 )
 
@@ -486,16 +459,16 @@ def _prompt_to_llm_inputs(
             )
 
         assert_never(parsed)
-```
 
 `_tokenize_prompt` 方法负责将输入的文本转换为 token 序列。它使用模型对应的 tokenizer 将文本切分成 token，并返回对应的 token ID 列表。
 
-```python
 def _tokenize_prompt(
+```java
         self,
         prompt: str,
         request_id: str,
         lora_request: Optional[LoRARequest],
+```
     ) -> List[int]:
         """
         Apply the model's tokenizer to a text prompt, returning the
@@ -512,7 +485,6 @@ def _tokenize_prompt(
                                 prompt=prompt,
                                 lora_request=lora_request,
                                 add_special_tokens=add_special_tokens)
-```
 
 - **获取 Tokenizer** ：通过 `get_tokenizer_group()` 获取当前模型对应的分词器。这个分词器通常在模型初始化时就已经加载，与模型使用相同的词表和分词规则。
 - **特殊标记处理** ：
@@ -522,18 +494,18 @@ def _tokenize_prompt(
 - **Token 编码** ：调用 tokenizer 的 encode 方法，将文本转换为 token ID 序列。这个过程包括：
 	- 将输入文本分割成子词（subwords）
 		- 将每个子词映射到对应的 token ID
-		- 根据需要添加特殊标记（如果 add\_special\_tokens 为 True）
-		- 处理 LoRA 相关的特殊需求（如果提供了 lora\_request）
-- **请求追踪** ：通过传入 request\_id，确保能够追踪每个请求的 tokenization 过程，这对于调试和性能分析很有帮助。
+		- 根据需要添加特殊标记（如果 add_special_tokens 为 True）
+		- 处理 LoRA 相关的特殊需求（如果提供了 lora_request）
+- **请求追踪** ：通过传入 request_id，确保能够追踪每个请求的 tokenization 过程，这对于调试和性能分析很有帮助。
 
-### 3.4 创建 sequence 和 sequence\_group
+### 3.4 创建 sequence 和 sequence_group
 
 通过这些精心设计的预处理步骤，vLLM 能够将各种形式的输入转换为标准化、高效的形式，为后续的推理计算打下坚实基础。这就像是一个细心的厨师，在烹饪之前将所有食材都准备妥当，确保整个烹饪过程的顺畅进行。
 
 在预处理之后，我们得到了 `ProcessorInputs` 实例，它包含了处理后的输入数据。接下来，我们调用 `_add_processed_request` 方法将处理后的请求添加到引擎的请求池中。
 
-```python
 def _add_processed_request(
+```java
         self,
         request_id: str,
         processed_inputs: ProcessorInputs,
@@ -543,15 +515,18 @@ def _add_processed_request(
         prompt_adapter_request: Optional[PromptAdapterRequest],
         trace_headers: Optional[Mapping[str, str]] = None,
         priority: int = 0,
+```
     ) -> Optional[SequenceGroup]:
         """Add a processed request to the engine's request pool.
         return the created sequence group.
         """
+```java
         if isinstance(params, SamplingParams) and params.n > 1:
             ParallelSampleSequenceGroup.add_request(
                 request_id,
                 self,
                 params,
+```
                 processed_inputs=processed_inputs,
                 arrival_time=arrival_time,
                 lora_request=lora_request,
@@ -564,10 +539,12 @@ def _add_processed_request(
         self._validate_model_inputs(processed_inputs, lora_request)
         # Create the sequences.
         block_size = self.cache_config.block_size
+```java
         seq_id = next(self.seq_counter)
         eos_token_id = self.input_preprocessor.get_eos_token_id(lora_request)
 
         if is_encoder_decoder_inputs(processed_inputs):
+```
             decoder_inputs = processed_inputs["decoder"]
             encoder_inputs = processed_inputs["encoder"]
         else:
@@ -584,9 +561,11 @@ def _add_processed_request(
         # Create a SequenceGroup based on SamplingParams or PoolingParams
         if isinstance(params, SamplingParams):
             seq_group = self._create_sequence_group_with_sampling(
+```java
                 request_id,
                 seq,
                 params,
+```
                 arrival_time=arrival_time,
                 lora_request=lora_request,
                 trace_headers=trace_headers,
@@ -595,9 +574,11 @@ def _add_processed_request(
                 priority=priority)
         elif isinstance(params, PoolingParams):
             seq_group = self._create_sequence_group_with_pooling(
+```java
                 request_id,
                 seq,
                 params,
+```
                 arrival_time=arrival_time,
                 lora_request=lora_request,
                 prompt_adapter_request=prompt_adapter_request,
@@ -616,14 +597,13 @@ def _add_processed_request(
         min_cost_scheduler.add_seq_group(seq_group)
 
         return seq_group
-```
 
 `SequenceGroup` 表示的是多个 `Sequence` 的集合，通常是因为这些 `Sequence` 共享相同的采样参数（如温度、采样策略等）以及优先级调度策略（如 priority）。 `SequenceGroup` 的创建是通过 `_create_sequence_group_with_sampling` 或 `_create_sequence_group_with_pooling` 方法完成的，具体取决于是否采用采样策略或者池化策略。
 
-SamplingParams 是用于控制模型生成文本时的行为的参数，比如温度（temperature）、采样概率（top\_p）等。SamplingParams 会影响生成的策略，比如生成的多样性、生成的质量等。
+SamplingParams 是用于控制模型生成文本时的行为的参数，比如温度（temperature）、采样概率（top_p）等。SamplingParams 会影响生成的策略，比如生成的多样性、生成的质量等。
 
-```python
 def _create_sequence_group_with_sampling(
+```java
         self,
         request_id: str,
         seq: Sequence,
@@ -634,6 +614,7 @@ def _create_sequence_group_with_sampling(
         prompt_adapter_request: Optional[PromptAdapterRequest] = None,
         encoder_seq: Optional[Sequence] = None,
         priority: int = 0,
+```
     ) -> SequenceGroup:
         """Creates a SequenceGroup with SamplingParams."""
         max_logprobs = self.get_model_config().max_logprobs
@@ -667,7 +648,6 @@ def _create_sequence_group_with_sampling(
             priority=priority)
 
         return seq_group
-```
 
 #### 3.4.1 深入理解 SequenceGroup
 
@@ -677,7 +657,7 @@ SequenceGroup 是 vLLM 中一个核心概念，它代表了一组共享相同采
 
 SequenceGroup
 
-  
+
 **初始化阶段**
 
 - 每个 SequenceGroup 初始时只包含一个序列(seq)，这个序列对应用户输入的 prompt
@@ -689,7 +669,7 @@ SequenceGroup
 - 如果采样参数中设置了 n > 1（例如 n = 4），系统会基于初始序列生成 n 个分支
 - 所有生成的序列状态都变为 `running` ，开始并行生成 tokens
 
-**资源竞争阶段（Preemption）**  
+**资源竞争阶段（Preemption）**
 当 GPU 资源不足时，调度器会触发抢占机制。此时根据序列数量采取不同策略：
 
 a) **Swap 策略** (序列数量 > 1)
@@ -707,50 +687,41 @@ b) **Recomputation 策略** (序列数量 = 1)
 - 下次调度时从 prefill 阶段重新开始
 - 选择重计算的原因：单序列重新计算 KV Cache 的成本相对较低
 
-sequence\_group 的属性：
+sequence_group 的属性：
 
-- **seqs\_dict**
+- **seqs_dict**
 
-```python
 self.seqs_dict: Dict[int, Sequence] = {}
-```
 
 - 存储序列ID到Sequence对象的映射
 - 使用字典结构实现快速查找和管理
 - 每个 Sequence 对象包含序列的状态、token 历史等信息
-- **sampling\_params**
+- **sampling_params**
 
-```python
 self.sampling_params: SamplingParams
-```
 
 - 控制文本生成的关键参数
-- 包含温度(temperature)、top\_p、top\_k等采样策略
+- 包含温度(temperature)、top_p、top_k等采样策略
 - 影响生成文本的多样性和质量
 - **metrics**
-	```python
 	self.metrics: Dict[str, Any] = {
 	    "arrival_time": float,
 	    "first_scheduled_time": Optional[float],
 	    "first_token_time": Optional[float],
 	    ...
 	}
-	```
 	- 记录序列组的关键时间点和性能指标
 		- 用于调度器进行决策和性能分析
 		- 包括到达时间、首次调度时间、首个token生成时间等
-- **max\_running\_steps**
-	```python
+- **max_running_steps**
 	def get_max_num_running_steps(self) -> int:
 	    """计算剩余生命周期内的最大并行序列数"""
-	```
 	- 预估序列组在整个生成过程中需要的最大并行步数
 		- 帮助调度器进行资源规划和分配
 		- 考虑了采样参数和当前生成状态
 
 实现细节：
 
-```python
 class SequenceGroup:
     """A group of sequences that are generated from the same prompt.
 
@@ -771,6 +742,7 @@ class SequenceGroup:
     """
 
     def __init__(
+```java
         self,
         request_id: str,
         seqs: List[Sequence],
@@ -783,6 +755,7 @@ class SequenceGroup:
         trace_headers: Optional[Mapping[str, str]] = None,
         prompt_adapter_request: Optional[PromptAdapterRequest] = None,
         priority: int = 0,
+```
     ) -> None:
         self.request_id = request_id
         self.seqs = seqs
@@ -809,7 +782,6 @@ class SequenceGroup:
         self.priority = priority
 
         self.cached_request_output = None
-```
 
 ## 4\. 小结
 
@@ -829,63 +801,3 @@ class SequenceGroup:
 - [vLLM 社区](https://github.com/vllm-project/vllm/discussions)
 - [Yan Feng's blog](https://fy2462.github.io/2024/09/vllm-diagram-overview/)
 - [vLLM 源码解析](https://github.com/PaddleJitLab/CUDATutorial/blob/develop/docs/16_vllm_source_code/03_scheduler.md)
-
-END
-
-1\. vLLM 整体代码架构
-
-1.1 vLLM 的设计目标与特点
-
-1.2 核心组件概览
-
-1.3 系统架构与工作流程
-
-2\. vLLM 处理请求的流程
-
-2.1 初始化并加载模型权重
-
-2.2 估计KV Cache的物理块数量
-
-2.3 预分配 KV Cache
-
-2.4 处理请求
-
-2.4.1 请求到达 LLMEngine
-
-2.4.2 调度器的任务
-
-2.4.3 Worker 执行推理
-
-2.4.4 模型的推理过程
-
-2.4.5 请求的完成和结果返回
-
-3\. vLLM 输入数据的预处理
-
-3.1 Tokenization 处理
-
-3.2 Prompt 模板与格式化
-
-3.3 输入验证与优化
-
-3.4 深入解析 add\_request
-
-3.4.1 preprocess 入口
-
-3.4 创建 sequence 和 sequence\_group
-
-3.4.1 深入理解 SequenceGroup
-
-4\. 小结
-
-5\. 参考资料
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

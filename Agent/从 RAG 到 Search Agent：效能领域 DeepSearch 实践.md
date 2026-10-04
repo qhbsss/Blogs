@@ -8,1740 +8,245 @@ description:
 tags:
   - "clippings"
 ---
-来源：[https://ata.atatech.org/articles/11020602880?spm=ata.25287382.0.0.629f4123zFa8lB](https://ata.atatech.org/articles/11020602880?spm=ata.25287382.0.0.629f4123zFa8lB)
 
-虎鲸文娱集团
+相关阅读：[知识库赋能 AI 研发，让资料随手可得，生码减少幻觉](https://ata.atatech.org/articles/12020521666)
 
-粉丝 2影响力 68
+## 背景
 
-__ 6
+### 什么是 Deep(Re)Search
 
-__ 18
+DeepSearch 是一种迭代式的搜索范式，通过搜索、阅读和推理的循环迭代，逐步优化搜索结果，直至找到最优答案。相比于传统 RAG，其优势在于其深度搜索能力，能够模拟人类的搜索、阅读和推理过程，从而获取更深入、完整的信息。
 
-__
+DeepResearch 是在 DeepSearch 的基础上，增加了一个结构化的框架，用于生成长篇的研究报告。它的工作流程一般从创建目录开始，然后系统性地将 DeepSearch 应用于报告的每一个所需部分：从引言到相关工作、再到方法论，直至最后的结论。报告的每个章节都是通过将特定的研究问题输入到 DeepSearch 中来生成的。最后将所有章节进行整合，以提高报告整体叙述的连贯性。
 
-__ 原创文章
+### DeepSearch 和 DeepResearch 的对比
 
-__ 内部资料
+| 特性 | Deep Search | Deep Research |
+| --- | --- | --- |
+| 主要功能 | 通过迭代搜索提高信息的准确性和完整性 | 撰写高质量、可读性强的长篇研究报告 |
+| 输出形式 | 简洁的答案，附带相关网址作为参考 | 结构化的长篇报告，包含多个章节、图表、表格和参考文献 |
+| 处理时间 | 相对较短（秒级到分钟级） | 较长（可能需要数分钟甚至数小时） |
+| 适用场景 | 信息收集、初步调研、日常问答 | 深度分析、报告生成 |
+| 资源消耗 | 中等 | 大 |
+| 关系 | 是 DeepResearch 的基础组件 | 构建于 DeepSearch 之上，核心在于结构化的报告生成 |
 
-__
+## 业界调研
 
-## AgentScope源码探究：入门Agent推理主流程
+### 信息检索范式的演进
 
-[谌怀义(义有)](https://ata.atatech.org/users/11001883154)
+搜索范式的演进主要经历了4个主要阶段：1）传统的 Web 检索；2）作为聊天机器人的 LLM；3）检索增强生成（RAG）；4）深度搜索/研究（Deep(Re)Search）。核心思路及其优劣势总结如下。
 
-3月17日发表3月26日更新489次浏览
+| 范式 | 思路 | 优点 | 缺点 |
+| --- | --- | --- | --- |
+| 传统Web搜索 | 主要包含爬取、索引和排序三个基本流程。爬虫系统性地收集网页内容，随后将这些内容分析整理成便于检索的倒排索引。当用户提交查询时，搜索引擎利用复杂算法评估文档的相关性和重要性。 | 速度快，近实时响应 | 准确性低，很多查询结果跟用户query不相关 |
+| LLM chatbot | 大模型通过参数学习聚合海量外部知识，成为在线信息的浓缩表达。通过指令微调、强化学习等手段，优化回答的准确性、相关性和用户偏好匹配度。同时，针对性的提示工程以及对话上下文管理，进一步提升了多轮交互的连贯性和成熟度。 | 直接生成答案，无需用户多次搜索/浏览，人工聚合答案 | 幻觉现象，生成看似合理但不准确的内容；对最新信息缺乏认知，回答时效性不足 |
+| RAG | RAG 将大型语言模型的生成能力与检索系统结合，实现动态获取相关外部信息。早期的 RAG 实现主要采用简单的"先检索后阅读"流程，通常从预定义的本地数据库或文档集合中进行单步检索。 | 解决大模型静态知识的局限，以及幻觉问题 | 面对复杂查询（如多跳问题）准确率仍然不足 |
+| DeepSearch | DeepSearch 通过多步骤、交互式地紧密结合检索和推理，系统能够逐步提升知识的相关性和深度，同时不断完善查询理解中的推理过程，从而产生更准确且语境丰富的回答。在此过程中，推理会动态影响检索（如基于中间推断优化查询），而检索结果则反过来递归地改善推理，形成动态反馈循环。 | 解决单次检索难以获取全面信息的问题 | 耗时长，复杂任务可能需要分钟级的生成时长 |
 
-__ 朗读
+### Deep(Re)Search的演进
 
-__ 字号
+Deep(Re)search 在业界的演进大致可以分为3个阶段：
 
-__ 笔记
+**早期探索（2023-2025.2）**：诸如 n8n、QwenLM/Qwen-Agent 等工作流程自动化框架早在 DeepResearch 兴起之前就已经存在。DeepResearch 的概念来源于 AI 助手向 Agent 的转变。2024年12月，Gemini 发布首个 DeepResearch 实现，聚焦基础的多步骤推理和知识整合。该阶段为后续的进步奠定了基础，开启了更为复杂的AI驱动研究工具的发展道路。许多进展都是建立在早期的工作流程自动化工具（如 n8n）以及自动化任务执行代理框架（如 AutoGPT 和 BabyAGI）的基础之上。其他早期贡献还包括开创集成 research 工作流的 cline2024 等。
 
-__ 分享 __
+**技术突破（2025.2-2025.3）**：2025年2月，OpenAI 发布了 Deep Research，基于 o3 模型，实现了自主研究规划、跨领域分析和高质量报告生成等功能，在复杂任务中准确率超越基准。Perplexity 在2025年2月推出免费的 Deep Research。开源项目如 nickscamara/open-deep-research、mshumer/OpenDeepResearcher、btahir_open_deep_research 及 GPT-researcher 等陆续出现。其他还包括适合本地执行的轻量级实现 Automated-AI-Web-Researcher-Ollama，以及可定制化的模块化框架 Langchain-AI/Open_deep_research。
 
-朗读文章55:01
+**生态扩展（2025.3-现在）**：开源项目如 Jina-AI/node-DeepResearch 支持本地部署与定制化。OpenAI 和谷歌的闭源商业版本持续突破，具备多模态支持和多智能体协作功能。同时，Manus、AutoGLM-Research、MGX 及 Devin 等平台不断引入 AI research 能力。2025年4月，Anthropic 推出 Claude/Research，引入了智能搜索功能，能够系统性、多角度地探索查询并提供含可验证引文的答案。
 
-Powered by 通义语音合成
+### 业界实现
 
-通义语音合成
+#### 实现范式举例
 
-__
+**Single Agent**
 
-最近收到一个Agent的项目开发，过去一直在看大模型推理的知识，对于整个Agent的了解并不是很多，然后这次借着对AgentScope这款Agent框架的研究，一次性带着大家梳理完整个Agent推理过程中的各个流程，以及其是在AgentScope这样的框架中是如何实现的？
+单 Agent 的实现较为简洁，与 ReAct 范式基本一致。核心是一个 LLM 驱动的 while loop，当存在信息缺口时，LLM 进一步决定下一步需要搜索的信息，当检索到的信息足以生成准确、全面的答案时，停止搜索，生成答案。
 
-[https://github.com/agentscope-ai](https://github.com/agentscope-ai)
+- [zilliztech/deep-searcher 的实现](https://github.com/zilliztech/deep-searcher)
+- [jina-ai/node-DeepResearch 的实现](https://github.com/jina-ai/node-DeepResearch)
 
-在AgentScope在github仓库上面贴了一张非常显眼的架构图，这里我借用一下：
+**Multi Agent**
 
-![[2155ee6c-4aee-4792-8ff3-0a31c15f6aac 1.png]]
+多 agent 的实现，比单 agent 稍复杂且更"重"一点。这里以 Anthropic 的实现为例，进行介绍。多 agent 的架构，通常包含一个主 agent，其复责整体搜索流程的调度，可以创建一系列子 agent 对用户提问的不同侧面进行搜索，每一个子 agent 也就是上面的 single agent。子 agent 可以迭代式地搜索主 agent 交给它的检索任务，同时主 agent 也可以迭代式地创建子 agent 持续搜索，直到信息完整，足以回答用户提问。本质上是一个双重while loop。最后还有一个 citation agent 用来生成正确的引用。
 
-AgentScope是阿里巴巴通义实验室开发的一款全链路生态的Agent框架；包含了现今Agent框架能力中需要的几乎所有能力，比如MCP，Tool，Rag，Hook等等。其次也支持了市场上常用的大模型api和中间件能力，为开发者提供了大量易用的api进行集成，对Agent开发者来说非常易用；
+- [Anthropic 的实现](https://www.anthropic.com/research/building-effective-agents)
 
-官网总结了AgentScope的如下特点：
+#### 闭源实现集合
 
-●
+| 平台 | 描述 | 发布时间 |
+| --- | --- | --- |
+| Gemini Deep Research | 谷歌面向深度分析的高级研究助手 | 2024年12月11日 |
+| Deep Research [API Guide] | OpenAI 的深度研究平台 | 2025年2月2日 |
+| Perplexity Deep Research | Perplexity 的深入研究和分析产品 | 2025年2月14日 |
+| Grok Agents | xAI 基于 Grok-3 的自主 DeepSearch 智能体 | 2025年2月19日 |
+| Copilot Researcher | Microsoft 365 Copilot 中的研究和分析助手 | 2025年3月25日 |
+| Research | Anthropic 的查找和推理信息研究平台 | 2025年4月15日 |
+| Manus | manus研究与分析平台 | 2025年3月6日 |
+| DeerFlow | 字节跳动的研究与分析解决方案 | 2025年5月9日 |
+| Deep Research | 阿里巴巴的 Qwen 驱动研究助手 | 2025年5月14日 |
+| Kimi-Researcher | Moonshot 基于 Kimi 的研究助手 | 2025年6月20日 |
 
-Simple yet powerful: start building your agents in 5 minutes with built-in ReAct agent, tools, skills, human-in-the-loop steering, memory, planning, realtime voice, evaluation, model finetuning, etc.
+#### 开源实现集合
 
-●
+| 仓库 | 描述 | GitHub star数 |
+| --- | --- | --- |
+| gemini-fullstack-langgraph-quickstart | Gemini 全栈与 LangGraph 集成。 | |
+| multi-agent research system | Anthropic 的多智能体研究系统。博客文章 | |
+| gpt-researcher | 用于综合研究任务的自主智能体。 | |
+| DeerFlow | 字节跳动开源的深度研究框架。 | |
+| r1-reasoning-rag | 具备推理能力的检索增强生成框架。 | |
+| nanoDeepResearch | 轻量级深度研究工具包。 | |
+| deep-research (Aomni) | Aomni 开发的深度研究助手。 | |
+| deep-research (u14app) | u14app 的深度研究平台。 | |
+| open-deep-research | 开源深度研究框架。 | |
+| deep-searcher | 深度搜索与研究工具包。 | |
+| node-DeepResearch | 用于寻找正确答案的深度研究工具包。 | |
+| Auto-Deep-Research | 自动化深度研究智能体。 | |
+| langgraph-deep-research | 使用 LangGraph 实现的深度研究工作流。 | |
+| DeepResearchAgent | SkyworkAI 提供的深度研究智能体。 | |
+| OpenManus | 用于构建通用 AI 智能体的开源框架。 | |
+| AtomSearcher | 自动化深度研究智能体。 | |
 
-Extensible: large number of ecosystem integrations for tools, memory and observability; built-in support for protocols such as MCP, A2A and agent skills; message hub for flexible multi-agent orchestration and workflows.
+## 我们的实践
 
-●
+### 产品入口
 
-Production-ready：deploy and serve your agents locally, as serverless in the cloud, or on your K8s cluster with built-in OTel support and multi-language support.
+- **DeepWiki/仓库问答**
+  - [DeepWiki 入口](https://deepwiki.antcode.antgroup-inc.cn/)
+  - [Antcode Copilot 入口](https://antcode.alipay.com/copilot)
+  - [Skybase 入口](https://skybase.alipay.com/)
+- **研发知识库问答**
+- **联网搜索**
 
-我后面的介绍主要针对AgentScope-java版来，也方便大量的后端程序员学习和理解。
+### 技术能力
 
-## Reactor响应式编程
+#### 从 RAG 到 DeepSearch 的范式转变
 
-响应式这个词语实际上在前端用的比较多，比如著名的响应式框架Vue。这是一种通过事件驱动，并执行回调函数一种异步实现方式。
+在效能领域，知识问答的两个重要应用场景：代码仓库问答、研发知识问答。这两部分能力分别于去年和今年上半年完成建设，但还都属于 RAG 的检索范式。
 
-在Java的Reactor的响应式库中，用两个比较重要异步操作模型，Mono和Flux，其实这两个差不太多，Mono是单值异步操作模型，Flux是多值异步模型；
+RAG 存在明显的缺陷：1）单轮检索只能搜索浅层的相关信息，对于复杂的任务（如多跳问题），搜索深度不足；2）单纯的 retrieval，无论是传统的关键字检索还是向量检索，对于多样化的搜索能力支持不足。
 
-先提供一个入门的例子带大家看一下 Mono是如何使用的：
+基于此，我们转向 DeepSearch 的搜索范式。相对 RAG，我们的 DeepSearch 方案的核心变化主要包括：1）支持多轮迭代式深度搜索；2）支持工具使用，其中传统 RAG 的 retrieval 能力只是工具之一，除此之外，支持了更多通用/专用工具。
 
-Mono.just("Hello")
+#### 技术方案
 
-.doOnTerminate(() -> System.out.println("执行完成"))
+##### 搜索范式
 
-error -> System.out.println("发生错误：" + error));
+我们采用简洁的 ReAct 范式，核心是一个由 LLM 驱动的 while loop。每一轮迭代，都由 LLM 借助于其强大的推理能力，判断是否存在信息缺失（information gap），如果存在，则选择（若干）合适的工具进行信息检索，检索完成后，LLM 会基于当前收集到的信息，进一步判断是否仍然存在信息缺失，以及是否进一步调用搜索工具补充信息。在 reason-search 的不断迭代中，信息最终完善，此时 LLM 会基于检索到的信息，生成最终答案。
 
-在这个例子中，整个过程主要分为三步：
+下图展示了我们从 RAG 范式到 DeepSearch 范式核心搜索流程的转变。
 
-首先 Mono.just("Hello") 创建一个Mono实例，其value为"Hello"；此时Mono并没有执行
+##### 上下文管理
 
-其次，Mono和Flux的另一个能力就是通过这种异步编程的模型，进行链式流程的串联执行；这种符合流程编排的执行模式非常适用于Agent推理过程中的多步流程执行。
+DeepSearch 的上下文膨胀来源于两方面：1）单轮问答中的多检索轮，每次检索都返回较长的内容；2）历史对话中的多轮问答。这两方面因素叠加起来，导致 DeepSearch agent 的上下文长度急剧增长。不仅导致模型响应变慢，更重要的是超长的上下文长度最终会突破 LLM 的上下文窗口极限。
 
-![[037ef334-d327-4772-8250-942718ccb0de 1.png]]
+为了解决这个问题，我们当前采取对话历史截断+工具调用结果折叠的策略。
 
-如上图所示，Reactor可以将多个Flux或者Mono实例拼接在一起，形成一个链式的flow，然后提供了map发放进行输出类型转换，异常方法终止流程等方式增加了整个flow的可编程性。可以参考如下代码：
+- 只保留最近 m 轮的对话历史；
+- 在最近 m 轮对话历史内部，所有的用户提问、工具调用schema、模型回答都会保留。但工具返回的结果不会完整保留，而是有一个字符级 budget B，当工具返回结果总长度超过 B 时，只保留最近 n 个搜索结果，且满足总长度小于 B。其他搜索结果会被折叠，用如下内容代替：
 
-getUserById(userId)
+```
+tool result is collapsed to reduce the token usage of the chat history, re-invoke the tool in latter turns if this piece of information is needed. \n
+```
 
-.flatMap(user -> getOrdersByUser(user.getId()))
+在我们的实现中，我们取 m=10， B=256k。
 
-.flatMap(orders -> getProductsFromOrders(orders))
+#### 垂直场景 DeepSearch Agent
 
-System.out.println("最终商品列表：" + products);
+基于以上的技术方案，结合不同场景下的搜索工具集，我们在3个垂直场景落地了 DeepSearch Agent。
 
-});
+**repo wiki/仓库问答**
 
-Reactor 响应式编程提供的异步操作 以及 流程编排能力非常适用于Agent推理过程中的多步执行，因此在AgentScope的推理主流程中也是通过Reactor 响应式框架中的Mono和Flux这两个实例对象完成的。
+- 源码检索语义
+- 文档语义检索检索：仓库 wiki / 中间件文档等
+- 程序分析工具集：如获取类/方法的实现
+- bash 命令类：如读文件、查看目录结构
 
-## ReActAgent初始化
+**研发知识库问答**
 
-ReActAgent是AgentScope框架提供的一个智能体，提供了包括tool，prompt，hook等基本能力，初始化方式如下
+- 文档语义检索
+- 文档阅读
+- 知识卡片、工单、研发实体等检索
 
-ReActAgent agent = ReActAgent.builder().name("资源投放推荐机器人")
+**联网搜索**
 
-.sysPrompt(SystemPrompt.SMART_HELPER_SYS_PROMPT)
+- 网页检索
+- 网页阅读
 
-.model(model)
+#### SkyBase 研发知识库
 
-.toolkit(toolkit)
+DeepSearch 作为上层搜索范式，底层基于 SkyBase 研发 AI 知识库构建的完善的产研数据体系和原子检索能力。
 
-.hook(new StudioMessageHook(StudioManager.getClient()))
+**打通蚂蚁产研数据**
 
-.build();
+当前已打通代码类（如源码、仓库wiki等）、非代码类（如技术文档、工单等）、研发平台类（如dima需求、产品等实体数据）。
 
-ReActAgent的各个参数说明大家可以看官方文档的说明，都是一些Agent需要用到的信息：
+**技术能力**
 
-[创建 ReAct 智能体 - AgentScope Java](https://java.agentscope.io/zh/quickstart/agent.html#)
+**索引&检索流程**
 
-## Hook钩子
+Skybase 研发知识库打通了 研发数据采集 - 加工 - 文档切分 - 索引 - 搜索 - RAG 链路。主要流程如下图：
 
-这里我单独讲一下Hook钩子这个概念，这个在AgentScope中非常重要，后面我们会发现其在整个推理流程中几乎无处不在；Hook相当于在Agent推理过程中向编程者提供的一些自定义流程的手段，可以作用在Agent执行过程中的不同阶段，非常灵活；
+**多模态能力**
 
-AgentScope Java 使用统一事件模型，所有 Hook 都需要实现 `onEvent(HookEvent)` 方法：
+**开放能力**
 
-●
+基于以上数据和能力，SkyBase 通过研发知识库小助手提供知识库搜索、问答等开放能力。Skybase 研发知识库小助手可以理解为 AI 知识库的轻量化 Agent，可以通过小助手将多个知识库作为数据源，包装成一个 RAG 服务，对外提供独立页面、内嵌 iframe、API 或 MCP 接口。详情见：[知识小助手 Ant](https://ata.atatech.org/articles/11020521666)
 
-基于事件：所有智能体活动生成事件
+#### Ant DeepWiki
 
-●
+2025年4月27日，Cognition AI（Cognition Labs）发布了 DeepWiki，它是基于其明星产品 Devin 开发的一款旨在通过AI技术为 GitHub 代码仓库生成交互式文档和知识库的工具。自发布以来，DeepWiki 迅速成为开发者社区的热门工具，被誉为"GitHub的维基百科"。
 
-类型安全：对事件类型进行模式匹配
+研发效能&程序分析团队也于今年下半年完成了蚂蚁版 DeepWiki 能力的建设，为更准更快的仓库问答提供了重要的信息输入。详情参考：[Ant Deepwiki —— 你的蚂蚁代码仓库，现在会自己写文档了](https://ata.atatech.org/articles/11020521666)
 
-●
+### 效果演示
 
-优先级排序：钩子按优先级执行（值越小优先级越高）
+#### DeepWiki 问答
 
-●
+##### 仓库问答
 
-可修改：某些事件允许修改执行上下文
+**case 1**：针对开源仓库 Llama-Factory，我们提问"llama factory 每个 training step 的指标保存在哪"。
 
-Hook提供了不同时期的事件执行类型，方便使用者在不同的阶段使用，主要的支持类型如下：
+分别在 Devin DeepWiki 和 Antcode DeepWiki 上进行提问，结果如下图所示。
 
-|事件类型|时机|可修改|描述|
-|---|---|---|---|
-|PreCallEvent|智能体调用前|❌|智能体开始处理之前（仅通知）|
-|PostCallEvent|智能体调用后|✅|智能体完成响应之后（可修改最终消息）|
-|PreReasoningEvent|推理前|✅|LLM 推理之前（可修改输入消息）|
-|PostReasoningEvent|推理后|✅|LLM 推理完成之后（可修改推理结果）|
-|ReasoningChunkEvent|推理流式期间|❌|流式推理的每个块（仅通知）|
-|PreActingEvent|工具执行前|✅|工具执行之前（可修改工具参数）|
-|PostActingEvent|工具执行后|✅|工具执行之后（可修改工具结果）|
-|ActingChunkEvent|工具流式期间|❌|工具执行进度块（仅通知）|
-|ErrorEvent|发生错误时|❌|发生错误时（仅通知）|
-|举个简单的例子：如下是一个基于PreReasoningEvent的Hook，当Agent注册了该hook之后，会在推理执行前执行其内部逻辑，使用者可自定义定制。||||
+- 我们的结果：准确，答案比 Devin DeepWiki 更详细一些
+- Devin DeepWiki 的结果：准确
 
-public class PromptEnhancingHook implements Hook {
+##### 仓库报错排查
 
-@Override
+- case 1
+- case 2
 
-public Mono onEvent(T event) {
+#### 研发知识问答
 
-if (event instanceof PreReasoningEvent e) {
+##### 常规问答
 
-List messages = new ArrayList<>(e.getInputMessages());
+- case 1、应用如何接入spanner？
+- case 2、maya部署模型的流程
+- case 3、如何通过离线数据表查询dima需求下面关联的缺陷列表？
 
-messages.add(0, Msg.builder()
+##### 多模态问答
 
-.role(MsgRole.SYSTEM)
+- case 1、分析图片中的报错原因
 
-.content(List.of(TextBlock.builder().text("逐步思考。").build()))
+##### 联网搜索
 
-.build());
+- case 1、寻找符合条件的列车车次
+- case 2、调研deepsearch和deepresearch的关系
 
-e.setInputMessages(messages);
+## 未来规划
 
-return Mono.just(event);
+### DeepSearch agent 能力优化
 
-}
+**上下文工程**：上下文管理是 agent 构建的重要环节。当前上下文管理机制较为简单，后续将探索更优的上下文管理机制。
 
-return Mono.just(event);
+**Test Time Scaling（TTS）**：DeepSearch 本质上是用更多的模型推理步骤换取更好的检索效果，可以看作是 TTS 的一种，后续将探索更复杂的 TTS 策略，进一步提高 agent 性能。
 
-}
+### 评测能力建设
 
-}
+尽管 DeepSearch 相比于 RAG 的回答效果在体感上已经有了很大提升，但仍缺乏可量化的评价指标对进一步的 agent 优化进行指导，评测数据集和评测体系构建是需要下一步做的事。
 
-不难发现，Hook中的onEvent方法返回的实际上就是一个Mono实例；结合前面我们说的Reactor编程知识，整个Agent推理流程都是通过Mono/Flux的异步编程模型串联起来的。
+## 项目组成员
 
-## Agent推理入口
-
-接下来，我们正式开始研究ReActAgent内部是如何执行的。
-
-首先通过call方法进入推理流程：
-
-msg = agent.call(Msg.builder().textContent(userInput).build()).block();
-
-这里的agent.call会返回一个Mono实例，这是一个异步操作对象，其返回类型为Msg，也就是整个Agent执行完成之后的输出结果；
-
-`block()` 是一个阻塞方法，它会等待 `Mono` 完成（成功或失败），并返回它的结果。如果 `Mono` 成功发射了值，则返回该值；如果出错，则抛出异常；如果没有值（如空的 `Mono` ），则返回 `null` 。所以这里就是等待Agent的执行完成，是一个阻塞等待的过程。
-
-## call执行方法
-
-call内部的执行就是Agent的推流大致流程，我们直接看代码：
-
-public final Mono call(List msgs) {
-
-return Mono.using(
-
-() -> {
-
-if (checkRunning &&!running.compareAndSet(false, true)) {
-
-throw new IllegalStateException(
-
-"Agent is still running, please wait for it to finish");
-
-}
-
-resetInterruptFlag();
-
-return this;
-
-},
-
-resource -> TracerRegistry.get().callAgent(
-
-this,
-
-msgs,
-
-() -> notifyPreCall(msgs)
-
-.flatMap(this::doCall)
-
-.flatMap(this::notifyPostCall)
-
-.onErrorResume(createErrorHandler(msgs.toArray(new Msg[0])))),
-
-resource -> running.set(false),
-
-true);
-
-}
-
-Mono.using方式也是一个实例化Mono异步操作的方式，核心在于它的第三个参数，也就是：
-
-() -> notifyPreCall(msgs) // 前置Hook处理
-
-.flatMap(this::doCall) // Agent推理执行
-
-.flatMap(this::notifyPostCall) // 后置Hook处理
-
-.onErrorResume(createErrorHandler(msgs.toArray(new Msg[0]))))
-
-call将整个执行过程拆成了三步：
-
-前置Hook处理：获取注册的hooks，执行hook内部的PreCallEvent事件；
-
-Agent推理执行：执行流程中最重要的阶段，完成输入到输出的核心推理步骤，后文中详细介绍；
-
-后置Hook处理：获取注册的hooks，执行hook内部的PostCallEvent事件。
-
-这里我以前置Hook处理为例说明：从源码可以看到，notifyPreCall方法会按照优先级取出hooks，通过链式调用的方法逐步执行其内部逻辑；这里的onEvent方法的传参是PreCallEvent，这样只要hook有对PreCallEvent事件的处理，就能实现hook逻辑。
-
-private Mono> notifyPreCall(List msgs) {
-
-PreCallEvent event = new PreCallEvent(this, msgs);
-
-Mono result = Mono.just(event);
-
-for (Hook hook: getSortedHooks()) {
-
-result = result.flatMap(hook::onEvent);
-
-}
-
-return result.map(PreCallEvent::getInputMessages);
-
-}
-
-## Reasoning推理主流程
-
-接下来，探究下整个Agent推理过程中最核心的主流程框架，也就是前面提到的doCall方法，doCall方法是一个抽象方法，不同的Agent框架可以通过实现该方法来自定义自己的执行过程；这里我们主要以ReActAgent智能体为例进行说明。
-
-观察源码可以看到，ReActAgent的doCall执行的主要是reasoning方法，该方法梳理了整体的执行流程
-
-private Mono reasoning(int iter, boolean ignoreMaxIters) {
-
-// Check maxIters unless ignoreMaxIters is set
-
-if (!ignoreMaxIters && iter >= maxIters) {
-
-return summarizing();
-
-}
-
-ReasoningContext context = new ReasoningContext(getName());
-
-return checkInterruptedAsync() // 检查请求是否中断
-
-.then(notifyPreReasoningEvent(prepareMessages())) // 推理前置hook处理流程
-
-.flatMapMany( // 将输入msg以及tools输入到大模型，完成推理输出
-
-event -> {
-
-GenerateOptions options =
-
-event.getEffectiveGenerateOptions()!= null
-
-? event.getEffectiveGenerateOptions()
-
-: buildGenerateOptions();
-
-return model.stream(
-
-event.getInputMessages(),
-
-toolkit.getToolSchemas(),
-
-options)
-
-.concatMap(chunk -> checkInterruptedAsync().thenReturn(chunk));
-
-})
-
-.doOnNext( // 处理推理输出,写入上下文
-
-chunk -> {
-
-List chunkMsgs = context.processChunk(chunk);
-
-// Notify streaming hooks for each chunk message
-
-for (Msg msg: chunkMsgs) {
-
-notifyReasoningChunk(msg, context).subscribe();
-
-}
-
-})
-
-.then(Mono.defer(() -> Mono.justOrEmpty(context.buildFinalMessage()))) // 构建最终消息
-
-.onErrorResume(
-
-InterruptedException.class,
-
-error -> {
-
-// Save accumulated message before propagating interrupt
-
-Msg msg = context.buildFinalMessage();
-
-我对上面的流程按照源码执行步骤进行了拆分，主要分为以下几步：
-
-创建推理上下文：创建一个推理上下文对象，用于累积模型流式输出的chunk
-
-中断检查与前置事件通知：检查是否中断请求，准备消息列表，通知所有注册的前置推理hook
-
-模型流式推理：使用模型对输入消息和工具模式进行流式推理，对每个输出块都检查中断状态
-
-chunk处理与hook通知：处理每个流式输出chunk，将其添加到推理上下文中；为每个chunk消息通知推理块事件钩子
-
-构建最终消息：从上下文构建最终的推理消息
-
-后置事件通知：通知所有注册的后置推理事件钩子
-
-执行决策逻辑：这是关键的决策步骤，会根据不同执行请求完成不同
-
-空结果处理：处理没有产生任何消息的情况
-
-接下来我们对上面的每一个过程进行详细的说明
-
-## 1、ReasoningContext推理上下文
-
-ReasoningContext context = new ReasoningContext(getName());
-
-ReasoningContext用来存储整个推理主流程中的输入和输出信息，方便流程各个阶段进行交互和使用，主要的信息有：
-
-public class ReasoningContext {
-
-private final String agentName; // agent名称
-
-private String messageId; // 消息id
-
-private final TextAccumulator textAcc = new TextAccumulator(); // 累积text内容块，支持流式文本的实时显示和最终聚合
-
-private final ThinkingAccumulator thinkingAcc = new ThinkingAccumulator(); // 累积thinking内容块，支持模型思考过程的实时流式展
-
-private final ToolCallsAccumulator toolCallsAcc = new ToolCallsAccumulator(); // 累积tool调用内容块，支持多个并行的工具调用，处理片段化的工具调用数据
-
-private final List allStreamedChunks = new ArrayList<>(); // 存储所有流式消息片段
-
-// ChatUsage
-
-private int inputTokens = 0; // 输入token计数
-
-private int outputTokens = 0; // 输出token计数
-
-private double time = 0; // 推理时间计数
-
-}
-
-## 2、中断检查与前置推理事件通知
-
-这部分比较简单，直接看源码吧；
-
-中断检查：检查当前agent是否处于interrupt中断状态，中断状态的设置可以通过调用interreupt方法完成；
-
-protected Mono checkInterruptedAsync() {
-
-return Mono.defer(
-
-() ->
-
-interruptFlag.get()
-
-? Mono.error(
-
-new InterruptedException("Agent execution interrupted"))
-
-: Mono.empty());
-
-}
-
-前置推理事件通知：和hook机制一样，只是使用的Event不同，这个阶段使用的是PreReasoningEvent；注意这里有一个prepareMessages方法，这里会对大模型输入的信息进行整合，主要包括system prompt, user prompt以及history（后两个都放在了memory当中）；
-
-private List prepareMessages() {
-
-List messages = new ArrayList<>();
-
-if (sysPrompt!= null &&!sysPrompt.trim().isEmpty()) {
-
-messages.add(
-
-Msg.builder()
-
-.name("system")
-
-.role(MsgRole.SYSTEM)
-
-.content(TextBlock.builder().text(sysPrompt).build())
-
-.build());
-
-}
-
-messages.addAll(memory.getMessages());
-
-return messages;
-
-}
-
-## 3、模型流式推理
-
-核心来了，这里Agent会完成和大模型model的交互，将前面处理和整合完成的输入信息提供给大模型，然后得到输出结果；
-
-源码中大模型的输出是通过调用model.stream方法完成的，model就是我们在初始化ReActAgent时写入的model实例，比如阿里百炼平台的DashScopeModel：
-
-DashScopeChatModel model = DashScopeChatModel.builder()
-
-.apiKey(BaseSwitch.QWEN_API_KEY).modelName("qwen3-max").build();
-
-model.stream方法的内部通过执行不同model类型的doStream方法完成，不同平台的Model实现doStream方法完成流式推理，这里以阿里百炼的DashScopeModel为例：
-
-protected Flux doStream(
-
-List messages, List tools, GenerateOptions options) {
-
-Flux responseFlux = streamWithHttpClient(messages, tools, options);
-
-// Apply timeout and retry if configured
-
-return ModelUtils.applyTimeoutAndRetry(
-
-responseFlux, options, defaultOptions, modelName, "dashscope");
-
-}
-
-doStream内部调用streamWithHttpClient，其会封装http请求和大模型完成交互：
-
-private Flux streamWithHttpClient(
-
-List messages, List tools, GenerateOptions options) {
-
-Instant start = Instant.now();
-
-boolean useMultimodal = httpClient.requiresMultimodalApi(modelName, endpointType);
-
-// Merge options with defaultOptions (options takes precedence)
-
-GenerateOptions effectiveOptions = GenerateOptions.mergeOptions(options, defaultOptions);
-
-ToolChoice toolChoice = effectiveOptions.getToolChoice();
-
-// Format messages using formatter
-
-List dashScopeMessages;
-
-if (useMultimodal) {
-
-if (formatter instanceof DashScopeChatFormatter chatFormatter) {
-
-dashScopeMessages = chatFormatter.formatMultiModal(messages);
-
-} else if (formatter instanceof DashScopeMultiAgentFormatter multiAgentFormatter) {
-
-dashScopeMessages = multiAgentFormatter.formatMultiModal(messages);
-
-} else {
-
-throw new IllegalStateException(
-
-"DashScope vision models require DashScopeChatFormatter or"
-
-+ " DashScopeMultiAgentFormatter, but got: "
-
-+ formatter.getClass().getName());
-
-}
-
-} else {
-
-dashScopeMessages = formatter.format(messages);
-
-}
-
-// Build request using formatter
-
-DashScopeRequest request;
-
-if (formatter instanceof DashScopeChatFormatter chatFormatter) {
-
-request =
-
-chatFormatter.buildRequest(
-
-modelName,
-
-dashScopeMessages,
-
-stream,
-
-options,
-
-defaultOptions,
-
-1、处理options参数：主要是大模型相关的参数(top-k等)
-
-2、格式化输入构建DashScopeMessage：判断输入是否为useMultimodal，这种格式相对于用户输入中的消息包含了role信息，比如system，tool等等；而反之就是简单的用户输入，都是user prompt。
-
-可以看到DashScopeMessage对象内部的属性其实就是对应的标准OpenAI API的JSON格式化信息。不清楚的可以看下这个博客，介绍的很清晰：
-
-[https://juejin.cn/post/7616943516188655616](https://juejin.cn/post/7616943516188655616)
-
-public class DashScopeMessage {
-
-/** Message role: "system", "user", "assistant", or "tool". */
-
-@JsonProperty("role")
-
-private String role;
-
-/**
-
-* Message content.
-
-* Can be String for text-only, or List for multimodal.
-
-*/
-
-@JsonProperty("content")
-
-private Object content;
-
-/** Tool name (for role="tool"). */
-
-@JsonProperty("name")
-
-private String name;
-
-/** Tool call ID (for role="tool"). */
-
-@JsonProperty("tool_call_id")
-
-private String toolCallId;
-
-/** Tool calls made by assistant. */
-
-@JsonProperty("tool_calls")
-
-private List toolCalls;
-
-/** Reasoning/thinking content (for assistant messages with thinking enabled). */
-
-@JsonProperty("reasoning_content")
-
-private String reasoningContent;
-
-}OpenAI API 接口协议指南public class DashScopeMessage {
-
-/** Message role: "system", "user", "assistant", or "tool". */
-
-@JsonProperty("role")
-
-private String role;
-
-/**
-
-* Message content.
-
-3、构建模型请求DashScopeRequest：请求封装，主要的信息如下：
-
-public class DashScopeRequest {
-
-/** The model name (e.g., "qwen-plus", "qwen-vl-max"). */
-
-@JsonProperty("model")
-
-private String model; // 使用模型
-
-/** The input containing messages. */
-
-@JsonProperty("input")
-
-private DashScopeInput input; // 前面的DashScoputMessage封装在该对象中
-
-/** The generation parameters. */
-
-@JsonProperty("parameters")
-
-private DashScopeParameters parameters; // 大模型推理参数，对应Options
-
-}
-
-4、通过HttpClient请求大模型：主流的大模型Api厂商大多数都提供了开放的api调用方式，这里就是通过Http请求的方式和百炼平台进行交互，获取输出信息。
-
-主要有stream-mode和Non-steram mode两种形式，这个相信大家都很清楚，stream-mode就是类似一个字一个字持续输出的形式，相反Non-steram mode就是一次性完成请求。这里我将stream-mode的流式输出模式单独拎出来讲一下，也带着大家熟悉一下SSE协议；
-
-Stream-mode流式现在主流的交互方案是SSE协议，这个协议可以和过去大家熟悉的WebSocket协议进行对比学习，这里我贴一张图来说明二者的区别：
-
-|特性|SSE (Server-Sent Events)|WebSocket|
-|---|---|---|
-|通信方向|单向(服务器 -> 客户端)|双向(全双工)|
-|协议|HTTP|独立的 WS/WSS 协议 (基于 TCP)|
-|数据格式|文本(UTF-8)|文本和二进制帧|
-|复杂度|简单|相对复杂|
-|自动重连|内置支持|需要手动实现|
-|![[9de584e2-0905-44c2-a3dc-719f062dbeb4 1.png]]|||
-
-简单来说，SSE就是一个通过Server-Client的持续单向交互协议，这种形式基本上完美的适配了当前的大模型交互需求；我结合AgentScope内部的JdkHttpTransport方法进行说明：
-
-public Flux stream(HttpRequest request) {
-
-if (closed.get()) {
-
-return Flux.error(new HttpTransportException("Transport has been closed"));
-
-}
-
-var jdkRequest = buildJdkRequest(request);
-
-// Check status code and read error body immediately when CompletableFuture completes
-
-// to avoid stream being closed before we can read it
-
-CompletableFuture> future =
-
-client.sendAsync(jdkRequest, BodyHandlers.ofInputStream())
-
-.thenApply(
-
-response -> {
-
-int statusCode = response.statusCode();
-
-if (statusCode < 200 || statusCode >= 300) {
-
-// Read error body immediately while stream is still open
-
-String errorBody = readInputStream(response.body());
-
-log.warn(
-
-"HTTP request failed. URL: {} | Status: {} | Error:"
-
-+ " {}",
-
-request.getUrl(),
-
-statusCode,
-
-errorBody);
-
-throw new CompletionException(
-
-new HttpTransportException(
-
-"HTTP request failed with status "
-
-+ statusCode
-
-+ " | "
-
-+ errorBody,
-
-statusCode,
-
-errorBody));
-
-}
-
-return response;
-
-});
-
-return Mono.fromCompletionStage(future)
-
-这里会构建一个sse的异步请求，请求内部会塞上SSE的头信息("X-DashScope-SSE","enable")，告诉平台这是一个SSE的流式请求：
-
-if (streaming) {
-
-headers.put("X-DashScope-SSE", "enable");
-
-}
-
-请求之后，HttpClient客户端会得到response响应的流式对象InputStream，这个对象就是SSE协议中进行Event事件交互的实例，Server服务端会不断往这个流中塞入信息，Client持续读取知道读取到结束符。
-
-private Flux readSseLines(BufferedReader reader) {
-
-return Flux.fromStream(reader.lines())
-
-.filter(line -> line.startsWith(SSE_DATA_PREFIX))
-
-.map(line -> line.substring(SSE_DATA_PREFIX.length()).trim())
-
-.takeWhile(data ->!SSE_DONE_MARKER.equals(data))
-
-.doOnNext(data -> log.debug("Received SSE data chunk"))
-
-.filter(data ->!data.isEmpty());
-
-}
-
-这里的 Flux.fromStream(reader.lines()) 实际上就是个多值的异步操作，每次从reader中读出一行，然后进行解析处理处理交给上层，直到读到休止符"[DONE]"。
-
-然后将模型文本输出进行格式化得到模型格式化输出DashScopeResponse；
-
-transport.stream(httpRequest)
-
-.map(
-
-data -> {
-
-try {
-
-// Decrypt response if encryption is enabled
-
-if (finalEncryptionContext!= null) {
-
-data = decryptResponse(data, finalEncryptionContext);
-
-}
-
-return JsonUtils.getJsonCodec()
-
-.fromJson(data, DashScopeResponse.class);
-
-} catch (JsonException e) {
-
-log.warn(
-
-"Failed to parse SSE data: {}. Error: {}",
-
-data,
-
-e.getMessage());
-
-// Return null and filter out later
-
-return null;
-
-}
-
-})
-
-5、将模型格式化输出DashScopeResponse转为ChatResponse
-
-public ChatResponse parseResponse(DashScopeResponse result, Instant startTime) {
-
-return responseParser.parseResponse(result, startTime);
-
-}
-
-## 4、chunk处理与hook通知
-
-当我们拿到了模型的输出chunk之后，需要对chuck进行处理；也可以针对每个chunk定制hook逻辑。
-
-chunk处理：主要是将chunk的推理输出信息记录到Reasoning推理上下文中，用于本次的推理使用。
-
-public List processChunk(ChatResponse chunk) {
-
-this.messageId = chunk.getId();
-
-// Accumulate ChatUsage
-
-ChatUsage usage = chunk.getUsage();
-
-if (usage!= null) {
-
-inputTokens = usage.getInputTokens();
-
-outputTokens = usage.getOutputTokens();
-
-time = usage.getTime();
-
-}
-
-List streamingMsgs = new ArrayList<>();
-
-for (ContentBlock block: chunk.getContent()) {
-
-if (block instanceof TextBlock tb) {
-
-textAcc.add(tb);
-
-// Emit text block immediately
-
-Msg msg = buildChunkMsg(tb);
-
-streamingMsgs.add(msg);
-
-allStreamedChunks.add(msg);
-
-} else if (block instanceof ThinkingBlock tb) {
-
-thinkingAcc.add(tb);
-
-// Emit thinking block immediately
-
-Msg msg = buildChunkMsg(tb);
-
-streamingMsgs.add(msg);
-
-allStreamedChunks.add(msg);
-
-} else if (block instanceof ToolUseBlock tub) {
-
-// Accumulate tool calls and emit immediately for real-time streaming
-
-toolCallsAcc.add(tub);
-
-// Emit ToolUseBlock chunk immediately for real-time display
-
-// Each tool call chunk is emitted separately, supporting multiple parallel tool
-
-hook通知：举个简单的例子，在流式输出的场景中，我们需要将SSE流中的每个chunk立马显示到客户端，形成一种流式输出的UI形式，这时候就需要在这个地方使用hook了，这是针对chunk使用的hook事件执行；使用的是ReasoningChunkEvent。
-
-// Notify streaming hooks for each chunk message
-
-for (Msg msg: chunkMsgs) {
-
-notifyReasoningChunk(msg, context).subscribe();
-
-}
-
-## 5、构建最终消息
-
-这一步比较简单，就是将ReasoningContext上下文中的推理信息进行整合，然后拼接成最终的输出信息：
-
-public Msg buildFinalMessage() {
-
-List blocks = new ArrayList<>();
-
-// Add thinking content if present
-
-if (thinkingAcc.hasContent()) {
-
-blocks.add(thinkingAcc.buildAggregated());
-
-}
-
-// Add text content if present
-
-if (textAcc.hasContent()) {
-
-blocks.add(textAcc.buildAggregated());
-
-}
-
-// Add all tool calls
-
-List toolCalls = toolCallsAcc.buildAllToolCalls();
-
-blocks.addAll(toolCalls);
-
-// If no content at all, return null
-
-if (blocks.isEmpty()) {
-
-return null;
-
-}
-
-// Build metadata with accumulated ChatUsage
-
-Map metadata = new HashMap<>();
-
-if (inputTokens > 0 || outputTokens > 0 || time > 0) {
-
-ChatUsage chatUsage =
-
-ChatUsage.builder()
-
-.inputTokens(inputTokens)
-
-.outputTokens(outputTokens)
-
-.time(time)
-
-.build();
-
-metadata.put(MessageMetadataKeys.CHAT_USAGE, chatUsage);
-
-}
-
-return Msg.builder()
-
-.id(messageId)
-
-## 6、后置推理事件通知
-
-和前面的hook的类似，这里使用的后置推理事件PostReasoningEvent
-
-private Mono notifyPostReasoning(Msg msg) {
-
-return notifyHooks(new PostReasoningEvent(this, model.getModelName(), null, msg));
-
-}
-
-## 7、执行决策逻辑
-
-这里主要就是对推理执行的判断，是否结束推理，或者继续推理；
-
-event -> {
-
-Msg msg = event.getReasoningMessage();
-
-if (msg!= null) {
-
-memory.addMessage(msg);
-
-}
-
-// HITL stop
-
-if (event.isStopRequested()) {
-
-return Mono.just(
-
-msg.withGenerateReason(
-
-GenerateReason.REASONING_STOP_REQUESTED));
-
-}
-
-// gotoReasoning requested (e.g., by StructuredOutputHook)
-
-if (event.isGotoReasoningRequested()) {
-
-// Validation already done in PostReasoningEvent.gotoReasoning()
-
-List gotoMsgs = event.getGotoReasoningMsgs();
-
-if (gotoMsgs!= null) {
-
-gotoMsgs.forEach(memory::addMessage);
-
-}
-
-// Continue to next iteration, ignoring maxIters for this entry
-
-return reasoning(iter + 1, true);
-
-}
-
-// Check finish conditions
-
-if (isFinished(msg)) {
-
-return Mono.just(msg);
-
-}
-
-// Continue to acting
-
-return checkInterruptedAsync().then(acting(iter));
-
-})
-
-我主要讲一下 event.isGotoReasoningRequested() 判断这个地方，这是一个继续推理的标志，当为true时，Agent会递归调用reasoning方法进行下一轮的推理。通常用于需要连续和大模型进行交互的场景，我这里以AgentScope内部的一个结构化输出功能为例，看看他是怎么做的。
-
-首先我们要清楚，如果要实现这种连续推理，需要将PostReasoningEvent的gotoReasoningMsgs填充进去，用于下次递归推理，我们来看看结构化输出StructuredOutputHook怎么做的。
-
-在StructuredOutputHook，会执行gotoReasoning来填充PostReasoningEvent的gotoReasoningMsgs信息。
-
-private void handlePostReasoning(PostReasoningEvent event) {
-
-Msg msg = event.getReasoningMessage();
-
-if (msg == null) {
-
-return;
-
-}
-
-boolean hasCall =!msg.getContentBlocks(ToolUseBlock.class).isEmpty();
-
-if (!hasCall && retryCount < MAX_RETRIES) {
-
-retryCount++;
-
-log.debug(
-
-"Model didn't call any tool, requesting retry ({}/{})",
-
-retryCount,
-
-MAX_RETRIES);
-
-// Add reminder message and goto reasoning
-
-event.gotoReasoning(createReminderMessage(reminderMode));
-
-}
-
-// If max retries exceeded, let it continue to summarizing which will report error
-
-}
-
-Msg输入信息如下，可以看到StructuredOutputHook递归推理时补充了prompt信息："Please call the 'generate_response' function to provide your response"，这里相当于要求大模型调用generate_response方法区结构化输出。
-
-private Msg createReminderMessage(StructuredOutputReminder mode) {
-
-Map metadata =
-
-Map.of(
-
-MessageMetadataKeys.STRUCTURED_OUTPUT_REMINDER,
-
-true,
-
-MessageMetadataKeys.STRUCTURED_OUTPUT_REMINDER_TYPE,
-
-mode.toString());
-
-return Msg.builder()
-
-.name("system")
-
-.role(MsgRole.USER)
-
-.content(
-
-TextBlock.builder()
-
-.text(
-
-"Please call the 'generate_response' function to provide"
-
-+ " your response.")
-
-.build())
-
-.metadata(metadata)
-
-.build();
-
-}
-
-generate_response就是在初始化Agent时写入的一个tool，其作用就是进行输出格式化；
-
-Map jsonSchema =
-
-targetClass!= null
-
-? JsonSchemaUtils.generateSchemaFromClass(targetClass)
-
-: JsonSchemaUtils.generateSchemaFromJsonNode(schemaDesc);
-
-AgentTool structuredOutputTool =
-
-createStructuredOutputTool(jsonSchema, targetClass, schemaDesc);
-
-toolkit.registerAgentTool(structuredOutputTool);
-
-## 8、空结果处理
-
-.switchIfEmpty(
-
-Mono.defer(
-
-() -> {
-
-// No message was produced
-
-return Mono.justOrEmpty((Msg) null);
-
-}));
-
-## Acting工具调用
-
-上一个部分我们聊完了reasoning推理，接下来我们来看看agent的第二个主流程，也就是acting的工具调用；首先我先了解什么是acting，以及调用acting的时机是什么时候；
-
-acting其实也就是tool调用，我们知道现在的agent之所以这么强大，就是因为其具备了tool调用的能力，也就是过去常说的function call，我们可以看到大模型交互的协议中，除了user system prompt这些输入信息之外，另外一个比较重要的信息就是tool。
-
-{
-
-"tools": [
-
-{
-
-"name": "interact_case_detail",
-
-"description": "检索现有的所有互动案例信息，在用户需要“查询已有案例”或者需要“根据案例和剧情进行结合”，”推荐案例投放点位“等情况时查询使用",
-
-"parameters": {
-
-"type": "object",
-
-"properties": {},
-
-"required": []
-
-},
-
-"strict": null
-
-}
-
-]
-
-}
-
-那么agent怎么知道什么时候去使用tool呢？其实也是通过大模型推理判断的，当我们将大量的prompt和tool信息交给大模型之后，大模型会除了会返回基本的text文本或者其他多模态信息之外，另外一个非常重要的就是tool_use信息，也就是告诉agent需要调用哪个tool，当agent收到之后就会去执行具体的调用过程：
-
-{
-
-"type": "tool_use",
-
-"id": "call_10ca8081261f4ad09cbcd484",
-
-"name": "plot_search_interact",
-
-"input": {
-
-"vdoEp": "长安二十四计 17"
-
-},
-
-"content": "{\"vdoEp\": \"长安二十四计 17\"}",
-
-"metadata": {}
-
-}
-
-接下来，正式进入agentscope的acting调用流程讲解：
-
-## Acting流程入口
-
-前面也提到了，执行acting工具调用的判断就是大模型的返回中用没有明确通过 tool_use 的指示来指定工具调用；因此在前面的reasoning推理过程中的 第七步. 执行决策逻辑中，就有这样的流程：
-
-// Check finish conditions
-
-if (isFinished(msg)) {
-
-return Mono.just(msg);
-
-}
-
-// Continue to acting
-
-return checkInterruptedAsync().then(acting(iter));
-
-深入到 isFinished 和checkInterruptedAsync 方法中
-
-private boolean isFinished(Msg msg) {
-
-if (msg == null) {
-
-return true;
-
-}
-
-List toolCalls = msg.getContentBlocks(ToolUseBlock.class);
-
-// No tool calls - finished
-
-// If there are tool calls (even non-existent ones), continue to acting phase
-
-// where ToolExecutor will return "Tool not found" error for the model to see
-
-return toolCalls.isEmpty();
-
-}
-
-isFinished方法本质上刚刚我们提到的，检查大模型的输出当中有没有明确指出使用tool_use，如果有的话表示推理并没有结束，需要继续执行acting过程；
-
-checkInterruptedAsync就是检查中断，这个是用户手动执行的，不再过多赘述。
-
-## Acting主链路分析
-
-和Reasoning类型，Acting也是将整体的调用流程拆成了多个部分，我们可以通过源码看一下
-
-private Mono acting(int iter) {
-
-// Extract only pending tool calls (those without results in memory)
-
-List pendingToolCalls = extractPendingToolCalls();
-
-if (pendingToolCalls.isEmpty()) {
-
-// No pending tools have been executed, continue to next iteration
-
-return executeIteration(iter + 1);
-
-}
-
-// Execute only pending tools (those without results in memory)
-
-return notifyPreActingHooks(pendingToolCalls)
-
-.flatMap(this::executeToolCalls)
-
-.flatMap(
-
-results -> {
-
-// Separate success and pending results
-
-List> successPairs =
-
-results.stream()
-
-.filter(e ->!e.getValue().isSuspended())
-
-.toList();
-
-List> pendingPairs =
-
-results.stream()
-
-.filter(e -> e.getValue().isSuspended())
-
-.toList();
-
-// If no success results to process
-
-if (successPairs.isEmpty()) {
-
-if (!pendingPairs.isEmpty()) {
-
-return Mono.just(buildSuspendedMsg(pendingPairs));
-
-}
-
-return executeIteration(iter + 1);
-
-}
-
-// Process success results through hooks and add to memory
-
-提取待执行工具tool_use ：获取大模型输出中的tool_use 信息，用于后续的tool调用
-
-注册流式回调：Hook Event中的一种，用于工具执行中的流式 chunk 实时通知
-
-前置Acting事件通知：Hook Event中的一种，用于acting执行前的hook
-
-执行tool工具调用：实际执行工具
-
-处理执行结果（分流）：对执行结果进行分析
-
-接下来我们从上面五个步骤逐一讲解
-
-## 1. 提取待执行工具tool_use
-
-private List extractPendingToolCalls() {
-
-List allToolCalls = extractRecentToolCalls();
-
-if (allToolCalls.isEmpty()) {
-
-return List.of();
-
-}
-
-Set pendingIds = getPendingToolUseIds();
-
-return allToolCalls.stream()
-
-.filter(toolUse -> pendingIds.contains(toolUse.getId()))
-
-.toList();
-
-}
-
-提取大模型输出中的tool_use的信息，和大模型输入中的可用的tool进行匹配分析；
-
-注意：这里的pending tool提取是不包含memory上下文中的tool块的，其不可用。
-
-## 2. 注册流式回调
-
-这一步会为toolkit注册一个回调的hook onEvent执行，用户处理工具调用过程中的流式输出chunk
-
-private Mono notifyActingChunk(ToolUseBlock toolUse, ToolResultBlock chunk) {
-
-ActingChunkEvent event =
-
-new ActingChunkEvent(
-
-this,
-
-toolkit,
-
-toolUse,
-
-chunk.withIdAndName(toolUse.getId(), toolUse.getName()));
-
-return Flux.fromIterable(getSortedHooks()).flatMap(hook -> hook.onEvent(event)).then();
-
-}
-
-使用到的event是 ActingChunkEvent ，工具调用chunk事件处理。
-
-## 3. 前置Acting事件通知
-
-和前面的Event类似，这里用到的Event是PreActingEvent，用于acting调用工具调用前的hook执行
-
-private Mono> notifyPreActingHooks(List toolCalls) {
-
-return Flux.fromIterable(toolCalls)
-
-.concatMap(tool -> notifyHooks(new PreActingEvent(this, toolkit, tool)))
-
-.map(PreActingEvent::getToolUse)
-
-.collectList();
-
-}
-
-## 4. 执行tool工具调用
-
-到这里整个acting工具调用流程才进入到重点，和reasoning中的agent与模型的交互类似，这里会涉及到agent和tool的交互，我们来看看是怎么做的吧；
-
-1、首先，tool调用的过程会交给ToolExecutor进行执行，其分为两种执行方式：Parallel并行执行 或者 sequential 并行执行。这个执行方式是通过Flux的响应式编程方法实现的。
-
-// Map each tool call to an execution Mono
-
-List> monos =
-
-toolCalls.stream()
-
-.map(
-
-toolCall ->
-
-executeWithInfrastructure(
-
-toolCall, executionConfig, agent, agentContext))
-
-.toList();
-
-// Parallel or sequential execution
-
-if (parallel) {
-
-return Flux.mergeSequential(monos).collectList();
-
-}
-
-return Flux.concat(monos).collectList();
-
-2、深入到 executeWithInfrastructure 内部，整个execute执行分为了以下几步
-
-// Build tool call parameter
-
-ToolCallParam param =
-
-ToolCallParam.builder()
-
-.toolUseBlock(toolCall)
-
-.agent(agent)
-
-.context(agentContext)
-
-.build();
-
-// Get core execution
-
-Mono execution = execute(param);
-
-// Apply infrastructure layers
-
-execution = applyScheduling(execution);
-
-execution = applyTimeout(execution, executionConfig, toolCall);
-
-execution = applyRetry(execution, executionConfig, toolCall);
-
-// Add tool metadata and error handling
-
-return execution
-
-.map(result -> result.withIdAndName(toolCall.getId(), toolCall.getName()))
-
-.onErrorResume(
-
-e -> {
-
-logger.warn("Tool call failed: {}", toolCall.getName(), e);
-
-String errorMsg = ExceptionUtils.getErrorMessage(e);
-
-return Mono.just(
-
-ToolResultBlock.error("Tool execution failed: " + errorMsg));
-
-});
-
-●
-
-构建tool请求参数：使用到agent注册的tool上下文和大模型返回的tool_use信息
-
-●
-
-执行核心调用流程：适配不同的客户端，比如MCP等，执行具体的调用
-
-●
-
-叠加基础能力：线程池分配、超时控制、失败重试等能力
-
-●
-
-封装tool调用结构：对tool返回进行对象封装
-
-3、核心execute执行流程
-
-ToolUseBlock toolCall = param.getToolUseBlock();
-
-AgentTool tool = toolRegistry.getTool(toolCall.getName());
-
-if (tool == null) {
-
-return Mono.just(ToolResultBlock.error("Tool not found: " + toolCall.getName()));
-
-}
-
-// Check tool activation
-
-RegisteredToolFunction registered = toolRegistry.getRegisteredTool(toolCall.getName());
-
-if (registered!= null &&!groupManager.isActiveTool(toolCall.getName())) {
-
-String errorMsg =
-
-String.format(
-
-"Unauthorized tool call: '%s' is not available", toolCall.getName());
-
-logger.warn(errorMsg);
-
-return Mono.just(ToolResultBlock.error(errorMsg));
-
-}
-
-// Validate input against schema
-
-String validationError =
-
-ToolValidator.validateInput(toolCall.getContent(), tool.getParameters());
-
-if (validationError!= null) {
-
-String errorMsg =
-
-String.format(
-
-"Parameter validation failed for tool '%s': %s\n"
-
-+ "Please correct the parameters and try again.",
-
-toolCall.getName(), validationError);
-
-logger.debug(errorMsg);
-
-return Mono.just(ToolResultBlock.error(errorMsg));
-
-}
-
-// Merge context
-
-ToolExecutionContext toolkitContext = config.getDefaultContext();
-
-ToolExecutionContext finalContext =
-
-ToolExecutionContext.merge(param.getContext(), toolkitContext);
-
-// Create emitter for streaming
-
-到这里就是tool调用的 “校验 + 准备 + 执行”的过程三部曲
-
-●
-
-前置校验：
-
-○
-
-检查工具是否存在且已经注册到agent中
-
-○
-
-入参 Schema 校验：会根据tool的入参要求检查tool_use中的入参拼装是否正确
-
-●
-
-执行准备：
-
-○
-
-构建流式输出toolEmitter，这个用于tool调用时的chunk回调函数event使用，前文有提到
-
-○
-
-合并预设参数 + LLM 传入参数：有值时优先使用tool_use的入参，无值时使用默认参数
-
-●
-
-执行
-
-○
-
-通过不同的client客户端执行调用操作，如MCP client
-
-4、不同客户端执行工具调用，我这里以mcp client为例
-
-![[1180288e-b508-43d8-8a0c-9e8b06ac2047 1.png]]
-
-可以看到agentscope支持了不同的mcp客户端执行方式，比如同步和异步的执行等等。
-
-其内部的调用，就是使用封装好的MCP Client客户端工具完成的远程调用;
-
-return client.callTool(request)
-
-.doOnSuccess(
-
-result -> {
-
-if (Boolean.TRUE.equals(result.isError())) {
-
-logger.warn(
-
-"MCP tool '{}' returned error: {}",
-
-toolName,
-
-result.content());
-
-} else {
-
-logger.debug("MCP tool '{}' completed successfully", toolName);
-
-}
-
-})
-
-.doOnError(
-
-e ->
-
-logger.error(
-
-"Failed to call MCP tool '{}': {}",
-
-toolName,
-
-e.getMessage()));
-
-## 5. 处理执行结果（分流）
-
-这一步就是对tool调用后的结果进行处理：
-
-results -> {
-
-// Separate success and pending results
-
-List> successPairs =
-
-results.stream()
-
-.filter(e ->!e.getValue().isSuspended())
-
-.toList();
-
-List> pendingPairs =
-
-results.stream()
-
-.filter(e -> e.getValue().isSuspended())
-
-.toList();
-
-// If no success results to process
-
-if (successPairs.isEmpty()) {
-
-if (!pendingPairs.isEmpty()) {
-
-return Mono.just(buildSuspendedMsg(pendingPairs));
-
-}
-
-return executeIteration(iter + 1);
-
-}
-
-// Process success results through hooks and add to memory
-
-return Flux.fromIterable(successPairs)
-
-.concatMap(this::notifyPostActingHook)
-
-.last()
-
-.flatMap(
-
-event -> {
-
-// HITL stop (also triggered by
-
-// StructuredOutputHook when completed)
-
-if (event.isStopRequested()) {
-
-return Mono.just(
-
-event.getToolResultMsg()
-
-.withGenerateReason(
-
-GenerateReason
-
-.ACTING_STOP_REQUESTED));
-
-}
-
-// If there are pending results, build suspended Msg
-
-取出执行成功和执行挂起的tool调用
-
-如果有执行挂起的情况，一般需要用户进行确认，重新执行下一轮的推理迭代，交由用户确认
-
-遍历tool调用的执行结果，并执行acting后置执行hook事件 PostActingEvent
-
-进行下一轮迭代 reasoning
-
-到这里，整个acting和reasoning的迭代执行就已经串起来了；
-
-相当于reasoning的过程中，如果需要进行工具调用，就会进入到acting流程中，acting执行完，再回来执行reasoning，这是一个循环迭代的过程；
-
-![[a5612185-2a63-4bde-beaf-75dd33b1dd09 1.png]]
-
-## 结语
-
-AI时代已经来临，希望借助这篇小文章帮助大家了解Agent的主推理流程是如何规划，大家也可以基于AgentScope的思路完成自己的Agent的流程搭建。
-
-END
-
-Reactor响应式编程
-
-ReActAgent初始化
-
-Hook钩子
-
-Agent推理入口
-
-call执行方法
-
-Reasoning推理主流程
-
-1、ReasoningContext推理上下文
-
-2、中断检查与前置推理事件通知
-
-3、模型流式推理
-
-4、chunk处理与hook通知
-
-5、构建最终消息
-
-6、后置推理事件通知
-
-7、执行决策逻辑
-
-8、空结果处理
-
-Acting工具调用
-
-Acting流程入口
-
-Acting主链路分析
-
-1. 提取待执行工具tool_use
-
-2. 注册流式回调
-
-3. 前置Acting事件通知
-
-4. 执行tool工具调用
-
-5. 处理执行结果（分流）
-
-结语
-
-有什么问题，和我聊聊吧～
-
-__
-
-内部资料
-
-INTERNAL
-
-495838
+- Ant Code Copilot: 承谐、乾欢、尤七、云辰、竹年
+- DeepWiki/Code Insight: 不恶、发散、合明、嘉珩、谨敕、山苍
+- Skybase/DeepSearch: 根鸟、黄莹莹、羚牛、慕冕、耐安、泉百、王月月、崖鹰、瞩恒

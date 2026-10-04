@@ -10,59 +10,16 @@ tags:
 ---
 蚂蚁集团
 
-粉丝 204影响力 3.4k
 
-** 41
 
-** 34
 
-** 1
 
-** 原创文章
 
-发表到圈儿
 
-[AI 提效俱乐部](https://ata.atatech.org/channels/16) / [精选文章](https://ata.atatech.org/channels/16/module/221/) / [文章](https://ata.atatech.org/channels/16/module/221/) (首发)
 
-[ATA之家](https://ata.atatech.org/community/group/45)
 
-[技术味儿](https://ata.atatech.org/community/group/386)
 
-[蚂蚁集团- 研发效能](https://ata.atatech.org/community/team/701)
 
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-[翰林院](https://ata.atatech.org/community/group/3390)
-
-[AI情报社](https://ata.atatech.org/community/group/1000072)
-
-[AI 提效俱乐部](https://ata.atatech.org/community/group/1000096)
-
-[Harness Engineering](https://ata.atatech.org/community/group/1000152)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[麦艮廷(稻森)](https://ata.atatech.org/users/12002170460)
-
-5月12日发表846次浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章20:19
-
-**
 
 最近在看 Codex 里 `/goal` 的实现，越看越觉得这个功能被低估了。
 
@@ -124,29 +81,17 @@ Codex 的 `/goal` 不是 Todo，不是 prompt，也不是一句“继续做到�
 
 真正的问题不是“要不要继续”，而是：
 
-●
+- 现在有没有用户的新输入？
 
-现在有没有用户的新输入？
+- 当前 turn 是否真的结束了？
 
-●
+- 目标有没有被替换？
 
-当前 turn 是否真的结束了？
+- 预算是不是已经用完？
 
-●
+- 模型是不是在等用户选择？
 
-目标有没有被替换？
-
-●
-
-预算是不是已经用完？
-
-●
-
-模型是不是在等用户选择？
-
-●
-
-当前模式是否允许它自己往前跑？
+- 当前模式是否允许它自己往前跑？
 
 如果这些条件不检查，自动继续就会变成抢方向盘。用户刚想插话，它又开了一轮；用户已经打断，它还在做旧目标；模型其实需要用户确认，它却继续猜。
 
@@ -166,25 +111,25 @@ Codex 的 `/goal` 不是 Todo，不是 prompt，也不是一句“继续做到�
 
 我读源码时，最先让我觉得“哦，这不是玩具功能”的，是这张表：
 
-CREATE TABLE thread\_goals (
+CREATE TABLE thread_goals (
 
-thread\_id TEXT PRIMARY KEY NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+thread_id TEXT PRIMARY KEY NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
 
-goal\_id TEXT NOT NULL,
+goal_id TEXT NOT NULL,
 
 objective TEXT NOT NULL,
 
-status TEXT NOT NULL CHECK(status IN ('active', 'paused', 'budget\_limited', 'complete')),
+status TEXT NOT NULL CHECK(status IN ('active', 'paused', 'budget_limited', 'complete')),
 
-token\_budget INTEGER,
+token_budget INTEGER,
 
-tokens\_used INTEGER NOT NULL DEFAULT 0,
+tokens_used INTEGER NOT NULL DEFAULT 0,
 
-time\_used\_seconds INTEGER NOT NULL DEFAULT 0,
+time_used_seconds INTEGER NOT NULL DEFAULT 0,
 
-created\_at\_ms INTEGER NOT NULL,
+created_at_ms INTEGER NOT NULL,
 
-updated\_at\_ms INTEGER NOT NULL
+updated_at_ms INTEGER NOT NULL
 
 );
 
@@ -206,21 +151,13 @@ updated\_at\_ms INTEGER NOT NULL
 
 第二个是 `status` 只有四种：
 
-●
+- `active`
 
-`active`
+- `paused`
 
-●
+- `budget_limited`
 
-`paused`
-
-●
-
-`budget_limited`
-
-●
-
-`complete`
+- `complete`
 
 这四个状态很克制，但刚好够用。
 
@@ -250,17 +187,11 @@ Codex 这里的语义很清楚：
 
 Codex 给模型暴露了三个 goal 工具：
 
-1.
+1. `get_goal`
 
-`get_goal`
+2. `create_goal`
 
-2.
-
-`create_goal`
-
-3.
-
-`update_goal`
+3. `update_goal`
 
 这里最有意思的是 `update_goal` 。
 
@@ -310,37 +241,21 @@ Codex 给模型暴露了三个 goal 工具：
 
 源码里会先过一串条件：
 
-●
+- goal 功能必须开启。
 
-goal 功能必须开启。
+- 当前不能是 Plan mode。
 
-●
+- 当前不能已经有 active turn。
 
-当前不能是 Plan mode。
+- 不能有排队的用户输入。
 
-●
+- 不能有 trigger-turn mailbox 里的待处理项。
 
-当前不能已经有 active turn。
+- 线程必须是持久线程，ephemeral thread 不支持 goal。
 
-●
+- 数据库里读到的 goal 必须还是同一个 `goal_id` 。
 
-不能有排队的用户输入。
-
-●
-
-不能有 trigger-turn mailbox 里的待处理项。
-
-●
-
-线程必须是持久线程，ephemeral thread 不支持 goal。
-
-●
-
-数据库里读到的 goal 必须还是同一个 `goal_id` 。
-
-●
-
-状态必须仍然是 `active` 。
+- 状态必须仍然是 `active` 。
 
 这才是真正的自动续跑。
 
@@ -352,11 +267,13 @@ goal 功能必须开启。
 
 首先，它把用户目标包在 `<untrusted_objective>` 里：
 
-<untrusted\_objective>
+```java
+<untrusted_objective>
 
 {{ objective }}
 
-</untrusted\_objective>
+</untrusted_objective>
+```
 
 这说明 objective 是用户数据，不是更高优先级的系统指令。目标可以告诉模型要做什么，但不能趁机变成 prompt injection。
 
@@ -364,25 +281,15 @@ goal 功能必须开启。
 
 它会要求模型：
 
-●
+- 把目标重述成具体交付物或成功标准。
 
-把目标重述成具体交付物或成功标准。
+- 建一个 prompt-to-artifact checklist。
 
-●
+- 检查相关文件、命令输出、测试结果、PR 状态或其他真实证据。
 
-建一个 prompt-to-artifact checklist。
+- 不要把“做了很多”“测试过了”“看起来差不多”当成完成证据。
 
-●
-
-检查相关文件、命令输出、测试结果、PR 状态或其他真实证据。
-
-●
-
-不要把“做了很多”“测试过了”“看起来差不多”当成完成证据。
-
-●
-
-有任何缺口，就继续做，而不是标记完成。
+- 有任何缺口，就继续做，而不是标记完成。
 
 这段很关键。
 
@@ -410,29 +317,17 @@ Codex 的做法是把“完成”变成审计问题：不是问 Agent 你觉得�
 
 它在很多边界上记账：
 
-●
+- turn 开始时记录 token baseline。
 
-turn 开始时记录 token baseline。
+- 工具完成后计算 token delta。
 
-●
+- turn 结束时补最后一笔。
 
-工具完成后计算 token delta。
+- 用户中断时先记账，再暂停 goal。
 
-●
+- 外部 UI 要改 goal 前，先把当前进度结清。
 
-turn 结束时补最后一笔。
-
-●
-
-用户中断时先记账，再暂停 goal。
-
-●
-
-外部 UI 要改 goal 前，先把当前进度结清。
-
-●
-
-线程恢复后，重新恢复 active goal 的运行时状态。
+- 线程恢复后，重新恢复 active goal 的运行时状态。
 
 这里面最容易被忽略的是“外部 UI 改 goal 前先记账”。
 
@@ -504,21 +399,13 @@ goal 不应该变成第二个超长 prompt。它应该是目标句柄，详细�
 
 TUI 状态栏会显示：
 
-●
+- `Pursuing goal (40K / 50K)`
 
-`Pursuing goal (40K / 50K)`
+- `Goal paused (/goal resume)`
 
-●
+- `Goal unmet (4K / 5K tokens)`
 
-`Goal paused (/goal resume)`
-
-●
-
-`Goal unmet (4K / 5K tokens)`
-
-●
-
-`Goal achieved (10h 12m)`
+- `Goal achieved (10h 12m)`
 
 这个东西看起来只是 UI 文案，其实很重要。
 
@@ -538,33 +425,19 @@ TUI 状态栏会显示：
 
 真正有用的是：
 
-●
+- 目标在哪里？
 
-目标在哪里？
+- 当前状态是什么？
 
-●
+- 花了多少预算？
 
-当前状态是什么？
+- 谁能改状态？
 
-●
+- 什么条件下继续？
 
-花了多少预算？
+- 什么条件下停？
 
-●
-
-谁能改状态？
-
-●
-
-什么条件下继续？
-
-●
-
-什么条件下停？
-
-●
-
-怎么证明完成？
+- 怎么证明完成？
 
 这些问题回答清楚，Agent 才能稳定做长任务。
 
@@ -578,29 +451,17 @@ TUI 状态栏会显示：
 
 系统里真正对应这些体验的，是一堆很普通的东西：
 
-●
+- 一张表。
 
-一张表。
+- 四个状态。
 
-●
+- 三个工具。
 
-四个状态。
+- 一套事件。
 
-●
+- 两段 prompt。
 
-三个工具。
-
-●
-
-一套事件。
-
-●
-
-两段 prompt。
-
-●
-
-一个状态栏。
+- 一个状态栏。
 
 这些东西合起来，用户才会感觉 Agent “有目标感”。
 
@@ -620,7 +481,7 @@ TUI 状态栏会显示：
 
 目标是 `objective` ，存在 `thread_goals` 里。
 
-是否继续由状态、模式、队列、active turn、goal\_id 一起决定。
+是否继续由状态、模式、队列、active turn、goal_id 一起决定。
 
 是否完成要做 completion audit，然后调用 `update_goal` 留痕。
 
@@ -649,57 +510,3 @@ Codex 的 `/goal` 看起来只是一个 slash command，但源码里真正做的
 代码决定 Agent 能不能跑起来。
 
 `/goal` 这种机制，决定它能不能跑久、跑稳、跑到该停的地方。
-
-END
-
-一、为什么很多长任务 Agent 不好用
-
-1\. 把目标写进 prompt，就以为 Agent 会记住
-
-2\. 把“自动继续”当成自驱
-
-3\. 没有预算，就没有长任务
-
-二、核心机制：一张表撑起长任务的骨架
-
-三、骨架之外：三个工具决定模型能碰什么
-
-四、自我推进的闭环：不是“继续”，而是“有条件地继续”
-
-五、预算账本：长任务不是跑完才结账
-
-六、几个源码细节，说明它不是一个简单命令
-
-1\. 目标长度限制是 4000 字符
-
-2\. Plan mode 会忽略 goal continuation
-
-3\. 中断会把 active goal 暂停
-
-4\. 完成时会回报预算使用
-
-5\. 前端状态栏不是装饰
-
-七、这意味着什么
-
-1\. 长任务的价值在状态，不在口号
-
-2\. Agent 自驱不是人格，是系统能力
-
-3\. 好的 Harness 会把“模糊协作”变成“明确协议”
-
-最后
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

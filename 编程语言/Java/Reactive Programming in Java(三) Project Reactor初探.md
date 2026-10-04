@@ -10,48 +10,30 @@ tags:
 ---
 阿里健康
 
-勋章
 
-粉丝 49影响力 826
 
-** 3
 
-** 12
 
-**
 
-** 原创文章
 
-发表到圈儿
 
-[阿里健康技术](https://ata.atatech.org/community/team/186) / [中间件](https://ata.atatech.org/community/team/186?cid=1253) (首发)
-
-**
-
-[刘金龙(诗翁)](https://ata.atatech.org/users/11000276723)
-
-** 字号
-
-** 笔记
-
-** 分享 **
 
 Java的RP类库主要有三个,分别是 [Akka-Streams](https://doc.akka.io/docs/akka/2.5.5/scala/stream/index.html),[RxJava](https://github.com/ReactiveX/RxJava) 和 [Project Reactor](https://ata.atatech.org/articles/projectreactor.io), 完全出于个人喜好,我们从 [Project Reactor](https://ata.atatech.org/articles/projectreactor.io) 开始,为了行文方便,下面的Reactor都是指 [Project Reactor](https://ata.atatech.org/articles/projectreactor.io).
 
 ## Project Reacotr简介
 
-Reactor是实现了 [reactive-streams](https://ata.atatech.org/articles/www.reactive-streams.org) 标准的第四代Reactive 类库,主用用于在jvm上构建non-blocking应用.所谓第四代,没有特别搞懂,但并不影响我们的使用,非要搞懂的话可以看下这个链接(虽然写的也很含糊,但是是我找到的唯一一个关于分代的介绍了,原文还无法访问):  
+Reactor是实现了 [reactive-streams](https://ata.atatech.org/articles/www.reactive-streams.org) 标准的第四代Reactive 类库,主用用于在jvm上构建non-blocking应用.所谓第四代,没有特别搞懂,但并不影响我们的使用,非要搞懂的话可以看下这个链接(虽然写的也很含糊,但是是我找到的唯一一个关于分代的介绍了,原文还无法访问):
 [https://blog.piasy.com/AdvancedRxJava/2017/05/01/operator-fusion-part-1/](https://blog.piasy.com/AdvancedRxJava/2017/05/01/operator-fusion-part-1/)
 
 ## Hello World
 
-为了后面的概念介绍更直观,我们先上个代码.Reactor对版本的管理也采用了 `BOM (Bill of Materials)` 方式,目前最新版本是 `BISMUTH-SR7`.  
+为了后面的概念介绍更直观,我们先上个代码.Reactor对版本的管理也采用了 `BOM (Bill of Materials)` 方式,目前最新版本是 `BISMUTH-SR7`.
 我们以 `maven` 工程为例,`gradle` 请自行转换.
 
 我们在pom文件里加上如下内容:
 
 ```xml
-<dependencyManagement> 
+<dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -66,12 +48,12 @@ Reactor是实现了 [reactive-streams](https://ata.atatech.org/articles/www.reac
 <dependencies>
     <dependency>
         <groupId>io.projectreactor</groupId>
-        <artifactId>reactor-core</artifactId> 
-        
+        <artifactId>reactor-core</artifactId>
+
     </dependency>
     <dependency>
         <groupId>io.projectreactor</groupId>
-        <artifactId>reactor-test</artifactId> 
+        <artifactId>reactor-test</artifactId>
         <scope>test</scope>
     </dependency>
 </dependencies>
@@ -92,20 +74,18 @@ public static void main(String[] args) {
 
 它的输出是:
 
-```
 1H
 2e
 3l
 4l
 5o
-6 
+6
 7w
 8o
 9r
 10l
 11d
 12!
-```
 
 如果你也得到了结果,恭喜你完成了一个没啥意义却有用的RP程序.
 
@@ -115,7 +95,7 @@ public static void main(String[] args) {
 
 上面代码里的 `Flux` 是生产者,即我们之前提到的 `Publisher`,它代表的是一个包含0-N个元素的异步序列,它还有一个特例,叫 `Mono`,代表0-1个元素,如果不需要生产任何元素,只是需要一个完成任务的信号,可以使用Mono.
 
-之所以区分 `Flux` 和 `Mono`,我理解是为了更精确的语义,`Flux` 相当于 `List`,`Mono` 相当于 `Optional`,虽然我们在编程中所有的结果都可以用 `List` 表示,但是当只返回一个或者没有结果时,用 `Optional` 要更精确.  
+之所以区分 `Flux` 和 `Mono`,我理解是为了更精确的语义,`Flux` 相当于 `List`,`Mono` 相当于 `Optional`,虽然我们在编程中所有的结果都可以用 `List` 表示,但是当只返回一个或者没有结果时,用 `Optional` 要更精确.
 `Mono` 和 `Flux` 都提供了一堆工厂方法,用来创建相关的实例:
 
 ```java
@@ -143,25 +123,25 @@ Mono.error(new IllegalStateException());
 
 ```java
 //只触发序列的计算操作
-subscribe(); 
+subscribe();
 //对每个值进行消费,hello world程序里就是调用的这个方法
-subscribe(Consumer<? super T> consumer); 
+subscribe(Consumer<? super T> consumer);
 
 //加上错误处理
+```
 subscribe(Consumer<? super T> consumer,
-          Consumer<? super Throwable> errorConsumer); 
+          Consumer<? super Throwable> errorConsumer);
 //完成之后再额外进行一些处理
 subscribe(Consumer<? super T> consumer,
           Consumer<? super Throwable> errorConsumer,
-          Runnable completeConsumer); 
+          Runnable completeConsumer);
 ....
-```
 
 可以看到,参数都是函数式接口,可以用lambda方便的调用.
 
 ### backpressure
 
-说到RP,`backpressure` 是永远无法跳过去的概念.不过Reactor没搞啥幺蛾子,基本上和协议以及我们之前的文章里介绍的保持一致:  
+说到RP,`backpressure` 是永远无法跳过去的概念.不过Reactor没搞啥幺蛾子,基本上和协议以及我们之前的文章里介绍的保持一致:
 一个订阅者可以没有限制,只要生产者有消息就都推给他,也可以通过 `request` 方法,告诉生产者它最多可以处理多少消息,`request` 方法可以参考 [这篇文章](https://www.atatech.org/articles/98002) 的介绍.
 
 ### Hot and Cold
@@ -172,11 +152,11 @@ subscribe(Consumer<? super T> consumer,
 
 RP最大的痛点就是测试和定位问题比较复杂,还好Reactor提供了 `StepVerifier` 这个工具,看下我改写的文档上的例子:
 
-```java
 @Test
+```java
 public void testVerify() {
     Flux<String> source = Flux.just("foo","bar").concatWith(Mono.error(new IllegalStateException("boom")));
-    
+
     StepVerifier.create(source)
         .expectNext("foo")
         .expectNext("bar")
@@ -185,7 +165,7 @@ public void testVerify() {
 }
 ```
 
-`StepVerifier.create` 是一个工厂方法,可以传递任意的 `Publisher`,`expectNext`,`expectErrorMessage` 用来验证序列是否产生了正确的消息,其它验证方法可以查看API文档,`verify` 方法注意一定要调用,否则不会开启验证.`StepVerifier` 还提供了一些其它的 `verify` 方法,比如 `verifyComplete`,`verifyError`,具体的可以查看文档.  
+`StepVerifier.create` 是一个工厂方法,可以传递任意的 `Publisher`,`expectNext`,`expectErrorMessage` 用来验证序列是否产生了正确的消息,其它验证方法可以查看API文档,`verify` 方法注意一定要调用,否则不会开启验证.`StepVerifier` 还提供了一些其它的 `verify` 方法,比如 `verifyComplete`,`verifyError`,具体的可以查看文档.
 `StepVerifier` 还提供了虚拟时间的验证方式,用来验证一些依赖时间的序列比如
 
 ```java
@@ -195,7 +175,7 @@ StepVerifier.withVirtualTime(() -> Flux.interval(Duration.ofSeconds(1)).take(360
 .verifyComplete();
 ```
 
-这个序列需要一个小时才能产生所有需要的3600个元素,但是我们也不能等一个小时就为了验证这么一个没用的玩意,于是Reactor贴心的提供了StepVerifier.withVirtualTime来包装一个Publisher,注意上面给这个方法传递的参数:  
+这个序列需要一个小时才能产生所有需要的3600个元素,但是我们也不能等一个小时就为了验证这么一个没用的玩意,于是Reactor贴心的提供了StepVerifier.withVirtualTime来包装一个Publisher,注意上面给这个方法传递的参数:
 `() -> Flux.interval(Duration.ofSeconds(1)).take(3600)`,这是一个产生Flux的Supplier,这里是用了函数式编程里惰性求值,有兴趣可以了解一下. 目的是延迟产生实例的时间,为时间调度做准备.
 
 ## 调试模式
@@ -204,53 +184,15 @@ StepVerifier.withVirtualTime(() -> Flux.interval(Duration.ofSeconds(1)).take(360
 
 ## 学习资料
 
-最好的资料是官方文档:  
-[http://projectreactor.io/docs/core/release/reference/](http://projectreactor.io/docs/core/release/reference/)  
+最好的资料是官方文档:
+[http://projectreactor.io/docs/core/release/reference/](http://projectreactor.io/docs/core/release/reference/)
 其它的(包括本文)都是对文档的提炼...
 
-其次是上手写代码:  
-[https://github.com/reactor/lite-rx-api-hands-on](https://github.com/reactor/lite-rx-api-hands-on)  
+其次是上手写代码:
+[https://github.com/reactor/lite-rx-api-hands-on](https://github.com/reactor/lite-rx-api-hands-on)
 这个练习可以帮你更好的掌握Reactor的一些API,里面提供了单测,实在写不出可以切换到 `complete` 分支查看答案.
 
 ## AD Time
 
-国际惯例,给我们的读书群\[独来读往\]打个广告,新群规大幅降低了读书要求和频次以及处罚力度.欢迎喜欢读书的小伙伴加入我们,一起交流,一起成长.详见  
+国际惯例,给我们的读书群[独来读往]打个广告,新群规大幅降低了读书要求和频次以及处罚力度.欢迎喜欢读书的小伙伴加入我们,一起交流,一起成长.详见
 [https://lark.alipay.com/growth/notes/ewqntu](https://lark.alipay.com/growth/notes/ewqntu)
-
-END
-
-Project Reacotr简介
-
-Hello World
-
-基本概念
-
-Mono and Flux
-
-Operator
-
-Processor
-
-Subscriber
-
-backpressure
-
-Hot and Cold
-
-如何测试
-
-调试模式
-
-学习资料
-
-AD Time
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

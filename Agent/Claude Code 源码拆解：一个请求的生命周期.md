@@ -10,39 +10,18 @@ tags:
 ---
 蚂蚁集团
 
-粉丝 1影响力 56
 
-** 18
 
-** 12
 
-**
 
-** 原创文章
 
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[刘帅(沐衡)](https://ata.atatech.org/users/12002603019)
 
 昨天00:07发表昨天00:11更新247次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章32:15
-
-**
 
 ## 引子
 
@@ -74,11 +53,11 @@ tags:
 
 用户在终端敲下 `claude` ，按下回车。代码从 `cli.tsx` 开始跑，第一个设计就很典型：
 
-```typescript
+```javascript
 // cli.tsx — Fast Path：零导入，12ms 退出
 if (args[0] === '--version') {
-  console.log(\`${MACRO.VERSION} (Claude Code)\`);
-  return;
+    console.log(\`${MACRO.VERSION} (Claude Code)\`);
+    return;
 }
 
 // 正常路径：全部延迟加载
@@ -134,7 +113,7 @@ Cache Key 包含 7 个维度：
 | Tools + Schema | 增/删/改 → bust |
 | Beta Headers | 增/删 → bust |
 | Model | 换模型 → bust |
-| cache\_control | scope/TTL 变化 → bust |
+| cache_control | scope/TTL 变化 → bust |
 | Fast Mode | 切换 → bust |
 | Effort | 变化 → bust |
 
@@ -144,11 +123,11 @@ Cache Key 包含 7 个维度：
 
 先解释"Latch"这个名字。它来自数字电路—— **锁存器** 是一种只能单向翻转的电子元件：一旦被触发就锁定在激活状态，只有显式 Reset 信号才能复位。Claude Code 借用这个概念： **一旦某个 Beta Header 被激活过，就锁住不变，直到用户执行 `/clear` 或 `/compact` 才重置** 。
 
-```typescript
 // state.ts:226-237
 
 afkModeHeaderLatched: boolean | null, // null → true → 保持 true
 
+```javascript
 fastModeHeaderLatched: boolean | null,
 
 cacheEditingHeaderLatched: boolean | null,
@@ -172,8 +151,8 @@ Cache 不是整体命中或整体 miss 的。源码中（ `utils/api.ts:splitSys
 | --- | --- | --- | --- | --- |
 | Seg 1 | 计费归属头 | null（不缓存） | — | 每次请求都不同 |
 | Seg 2 | CLI 静态前缀 | `org` | 5m/1h | 同组织共享 |
-| Seg 3 | 全局静态内容（DYNAMIC\_BOUNDARY 之前） | `global` | 1h（符合条件的用户） | **命中率最高的段** ，包含核心系统指令 |
-| Seg 4 | 动态内容（DYNAMIC\_BOUNDARY 之后） | null（不缓存） | — | 每轮变化的部分 |
+| Seg 3 | 全局静态内容（DYNAMIC_BOUNDARY 之前） | `global` | 1h（符合条件的用户） | **命中率最高的段** ，包含核心系统指令 |
+| Seg 4 | 动态内容（DYNAMIC_BOUNDARY 之后） | null（不缓存） | — | 每轮变化的部分 |
 
 Seg 2-3 命中时直接复用，总命中约 50-70K token。
 
@@ -197,27 +176,17 @@ Latch 机制不是"技术上做不到"，而是"我们选择这样做"。它选�
 
 `QueryEngine.submitMessage()` 是请求进入核心循环前的最后一道关口。它做了 7 件事：
 
-```typescript
+```java
 class QueryEngine {
-
-async *submitMessage(prompt, options): AsyncGenerator<SDKMessage> {
-
-// 1. 构建 system prompt
-
-// 2. 处理用户输入（slash commands、attachments、hooks）
-
-// 3. 写入 transcript（在 API 调用之前！）
-
-// 4. Skills 和 Plugins 加载（cache-only，不阻塞网络）
-
-// 5. yield 系统初始化消息
-
-// 6. 进入核心循环 for await (message of query(...))
-
-// 7. yield 最终 result
-
-}
-
+    async *submitMessage(prompt, options): AsyncGenerator<SDKMessage> {
+        // 1. 构建 system prompt
+        // 2. 处理用户输入（slash commands、attachments、hooks）
+        // 3. 写入 transcript（在 API 调用之前！）
+        // 4. Skills 和 Plugins 加载（cache-only，不阻塞网络）
+        // 5. yield 系统初始化消息
+        // 6. 进入核心循环 for await (message of query(...))
+        // 7. yield 最终 result
+    }
 }
 ```
 
@@ -265,31 +234,24 @@ Query Engine 把请求打包后，送入了整个系统的心脏： `query.ts` �
 
 Query Loop 的结构很简单：
 
-```typescript
+```java
 while (true) {
-
-// 1. 上下文准备（五级压缩）
-
-// 2. 检查阻塞限制
-
-// 3. API 调用（流式）
-
-// 4. 工具执行
-
-// 5. 附加消息注入
-
-// 6. 状态打包继续
-
+    // 1. 上下文准备（五级压缩）
+    // 2. 检查阻塞限制
+    // 3. API 调用（流式）
+    // 4. 工具执行
+    // 5. 附加消息注入
+    // 6. 状态打包继续
 }
 ```
 
-你可能会想：为什么不用递归？模型返回 tool\_use → 执行工具 → 再调模型 → 再返回……这不是天然的递归吗？
+你可能会想：为什么不用递归？模型返回 tool_use → 执行工具 → 再调模型 → 再返回……这不是天然的递归吗？
 
 原因有三个：
 
-1. **避免栈溢出** 。如果模型连续返回 50 轮 tool\_use，递归调用就 50 层。用 while(true)，栈永远是平的。
+1. **避免栈溢出** 。如果模型连续返回 50 轮 tool_use，递归调用就 50 层。用 while(true)，栈永远是平的。
 2. **State 对象一次打包** 。所有可变状态收在一个 State 对象里，一轮结束一次赋值。而不是分散在 50 个栈帧里各自维护状态。
-3. \*\*transition 字段记录"继续原因"\*\*。每次循环结束时， `state.transition = { reason: 'next_turn' }` 。这样测试时可以断言恢复路径，调试时可以知道为什么进入了下一轮。
+3. **transition 字段记录"继续原因"**。每次循环结束时， `state.transition = { reason: 'next_turn' }` 。这样测试时可以断言恢复路径，调试时可以知道为什么进入了下一轮。
 
 ### 五级上下文压缩
 
@@ -336,7 +298,7 @@ while (true) {
 
 ![[Image 12.jpg]]
 
-**为什么不直接修改本地消息？** 因为 cache\_edits 是在 API 侧执行的，客户端消息保持完整。这意味着如果 API 调用失败，本地状态不会被破坏——又是容错优先。
+**为什么不直接修改本地消息？** 因为 cache_edits 是在 API 侧执行的，客户端消息保持完整。这意味着如果 API 调用失败，本地状态不会被破坏——又是容错优先。
 
 #### L3: ContextCollapse — 上下文折叠
 
@@ -363,9 +325,9 @@ while (true) {
 
 | 关键常量 | 值 | 作用 |
 | --- | --- | --- |
-| AUTOCOMPACT\_BUFFER\_TOKENS | 13,000 | 触发阈值 = 窗口大小 - 13K |
-| WARNING\_THRESHOLD\_BUFFER\_TOKENS | 20,000 | UI 警告阈值 |
-| MAX\_CONSECUTIVE\_AUTOCOMPACT\_FAILURES | 3 | 熔断器上限 |
+| AUTOCOMPACT_BUFFER_TOKENS | 13,000 | 触发阈值 = 窗口大小 - 13K |
+| WARNING_THRESHOLD_BUFFER_TOKENS | 20,000 | UI 警告阈值 |
+| MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES | 3 | 熔断器上限 |
 
 **熔断器** （circuit breaker）是这层最重要的防御：如果连续 3 次压缩失败，就不再尝试，避免"上下文快满了 → 调模型压缩 → 压缩失败 → 上下文更满 → 再调模型"的死循环。
 
@@ -393,9 +355,7 @@ while(true) + State 对象 + transition 字段，这就是一个标准的状态�
 
 大多数人以为的流程是：
 
-```
 调 API → 等完整返回 → 提取 tool_use → 执行工具 → 拿到结果 → 调下一轮
-```
 
 实际流程是：
 
@@ -407,7 +367,7 @@ while(true) + State 对象 + transition 字段，这就是一个标准的状态�
 | `getCompletedResults()` | 获取已完成的结果 | 否，非阻塞轮询 |
 | `getRemainingResults()` | 获取所有剩余结果 | 是，等待完成 |
 
-API 流式返回时，每收到一个 tool\_use block 就 `addTool()` 注册。注册完不等待，工具已经开始跑了。等 API 返回结束后，再 `getRemainingResults()` 拿到所有剩余结果。
+API 流式返回时，每收到一个 tool_use block 就 `addTool()` 注册。注册完不等待，工具已经开始跑了。等 API 返回结束后，再 `getRemainingResults()` 拿到所有剩余结果。
 
 这就是 Claude Code 快的核心原因之一： **API 和工具不是串行的，是重叠的** 。
 
@@ -415,7 +375,6 @@ API 流式返回时，每收到一个 tool\_use block 就 `addTool()` 注册。�
 
 工具能不能并行执行？每个工具定义时有三个安全标记：
 
-```typescript
 TOOL_DEFAULTS = {
 
 isConcurrencySafe: false, // 默认不安全
@@ -425,7 +384,6 @@ isReadOnly: false, // 默认会写入
 isDestructive: false,
 
 }
-```
 
 | 工具 | isConcurrencySafe | 行为 |
 | --- | --- | --- |
@@ -440,11 +398,9 @@ isDestructive: false,
 
 如果一个 Bash 命令出错了怎么办？Claude Code 的做法是： **取消所有兄弟工具** 。
 
-```typescript
 // 一个 Bash 出错
 
 siblingAbortController.abort() // 取消所有并行中的工具
-```
 
 这避免了"一个工具失败了，其他工具还在跑，最后拿到一个不一致的状态"。
 
@@ -535,11 +491,11 @@ Claude Code 每轮还会注入 **附加消息** （attachment）——这些是 
 
 | 类型 | 作用 | 示例 |
 | --- | --- | --- |
-| edited\_text\_file | 文件变更通知 | 用户用 VSCode 改了文件 |
-| queued\_command | 排队的用户命令 | 用户在 Claude 跑任务时又丢了一个 prompt |
+| edited_text_file | 文件变更通知 | 用户用 VSCode 改了文件 |
+| queued_command | 排队的用户命令 | 用户在 Claude 跑任务时又丢了一个 prompt |
 | task-notification | 后台任务完成 | npm install 跑完了 |
 | memory | 记忆目录检索 | MEMORY.md 中的备忘 |
-| skill\_discovery | 动态发现的 Skill | 发现.claude/skills/ 目录 |
+| skill_discovery | 动态发现的 Skill | 发现.claude/skills/ 目录 |
 
 这些消息以 `tool_result` 的形式注入。模型会看到并响应它们，但它"知道"这些是系统注入的信息。
 
@@ -547,7 +503,6 @@ Claude Code 每轮还会注入 **附加消息** （attachment）——这些是 
 
 在多 Agent 场景下，有一个重要的机制叫 **drain** （消费/排空队列）。
 
-```
 全局命令队列:
 
 [cmd1: agentId=undefined] ← 主线程 drain
@@ -555,7 +510,6 @@ Claude Code 每轮还会注入 **附加消息** （attachment）——这些是 
 [cmd2: agentId="agent-A"] ← 子 Agent A drain
 
 [cmd3: agentId="agent-B"] ← 子 Agent B drain
-```
 
 每个 Agent 只消费发给自己的消息，不碰别人的。子 Agent 只接收 `task-notification` ，即使有人发了 prompt 也忽略—— **防止用户的 prompt 误入子 Agent** 。
 
@@ -603,9 +557,7 @@ Command 是人用的（CLI 命令），Tool 是模型用的（API 调用）。Sk
 
 经过源码验证（ `runAgent.ts:748` ），子 Agent 的本质是：
 
-```
 子 Agent = 递归调用 query() 的 AsyncGenerator 实例
-```
 
 它不是新进程，不是新线程，就是同一个进程里的一次递归调用。父 Agent 把自己的 `query()` 调用栈往下压了一层，创建了一个新的 AsyncGenerator 实例来执行子任务。
 
@@ -635,9 +587,7 @@ Fork Agent 是一种特殊的子 Agent，它有三个关键特性：
 
 子 Agent 不能直接向用户提问。如果子 Agent 需要用户确认（比如一个危险操作），它必须把请求"上收"到父 Agent，由父 Agent 统一处理。
 
-```
 子 Agent → 权限请求 → Mailbox → 父 Agent → 用户确认 → Mailbox → 子 Agent
-```
 
 这保证了用户只需要和一个"窗口"交互，不会突然出现"第二个 Claude"来问你问题。
 
@@ -709,15 +659,14 @@ Claude Code 定义了 6 种 Span：
 | Span 类型 | 含义 |
 | --- | --- |
 | interaction | 用户请求 → Claude 回复的完整周期 |
-| llm\_request | 单次 API 调用 |
+| llm_request | 单次 API 调用 |
 | tool | 工具注册（权限检查前） |
-| tool.blocked\_on\_user | 等待用户确认权限 |
+| tool.blocked_on_user | 等待用户确认权限 |
 | tool.execution | 工具实际执行 |
 | hook | Hook 执行 |
 
 Span 层级是嵌套的：
 
-```
 Interaction Span (root)
 
 ├── LLM Request Span
@@ -731,7 +680,6 @@ Interaction Span (root)
 │ └── hook
 
 └── ...下一轮交互...
-```
 
 Claude Code 使用了 **两个独立的 AsyncLocalStorage** 来管理 span 上下文： `interactionContext` （交互级）和 `toolContext` （工具级）。为什么需要两个？因为工具可能有自己的子 span（blocked-on-user、execution），需要独立于交互的上下文。
 
@@ -741,11 +689,9 @@ Claude Code 使用了 **两个独立的 AsyncLocalStorage** 来管理 span 上�
 
 Claude Code 编辑文件后，会自动检查 IDE 的 LSP 诊断：
 
-```
 编辑文件前 → beforeFileEdited() → 获取诊断基线
 
 编辑文件后 → getNewDiagnostics() → 对比基线 → 过滤出新诊断
-```
 
 新发现的诊断（比如类型错误、lint 报错）会注入到下一轮 LLM 上下文，让 Claude Code "知道"自己改出了 bug，可以自动修复。
 
@@ -753,11 +699,11 @@ Claude Code 编辑文件后，会自动检查 IDE 的 LSP 诊断：
 
 | 用户看到 | 内部记录 |
 | --- | --- |
-| 读取 3 个文件 | `tengu_session_file_read` ×3，含 file\_extension、read\_method |
-| 运行测试 | `tengu_tool_use` + `tengu_tool_use_completed` ，含 duration\_ms、success |
-| Auto Mode 切换 | `tengu_auto_mode_decision` ，含 classifier\_confidence |
-| AutoCompact 触发 | original\_message\_count、pre/post compact token 数 |
-| 模型 fallback | original\_model → fallback\_model |
+| 读取 3 个文件 | `tengu_session_file_read` ×3，含 file_extension、read_method |
+| 运行测试 | `tengu_tool_use` + `tengu_tool_use_completed` ，含 duration_ms、success |
+| Auto Mode 切换 | `tengu_auto_mode_decision` ，含 classifier_confidence |
+| AutoCompact 触发 | original_message_count、pre/post compact token 数 |
+| 模型 fallback | original_model → fallback_model |
 
 ### 设计哲学
 
@@ -804,7 +750,7 @@ Sticky-on Latch 不只适用于 Prompt Cache。任何带缓存的系统都有类
 
 ### Pattern 2：while(true) 状态机 — 对比递归的工程优势
 
-很多 Agent 框架（如早期 LangChain）用递归实现 tool-use 循环：模型返回 tool\_use → 执行工具 → 递归调用自己。Claude Code 用 while(true) + State 对象 + transition 字段。
+很多 Agent 框架（如早期 LangChain）用递归实现 tool-use 循环：模型返回 tool_use → 执行工具 → 递归调用自己。Claude Code 用 while(true) + State 对象 + transition 字段。
 
 | 维度 | 递归 | while(true) 状态机 |
 | --- | --- | --- |
@@ -826,141 +772,3 @@ Sticky-on Latch 不只适用于 Prompt Cache。任何带缓存的系统都有类
 子 Agent 不能直接向用户提问——这不只是技术约束，更是 UX 原则： **用户只应该和一个"窗口"交互** 。
 
 如果你在做多 Agent 系统，无论技术上 Agent 有多独立，对用户来说它应该是一个统一的界面。所有需要用户决策的请求都上收到一个控制点。
-
-END
-
-引子
-
-全文流程图
-
-第 1 章：入口 — 按下回车之后
-
-设计哲学
-
-第 2 章：全局状态 — 一个请求的"上下文护照"
-
-State：80+ 个字段的"护照"
-
-Sticky-on Latch：保护 50-70K token 的缓存
-
-缓存分段机制
-
-设计哲学
-
-第 3 章：Query Engine — 会话的"大脑"
-
-submitMessage()：7 步流程
-
-Transcript 先写后调
-
-Skills 延迟加载闭包
-
-AsyncGenerator：边做边返回
-
-设计哲学
-
-第 4 章：核心循环 — while(true) 状态机
-
-while(true) 而不是递归
-
-五级上下文压缩
-
-L0: ToolResultBudget — 工具输出裁剪
-
-L1: Snip — 历史消息截断
-
-L2: MicroCompact — 缓存级微压缩
-
-L3: ContextCollapse — 上下文折叠
-
-L4: AutoCompact — 模型总结压缩
-
-五级编排总览
-
-设计哲学
-
-第 5 章：流式调用与工具穿插 — 性能魔法
-
-StreamingToolExecutor：API 还在返回，工具已经开始跑了
-
-并发安全三标记
-
-错误传播：siblingAbortController
-
-容错三层恢复
-
-设计哲学
-
-第 6 章：权限系统 — 8 层安全检查链
-
-8 层检查
-
-AFK Mode：YOLO Classifier
-
-两个容易忽略的防御机制
-
-权限四级
-
-设计哲学
-
-第 7 章：附加消息 — 模型看不到的上下文
-
-5 种附加消息
-
-drain 机制：只消费发给自己的消息
-
-扩展点的收敛设计：Skill → Command → Tool
-
-设计哲学
-
-第 8 章：多 Agent — 递归的边界
-
-子 Agent 的本质：递归调用 query()
-
-6 种子 Agent 类型
-
-Fork Agent：上下文继承 + 输出隔离 + 递归防护
-
-Mailbox 通信：文件系统的 proper-lockfile
-
-权限上收
-
-Agent Swarm：三种后端
-
-横向对比：为什么 Claude Code 选择这种方式？
-
-设计哲学
-
-第 9 章：三层可观测性 — 用户看不到的记录
-
-L1: Analytics Events — 业务事件层
-
-L2: OpenTelemetry — 分布式追踪层
-
-L3: Diagnostic Tracking — IDE 诊断反馈
-
-用户看到的 vs 内部记录的
-
-设计哲学
-
-第 10 章：全局设计哲学 — 一张表看懂 Claude Code
-
-第 11 章：带走什么 — 可复用的工程 Pattern
-
-Pattern 1：Sticky-on Latch — 保护缓存的通用范式
-
-Pattern 2：while(true) 状态机 — 对比递归的工程优势
-
-Pattern 3：流式穿插执行 — 通用 Pipeline 优化
-
-Pattern 4：权限上收 — 多 Agent 系统的 UX 原则
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

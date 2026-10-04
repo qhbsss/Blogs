@@ -8,41 +8,16 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 190影响力 1.9k
-
-** 2
-
-** 2
-
-**
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
 ## Linux 锁与进程间通信
-
-[陈阳(逸殊)](https://ata.atatech.org/users/11000967975)
 
 2021-01-11发表2023-08-13更新286次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 引言
 
-本文整理了 Linux 内核中锁与进程间通讯的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。  
+本文整理了 Linux 内核中锁与进程间通讯的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。
 
 ## 锁与进程间通讯
 
@@ -58,7 +33,7 @@ tags:
 
 #### 原子操作
 
-内核定义了 atomic\_t 数据类型，用作对整数计数器的原子操作。从内核的角度来看，这些操作的执行仿佛是一条汇编语句。回到刚才对计数器加 1 的例子中。它通常分为 3 步执行:
+内核定义了 atomic_t 数据类型，用作对整数计数器的原子操作。从内核的角度来看，这些操作的执行仿佛是一条汇编语句。回到刚才对计数器加 1 的例子中。它通常分为 3 步执行:
 
 1. 将计数器值从内存复制到处理器寄存器
 2. 将其值加 1
@@ -70,13 +45,13 @@ tags:
 
 自旋锁用于保护短的代码段，其中只包含少量 C 语句，因此会很快执行完毕。它的特点是在内核等待自旋锁释放时，会重复检查是否能获取锁(忙等待)，而不会进入睡眠状态。当然，如果等待时间较长，则效率显然不高。大多数内核数据结构都有自身的自旋锁，在处理结构中的关键成员时，必须获得相应的自旋锁。
 
-自旋锁通过 spinlock\_t 数据结构实现，基本上可使用 spin\_lock 和 spin\_unlock 操纵。还有其他一些自旋锁操作: spin\_lock\_irqsave 不仅获得自旋锁，还停用本地 CPU 的中断，而 spin\_lock\_bh 则停用 sofIRQ (软中断)。同样，自旋锁的实现也几乎完全是汇编语言(与体系结构非常相关)，因此在这里不讨论了。
+自旋锁通过 spinlock_t 数据结构实现，基本上可使用 spin_lock 和 spin_unlock 操纵。还有其他一些自旋锁操作: spin_lock_irqsave 不仅获得自旋锁，还停用本地 CPU 的中断，而 spin_lock_bh 则停用 sofIRQ (软中断)。同样，自旋锁的实现也几乎完全是汇编语言(与体系结构非常相关)，因此在这里不讨论了。
 
 这里大家可能会有疑问，为什么会有自旋锁和中断（无论是软中断还是硬中断）一同禁用的情况，我们前面说过中断具有最高执行优先级，当中断到来时，内核会完全停止手头的工作并转而去执行中断处理程序。如果当前 CPU 正处于自旋锁保护的临界区中（操作某种内核资源），在退出临界区之前当前 CPU 被中断抢占，而如果中断处理程序中操作了和临界区中相同的内核资源，那么这个中断处理程序中势必也要使用这个自旋锁，因为中断没有调度实体，所以这时候当前 CPU 会被自己锁死。所以自旋锁有配套禁用中断的函数，通过它可以在获得自旋锁的同时禁用中断，它们一般在中断上下文中和内核工作时使用。
 
 自旋锁的使用方式如下：
 
-```cpp
+```java
 spinlock_t lock = SPIN_LOCK_UNLOCKED;
 ...
 spin_lock(&lock);
@@ -91,13 +66,13 @@ spin_unlock(&lock);
 3. 自旋锁当前的持有者无法多次获得同一自旋锁（不可重入）! 在函数调用了其他函数，而这些函数每次都操作同一个锁时，这种约束特别重要。如果已经获得一个锁，而调用的某个函数试图再次获得该锁，尽管当前的代码路径已经持有该锁，也同样会发生死锁。这是内核自旋锁的一个约束，主要是为了锁的使用更加清晰。
 4. 自旋锁保护的临界区内不可睡眠，如果只是单纯的使用自旋锁没有关闭中断的情况下，那么很可能有其他 CPU 还在等待这个自旋锁，如果允许睡眠，可能很久都不会释放该锁，那么其他请求该锁的 CPU 都会白等，这显然和自旋锁的设计目的（保护短代码）相背。而如果使用自旋锁的同时禁用了中断，并且睡眠了就更可怕了，因为 CPU 的调度是依赖于中断机制的，没有了中断当前进程还去睡眠了 CPU 就会无限期停止工作。
 
-在单处理器系统上，自旋锁定义为空操作，因为不存在几个 CPU 同时进入临界区的情况。但如果启用了内核抢占，这种说法就不适用了。如果内核在临界区中被中断，而此时另一个进程进入临界区，这与 SMP 系统上两个处理器同时在临界区执行的情况是等效的。通过一个简单的技巧就可以防止这种情况发生: 内核进入到由自旋锁保护的临界区时，就停用内核抢占。在启用了内核抢占的单处理器内核中，spin\_lock(基本上) 等价于 preempt\_disable，而 spin\_unlock 则等价于 preempt\_enable.
+在单处理器系统上，自旋锁定义为空操作，因为不存在几个 CPU 同时进入临界区的情况。但如果启用了内核抢占，这种说法就不适用了。如果内核在临界区中被中断，而此时另一个进程进入临界区，这与 SMP 系统上两个处理器同时在临界区执行的情况是等效的。通过一个简单的技巧就可以防止这种情况发生: 内核进入到由自旋锁保护的临界区时，就停用内核抢占。在启用了内核抢占的单处理器内核中，spin_lock(基本上) 等价于 preempt_disable，而 spin_unlock 则等价于 preempt_enable.
 
 #### 信号量
 
 内核使用的信号量定义如下。注意：用户空间信号量的实现有所不同，它不仅能够提供互斥访问，还是进程间通讯的一种方式，这一点我们后面介绍 IPC 部分时你就会发现。
 
-```cpp
+```java
 struct semaphore {
     // 可同时处于临界区中的进程数目，大部分情况下 count == 1，这时候又称为互斥信号量
     atomic_t count;
@@ -112,7 +87,7 @@ struct semaphore {
 
 大多数情况下，我们不会使用信号量的所有功能（多个进程同时进入临界区），只是将其用作互斥量，这时候只有一个进程能进入临界区。内核有一个宏函数来定义这种互斥信号量：
 
-```cpp
+```java
 // 定义互斥信号量
 DECLARE_MUTEX(mutex)
 // 计数器减一，其他进程不能进入临界区
@@ -122,14 +97,14 @@ down(&mutex);
 up(&mutex);
 ```
 
-在试图用 down 获取已经分配的信号量时，当前进程进入睡眠，并放置在与该信号量关联的等待队列上。同时，该进程被置于 TASK\_UNINTERRUPTIBLE 状态，在等待进入临界区的过程中无法接收信号。如果信号量没有分配，则该进程可以立即获得信号量并进入到临界区，而不会进入睡眠。
+在试图用 down 获取已经分配的信号量时，当前进程进入睡眠，并放置在与该信号量关联的等待队列上。同时，该进程被置于 TASK_UNINTERRUPTIBLE 状态，在等待进入临界区的过程中无法接收信号。如果信号量没有分配，则该进程可以立即获得信号量并进入到临界区，而不会进入睡眠。
 
 在退出临界区时，必须调用 up。该函数负责唤醒在信号量睡眠的某个进程，该进程随后临界区，而所有其他等待的进程继续睡眠。
 
 除了 down 操作之外，还有两种其他的操作用于获取信号量：
 
-1. down\_interruptible 工作方式与 down 相同，但如果无法获得信号量，则将进程置于 TASK\_INTERRUPTIBLE 状态。因此，在进程睡眠时可以通过信号唤醒。
-2. down\_trylock 试图获取信号量。如果失败，则进程不会进入睡眠等待信号量，而是返回非 0 并继续正常执行。
+1. down_interruptible 工作方式与 down 相同，但如果无法获得信号量，则将进程置于 TASK_INTERRUPTIBLE 状态。因此，在进程睡眠时可以通过信号唤醒。
+2. down_trylock 试图获取信号量。如果失败，则进程不会进入睡眠等待信号量，而是返回非 0 并继续正常执行。
 
 #### RCU 机制
 
@@ -143,18 +118,18 @@ RCU 的原理很简单: 该机制记录了指向共享数据结构的指针的�
 
 RCU 的读操作使用方式如下：
 
-```cpp
+```java
 rcu_read_lock();
 // 获取当前数据指针，对该指针的使用必须在 rcu_read_lock 和 rcu_read_unlock 范围内，同时也不能对其进行写操作
 p = rcu_dereference(ptr);
 if (p != NULL) {
     awesome_function(p);
-rcu_read_unlock();
+    rcu_read_unlock();
 ```
 
 RCU 的写操作使用方式如下：
 
-```cpp
+```java
 // 创建新的对象实例
 struct super_duper *new_ptr = kmalloc(...);
 new_ptr->meaning = xyz;
@@ -166,22 +141,21 @@ rcu_assign_pointer(ptr，new_ptr);
 
 **RCU 允许读取者与写入者之间因指针切换所造成的短暂的资源视图不一致。** 正是因为这一宽松的限制，RCU 才能让读写可以并发，从而提高了并发性。
 
-好了，现在我们来说一下为什么 RCU 的保护范围内为什么不能睡眠。这是因为在 rcu\_read\_lock 会禁用内核抢占（注意：不是禁用中断），换句话说在 rcu\_read\_lock 和 rcu\_read\_unlock 之间，不会发生进程调度。之所以这么做是因为内核将每个 CPU 都进行了一个进程调度作为 RCU 旧指针的释放前提。在使用当前指针的时候，禁止进程调度，将一个与当前 CPU 对应的变量 per-CPU 置为 1，当使用结束后开启调度，这样在这个 CPU 发生了一次进程调度后，会将 CPU 对应的变量 per-CPU 置为 0，当所有 CPU 对应的 per-CPU 都为 0 时就可以释放旧指针了。
+好了，现在我们来说一下为什么 RCU 的保护范围内为什么不能睡眠。这是因为在 rcu_read_lock 会禁用内核抢占（注意：不是禁用中断），换句话说在 rcu_read_lock 和 rcu_read_unlock 之间，不会发生进程调度。之所以这么做是因为内核将每个 CPU 都进行了一个进程调度作为 RCU 旧指针的释放前提。在使用当前指针的时候，禁止进程调度，将一个与当前 CPU 对应的变量 per-CPU 置为 1，当使用结束后开启调度，这样在这个 CPU 发生了一次进程调度后，会将 CPU 对应的变量 per-CPU 置为 0，当所有 CPU 对应的 per-CPU 都为 0 时就可以释放旧指针了。
 
 #### 内存和优化屏障
 
 现代编译器和处理器会尽可能从代码中“压榨”出每一点性能，其中一个有利于提高性能的技术是指令重排。只要结果不变，这完全没有问题。但编译器或处理器很难判定重排的结果是否确实与代码原本的意图匹配。
 
-尽管锁足以确保原子性，但对编译器和处理器优化过的代码，锁可能就不能保证时序正确了。就比如前面介绍的 RCU，如果对当前数据指针的读操作重排后出现在了 rcu\_read\_unlock 之后，可能就会出现潜在的空指针问题。内核提供了下面几个函数，可阻止处理器和编译器进行代码重排。
+尽管锁足以确保原子性，但对编译器和处理器优化过的代码，锁可能就不能保证时序正确了。就比如前面介绍的 RCU，如果对当前数据指针的读操作重排后出现在了 rcu_read_unlock 之后，可能就会出现潜在的空指针问题。内核提供了下面几个函数，可阻止处理器和编译器进行代码重排。
 
 - mb()、rmb(、wmb() 将硬件内存屏障插入到代码流程中。rm() 是读访问内存屏障。它保证在屏障之后发出的任何读取操作执行之前，屏障之前发出的所有读取操作都已经完成。wmb 适用于写访问，语义与 rm 类似。mb() 合并了二者的语义。
 - barrier 插入一个优化屏障。该指令告知编译器，保存在CPU寄存器中、在屏障之前有效的所有内存地址，在屏障之后都将失效。本质上，这意味着编译器在屏障之前发出的读写请求完成之前，不会处理屏障之后的任何读写请求。但 CPU 仍然可以重排时序!
-- smb\_mb()、smp\_rmb()、smp\_wmb() 相当于上述的硬件内存屏障，但只用于 SMP 系统。它们在单处理器系统上产生的是软件屏障。
-- read\_barrier\_depends() 是一种特殊形式的读访问屏障，它会考虑读操作之间的依赖性。如果屏障之后的读请求，依赖于屏障之前执行的读请求的数据，那么编译器和硬件都不能重排这些请求。
+- smb_mb()、smp_rmb()、smp_wmb() 相当于上述的硬件内存屏障，但只用于 SMP 系统。它们在单处理器系统上产生的是软件屏障。
+- read_barrier_depends() 是一种特殊形式的读访问屏障，它会考虑读操作之间的依赖性。如果屏障之后的读请求，依赖于屏障之前执行的读请求的数据，那么编译器和硬件都不能重排这些请求。
 
-RCU 在 rcu\_read\_unlock 就使用了 barrier 命令来保证对当前指针的所有读操作不会发生在 rcu\_read\_unlock 之后。除此之外，禁止抢占的函数也是用该内存屏障。
+RCU 在 rcu_read_unlock 就使用了 barrier 命令来保证对当前指针的所有读操作不会发生在 rcu_read_unlock 之后。除此之外，禁止抢占的函数也是用该内存屏障。
 
-```cpp
 #define preempt_disable() \
 do { \
         inc_preempt_count(); \
@@ -190,21 +164,22 @@ do { \
 } while (0)
 
 #define preempt_enable() \
+```java
     do {\
     ...
     // 防止前面的指令发生在开启抢占之后
     barrier(); \
     preempt_check_resched(); \
 } while (0)
-```
 
+```
 #### per-CPU
 
-在介绍 RCU 时，我们还用到 per-CPU，它为每个 CPU 都维护了一个标志来表示当前 CPU 是否发生了进程调度，当所有 CPU 都完成了进程调度之后，才开始释放 RCU 的旧指针。想象一下，如果我们只用一个单一计数器来统计当前 RCU 指针有多少个地方在使用，那么这个变量就必须是原子变量，如果系统有大量 CPU，并且有很多 CPU 上都使用了 RCU 的同一指针，那么在它们一起释放的时候这个原子计数器势必会成为瓶颈。每次只有一个 CPU 可以修改其值，所有其他 CPU 都必须等待操作结束，才能再次访问计数器。如果计数器频繁访问，则会严重影响系统性能。所以我们转而使用一个数组，数组中的每一项对应了一个 CPU，这样每个 CPU 单独维护自己是否进行了进程切换。这样就不会有上述的竞争发生，效率就更高，在我们要确认是否能够释放 RCU 指针的时候，只需要确认当前是否每个 CPU 对应的项都为 0 就行了。  
-![[6e9bcfe8-a90a-4209-976b-0ba38f53a83e.png|per-cpu]]  
+在介绍 RCU 时，我们还用到 per-CPU，它为每个 CPU 都维护了一个标志来表示当前 CPU 是否发生了进程调度，当所有 CPU 都完成了进程调度之后，才开始释放 RCU 的旧指针。想象一下，如果我们只用一个单一计数器来统计当前 RCU 指针有多少个地方在使用，那么这个变量就必须是原子变量，如果系统有大量 CPU，并且有很多 CPU 上都使用了 RCU 的同一指针，那么在它们一起释放的时候这个原子计数器势必会成为瓶颈。每次只有一个 CPU 可以修改其值，所有其他 CPU 都必须等待操作结束，才能再次访问计数器。如果计数器频繁访问，则会严重影响系统性能。所以我们转而使用一个数组，数组中的每一项对应了一个 CPU，这样每个 CPU 单独维护自己是否进行了进程切换。这样就不会有上述的竞争发生，效率就更高，在我们要确认是否能够释放 RCU 指针的时候，只需要确认当前是否每个 CPU 对应的项都为 0 就行了。
+![[6e9bcfe8-a90a-4209-976b-0ba38f53a83e.png|per-cpu]]
 除了上述的使用之外，内核中还有一个近似 per-CPU 计数器的结构，这种计数器实际上是一个懒计算，在并不一定需要计数器准确值时可以使用它，在每个 CPU 要修改计数器的值时只是将变动保存在 per-CPU 项中，比如一个 CPU 要对计数器+3，那么 per-CPU 项中保存 +3，如果该 CPU 之后要将计数器 -5，那么per-CPU 项中的值变成 -2。当需要计数器准确值或者某个 per-CPU 项的值（绝对值）过大时，才会更新计数器的实际值。
 
-```cpp
+```java
 struct percpu_counter {
     // 重新计算实际值时，使用自旋锁保护
     spinlock_t lock;
@@ -219,14 +194,14 @@ struct percpu_counter {
 
 上述的各个机制有一种不利情况。它们没有区分数据结构的读写访问。通常，任意数目的进程都可以并发读取数据结构，而写访问只能限于一个进程。因此内核提供了额外的信号量和自旋锁版本，考虑到上述因素，分别称之为读/写信号量和读/写自旋锁。
 
-读写自旋锁定义为 rwlock\_t 数据类型。必须根据读写访问，以不同的方法获取锁。
+读写自旋锁定义为 rwlock_t 数据类型。必须根据读写访问，以不同的方法获取锁。
 
-- 进程对临界区进行读访问时，在进入和离开时需要分别执行 read\_lock 和 read\_unlock。内核会允许任意数目的读进程并发访问临界区。
-- write\_lock 和 write\_unlock 用于写访问。内核保证只有一个写进程(此时没有读进程)能够处于临界区中。
+- 进程对临界区进行读访问时，在进入和离开时需要分别执行 read_lock 和 read_unlock。内核会允许任意数目的读进程并发访问临界区。
+- write_lock 和 write_unlock 用于写访问。内核保证只有一个写进程(此时没有读进程)能够处于临界区中。
 
 #### 大内核锁
 
-这是内核锁遗迹之一，它可以锁定整个内核，确保没有处理器在核心态并行运行。该锁称为大内核锁 (big kernel lock)，通常用缩写表示，即 BKL。BKL 的一个特性是，它的锁深度也会进行计数。这意味着在内核已经锁定时，仍然可以调用 lock\_kernel（可重入）。对应的解锁操作 (unlock\_kernel) 必须调用同样的次数，以解锁内核，使其他处理器能够进入。BKL 已经被废弃，应该避免使用它而去使用更加细粒度的锁。
+这是内核锁遗迹之一，它可以锁定整个内核，确保没有处理器在核心态并行运行。该锁称为大内核锁 (big kernel lock)，通常用缩写表示，即 BKL。BKL 的一个特性是，它的锁深度也会进行计数。这意味着在内核已经锁定时，仍然可以调用 lock_kernel（可重入）。对应的解锁操作 (unlock_kernel) 必须调用同样的次数，以解锁内核，使其他处理器能够进入。BKL 已经被废弃，应该避免使用它而去使用更加细粒度的锁。
 
 #### 互斥量
 
@@ -234,7 +209,7 @@ struct percpu_counter {
 
 经典互斥量的结构如下：
 
-```cpp
+```java
 struct mutex {
     /* 1:未锁定，0:锁定只有一个进程使用，负值: 锁定，有等待者 */
     atomic_t count;
@@ -245,10 +220,10 @@ struct mutex {
 
 有两种方法定义新的互斥量。
 
-1. 静态互斥量可以在编译时通过使用 DEFINE\_MUTEX 产生(不要与 DECLARE\_MUTEX 混淆，它是基于信号量的互斥量)。
-2. mutex\_init 在运行时动态初始化个新的互斥量。
+1. 静态互斥量可以在编译时通过使用 DEFINE_MUTEX 产生(不要与 DECLARE_MUTEX 混淆，它是基于信号量的互斥量)。
+2. mutex_init 在运行时动态初始化个新的互斥量。
 
-mutex\_lock 和 mutex\_unlock 分别用于锁定和解锁互斥量。此外内核也提供了 mutex\_trylock，该函数尝试获取互斥量。如果互斥量已经锁定，则立即返回。
+mutex_lock 和 mutex_unlock 分别用于锁定和解锁互斥量。此外内核也提供了 mutex_trylock，该函数尝试获取互斥量。如果互斥量已经锁定，则立即返回。
 
 实时互斥量是内核支持的另一种形式的互斥量。与普通的互斥量相比，它们实现了优先级继承(priority inheritance)，该特性可用于解决优先级反转的影响。
 
@@ -258,7 +233,7 @@ mutex\_lock 和 mutex\_unlock 分别用于锁定和解锁互斥量。此外内�
 
 这种情况称为无限制优先级反转(unbounded priority inversion)。该问题可以通过优先级继承解决。如果高优先级进程阻塞在互斥量上，该互斥量当前由低优先级进程持有，那么进程 C 的优先级(在我们的例子中)临时提高到进程 A 的优先级。如果进程 B 现在开始运行，只能得到与进程 A 竞争情况下的 CPU 时间，这就理顺了优先级的问题。
 
-```cpp
+```java
 struct rt_mutex {
     // 提供实际保护
     spinlock_t wait_lock;
@@ -269,7 +244,7 @@ struct rt_mutex {
 };
 ```
 
-在上例中，如果 C 当前持有该互斥量，A 进程进入等待，因为 A 的优先级大于 C 所以会临时提高到 A 的优先级。这会动态的改变 task\_struct->prio，而普通优先级 task\_struct->normal\_priority 不变。这两者的区别我们在前面介绍进程的时候提过。
+在上例中，如果 C 当前持有该互斥量，A 进程进入等待，因为 A 的优先级大于 C 所以会临时提高到 A 的优先级。这会动态的改变 task_struct->prio，而普通优先级 task_struct->normal_priority 不变。这两者的区别我们在前面介绍进程的时候提过。
 
 #### 锁竞争与细粒度锁
 
@@ -294,9 +269,9 @@ SIGKILL 信号无法阻塞，也不能通过特定于进程的处理程序处理
 
 sigaction 系统调用用于设置新的处理程序：
 
-```cpp
 #include<signal.h>
 #include<stdio.h>
+```c
 /*处理程序函数*/
 void handler(int sig) {
     printf("Receive signal: %u\n"，sig);
@@ -326,40 +301,40 @@ int main(void) {
 };
 ```
 
-尽管信号处理发生在内核中，但设置的信号处理程序是在用户状态运行，否则很容易向内核引入恶意或有缺陷的代码，从而破坏系统安全机制。  
+尽管信号处理发生在内核中，但设置的信号处理程序是在用户状态运行，否则很容易向内核引入恶意或有缺陷的代码，从而破坏系统安全机制。
 
 ![[65e761ef-5c2f-43e7-8a73-6f75185034c9.png|signal-call]]
 
 signal-call
 
-  
+
 如果应用进程没有为信号指定信号处理程序，那么内核会根据信号类型分别进行如下之一的操作：
 
 - 忽略：什么都不做
 - 结束：结束进程或进程组
-- 停止：将进程置于 TASK\_STOPPED 状态
+- 停止：将进程置于 TASK_STOPPED 状态
 - 内存转储：创建地址空间的内存转储，并写入内存转储文件供调试器查看
 
-信号和其默认处理操作的映射关系如下：  
+信号和其默认处理操作的映射关系如下：
 
 ![[2fcc993c-4662-49db-9d28-8a0746c3900a.png|default-signal-handler]]
 
 default-signal-handler
 
-  
-在内核中通过如下结构来维护进程的信号处理相关内容：  
+
+在内核中通过如下结构来维护进程的信号处理相关内容：
 ![[53617812-8175-4baf-ad67-7655564d05c7.png|kernel-signal-manage]]
 
 kernel-signal-manage
 
-  
-上图中的 pending 对应的就是由于信号屏蔽而被阻塞的信号，它们以链表的形式保存。而 sighand 对应的则是信号处理程序，其中 count 指的是共享了该信号处理方案的进程数，回想一下 clone 操作产生的父子进程会共享同一套信号处理程序，这个时候 count 就是 2。此外，action 数组对应的就是信号处理程序的地址，\_NSIG 代表了该体系结构中信号的总数。
 
-当通过 kill 系统调用发送一个信号后，会先找到回应的进程，确认信号是否被忽略 `handler == SIG_IGN || (handler == SIG_DFL && sig_kernel_ignore(sig))` ，如果没有被忽略，则会添加到待决队列（如果信号被阻塞并且待决队列中存在该信号，则不添加）。如果发送成功，则调用 `signal_wake_up` 唤醒进程，使调度器可以选择运行该进程。此外，还设置了进程的 TIF\_SIGPENDING 标志，标有有待处理的信号。到此为止，信号已经发送完成，注意： **信号的处理过程不会同步触发** 。
+上图中的 pending 对应的就是由于信号屏蔽而被阻塞的信号，它们以链表的形式保存。而 sighand 对应的则是信号处理程序，其中 count 指的是共享了该信号处理方案的进程数，回想一下 clone 操作产生的父子进程会共享同一套信号处理程序，这个时候 count 就是 2。此外，action 数组对应的就是信号处理程序的地址，_NSIG 代表了该体系结构中信号的总数。
+
+当通过 kill 系统调用发送一个信号后，会先找到回应的进程，确认信号是否被忽略 `handler == SIG_IGN || (handler == SIG_DFL && sig_kernel_ignore(sig))` ，如果没有被忽略，则会添加到待决队列（如果信号被阻塞并且待决队列中存在该信号，则不添加）。如果发送成功，则调用 `signal_wake_up` 唤醒进程，使调度器可以选择运行该进程。此外，还设置了进程的 TIF_SIGPENDING 标志，标有有待处理的信号。到此为止，信号已经发送完成，注意： **信号的处理过程不会同步触发** 。
 
 kill 系统调用不会触发信号队列的处理，在每次由核心态切换到用户状态时，内核都会发起信号队列处理，如果待决队列中的某个信号处于阻塞状态，则暂时先不处理它。
 
-handle\_signal 会修改该进程在用户状态下的栈，使得在从核心态切换到用户状态之后运行信号处理程序，而不是回到之前正常的程序流程。这种复杂的方法是必要的，因为处理程序函数不能在核心态执行。当信号处理程序执行完毕后，会调用 sigreturn 系统调用（通过修改栈或用户空间"胶水"代码实现）。sigreturn 系统调用负责恢复进程上下文，使得下次切换到用户态时，应用可以继续执行。  
+handle_signal 会修改该进程在用户状态下的栈，使得在从核心态切换到用户状态之后运行信号处理程序，而不是回到之前正常的程序流程。这种复杂的方法是必要的，因为处理程序函数不能在核心态执行。当信号处理程序执行完毕后，会调用 sigreturn 系统调用（通过修改栈或用户空间"胶水"代码实现）。sigreturn 系统调用负责恢复进程上下文，使得下次切换到用户态时，应用可以继续执行。
 
 ![[65e761ef-5c2f-43e7-8a73-6f75185034c9.png|signal-call]]
 
@@ -369,9 +344,7 @@ signal-call
 
 shell 用户可能比较熟悉管道，在命令行上可以如下使用:
 
-```bash
 prog | ghostscript | lpr-
-```
 
 这里将一个进程的输出用作另个进程的输入，管道负责数据的传输。顾名思义，管道是用于交换数据的连接。一个进程向管道的一端供给数据，另一个在管道的另一端取出数据，供进步处理。几个进程可以通过系列管道连按起来。
 
@@ -393,24 +366,24 @@ UNIX 域套接字与 TCP 套接字相比较，在同一台主机的传输速度�
 
 就像前面所说的，用户进程使用的信号量不仅仅是控制原子操作的工具，而且可以在多个进程间共享以进行进程间通讯的任务。
 
-信号量可以通过命名空间隔离，通过魔数可以查到信号量的内核内部 ID，然后可以访问到信号量对象。在信号量对象中会维护撤销列表，如果进程修改信号量后崩溃，保存在撤销列表的信息可用于恢复信号量。通过这种崩溃撤销机制，可以防止死锁。  
+信号量可以通过命名空间隔离，通过魔数可以查到信号量的内核内部 ID，然后可以访问到信号量对象。在信号量对象中会维护撤销列表，如果进程修改信号量后崩溃，保存在撤销列表的信息可用于恢复信号量。通过这种崩溃撤销机制，可以防止死锁。
 
 ![[12486882-415c-432d-8136-280b42c720ca.png|seg-structure]]
 
 seg-structure
 
-  
-上图就是信号量组的结构，其中故意隐藏了撤销列表来降低图示的复杂度。我们可以看到一个信号量组可以包含多个信号量（sem\_base)，此外还有一个等待列表来维护所有的等待进程。
+
+上图就是信号量组的结构，其中故意隐藏了撤销列表来降低图示的复杂度。我们可以看到一个信号量组可以包含多个信号量（sem_base)，此外还有一个等待列表来维护所有的等待进程。
 
 #### 消息队列
 
-消息队列的功能比较简单，如下所示：  
+消息队列的功能比较简单，如下所示：
 
 ![[80878366-6c90-452f-924c-989d9ec9bc4d.png|message-queue]]
 
 message-queue
 
-  
+
 产生消息并将其写到队列的进程通常称之为发送者，而一个或多个其他进程(逻辑上称之为接收者)则从队列获取信息。各个消息包含消息正文和一个序号，接收者可以根据该数字检索消息，例如，可以指定只接收编号 1 的消息，或接收编号不大于 5 的消息。在消息已经读取后，内核将其从队列剔除。即使几个进程在同一信道上监听，每个消息仍然只能由一个进程读取。
 
 同一编号的消息按先进先出次序处理。放置在队列开始的消息将首先读取。但如果有选择地读取消息，则先进先出次序就不再适用。发送者和接收者通过消息队列通信时，无需同时运行。例如，发送进程可以打开一个队列，写入消息，然后结束工作。接收进程在发送者结束之后启动，仍然可以访问队列并获取消息。中间的一段时间内，消息由内核维护。
@@ -421,8 +394,8 @@ message-queue
 
 multiple-page-message
 
-  
-消息队列可以通过命名空间隔离，通过内核内部 ID 将映射到 msg\_queue，其中包含了消息链表和接受者列表，每个接受者又映射到了所属的进程。当消息队列已满时，消息的发送者会在试图发送消息时进入睡眠，反之，如果消息队列没有消息，那么接受者试图获取消息时进入睡眠。  
+
+消息队列可以通过命名空间隔离，通过内核内部 ID 将映射到 msg_queue，其中包含了消息链表和接受者列表，每个接受者又映射到了所属的进程。当消息队列已满时，消息的发送者会在试图发送消息时进入睡眠，反之，如果消息队列没有消息，那么接受者试图获取消息时进入睡眠。
 ![[ed7cbc34-98a8-42c6-afaa-80baeaeabdc8.png|message-structure]]
 
 message-structure
@@ -439,100 +412,42 @@ message-structure
 
 share-memory
 
-  
-共享内存可以通过命名空间隔离，通过内核内部 ID 将映射到 shmid\_kernel 对象，其中管理的权限相关的内容，每个共享内存都创建一个伪文件，通过该文件又能链接到地址空间对象，用于创建匿名映射。在需要使用共享内存时，需要修改相关进程的页表，来进行访问。
+
+共享内存可以通过命名空间隔离，通过内核内部 ID 将映射到 shmid_kernel 对象，其中管理的权限相关的内容，每个共享内存都创建一个伪文件，通过该文件又能链接到地址空间对象，用于创建匿名映射。在需要使用共享内存时，需要修改相关进程的页表，来进行访问。
 
 ## 参考内容
 
-\[1\]《Linux内核设计与实现》  
-\[2\]《Linux系统编程》  
-\[3\]《深入理解Linux内核》  
-\[4\]《深入Linux内核架构》  
-\[5\] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)  
-\[6\] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)  
-\[7\] [Linux中的物理内存管理 \[一\]](https://zhuanlan.zhihu.com/p/68465952)  
-\[8\] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)  
-\[9\] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)  
-\[10\] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)  
-\[11\] [linux内核学习笔记-struct vm\_area\_struct](https://blog.csdn.net/ywf861029/article/details/6114794)  
-\[12\] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)  
-\[13\] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)  
-\[14\] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)  
-\[15\] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)  
-\[16\] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)  
-\[17\] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)  
-\[18\] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)  
-\[18\] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)  
-\[19\] [页缓存page cache和地址空间address\_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)  
-\[20\] [rocketmq使用的系统参数（dirty\_background\_ration dirty\_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)  
-\[21\] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)  
-\[22\] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)  
-\[23\] [Linux中的内存回收\[一\]](https://zhuanlan.zhihu.com/p/70964195)  
-\[24\] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)  
-\[25\] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)  
-\[26\] [对 jiffies 溢出、回绕及 time\_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)  
-\[27\] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)  
-\[28\] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)  
-\[29\] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)  
-\[30\] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)  
-\[31\] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)  
-\[32\] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)  
-\[33\] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)
-
-END
-
-引言
-
-锁与进程间通讯
-
-锁
-
-原子操作
-
-自旋锁
-
-信号量
-
-RCU 机制
-
-内存和优化屏障
-
-per-CPU
-
-读写锁
-
-大内核锁
-
-互斥量
-
-锁竞争与细粒度锁
-
-进程间通讯
-
-信号
-
-管道
-
-套接字
-
-信号量介绍
-
-消息队列
-
-共享内存
-
-参考内容
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[1]《Linux内核设计与实现》
+[2]《Linux系统编程》
+[3]《深入理解Linux内核》
+[4]《深入Linux内核架构》
+[5] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)
+[6] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)
+[7] [Linux中的物理内存管理 [一]](https://zhuanlan.zhihu.com/p/68465952)
+[8] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)
+[9] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)
+[10] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)
+[11] [linux内核学习笔记-struct vm_area_struct](https://blog.csdn.net/ywf861029/article/details/6114794)
+[12] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)
+[13] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)
+[14] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)
+[15] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)
+[16] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)
+[17] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)
+[18] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)
+[18] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)
+[19] [页缓存page cache和地址空间address_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)
+[20] [rocketmq使用的系统参数（dirty_background_ration dirty_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)
+[21] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)
+[22] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)
+[23] [Linux中的内存回收[一]](https://zhuanlan.zhihu.com/p/70964195)
+[24] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)
+[25] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)
+[26] [对 jiffies 溢出、回绕及 time_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)
+[27] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)
+[28] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)
+[29] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)
+[30] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)
+[31] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)
+[32] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+[33] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)

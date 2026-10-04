@@ -8,36 +8,6 @@ description:
 tags:
   - "clippings"
 ---
-阿里控股
-
-勋章
-
-粉丝 13影响力 106
-
-** 17
-
-** 10
-
-**
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[陈松槟](https://ata.atatech.org/users/11001308292)
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
 > 本文重点：介绍React重构的起因和目的，理解Fiber tree单向链表结构中各属性含义，梳理调度过程和核心实现手段，深入新的生命周期，hooks，suspense，异常捕获等特性的用法和原理。
 
 当react刚推出的时候，最具革命性的特性就是虚拟dom，因为这大大降低了应用开发的难度，相比较以往告诉浏览器我需要怎么更新我的ui，现在我们只需要告诉react我应用ui的下个状态是怎么样的，react会帮我们自动处理两者之间的所有事宜。
@@ -75,9 +45,9 @@ Fiber能否给我们答案，又将带给我们什么惊喜，卷起一波新的
 
 ![](redirect_21.png)
 
-帧：在动画过程中，每一幅静止画面即为一“帧”；  
-帧率：是用于测量显示帧数的量度，测量单位为“每秒显示帧数”（Frame per Second，FPS）或“赫兹”；  
-帧时长：即每一幅静止画面的停留时间，单位一般是ms(毫秒)；  
+帧：在动画过程中，每一幅静止画面即为一“帧”；
+帧率：是用于测量显示帧数的量度，测量单位为“每秒显示帧数”（Frame per Second，FPS）或“赫兹”；
+帧时长：即每一幅静止画面的停留时间，单位一般是ms(毫秒)；
 丢帧：在帧率固定的动画中，某一帧的时长远高于平均帧时长，导致其后续数帧被挤压而丢失的现象；
 
 当前大部分笔记本电脑和手机的常见帧率为60hz，即一秒显示60帧的画面，一帧停留的时间为16.7ms(1000/60≈16.7)，这就留给了开发者和UI系统大约16.67ms来完成生成一张静态图片（帧）所需要的所有工作。如果在这分派的16.67ms之内没有能够完成这些工作，就会引发‘丢帧’的后果，使界面表现的不够流畅。
@@ -88,19 +58,19 @@ Fiber能否给我们答案，又将带给我们什么惊喜，卷起一波新的
 
 > 在浏览器中GUI渲染线程与JS引擎线程是互斥的，当JS引擎执行时GUI线程会被挂起（相当于被冻结了），GUI更新会被保存在一个队列中等到JS引擎空闲时立即被执行。
 
-![](redirect_23.png)  
+![](redirect_23.png)
 浏览器拥挤的主线程
 
 React16 推出Fiber之前协调算法是Stack Reconciler，即递归遍历所有的 Virtual DOM 节点执行Diff算法，一旦开始便无法中断，直到整颗虚拟dom树构建完成后才会释放主线程，因其JavaScript单线程的特点，若当下组件具有复杂的嵌套和逻辑处理，diff便会堵塞UI进程，使动画和交互等优先级相对较高的任务无法立即得到处理，造成页面卡顿掉帧，影响用户体验。
 
 16年在 facebook 上 Seb 正式提到了 Fiber 这个概念，解释为什么要重写框架：
 
-> Once you have each stack frame as an object on the heap you can do clever things like reusing it during future updates and yielding to the event loop without losing any of your currently in progress data.  
+> Once you have each stack frame as an object on the heap you can do clever things like reusing it during future updates and yielding to the event loop without losing any of your currently in progress data.
 > 一旦将每个堆栈帧作为堆上的对象，您就可以做一些聪明的事情，例如在将来的更新中重用它并暂停于事件循环，而不会丢失任何当前正在进行的数据。
 
 我们来做一个实验
 
-```
+```javascript
 function randomHexColor() {
   return (
     "#" + ("0000" + ((Math.random() * 0x1000000) << 0).toString(16)).substr(-6)
@@ -147,10 +117,10 @@ function b() {
 }
 ```
 
-a执行性能截图：掉帧严重，普遍fps为1139.6ms  
+a执行性能截图：掉帧严重，普遍fps为1139.6ms
 ![](redirect_24.png)
 
-b执行性能截图: fps处于15ms～19ms  
+b执行性能截图: fps处于15ms～19ms
 ![](redirect_25.png)
 
 > 究其原因是因为浏览器的主线程需要处理GUI描绘，时间器处理，事件处理，JS执行，远程资源加载等，当做某件事，只有将它做完才能做下一件事。如果有足够的时间，浏览器是会对我们的代码进行编译优化（JIT）及进行热代码优化，一些DOM操作，内部也会对reflow进行处理。reflow是一个性能黑洞，很可能让页面的大多数元素进行重新布局。
@@ -173,15 +143,15 @@ b执行性能截图: fps处于15ms～19ms
 
 Andrew Clark的 [React Fiber体系文档](https://github.com/acdlite/react-fiber-architecture) 很好地解释了Fiber实现背后的想法，我在这里引用一下：
 
-> Fiber是堆栈的重新实现，专门用于React组件。  
-> 您可以将单个Fiber视为虚拟堆栈框架。  
-> 重新实现堆栈的优点是，您可以将堆栈帧保留在内存中，并根据需要（以及在任何时候）执行它们。  
+> Fiber是堆栈的重新实现，专门用于React组件。
+> 您可以将单个Fiber视为虚拟堆栈框架。
+> 重新实现堆栈的优点是，您可以将堆栈帧保留在内存中，并根据需要（以及在任何时候）执行它们。
 > 这对于实现调度的目标至关重要。
 
 ##### JavaScript的执行模型：call stack
 
-JavaScript原生的执行模型：通过调用栈来管理函数执行状态。  
-其中每个栈帧表示一个工作单元（a unit of work），存储了函数调用的返回指针、当前函数、调用参数、局部变量等信息。  
+JavaScript原生的执行模型：通过调用栈来管理函数执行状态。
+其中每个栈帧表示一个工作单元（a unit of work），存储了函数调用的返回指针、当前函数、调用参数、局部变量等信息。
 因为JavaScript的执行栈是由引擎管理的，执行栈一旦开始，就会一直执行，直到执行栈清空。无法按需中止。
 
 react以往的渲染就是使用原生执行栈来管理组件树的递归渲染，当其层次较深component不断递归子节点，无法被打断就会导致主线程堵塞ui卡顿。
@@ -202,8 +172,8 @@ fiber是一个js对象，fiber的创建是通过React元素来创建的，在整
 
 让我们看一下fiber的结构
 
-```
 type Fiber = {|
+```javascript
   // 标记不同的组件类型
   //export const FunctionComponent = 0;
   //export const ClassComponent = 1;
@@ -245,7 +215,7 @@ type Fiber = {|
   ref: null | (((handle: mixed) => void) & {_stringRef: ?string}) | RefObject,
 
   // 新的变动带来的新的props
-  pendingProps: any, 
+  pendingProps: any,
   // 上一次渲染完成之后的props
   memoizedProps: any,
 
@@ -301,7 +271,7 @@ type Fiber = {|
 
 ### 链表结构
 
-![](redirect_28.png)  
+![](redirect_28.png)
 fiber中最为重要的是return、child、sibling指针，连接父子兄弟节点以构成一颗单链表fiber树，其扁平化的单链表结构的特点将以往递归遍历改为了循环遍历，实现深度优先遍历。
 
 React16特别青睐于链表结构，链表在内存里不是连续的，动态分配，增删方便，轻量化，对异步友好
@@ -312,7 +282,7 @@ React16特别青睐于链表结构，链表在内存里不是连续的，动态�
 
 **workInProgress树** ：当React经过current当前树时，对于每一个先存在的fiber节点，它都会创建一个替代（alternate）节点，这些节点组成了workInProgress树。这个节点是使用render方法返回的React元素的数据创建的。一旦更新处理完以及所有相关工作完成，React就有一颗替代树来准备刷新屏幕。一旦这颗workInProgress树渲染（render）在屏幕上，它便成了当前树。下次进来会把current状态复制到WIP上，进行交互复用，而不用每次更新的时候都创建一个新的对象，消耗性能。这种同时缓存两棵树进行引用替换的技术被称为 **双缓冲技术** 。
 
-```
+```javascript
 function createWorkInProgress(current, ...) {
   let workInProgress = current.alternate;
   if (workInProgress === null) {
@@ -326,7 +296,7 @@ function createWorkInProgress(current, ...) {
 }
 ```
 
-![](redirect_29.png)  
+![](redirect_29.png)
 **alternate** fiber可以理解为一个fiber版本池，用于交替记录组件更新（切分任务后变成多阶段更新）过程中fiber的更新，因为在组件更新的各阶段，更新前及更新过程中fiber状态并不一致，在需要恢复时（如发生冲突），即可使用另一者直接回退至上一版本fiber。
 
 Dan在 [Beyond React 16](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html) 演讲中用了一个非常恰当的比喻，那就是Git 功能分支，你可以将 WIP 树想象成从旧树中 Fork 出来的功能分支，你在这新分支中添加或移除特性，即使是操作失误也不会影响旧的分支。当你这个分支经过了测试和完善，就可以合并到旧分支，将其替换掉。
@@ -341,7 +311,7 @@ Dan在 [Beyond React 16](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-r
 
 > ps: setState一直有人疑问为啥不是同步，将 setState() 视为请求而不是立即更新组件的命令。为了更好的感知性能，React 会延迟调用它，然后通过一次传递更新多个组件。React 并不会保证 state 的变更会立即生效。
 
-```
+```javascript
 export function createUpdate(
   expirationTime: ExpirationTime,
   suspenseConfig: null | SuspenseConfig,
@@ -367,7 +337,7 @@ export function createUpdate(
     // 指向下一个update
     // 单链表update queue通过 next串联
     next: null,
-    
+
     // 下一个side effect
     // 最新源码被抛弃 next替换
     //nextEffect: null,
@@ -381,7 +351,7 @@ export function createUpdate(
 
 #### UpdateQueue
 
-```
+```javascript
 //创建更新队列
 export function createUpdateQueue<State>(baseState: State): UpdateQueue<State> {
   const queue: UpdateQueue<State> = {
@@ -408,10 +378,8 @@ export function createUpdateQueue<State>(baseState: State): UpdateQueue<State> {
 
 update中的payload：通常我们现在在调用setState传入的是一个对象，但在使用fiber conciler时，必须传入一个函数，函数的返回值是要更新的state。react从很早的版本就开始支持这种写法了，不过通常没有人用。在之后的react版本中，可能会废弃直接传入对象的写法。
 
-```
 setState({}, callback); // stack conciler
 setState(() => { return {} }, callback); // fiber conciler
-```
 
 [ReactUpdateQueue源码](https://github.com/facebook/react/blob/0f3838a01b0fda0ac5fd054c6be13166697a113c/packages/react-reconciler/src/ReactUpdateQueue.js)
 
@@ -419,7 +387,7 @@ setState(() => { return {} }, callback); // fiber conciler
 
 每个组件都会有一个Updater对象，它的用处就是把组件元素更新和对应的fiber关联起来。监听组件元素的更新，并把对应的更新放入该元素对应的fiber的UpdateQueue里面，并且调用ScheduleWork方法，把最新的fiber让scheduler去调度工作。
 
-```
+```javascript
 const classComponentUpdater = {
   isMounted,
   enqueueSetState(inst, payload, callback) {
@@ -471,7 +439,7 @@ React能够非常快速地更新，并且为了实现高性能，它采用了一
 
 每个fiber节点都可以具有与之相关的effects, 通过fiber节点中的effectTag字段表示。
 
-![](redirect_30.png)  
+![](redirect_30.png)
 ![](redirect_31.png)
 
 此列表的目标是标记具有DOM更新或与其关联的其他effects的节点，此列表是WIP tree的子集，并使用nextEffect属性，而不是current和workInProgress树中使用的child属性进行链接。
@@ -492,7 +460,7 @@ Reconciliation分为两个阶段：reconciliation 和 commit
 
 #### reconciliation
 
-![](redirect_32.png)  
+![](redirect_32.png)
 从图中可以看到，可以把reconciler阶段分为三部分，分别以红线划分。简单的概括下三部分的工作：
 
 1. 第一部分从 ReactDOM.render() 方法开始，把接收的React Element转换为Fiber节点，并为其设置优先级，记录update等。这部分主要是一些数据方面的准备工作。
@@ -511,7 +479,7 @@ Reconciliation分为两个阶段：reconciliation 和 commit
 
 > expirationTime本质上是fiber work执行的优先级。
 
-```
+```javascript
 // 源码中的priorityLevel优先级划分
 export const NoWork = 0;
 // 仅仅比Never高一点 为了保证连续必须完整完成
@@ -523,7 +491,7 @@ export const Batched = Sync - 1;
 
 源码中的 [computeExpirationForFiber函数](https://github.com/facebook/react/blob/16.8.4/packages/react-reconciler/src/ReactFiberScheduler.js#L1595) ，该方法用于计算fiber更新任务的最晚执行时间，进行比较后，决定是否继续做下一个任务。
 
-```
+```javascript
 //为fiber对象计算expirationTime
 function computeExpirationForFiber(currentTime: ExpirationTime, fiber: Fiber) {
   ...
@@ -573,38 +541,41 @@ export const HIGH_PRIORITY_EXPIRATION = __DEV__ ? 500 : 150
 export const HIGH_PRIORITY_BATCH_SIZE = 100
 
 export function computeInteractiveExpiration(currentTime: ExpirationTime) {
-  return computeExpirationBucket(
+    return computeExpirationBucket(
     currentTime,
     HIGH_PRIORITY_EXPIRATION,
     HIGH_PRIORITY_BATCH_SIZE,
   )
 }
-
 function computeExpirationBucket(
+```
+```java
   currentTime,
   expirationInMs,
   bucketSizeMs,
 ): ExpirationTime {
   return (
+```
     MAGIC_NUMBER_OFFSET -
+```java
     ceiling(
     // 之前的算法
      //currentTime - MAGIC_NUMBER_OFFSET + expirationInMs / UNIT_SIZE,
+```
       MAGIC_NUMBER_OFFSET - currentTime + expirationInMs / UNIT_SIZE,
       bucketSizeMs / UNIT_SIZE,
     )
+```java
   );
 }
-```
 
-```
 // 我们把公式整理一下：
 // low
+```
  1073741821-ceiling(1073741821-currentTime+500,25) =>
  1073741796-((1073742321-currentTime)/25 | 0)*25
-// high 
+// high
 1073741821-ceiling(1073741821-currentTime+15,10)
-```
 
 简单来说，最终结果是以25为单位向上增加的，比如说我们输入102 - 126之间，最终得到的结果都是625，但是到了127得到的结果就是650了，这就是除以25取整的效果。
 
@@ -623,7 +594,7 @@ expiration算法源码
 
 这里要介绍介绍浏览器提供的两个API：requestIdleCallback和requestAnimationFrame:
 
-> requestIdleCallback：  
+> requestIdleCallback：
 > 在浏览器空闲时段内调用的函数排队。是开发人员可以在主事件循环上执行后台和低优先级工作而不会影响延迟关键事件，如动画和输入响应。
 
 ![](redirect_34.png)
@@ -636,7 +607,7 @@ expiration算法源码
 
 > 合作式调度:这是一种’契约‘调度，要求我们的程序和浏览器紧密结合，互相信任。比如可以由浏览器给我们分配执行时间片，我们要按照约定在这个时间内执行完毕，并将控制权还给浏览器。
 
-![](redirect_36.png)  
+![](redirect_36.png)
 ![](redirect_37.png)
 
 Fiber所做的就是需要分解渲染任务，然后根据优先级使用API调度，异步执行指定任务：
@@ -648,7 +619,7 @@ Fiber所做的就是需要分解渲染任务，然后根据优先级使用API调
 
 ## 生命周期
 
-因为其在协调阶段任务可被打断的特点，任务在切片后运行完一段便将控制权交还到react负责任务调度的模块，再根据任务的优先级，继续运行后面的任务。所以会导致某些组件渲染到一半便会打断以运行其他紧急，优先级更高的任务，运行完却不会继续之前中断的部分，而是重新开始，所以在协调的所有生命周期都会面临这种被多次调用的情况。  
+因为其在协调阶段任务可被打断的特点，任务在切片后运行完一段便将控制权交还到react负责任务调度的模块，再根据任务的优先级，继续运行后面的任务。所以会导致某些组件渲染到一半便会打断以运行其他紧急，优先级更高的任务，运行完却不会继续之前中断的部分，而是重新开始，所以在协调的所有生命周期都会面临这种被多次调用的情况。
 为了限制这种被多次重复调用，耗费性能的情况出现，react官方一步步把处在协调阶段的部分生命周期进行移除。
 
 ![](redirect_38.png)
@@ -682,7 +653,7 @@ static 是ES6的写法，当我们定义一个函数为static时，就意味着�
 
 getDerivedStateFromError是在reconciliation阶段触发，所以getDerivedStateFromError进行捕获错误后进行组件的状态变更，不允许出现副作用。
 
-```
+```java
 static getDerivedStateFromError(error) {
     // 更新 state 使下一次渲染可以显降级 UI
     return { hasError: true };
@@ -691,7 +662,7 @@ static getDerivedStateFromError(error) {
 
 componentDidCatch因为在commit阶段，因此允许执行副作用。 它应该用于记录错误之类的情况：
 
-```
+```java
 componentDidCatch(error, info) {
     // "组件堆栈" 例子:
     //   in ComponentThatThrows (created by App)
@@ -706,7 +677,7 @@ componentDidCatch(error, info) {
 
 ## Suspense
 
-Suspense的实现很诡异，也备受争议。  
+Suspense的实现很诡异，也备受争议。
 用Dan的原话讲：你将会恨死它，然后你会爱上他。
 
 **Suspense** 功能想解决从react出生到现在都存在的「异步副作用」的问题，而且解决得非常的优雅，使用的是「异步但是同步的写法」.
@@ -715,24 +686,21 @@ Suspense暂时只是用于搭配lazy进行代码分割，在组件等待某事�
 
 ### 用法
 
-```
+```javascript
 // 懒加载组件切换时显示过渡组件
 const ProfilePage = React.lazy(() => import('./ProfilePage')); // Lazy-loaded
 
 // Show a spinner while the profile is loading
 <Suspense fallback={<Spinner />}>
-  <ProfilePage />
+<ProfilePage />
 </Suspense>
-```
 
-```
 // 异步获取数据
 import { unstable_createResource } from 'react-cache'
 
 const resource = unstable_createResource((id) => {
-  return fetch(\`/demo/${id}\`)
+    return fetch(\`/demo/${id}\`)
 })
-
 function ProfilePage() {
   return (
     <Suspense fallback={<h1>Loading profile...</h1>}>
@@ -758,6 +726,8 @@ function ProfileTimeline() {
       {posts.map(post => (
         <li key={post.id}>{post.text}</li>
       ))}
+```
+```java
     </ul>
   );
 }
@@ -780,9 +750,9 @@ function ProfileTimeline() {
 
 ### 原理
 
-看一下react提供的unstable\_createResource源码
+看一下react提供的unstable_createResource源码
 
-```
+```javascript
 export function unstable_createResource(fetch, maybeHashInput) {
   const resource = {
     read(input) {
@@ -811,11 +781,21 @@ export function unstable_createResource(fetch, maybeHashInput) {
   return resource;
 }
 ```
+        default:
+```javascript
+          // Should be unreachable
+          return (undefined: any);
+      }
+    },
+  };
+  return resource;
+}
+```
 
 ![](redirect_40.png)
 
-为此，React使用Promises。  
-组件可以在其render方法（或在组件的渲染过程中调用的任何东西，例如新的静态getDerivedStateFromProps）中抛出Promise。  
+为此，React使用Promises。
+组件可以在其render方法（或在组件的渲染过程中调用的任何东西，例如新的静态getDerivedStateFromProps）中抛出Promise。
 React捕获了抛出的Promise，并在树上寻找最接近的Suspense组件，Suspense其本身具有componentDidCatch，将promise当成error捕获，等待其执行完成其更改状态重新渲染子组件。
 
 Suspense组件将一个元素（fallback 作为其后备道具，无论子节点在何处或为什么挂起，都会在其子树被挂起时进行渲染。
@@ -829,7 +809,7 @@ Suspense组件将一个元素（fallback 作为其后备道具，无论子节点
 
 react-reconciler中的 [performConcurrentWorkOnRoot](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L642)
 
-```
+```javascript
 // This is the entry point for every concurrent task, i.e. anything that
 // goes through Scheduler.
 // 这里是每一个通过Scheduler的concurrent任务的入口
@@ -852,6 +832,8 @@ function handleError(root, thrownValue) {
       throwException(
         root,
         workInProgress.return,
+```
+```java
         workInProgress,
         thrownValue,
         renderExpirationTime,
@@ -863,20 +845,26 @@ function handleError(root, thrownValue) {
 
 [throwException](https://github.com/facebook/react/blob/f523b2e0d369e3f42938b56784f9ce1990838753/packages/react-reconciler/src/ReactFiberThrow.js#L178)
 
+```javascript
+function performConcurrentWorkOnRoot(root, didTimeout) {
+    ...
+    do {
+        try {
+            //开始执行Concurrent任务直到Scheduler要求我们让步
+            workLoopConcurrent();
+            break;
+        } catch (thrownValue) {
+            handleError(root, thrownValue);
+        }
+    } while (true);
+    ...
+}
 ```
-do {
-    switch (workInProgress.tag) {
-      ....
-      case ClassComponent:
-        // Capture and retry
-        const errorInfo = value;
-        const ctor = workInProgress.type;
-        const instance = workInProgress.stateNode;
-        if (
           (workInProgress.effectTag & DidCapture) === NoEffect &&
           (typeof ctor.getDerivedStateFromError === 'function' ||
             (instance !== null &&
               typeof instance.componentDidCatch === 'function' &&
+```java
               !isAlreadyFailedLegacyErrorBoundary(instance)))
         ) {
           workInProgress.effectTag |= ShouldCapture;
@@ -895,15 +883,15 @@ do {
 }
 ```
 
-throwException函数分为两部分  
+throwException函数分为两部分
 1、遍历当前异常节点的所有父节点，找到对应的错误信息（错误名称、调用栈等），这部分代码在上面中没有展示出来
 
 2、第二部分是遍历当前异常节点的所有父节点，判断各节点的类型，主要还是上面提到的两种类型，这里重点讲ClassComponent类型，判断该节点是否是异常边界组件（通过判断是否存在componentDidCatch生命周期函数等），如果是找到异常边界组件，则调用 createClassErrorUpdate函数新建update，并将此update放入此节点的异常更新队列中，在后续更新中，会更新此队列中的更新工作
 
 #### commit阶段
 
-ReactFiberWorkLoop中的 [finishConcurrentRender](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1709) =》  
-[commitRoot](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1709) =》  
+ReactFiberWorkLoop中的 [finishConcurrentRender](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1709) =》
+[commitRoot](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1709) =》
 [commitRootImpl](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L1718) =》 [captureCommitPhaseError](https://github.com/facebook/react/blob/e039e690b5c45c458dd4026f3db16bac18ed0e47/packages/react-reconciler/src/ReactFiberWorkLoop.js#L2280)
 
 commit被分为几个子阶段，每个阶段都try catch调用了一次captureCommitPhaseError
@@ -912,7 +900,7 @@ commit被分为几个子阶段，每个阶段都try catch调用了一次captureC
 2. 突变阶段：我们在这个阶段更改主树，完成WIP树转变为current树
 3. 样式阶段：调用从被更改后主树读取的effect
 
-```
+```javascript
 export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
   if (sourceFiber.tag === HostRoot) {
     // Error was thrown at the root. There is no parent, so the root
@@ -932,6 +920,31 @@ export function captureCommitPhaseError(sourceFiber: Fiber, error: mixed) {
       if (
         typeof ctor.getDerivedStateFromError === 'function' ||
         (typeof instance.componentDidCatch === 'function' &&
+          !isAlreadyFailedLegacyErrorBoundary(instance))
+      ) {
+        const errorInfo = createCapturedValue(error, sourceFiber);
+        const update = createClassErrorUpdate(
+          fiber,
+          errorInfo,
+          // TODO: This is always sync
+          Sync,
+        );
+        enqueueUpdate(fiber, update);
+        const root = markUpdateTimeFromFiberToRoot(fiber, Sync);
+        if (root !== null) {
+          ensureRootIsScheduled(root);
+          schedulePendingInteractions(root, Sync);
+        }
+        return;
+      }
+    }
+    fiber = fiber.return;
+  }
+}
+```
+        typeof ctor.getDerivedStateFromError === 'function' ||
+        (typeof instance.componentDidCatch === 'function' &&
+```javascript
           !isAlreadyFailedLegacyErrorBoundary(instance))
       ) {
         const errorInfo = createCapturedValue(error, sourceFiber);
@@ -982,7 +995,7 @@ hooks优势
 
 #### capture props
 
-```
+```javascript
 class ProfilePage extends React.Component {
   showMessage = () => {
     alert("Followed " + this.props.user);
@@ -996,9 +1009,7 @@ class ProfilePage extends React.Component {
     return <button onClick={this.handleClick}>Follow</button>;
   }
 }
-```
 
-```
 function ProfilePage(props) {
   const showMessage = () => {
     alert("Followed " + props.user);
@@ -1030,7 +1041,7 @@ function ProfilePage(props) {
 
 #### hook中的capture value
 
-```
+```javascript
 function MessageThread() {
   const [message, setMessage] = useState("");
 
@@ -1047,17 +1058,17 @@ function MessageThread() {
   };
 
   return (
+```
     <>
       <input value={message} onChange={handleMessageChange} />
       <button onClick={handleSendClick}>Send</button>
     </>
   );
 }
-```
 
 hook重同样有capture value，每次渲染都有自己的 Props and State，如果要时刻获取最新的值，规避 capture value 特性，可以用useRef
 
-```
+```javascript
 const lastest = useRef("");
 
 const showMessage = () => {
@@ -1083,7 +1094,7 @@ const handleMessageChange = e => {
 
 日常调用三次
 
-```
+```javascript
 function Form() {
   const [hero, setHero] = useState('iron man');
   if(hero){
@@ -1096,7 +1107,7 @@ function Form() {
 
 来看看我们的useState是怎么实现的
 
-```
+```javascript
 // useState 源码中的链表实现
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -1111,7 +1122,7 @@ function useState(initState) {
         currentHook.memoizedState = newState;
         render();
     }
-    
+
     // 假如某个 useState 没有执行，会导致Next指针移动出错，数据存取出错
     if (workInProgressHook.next) {
         // 这里只有组件刷新的时候，才会进入
@@ -1135,12 +1146,16 @@ function Counter() {
     const [name, setName] = useState('计数器');
     const [number, setNumber] = useState(0);
     return (
+```
         <>
+```java
             <p>{name}:{number}</p>
             <button onClick={() => setName('新计数器' + Date.now())}>新计数器</button>
             <button onClick={() => setNumber(number + 1)}>+</button>
+```
         </>
     )
+```javascript
 }
 
 function render() {
@@ -1152,7 +1167,7 @@ function render() {
 render();
 ```
 
-我们来还原一下这个过程  
+我们来还原一下这个过程
 大家看完应该了解，当下设置currentHook其实是上个workInProgressHook通过next指针进行绑定获取的，所以如果在条件语句中打破了调用顺序，将会导致next指针指向出现偏差，这个时候你传进去的setState是无法正确改变对应的值，因为
 
 各种自定义封装的hooks =》 [react-use](https://github.com/streamich/react-use)
@@ -1185,16 +1200,16 @@ render();
 
 ##### 栗子
 
-```
+```javascript
 import  {  startTransition  }  from  'react' ;
 
 // 紧急：显示输入的内容
 setInputValue ( input ) ;
 
 // 将内部的任何状态更新标记为转换
-startTransition ( ( )  =>  { 
-  // Transition: 显示结果
-  setSearchQuery ( input ) ; 
+startTransition ( ( )  =>  {
+    // Transition: 显示结果
+    setSearchQuery ( input ) ;
 } ) ;
 ```
 
@@ -1211,118 +1226,10 @@ startTransition ( ( )  =>  {
 
 ## 参考：
 
-[如何以及为什么React Fiber使用链表遍历组件树](https://github.com/dawn-plex/translate/blob/master/articles/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-to-walk-the-components-tree.md)  
-[React Fiber架构](https://zhuanlan.zhihu.com/p/37095662)  
-[React 源码解析 - reactScheduler 异步任务调度](https://www.jianshu.com/p/4a3a09925a28)  
-[展望 React 17，回顾 React 往事 全面 深入](https://zhuanlan.zhihu.com/p/40160380)  
-[这可能是最通俗的 React Fiber(时间分片) 打开方式](https://juejin.im/post/6844903975112671239) =>调度策略  
-[全面了解 React 新功能: Suspense 和 Hooks 生命周期](https://segmentfault.com/a/1190000017483690?utm_source=tag-newest)  
+[如何以及为什么React Fiber使用链表遍历组件树](https://github.com/dawn-plex/translate/blob/master/articles/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-to-walk-the-components-tree.md)
+[React Fiber架构](https://zhuanlan.zhihu.com/p/37095662)
+[React 源码解析 - reactScheduler 异步任务调度](https://www.jianshu.com/p/4a3a09925a28)
+[展望 React 17，回顾 React 往事 全面 深入](https://zhuanlan.zhihu.com/p/40160380)
+[这可能是最通俗的 React Fiber(时间分片) 打开方式](https://juejin.im/post/6844903975112671239) =>调度策略
+[全面了解 React 新功能: Suspense 和 Hooks 生命周期](https://segmentfault.com/a/1190000017483690?utm_source=tag-newest)
 [详谈 React Fiber 架构(1)](https://github.com/crazylxr/deep-in-react/blob/master/analysis/%E8%AF%A6%E8%B0%88%20React%20Fiber%20%E6%9E%B6%E6%9E%84\(1\).md)
-
-END
-
-react协调是什么
-
-为什么要重写协调
-
-Fiber你是个啥（第四音
-
-定义：
-
-针对其定义我们来进行拓展：
-
-虚拟堆栈帧：
-
-JavaScript的执行模型：call stack
-
-可控的调用栈
-
-具备扁平化的链表数据存储结构的js对象：
-
-链表结构
-
-current与workInProgress
-
-Update
-
-UpdateQueue
-
-Updater
-
-Effect list
-
-How it work
-
-核心目标
-
-更新过程概述
-
-reconciliation
-
-commit阶段
-
-分配优先级
-
-执行优先级
-
-生命周期
-
-为什么新的生命周期用static
-
-getDerivedStateFromError和componentDidCatch之间的区别是什么？
-
-Suspense
-
-用法
-
-原理
-
-如何达成异常捕获
-
-reconciliation阶段的异常捕获
-
-commit阶段
-
-Hook相关
-
-Function Component和Class Component
-
-capture props和capture value特性
-
-capture props
-
-hook中的capture value
-
-Hooks实现原理
-
-React 依赖于 Hook 的调用顺序
-
-react 18更新
-
-1\. 正式引入了对并发模式/特性的「渐进升级」策略
-
-2\. 自动批处理
-
-3\. 新的api
-
-startTransitionAPI
-
-作用
-
-栗子
-
-场景：
-
-4\. Suspense SSR
-
-参考：
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

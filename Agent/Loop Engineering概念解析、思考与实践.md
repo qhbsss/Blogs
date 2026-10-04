@@ -10,63 +10,18 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 2.1k影响力 19k
 
-** 7
 
-** 6
 
-** 2
 
-** 原创文章
 
-** AI辅助创作 50%
-
-发表到圈儿
-
-[ATA之家](https://ata.atatech.org/community/group/45) (首发)
-
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152)
-
-[AI 提效俱乐部](https://ata.atatech.org/community/group/1000096)
-
-[AI情报社](https://ata.atatech.org/community/group/1000072)
-
-[悦读社](https://ata.atatech.org/community/group/3446)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-[蚂蚁数据智能](https://ata.atatech.org/community/group/3310)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-[云智能技术服务圈](https://ata.atatech.org/community/team/619)
-
-[阿里云全球交付中心](https://ata.atatech.org/community/team/479)
-
-[全球技术服务部](https://ata.atatech.org/community/team/66)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[姜剑(飞樰)](https://ata.atatech.org/users/11000429133)
 
 1 分钟前发表126次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 背景
 
@@ -76,7 +31,7 @@ tags:
 
 我之所以突然关注 Loop 以及 Loop Engineering 的技术概念，主要是因为最近 AI 行业里不少大佬都在密集讨论这个话题。
 
-首先，作为 AI 领域的风向标，Anthropic 公司 Claude Code 的负责人 Boris Cherny 就明确表示，他在使用 Claude Code 时已经不再手写提示词 Prompt 了，而是转向编写 Loop，用 Loop 来驱动工作流的完成。与此同时，小龙虾 OpenClaw 的创始人 Peter Steinberger 也在 X 上指出过，我们不应该再用传统的提示词去指挥 Agent，而应该通过设计 Loop 来引导 Agent 的行为。此外，AI 大神，也是 Vibe Coding 和 LLM-Wiki 的提出人 Andrej Karpathy，也在同样强调说 “你必须把你自己从 Loop 的执行过程中移除出去”。就在 6 月初（也就是上周），Google AI 总监 Addy Osmani 专门写了一篇文章，正式定义了“Loop Engineering”这个概念\[1\]，并在文章开头就给出了一句核心定义：Loop engineering is replacing yourself as the person who prompts the agent. You design the system that does it instead. （Loop Engineering 就是把你从“给 Agent 提示词的人”这个位置上替换掉。你不需要再亲自去写提示词，而是转而设计一套能够自动完成这件事的系统”）。
+首先，作为 AI 领域的风向标，Anthropic 公司 Claude Code 的负责人 Boris Cherny 就明确表示，他在使用 Claude Code 时已经不再手写提示词 Prompt 了，而是转向编写 Loop，用 Loop 来驱动工作流的完成。与此同时，小龙虾 OpenClaw 的创始人 Peter Steinberger 也在 X 上指出过，我们不应该再用传统的提示词去指挥 Agent，而应该通过设计 Loop 来引导 Agent 的行为。此外，AI 大神，也是 Vibe Coding 和 LLM-Wiki 的提出人 Andrej Karpathy，也在同样强调说 “你必须把你自己从 Loop 的执行过程中移除出去”。就在 6 月初（也就是上周），Google AI 总监 Addy Osmani 专门写了一篇文章，正式定义了“Loop Engineering”这个概念[1]，并在文章开头就给出了一句核心定义：Loop engineering is replacing yourself as the person who prompts the agent. You design the system that does it instead. （Loop Engineering 就是把你从“给 Agent 提示词的人”这个位置上替换掉。你不需要再亲自去写提示词，而是转而设计一套能够自动完成这件事的系统”）。
 
 听到这里，可能很多同学会觉得：Loop？ 不就是循环吗？Agent 本身不就是一个 Loop 吗？但需要强调的是，此 Loop 非彼 Loop。接下来，我就重点为大家拆解一下这背后的区别与深意。
 
@@ -172,9 +127,7 @@ Connectors / Plugins 本质上就是 MCP 及其延伸的各类工具，负责把
 
 传统方式 ：写一个提示词，告诉模型分类标准和数据样例，让它输出分类结果；然后人工检查准确率，发现不准就手动反馈调整；最后把调好的提示词沉淀成 Skill，供下次复用。整个过程高度依赖“人”在中间反复校验和修正。
 
-●
-
-Loop 方式 ：我把“验证”和“迭代”直接写进 Loop 的定义里。具体来说，我会这样描述任务：“请完成文本分类，分类标准为 1/2/3/4/5；完成后，请严格按照该标准对结果进行自评；若发现错误，请主动修正分类逻辑或标准，直到满足要求；最终将稳定的分类能力沉淀为 Skill。”同时设定量化目标，比如“在 100 条测试数据上，准确率 ≥95% 或者错误率 ≤5%”。那么这个目标写入 Loop之后，Agent 就会自主循环打磨，不断逼近这个指标，无需人工中途干预。
+- Loop 方式 ：我把“验证”和“迭代”直接写进 Loop 的定义里。具体来说，我会这样描述任务：“请完成文本分类，分类标准为 1/2/3/4/5；完成后，请严格按照该标准对结果进行自评；若发现错误，请主动修正分类逻辑或标准，直到满足要求；最终将稳定的分类能力沉淀为 Skill。”同时设定量化目标，比如“在 100 条测试数据上，准确率 ≥95% 或者错误率 ≤5%”。那么这个目标写入 Loop之后，Agent 就会自主循环打磨，不断逼近这个指标，无需人工中途干预。
 
 看到这里，可能有同学会问：这不就是之前文章里提到比如 EvoSkill、SkillOpt 这些 Skill 自进化差不多吗？
 
@@ -214,9 +167,9 @@ Loop 虽然好用，但它对使用者描述需求和验证的能力要求其实
 
 ## References
 
-\[1\] Loop Engineering： [https://addyosmani.com/blog/loop-engineering/](https://addyosmani.com/blog/loop-engineering/)
+[1] Loop Engineering： [https://addyosmani.com/blog/loop-engineering/](https://addyosmani.com/blog/loop-engineering/)
 
-\[2\] Loop Engineering: Build Self-Running Coding Agents 2026： [https://www.the-ai-corner.com/p/loop-engineering-coding-agents-2026](https://www.the-ai-corner.com/p/loop-engineering-coding-agents-2026)
+[2] Loop Engineering: Build Self-Running Coding Agents 2026： [https://www.the-ai-corner.com/p/loop-engineering-coding-agents-2026](https://www.the-ai-corner.com/p/loop-engineering-coding-agents-2026)
 
 欢迎大家点击此处加入 [“AI Agent前沿技术交流群”](https://qr.dingtalk.com/action/joingroup?code=v1,k1,+5qumTZxQI8mUdHS4YWAcu4FwFw6XaCuAJWq7zX4bPE=&_dt_no_comment=1&origin=11?) ，或者手机扫码加群 👇🏻
 
@@ -226,148 +179,58 @@ Loop 虽然好用，但它对使用者描述需求和验证的能力要求其实
 
 『项目解析』：
 
-●
+- [从 LLM Wiki / Obsidian-Wiki / GBrain 来看 Agent时代知识的“自组织”与“自进化”](https://ata.atatech.org/articles/11020627647) 🔥
 
-[从 LLM Wiki / Obsidian-Wiki / GBrain 来看 Agent时代知识的“自组织”与“自进化”](https://ata.atatech.org/articles/11020627647) 🔥
+- [深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
 
-●
+- [深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
 
-[深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
+- [深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
 
-●
-
-[深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
-
-●
-
-[深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
-
-●
-
-[Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
+- [Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
 
 『AI方法论』：
 
-●
+- [如何更科学、方向可控的实现 Skill 的“自进化”?](https://ata.atatech.org/articles/11020655223) 🔥🔥
 
-[如何更科学、方向可控的实现 Skill 的“自进化”?](https://ata.atatech.org/articles/11020655223) 🔥🔥
+- [Agent核心技术概念与范式发生了哪些演变以及背后的思考](https://ata.atatech.org/articles/11020644402) 🔥🔥
 
-●
+- [Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
 
-[Agent核心技术概念与范式发生了哪些演变以及背后的思考](https://ata.atatech.org/articles/11020644402) 🔥🔥
+- [如何让Agent更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
 
-●
+- [如何构建和调优高可用性的Agent？浅谈阿里云服务领域Agent构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
 
-[Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
-
-●
-
-[如何让Agent更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
-
-●
-
-[如何构建和调优高可用性的Agent？浅谈阿里云服务领域Agent构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
-
-●
-
-[为什么一定要做Agent智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
+- [为什么一定要做Agent智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
 
 『业务落地』：
 
-●
+- [从Multi-Agent到Skills：云小二Aivis如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
 
-[从Multi-Agent到Skills：云小二Aivis如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
+- [MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
 
-●
+- [阿里云服务领域Agent平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
 
-[MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
+- [基于通义千问的阿里云小智服务领域Agent设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
 
-●
+- [基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
 
-[阿里云服务领域Agent平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
-
-●
-
-[基于通义千问的阿里云小智服务领域Agent设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
-
-●
-
-[基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
-
-●
-
-[基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
+- [基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
 
 『技术干货』：
 
-●
+- [如何最大化发挥大模型LLM的效果？来看看OpenAI的技术分享干货吧](https://ata.atatech.org/articles/11020141673) 🔥
 
-[如何最大化发挥大模型LLM的效果？来看看OpenAI的技术分享干货吧](https://ata.atatech.org/articles/11020141673) 🔥
+- [通义千问2技术报告（Qwen2 Technical Report）解读](https://ata.atatech.org/articles/11020284419) 🔥
 
-●
+- [通义千问技术报告（Qwen Technical Report）解读](https://ata.atatech.org/articles/11020088844) 🔥
 
-[通义千问2技术报告（Qwen2 Technical Report）解读](https://ata.atatech.org/articles/11020284419) 🔥
+- [像打字机一样！大模型流式推理输出与部署的原理与实践](https://ata.atatech.org/articles/11000267465)
 
-●
+- [Temperature和TopP是什么？大模型常用超参数原理介绍与调参实践](https://ata.atatech.org/articles/11000267891)
 
-[通义千问技术报告（Qwen Technical Report）解读](https://ata.atatech.org/articles/11020088844) 🔥
+- [模型太大显存放不下？EAS多卡部署大模型实践](https://ata.atatech.org/articles/11020076048)
 
-●
+- [大模型生成太慢？使用FlashAttention优化LLMs推理性能的EAS部署实践](https://ata.atatech.org/articles/11020093226)
 
-[像打字机一样！大模型流式推理输出与部署的原理与实践](https://ata.atatech.org/articles/11000267465)
-
-●
-
-[Temperature和TopP是什么？大模型常用超参数原理介绍与调参实践](https://ata.atatech.org/articles/11000267891)
-
-●
-
-[模型太大显存放不下？EAS多卡部署大模型实践](https://ata.atatech.org/articles/11020076048)
-
-●
-
-[大模型生成太慢？使用FlashAttention优化LLMs推理性能的EAS部署实践](https://ata.atatech.org/articles/11020093226)
-
-●
-
-[给大模型提速！使用vLLM加速大模型推理部署实践](https://ata.atatech.org/articles/11020197762)
-
-END
-
-背景
-
-Agent Loop vs Loop Engineering
-
-“人机协同循环”重构为“自动化验收闭环”
-
-Loop Engineering 的六大核心框架
-
-1\. Automations（自动化）
-
-2\. Worktrees（工作树隔离）
-
-3\. Skills（可进化的技能包）
-
-4\. Connectors / Plugins（连接器 / 插件）
-
-5\. Sub Agents（子智能体）
-
-6\. 状态（State）
-
-简单实践以及我的思考
-
-Loop 不是银弹，用之前需要先想清楚
-
-总结
-
-References
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+- [给大模型提速！使用vLLM加速大模型推理部署实践](https://ata.atatech.org/articles/11020197762)

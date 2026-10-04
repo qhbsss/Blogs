@@ -8,54 +8,6 @@ description:
 tags:
   - "clippings"
 ---
-阿里控股
-
-勋章
-
-粉丝 47影响力 858
-
-** 110
-
-** 87
-
-** 8
-
-** 原创文章
-
-[本文正在参加《ATA FY26年终总结征文 | 主题一：我的FY26技术进化年》征文活动](https://ata.atatech.org/articles/11020572828)
-
-发表到圈儿
-
-[智能引擎技术](https://ata.atatech.org/community/group/271) (首发)
-
-[ATA之家](https://ata.atatech.org/community/group/45)
-
-[Python](https://ata.atatech.org/community/group/63)
-
-[技术味儿](https://ata.atatech.org/community/group/386)
-
-[技术发展](https://ata.atatech.org/community/group/1481)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-**
-
-[马征(唯勤)](https://ata.atatech.org/users/11000178320)
-
-2月18日发表1.6k浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章38:02
-
-**
-
 ## 前言
 
 不知不觉在AI Infra上投入已经有快一年时间了，其中与vLLM接触最多，收获也最为丰厚。期间一直想抽时间将学习vLLM过程中的知识点系统整理一番，临近假期，终于有了相对充裕的时间。
@@ -66,21 +18,13 @@ tags:
 
 文章大致分为四个部分
 
-1.
+1. LLM基础知识
 
-LLM基础知识
+2. 推理框架概览
 
-2.
+3. vLLM核心功能梳理
 
-推理框架概览
-
-3.
-
-vLLM核心功能梳理
-
-4.
-
-结语
+4. 结语
 
 ## LLM基础知识
 
@@ -119,37 +63,21 @@ $$
 
 虽说LLM不擅长数学计算，但其在其它领域有极为广泛的应用，包括但不限于以下几种：
 
-●
+- 对话与问答：类人工自然对话，垂直、通用知识问答。
 
-对话与问答：类人工自然对话，垂直、通用知识问答。
+- 内容创作：撰写文章、邮件、报告、诗歌、剧本、营销文案等。
 
-●
+- 代码辅助：生成、解释、调试代码、测试开发。
 
-内容创作：撰写文章、邮件、报告、诗歌、剧本、营销文案等。
+- 信息总结与提取：提炼长文档、会议记录、面试总结等。
 
-●
+- 翻译：在多语言间进行高质量的翻译。
 
-代码辅助：生成、解释、调试代码、测试开发。
+- 知识推理：根据上下文进行逻辑分析、解答谜题、解决数学问题。
 
-●
+- 商品推荐：基于用户历史消费、用户上下文的综合推荐。
 
-信息总结与提取：提炼长文档、会议记录、面试总结等。
-
-●
-
-翻译：在多语言间进行高质量的翻译。
-
-●
-
-知识推理：根据上下文进行逻辑分析、解答谜题、解决数学问题。
-
-●
-
-商品推荐：基于用户历史消费、用户上下文的综合推荐。
-
-●
-
-等等等等....
+- 等等等等....
 
 如此广凡应用场景的适应性真堪称21世纪极端模型参数所展示出的暴力美学！
 
@@ -157,17 +85,11 @@ $$
 
 很多业务场景落地几乎可以简化为3步：
 
-1.
+1. 调研与业务场景相似的大模型
 
-调研与业务场景相似的大模型
+2. 模型部署
 
-2.
-
-模型部署
-
-3.
-
-应用开发对接
+3. 应用开发对接
 
 至此，一款高端、大气、上档次的AI应用就顺利落地了，相比以前AI相关的开发项目都不用写多少代码。
 
@@ -203,59 +125,45 @@ MODEL = "Qwen/Qwen3-Omni-30B-A3B-Instruct"
 
 \# Load model
 
-model = Qwen3OmniMoeForConditionalGeneration.from\_pretrained(
+model = Qwen3OmniMoeForConditionalGeneration.from_pretrained(
 
 MODEL,
 
 dtype="auto",
 
-device\_map="auto",
+device_map="auto",
 
-attn\_implementation="flash\_attention\_2",
+attn_implementation="flash_attention_2",
 
 )
 
 \# Inference
 
-inputs = build\_input()
+inputs = build_input()
 
-result = model.generate(\*\*inputs,
+result = model.generate(**inputs,
 
 speaker="Ethan",
 
-thinker\_return\_dict\_in\_generate=True,
+thinker_return_dict_in_generate=True,
 
-use\_audio\_in\_video=USE\_AUDIO\_IN\_VIDEO)
+use_audio_in_video=USE_AUDIO_IN_VIDEO)
 
 但需要注意的是，生产环境的要求远不止如此：
 
-●
+- 多卡、多机部署的支持
 
-多卡、多机部署的支持
+- 低延迟、高吞吐的推理性能
 
-●
+- 高效的资源存利用率
 
-低延迟、高吞吐的推理性能
+- 丰富的模型支持
 
-●
+- 生产易用性
 
-高效的资源存利用率
+- 灵活的二次开发能力
 
-●
-
-丰富的模型支持
-
-●
-
-生产易用性
-
-●
-
-灵活的二次开发能力
-
-●
-
-等等等等
+- 等等等等
 
 综合考虑以上问题，仅仅是上述可以运行的Demo就不够了，需要更为专业的推理框架支持，后文重点介绍的vLLM便是其中之一。
 
@@ -299,17 +207,11 @@ use\_audio\_in\_video=USE\_AUDIO\_IN\_VIDEO)
 
 以上都是十分优秀的推理框架，在业务选型上可以参考官方的文档说明。个人在这里基于有限的经验给一些粗略的建议：
 
-●
+- 如果自身业务依赖众多开源模型，有多种厂商显卡的支持需求，同时需要寻求开源社区的技术支持，推荐使用vLLM和sglang
 
-如果自身业务依赖众多开源模型，有多种厂商显卡的支持需求，同时需要寻求开源社区的技术支持，推荐使用vLLM和sglang
+- 如果仅限定与NVDIA的显卡，对于N卡有着极致的性能诉求，推荐用TensorRT-LLM
 
-●
-
-如果仅限定与NVDIA的显卡，对于N卡有着极致的性能诉求，推荐用TensorRT-LLM
-
-●
-
-如果是阿里内部业务，对于超大规模参数的moe模型（如deepseek）以及内部自研大模型有极致的性能诉求，推荐使用rtp-llm
+- 如果是阿里内部业务，对于超大规模参数的moe模型（如deepseek）以及内部自研大模型有极致的性能诉求，推荐使用rtp-llm
 
 ## vLLM核心功能梳理
 
@@ -345,7 +247,7 @@ V1重构之后对于prefill和decode流程进行了合并统一，chunked prefil
 
 ![[93fd5fd6-2ca8-4277-bd72-2e2328737cbd.png]]
 
-只有一个小的注意点：prefill和decode统一之后，vllm将无法严格的保证prefill优先还是decode优先。V1架构新增加了参数max\_num\_batched\_tokens，默认值是2048。如果期望降低TPOT，可以适当调小此值; 如果期望降低TTFT，可以适当调高此值。
+只有一个小的注意点：prefill和decode统一之后，vllm将无法严格的保证prefill优先还是decode优先。V1架构新增加了参数max_num_batched_tokens，默认值是2048。如果期望降低TPOT，可以适当调小此值; 如果期望降低TTFT，可以适当调高此值。
 
 ### 模型支持
 
@@ -359,21 +261,13 @@ V1重构之后对于prefill和decode流程进行了合并统一，chunked prefil
 
 简单总结模型开发的流程大概只有4个部分：
 
-1.
+1. 按照vllm的规范重新加载权重
 
-按照vllm的规范重新加载权重
+2. 按照vllm的接口规范进行适配实现
 
-2.
+3. 注册模型
 
-按照vllm的接口规范进行适配实现
-
-3.
-
-注册模型
-
-4.
-
-算子替换为vllm的高效实现（性能优化项，推荐）
+4. 算子替换为vllm的高效实现（性能优化项，推荐）
 
 因为开发简单，vllm目前覆盖text generation、rerank、classify、embedding等多种类型，具体的模型细节详见「 [support models](https://docs.vllm.ai/en/latest/models/supported_models/#list-of-text-only-language-models) 」。在算法实验尝试新模型时可以先在此页面查找，如果存在可直接使用。
 
@@ -417,53 +311,50 @@ return softmax(Q @ K.T) @ V
 
 不带KV cache 计算时：
 
-def decode\_without\_cache(inputs, total\_steps):
+def decode_without_cache(inputs, total_steps):
 
-for step in range(total\_steps - 1):
+for step in range(total_steps - 1):
 
 X = inputs
 
-Q = project(X, W\_Q)
-
-K = project(X, W\_K)
-
-V = project(X, W\_V)
-
+```java
+Q = project(X, W_Q)
+K = project(X, W_K)
+V = project(X, W_V)
 next = attention(Q, K, V)
-
 inputs.append(next)
+```
 
 带有KV cache计算时：
 
-def decode\_with\_cache(inputs, total\_steps):
+def decode_with_cache(inputs, total_steps):
 
-K\_cache = None
+K_cache = None
 
-V\_cache = None
+V_cache = None
 
-for step in range(total\_steps - 1):
+for step in range(total_steps - 1):
 
-X = inputs\[-1\]
+X = inputs[-1]
 
-Q = project(X, W\_Q)
+```java
+Q = project(X, W_Q)
+K = project(X, W_K)
+V = project(X, W_V)
+if K_cache is None:
+```
 
-K = project(X, W\_K)
+K_cache = K[:]
 
-V = project(X, W\_V)
-
-if K\_cache is None:
-
-K\_cache = K\[:\]
-
-V\_cache = V\[:\]
+V_cache = V[:]
 
 else:
 
-K\_cache += K
+K_cache += K
 
-V\_cache += V
+V_cache += V
 
-next = attention(Q, K\_cache, V\_cache)
+next = attention(Q, K_cache, V_cache)
 
 inputs.append(next)
 
@@ -475,33 +366,19 @@ inputs.append(next)
 
 一个粗略的计算方式，定义如下参数：
 
-●
+- batch size B：并行处理的序列数量
 
-batch size B：并行处理的序列数量
+- 序列长度 T：包含prompt以及生成的token总数
 
-●
+- 层数 L：Transformer 解码器的层数
 
-序列长度 T：包含prompt以及生成的token总数
+- 注意力头数H
 
-●
+- 注意力头维度dk
 
-层数 L：Transformer 解码器的层数
+- 隐藏维度 dmodel：模型的隐藏层维度（一般dmodel=H×dk）
 
-●
-
-注意力头数H
-
-●
-
-注意力头维度dk
-
-●
-
-隐藏维度 dmodel：模型的隐藏层维度（一般dmodel=H×dk）
-
-●
-
-数据类型大小 s：每个元素占用的字节数（例如 float16 为2字节，float32 为4字节，int8 为1字节）
+- 数据类型大小 s：每个元素占用的字节数（例如 float16 为2字节，float32 为4字节，int8 为1字节）
 
 那么KV cache显存占用的计算公式为：
 
@@ -521,7 +398,7 @@ $$
 
 带入计算后：
 
-KV cache = 2 \* 32 \* 2048 \* 64 \* 2048 \* 2 = 128GB
+KV cache = 2 * 32 * 2048 * 64 * 2048 * 2 = 128GB
 
 这是一笔非常大的开销，现如今还有很多显卡单卡都没有这么大的显存，仅仅KV cache的开销甚至比模型本身占用的开销还大。而且在线服务由于不能事先预估请求长度的大小，往往会按照一个固定值预分配显存的大小，当显存空间申请是连续的，序列长度与预分配不符时会导致比较严重的显存浪费问题。
 
@@ -551,9 +428,9 @@ vllm之后采用paged attention进行了深度显存优化，它借鉴了操作�
 
 pytorch自带的SDPA（scaled dot product attention）覆盖多种mask计算，可以满足算法原型开发的功能需求甚至一些小数据规模的性能需求。但其为attention的通用实现，在矩阵运算上没有做深度定制的优化，对于在线性能要求较高的场景仍有一些不足。
 
-torch.nn.functional.scaled\_dot\_product\_attention(
+torch.nn.functional.scaled_dot_product_attention(
 
-query, key, value, attn\_mask=None, dropout\_p=0.0, is\_causal=False, scale=None, enable\_gqa=False
+query, key, value, attn_mask=None, dropout_p=0.0, is_causal=False, scale=None, enable_gqa=False
 
 ) -> torch.Tensor
 
@@ -567,29 +444,29 @@ key (Tensor): Key tensor; shape:math:\`(N,..., H, S, E)\`.
 
 value (Tensor): Value tensor; shape:math:\`(N,..., H, S, Ev)\`.
 
-attn\_mask (optional Tensor): Attention mask; shape must be broadcastable to the shape of attention weights,
+attn_mask (optional Tensor): Attention mask; shape must be broadcastable to the shape of attention weights,
 
 which is:math:\`(N,..., L, S)\`. Two types of masks are supported.
 
-A boolean mask where a value of True indicates that the element \*should\* take part in attention.
+A boolean mask where a value of True indicates that the element *should* take part in attention.
 
 A float mask of the same type as query, key, value that is added to the attention score.
 
-dropout\_p (float): Dropout probability; if greater than 0.0, dropout is applied
+dropout_p (float): Dropout probability; if greater than 0.0, dropout is applied
 
-is\_causal (bool): If set to true, the attention masking is a lower triangular matrix when the mask is a
+is_causal (bool): If set to true, the attention masking is a lower triangular matrix when the mask is a
 
 square matrix. The attention masking has the form of the upper left causal bias due to the alignment
 
 (see:class:\`torch.nn.attention.bias.CausalBias\`) when the mask is a non-square matrix.
 
-An error is thrown if both attn\_mask and is\_causal are set.
+An error is thrown if both attn_mask and is_causal are set.
 
 scale (optional float, keyword-only): Scaling factor applied prior to softmax. If None, the default value is set
 
 to:math:\`\\frac{1}{\\sqrt{E}}\`.
 
-enable\_gqa (bool): If set to True, Grouped Query Attention (GQA) is enabled, by default it is set to False.
+enable_gqa (bool): If set to True, Grouped Query Attention (GQA) is enabled, by default it is set to False.
 
 """
 
@@ -597,49 +474,31 @@ vllm根据推理需求结合attention极致优化的开源项目flash-attention�
 
 标准版（包含MHA,MQA以及GQA），包括以下4种：
 
-●
+- FLASHINFER
 
-FLASHINFER
+- FLASH_ATTN
 
-●
+- TRITON_ATTN
 
-FLASH\_ATTN
-
-●
-
-TRITON\_ATTN
-
-●
-
-FLEX\_ATTN
+- FLEX_ATTN
 
 deepseek版（MLA），包括以下多种实现：
 
-●
+- FLASHINFER_MLA
 
-FLASHINFER\_MLA
+- FLASH_ATTN_MLA
 
-●
+- TRITON_ATTN_MLA
 
-FLASH\_ATTN\_MLA
+- CUTLASS_MLA
 
-●
-
-TRITON\_ATTN\_MLA
-
-●
-
-CUTLASS\_MLA
-
-●
-
-....
+- ....
 
 ![[45d5b9f9-f6d1-448a-a34f-974aae9c43b4.png]]
 
 不同backend在不同的显卡以及不同的模型上性能表现会有所不同，可以根据自己的环境进行实验。至于各个backend的实现原理以及MLA的具体优化本篇不再展开。
 
-需要补充注意的一点是：除FLEX\_ATTN以及TRITON\_ATTN外，其他attention backend均只支持fp16/bf16精度，如果原生模型强依赖fp32精度，需要评估迁移backend带来的精度损失问题。
+需要补充注意的一点是：除FLEX_ATTN以及TRITON_ATTN外，其他attention backend均只支持fp16/bf16精度，如果原生模型强依赖fp32精度，需要评估迁移backend带来的精度损失问题。
 
 ### 量化
 
@@ -661,7 +520,7 @@ $$
 q = \text{round}\left( \frac{x - \min(x)}{\Delta} \right), \quad \Delta = \frac{\max(x) - \min(x)}{2^{8} - 1}
 $$
 
-其中的 
+其中的
 $$
 {\Delta}
 $$
@@ -737,7 +596,16 @@ vllm的prefill server在处理request的prefill阶段时异步的将KV cache传�
 
 vllm针对不同场景做了深度优化，实现了多种alltoall backend可供选择：
 
-<table><colgroup><col width="187"> <col width="289"> <col width="374"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>Backend</p></td><td rowspan="1" colspan="1"><p>适用场景</p></td><td rowspan="1" colspan="1"><p>特点</p></td></tr><tr><td rowspan="1" colspan="1"><p>allgather_reducescatter</p></td><td rowspan="1" colspan="1"><p>默认</p></td><td rowspan="1" colspan="1"><p>通用</p></td></tr><tr><td rowspan="1" colspan="1"><p>pplx</p></td><td rowspan="1" colspan="1"><p>单节点</p></td><td rowspan="1" colspan="1"><p>适合单机多卡环境</p></td></tr><tr><td rowspan="1" colspan="1"><p>deepep_high_throughtput</p></td><td rowspan="1" colspan="1"><p>多节点</p></td><td rowspan="1" colspan="1"><p>适合prefill server</p></td></tr><tr><td rowspan="1" colspan="1"><p>deepep_low_throughtput</p></td><td rowspan="1" colspan="1"><p>多节点</p></td><td rowspan="1" colspan="1"><p>适合decode server</p></td></tr><tr><td rowspan="1" colspan="1"><p>flashinfer_all2all</p></td><td rowspan="1" colspan="1"><p>多节点</p></td><td rowspan="1" colspan="1"><p>适合系统为跨节点NVLink环境</p></td></tr><tr><td rowspan="1" colspan="1"><p>naive</p></td><td rowspan="1" colspan="1"><p>本地环境</p></td><td rowspan="1" colspan="1"><p>方便调试</p></td></tr></tbody></table>
+
+| Backend                 | 适用场景 | 特点               |
+| ----------------------- | ---- | ---------------- |
+| allgather_reducescatter | 默认   | 通用               |
+| pplx                    | 单节点  | 适合单机多卡环境         |
+| deepep_high_throughtput | 多节点  | 适合prefill server |
+| deepep_low_throughtput  | 多节点  | 适合decode server  |
+| flashinfer_all2all      | 多节点  | 适合系统为跨节点NVLink环境 |
+| naive                   | 本地环境 | 方便调试             |
+
 
 #### PP（Pipeline Parallel）
 
@@ -773,27 +641,27 @@ EAGLE模式只能进行单层预测，不过其不依赖于离线联合训练，
 
 from vllm import LLM, SamplingParams
 
-prompts = \[
+prompts = [
 
 "Hello eagle",
 
-\]
+]
 
-sampling\_params = SamplingParams(temperature=0.8, top\_p=0.95)
+sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
 
 llm = LLM(
 
 model="meta-llama/Meta-Llama-3-8B-Instruct",
 
-tensor\_parallel\_size=4,
+tensor_parallel_size=4,
 
-speculative\_config={
+speculative_config={
 
 "model": "yuhuili/EAGLE-LLaMA3-Instruct-8B",
 
-"draft\_tensor\_parallel\_size": 1,
+"draft_tensor_parallel_size": 1,
 
-"num\_speculative\_tokens": 2,
+"num_speculative_tokens": 2,
 
 "method": "eagle",
 
@@ -801,7 +669,7 @@ speculative\_config={
 
 )
 
-outputs = llm.generate(prompts, sampling\_params)
+outputs = llm.generate(prompts, sampling_params)
 
 ### 约束解码
 
@@ -815,9 +683,9 @@ outputs = llm.generate(prompts, sampling\_params)
 
 {
 
-"name": "\[\\w\\d\\s\]+",
+"name": "[\\w\\d\\s]+",
 
-"age": \[0-9\]+,
+"age": [0-9]+,
 
 "house": "(Gryffindor|slytherin|Ravenclaw|Hufflepuff)"
 
@@ -839,21 +707,13 @@ outputs = llm.generate(prompts, sampling\_params)
 
 vllm中内置了几种策略：
 
-●
+- `guided_choice`: 输出结果将恰好是其中一个。
 
-`guided_choice`: 输出结果将恰好是其中一个。
+- `guided_regex`: 输出将遵循正则表达式。
 
-●
+- `guided_json`: 输出将遵循 JSON格式。
 
-`guided_regex`: 输出将遵循正则表达式。
-
-●
-
-`guided_json`: 输出将遵循 JSON格式。
-
-●
-
-`guided_grammar`: 输出将遵循特定的语法，比如sql。
+- `guided_grammar`: 输出将遵循特定的语法，比如sql。
 
 开箱即用，只是因为有了额外的判定检测，可能会有一些性能损耗，但由于避免了大模型随意发挥，输出token更加稳定，也可能有一定程度的性能提升，可以根据自身的业务场景进行实验。
 
@@ -867,7 +727,15 @@ LLM流行以前，pytorch由于其保持着编写开发运行调试的一致性�
 
 vllm深度依赖torch compile，不过由于其需要对LLM推理进行更加灵活、更加定制的优化，vllm在此基础指向提供了其他的cuda graph模式，包括以下5种:
 
-<table><colgroup><col width="176"> <col width="658"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>类型</p></td><td rowspan="1" colspan="1"><p>特点</p></td></tr><tr><td rowspan="1" colspan="1"><p>NONE</p></td><td rowspan="1" colspan="1"><p>关闭cuda graph，虽然性能很差但适合本地调试，在查一些推理问题时会很有帮助。</p></td></tr><tr><td rowspan="1" colspan="1"><p>PIECEWISE</p></td><td rowspan="1" colspan="1"><p>非常灵活，attention或其他与cuda graph不兼容的算子不做融合，其他部分都融合进cuda graph。</p></td></tr><tr><td rowspan="1" colspan="1"><p>FULL</p></td><td rowspan="1" colspan="1"><p>对于prefill和decode均使用完整的cuda graph，但多数情况下效果并不比PIECEWISE的分段图模式性能更优。</p></td></tr><tr><td rowspan="1" colspan="1"><p>FULL_DECODE_ONLY</p></td><td rowspan="1" colspan="1"><p>decode阶段使用完整cuda graph，prefill/mixed阶段无cuda graph，适合在P/D分离环境中的decode服务中，节省一部分显存开销。</p></td></tr><tr><td rowspan="1" colspan="1"><p>FULL_AND_PIECEWISE</p></td><td rowspan="1" colspan="1"><p>在官方的大量小模型以及海量参数的moe模型测试中表现最佳，通常是性能最高的配置，也是官方默认指定的模式，缺点是占用显存最多，捕获时间最长。</p></td></tr></tbody></table>
+
+| 类型                 | 特点                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| NONE               | 关闭cuda graph，虽然性能很差但适合本地调试，在查一些推理问题时会很有帮助。                                         |
+| PIECEWISE          | 非常灵活，attention或其他与cuda graph不兼容的算子不做融合，其他部分都融合进cuda graph。                         |
+| FULL               | 对于prefill和decode均使用完整的cuda graph，但多数情况下效果并不比PIECEWISE的分段图模式性能更优。                   |
+| FULL_DECODE_ONLY   | decode阶段使用完整cuda graph，prefill/mixed阶段无cuda graph，适合在P/D分离环境中的decode服务中，节省一部分显存开销。 |
+| FULL_AND_PIECEWISE | 在官方的大量小模型以及海量参数的moe模型测试中表现最佳，通常是性能最高的配置，也是官方默认指定的模式，缺点是占用显存最多，捕获时间最长。              |
+
 
 总体设计流程如下：
 
@@ -887,150 +755,26 @@ vllm深度依赖torch compile，不过由于其需要对LLM推理进行更加灵
 
 ## 附录
 
-1.
+1. [https://docs.vllm.ai/en/latest/](https://docs.vllm.ai/en/latest/)
 
-[https://docs.vllm.ai/en/latest/](https://docs.vllm.ai/en/latest/)
+2. [https://blog.vllm.ai/](https://blog.vllm.ai/)
 
-2.
+3. [https://docs.sglang.io/](https://docs.sglang.io/)
 
-[https://blog.vllm.ai/](https://blog.vllm.ai/)
+4. [https://docs.nvidia.com/](https://docs.nvidia.com/)
 
-3.
+5. [https://pytorch.org/blog/](https://pytorch.org/blog/)
 
-[https://docs.sglang.io/](https://docs.sglang.io/)
+6. [https://nvidia.github.io/TensorRT-LLM/reference/support-matrix.html](https://nvidia.github.io/TensorRT-LLM/reference/support-matrix.html)
 
-4.
+7. [https://rtp-llm.ai/](https://rtp-llm.ai/)
 
-[https://docs.nvidia.com/](https://docs.nvidia.com/)
+8. [https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-204e3073870fae3d05bcbc2f6a8e263d9b72e776](https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-204e3073870fae3d05bcbc2f6a8e263d9b72e776)
 
-5.
+9. [https://turing-scholar.alibaba-inc.com/scholar/papers/107574-176913426815747d83a8e?spm=tb-scholar.collection.0.0.75081e9431hXyk](https://turing-scholar.alibaba-inc.com/scholar/papers/107574-176913426815747d83a8e?spm=tb-scholar.collection.0.0.75081e9431hXyk)
 
-[https://pytorch.org/blog/](https://pytorch.org/blog/)
+10. [https://turing-scholar.alibaba-inc.com/scholar/papers/107574-1771043946395f715154b](https://turing-scholar.alibaba-inc.com/scholar/papers/107574-1771043946395f715154b)
 
-6.
+11. [https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-a9780bdecdf142d31a106322e43ec811ced7e10a](https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-a9780bdecdf142d31a106322e43ec811ced7e10a)
 
-[https://nvidia.github.io/TensorRT-LLM/reference/support-matrix.html](https://nvidia.github.io/TensorRT-LLM/reference/support-matrix.html)
-
-7.
-
-[https://rtp-llm.ai/](https://rtp-llm.ai/)
-
-8.
-
-[https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-204e3073870fae3d05bcbc2f6a8e263d9b72e776](https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-204e3073870fae3d05bcbc2f6a8e263d9b72e776)
-
-9.
-
-[https://turing-scholar.alibaba-inc.com/scholar/papers/107574-176913426815747d83a8e?spm=tb-scholar.collection.0.0.75081e9431hXyk](https://turing-scholar.alibaba-inc.com/scholar/papers/107574-176913426815747d83a8e?spm=tb-scholar.collection.0.0.75081e9431hXyk)
-
-10.
-
-[https://turing-scholar.alibaba-inc.com/scholar/papers/107574-1771043946395f715154b](https://turing-scholar.alibaba-inc.com/scholar/papers/107574-1771043946395f715154b)
-
-11.
-
-[https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-a9780bdecdf142d31a106322e43ec811ced7e10a](https://turing-scholar.alibaba-inc.com/scholar/papers/semantic-a9780bdecdf142d31a106322e43ec811ced7e10a)
-
-12.
-
-[https://huggingface.co/deepseek-ai/DeepSeek-V3.2](https://huggingface.co/deepseek-ai/DeepSeek-V3.2)
-
-END
-
-前言
-
-指引
-
-LLM基础知识
-
-LLM是什么？
-
-基本原理
-
-适用场景
-
-推理框架概览
-
-为什么会有推理框架？
-
-核心指标
-
-在线
-
-TTFT（Time to first token）
-
-TPOT（Time per output token）
-
-离线
-
-Token Throughput
-
-Request Throughput
-
-框架选型参考
-
-vLLM核心功能梳理
-
-架构设计
-
-API Server
-
-AsyncLLM
-
-EngineCore
-
-模型支持
-
-Continuous Batching
-
-KV Cache
-
-伪代码对比分析
-
-Paged Attention
-
-显存开销
-
-Prefix Caching
-
-Attention Backend
-
-量化
-
-PD分离
-
-Roofline
-
-并行策略
-
-DP（Data Parallel）
-
-TP（Tensor Parallel）
-
-EP（Expert Parallel）
-
-PP（Pipeline Parallel）
-
-投机解码
-
-MTP（Deepseek）
-
-EAGLE
-
-约束解码
-
-CUDA Graph设计
-
-结语
-
-附录
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+12. [https://huggingface.co/deepseek-ai/DeepSeek-V3.2](https://huggingface.co/deepseek-ai/DeepSeek-V3.2)

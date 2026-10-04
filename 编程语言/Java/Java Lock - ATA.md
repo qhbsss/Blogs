@@ -8,41 +8,16 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 190影响力 1.9k
-
-** 5
-
-** 11
-
-**
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
 ## Java Lock
-
-[陈阳(逸殊)](https://ata.atatech.org/users/11000967975)
 
 2021-01-11发表2023-06-12更新359次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 引言
 
-本文着重介绍 Java 中 Lock 的不同实现方式。所有关于 Java 并发的文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。  
+本文着重介绍 Java 中 Lock 的不同实现方式。所有关于 Java 并发的文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。
 
 ## 锁的种类
 
@@ -71,7 +46,6 @@ public class LockTest{
     private ReentrantLock lock;
 
     /**
-     * 悲观锁，使用对象的 Monitor 锁
      */
     public synchronized void increase1() {
         sum1++;
@@ -87,7 +61,6 @@ public class LockTest{
     }
 
     /**
-     * 乐观锁，下层通过 CAS 实现
      */
     public void increase2() {
         sum2.incrementAndGet();
@@ -129,6 +102,19 @@ public class AtomicInteger extends Number implements java.io.Serializable {
     }
 }
 ```
+            valueOffset = unsafe.objectFieldOffset
+```javascript
+                (AtomicInteger.class.getDeclaredField("value"));
+        } catch (Exception ex) { throw new Error(ex); }
+    }
+
+    private volatile int value;
+    ///...
+    public final int incrementAndGet() {
+        return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
+    }
+}
+```
 
 上述就是 JUC 中原子类的实现，其中 `unsafe` 是 Java 提供的操作底层内存的接口，CAS 指令就在其中，而这个原子类的实际数据保存在 `value` 字段中，该属性需要借助volatile关键字保证其在线程间是可见的。 `valueOffset` 存储了value在AtomicInteger中的偏移量，我们在使用 `unsafe` 是需要用到它。
 
@@ -149,22 +135,22 @@ public final int getAndAddInt(Object o, long offset, int delta) {
 
 而 `compareAndSwapInt` 已经是一个 native 函数了，它的实现如下：
 
-```cpp
+```java
 // unsafe.cpp
 UNSAFE_ENTRY(jboolean, Unsafe_CompareAndSwapInt(JNIEnv *env, jobject unsafe, jobject obj, jlong offset, jint e, jint x))
   UnsafeWrapper("Unsafe_CompareAndSwapInt");
   oop p = JNIHandles::resolve(obj);
   jint* addr = (jint *) index_oop_from_field_offset_long(p, offset);
   return (jint)(Atomic::cmpxchg(x, addr, e)) == e;
-UNSAFE_END
 ```
+UNSAFE_END
 
 代码中能看到 cmpxchg 有基于各个平台的实现，这里我选择Linux X86平台下的源码分析：
 
-```cpp
+```java
 // atomic_linux_x86.inline.hpp
 inline jint     Atomic::cmpxchg    (jint     exchange_value, volatile jint*     dest, jint     compare_value) {
-  int mp = os::is_MP();
+    int mp = os::is_MP();
   __asm__ volatile (LOCK_IF_MP(%4) "cmpxchgl %1,(%3)"
                     : "=a" (exchange_value)
                     : "r" (exchange_value), "a" (compare_value), "r" (dest), "r" (mp)
@@ -173,17 +159,17 @@ inline jint     Atomic::cmpxchg    (jint     exchange_value, volatile jint*     
 }
 
 // Adding a lock prefix to an instruction on MP machine
-#define LOCK_IF_MP(mp) "cmp $0, " #mp "; je 1f; lock; 1: "
 ```
+#define LOCK_IF_MP(mp) "cmp $0, " #mp "; je 1f; lock; 1: "
 
-这是一段小汇编，\_\_asm\_\_说明是ASM汇编，\_\_volatile\_\_禁止编译器优化。
+这是一段小汇编，__asm__说明是ASM汇编，__volatile__禁止编译器优化。
 
-os::is\_MP判断当前系统是否为多核系统，如果是就给该数据加锁（总线锁或者缓存锁），所以同一芯片上的其他处理器就暂时不能访问内存，保证了该指令在多处理器环境下的原子性。
+os::is_MP判断当前系统是否为多核系统，如果是就给该数据加锁（总线锁或者缓存锁），所以同一芯片上的其他处理器就暂时不能访问内存，保证了该指令在多处理器环境下的原子性。
 
 在正式解读这段汇编前，我们来了解下嵌入汇编的基本格式：
 
-```cpp
 asm ( assembler template
+```java
     : output operands                  /* optional */
     : input operands                   /* optional */
     : list of clobbered registers      /* optional */
@@ -194,7 +180,7 @@ asm ( assembler template
 
 - template就是cmpxchgl %1, (%3)表示汇编模板
 - output operands表示输出操作数, =a对应eax寄存器
-- input operand 表示输入参数，%1 就是exchange\_value, %3是dest, %4就是mp， r表示任意寄存器，a还是eax寄存器
+- input operand 表示输入参数，%1 就是exchange_value, %3是dest, %4就是mp， r表示任意寄存器，a还是eax寄存器
 - list of clobbered registers就是些额外参数，cc表示编译器cmpxchgl的执行将影响到标志寄存器, memory告诉编译器要重新从内存中读取变量的最新值
 
 在 Linux X86平台下，最终JDK通过CPU的cmpxchgl指令的支持，实现AtomicInteger的CAS操作的原子性。虽然我们说 CAS 是无锁化的设计，但是在机器指令这一层面来看实际上也会使用到内存锁定，才能达到原子化的目标。
@@ -218,8 +204,6 @@ asm ( assembler template
 * current reference is {@code ==} to the expected reference
 * and the current stamp is equal to the expected stamp.
 
-*
-
 * @param expectedReference the expected value of the reference
 * @param newReference the new value for the reference
 * @param expectedStamp the expected value of the stamp
@@ -228,6 +212,7 @@ asm ( assembler template
 
 */
 public boolean compareAndSet(V   expectedReference,
+```
                             V   newReference,
                             int expectedStamp,
                             int newStamp) {
@@ -237,27 +222,30 @@ public boolean compareAndSet(V   expectedReference,
        expectedStamp == current.stamp &&
        ((newReference == current.reference &&
          newStamp == current.stamp) ||
-        casPair(current, Pair.of(newReference, newStamp)));
+```java
+casPair(current, Pair.of(newReference, newStamp)));
 }
 
 private boolean casPair(Pair<V> cmp, Pair<V> val) {
-   return UNSAFE.compareAndSwapObject(this, pairOffset, cmp, val);
+    return UNSAFE.compareAndSwapObject(this, pairOffset, cmp, val);
 }
 ```
 
 无论是上述的 `AtomicStampedReference` 还是 `AtomicReference` 最终都是通过 `compareAndSwapObject` 来实现的，而这个 CAS 操作比较的实际上就是对象的地址。
 
-```cpp
+```java
 // Unsafe.h
 virtual jboolean compareAndSwapObject(::java::lang::Object *, jlong, ::java::lang::Object *, ::java::lang::Object *);
 
 // natUnsafe.cc
 static inline bool
+```
 compareAndSwap (volatile jobject *addr, jobject old, jobject new_val)
+```java
 {
     jboolean result = false;
     spinlock lock;
-  
+
     // 如果字段的地址与期望的地址相等则将字段的地址更新
     if ((result = (*addr == old)))
         *addr = new_val;
@@ -265,9 +253,11 @@ compareAndSwap (volatile jobject *addr, jobject old, jobject new_val)
 }
 
 // natUnsafe.cc
+```
 jboolean
 sun::misc::Unsafe::compareAndSwapObject (jobject obj, jlong offset,
                      jobject expect, jobject update)
+```java
 {
     // 获取字段地址并转换为字符串
     jobject *addr = (jobject*)((char *) obj + offset);
@@ -319,7 +309,7 @@ unfair-lock
 
 我们知道在 `ReentrantLock` 中，我们即可以使用公平锁，又可以使用非公平锁，不妨来看看它们分别是怎么实现的。在 `ReentrantLock` 中，锁的核心都是通过 `Sync` 对象实现，它继承自 `AbstractQueuedSynchronizer(AQS)` ，AQS 是一个集成了等待队列与锁与一身的基类，很多 JUC 中的库都是建立在其上开发的。我们之后会详细介绍到它，这里先来看一下公平锁和非公平锁的实现方式。
 
-```java
+```javascript
 /**
  * Fair version of tryAcquire.  Don't grant access unless
  * recursive call or no waiters or is first.
@@ -344,7 +334,6 @@ protected final boolean tryAcquire(int acquires) {
     }
     return false;
 }
-
 /**
  * Performs non-fair tryLock.  tryAcquire is implemented in
  * subclasses, but both need nonfair try for trylock method.
@@ -454,7 +443,7 @@ public class LockTest{
 
 前面提到的 ReentrantLock 是一个可重入锁，从它的加锁代码中，我们不难发现加锁成功时，如果发现当前线程已经是持有锁的线程，则会通过一个 int 来保存重入次数。
 
-```java
+```javascript
 /**
  * Fair version of tryAcquire.  Don't grant access unless
  * recursive call or no waiters or is first.
@@ -482,7 +471,7 @@ protected final boolean tryAcquire(int acquires) {
 
 而在解锁时，则会将重入次数减1，直到该值为0时，才真正的释放锁。
 
-```java
+```c
 protected final boolean tryRelease(int releases) {
     int c = getState() - releases;
     if (Thread.currentThread() != getExclusiveOwnerThread())
@@ -543,14 +532,12 @@ public class ReentrantReadWriteLock
 public interface ReadWriteLock {
     /**
      * Returns the lock used for reading.
-     *
      * @return the lock used for reading
      */
     Lock readLock();
 
     /**
      * Returns the lock used for writing.
-     *
      * @return the lock used for writing
      */
     Lock writeLock();
@@ -600,10 +587,8 @@ read-write-lock-use-state
 		2. 非公平锁则直接是 false
 5. 如果第四步返回了false，就尝试进行 CAS 加锁，如果 CAS 失败，则加锁失败，否则加锁成功，将当前持有锁的线程置为当前线程。
 
-```java
 protected final boolean tryAcquire(int acquires) {
     /*
-     * Walkthrough:
      * 1. If read count nonzero or write count nonzero
      *    and owner is a different thread, fail.
      * 2. If count would saturate, fail. (This can only
@@ -611,7 +596,7 @@ protected final boolean tryAcquire(int acquires) {
      * 3. Otherwise, this thread is eligible for lock if
      *    it is either a reentrant acquire or
      *    queue policy allows it. If so, update state
-     *    and set owner.
+```javascript
      */
     Thread current = Thread.currentThread();
     int c = getState();
@@ -652,9 +637,11 @@ static final class FairSync extends Sync {
         return hasQueuedPredecessors();
     }
 }
+
 ```
 
 ReentrantReadWriteLock 的tryAcquire()相较于 ReentrantLock 来说，除了重入条件（当前线程为获取了写锁的线程）之外，增加了一个读锁是否存在的判断。如果存在读锁，则写锁不能被获取，原因在于：必须确保写锁的操作对读锁可见，如果允许读锁在已被获取的情况下对写锁的获取，那么正在运行的其他读线程就无法感知到当前写线程的操作。
+
 
 因此，只有等待其他读线程都释放了读锁，写锁才能被当前线程获取，而写锁一旦被获取，则其他读写线程的后续访问均被阻塞。写锁的释放与ReentrantLock的释放过程基本类似，每次释放均减少写状态，当写状态为0时表示写锁已被释放，然后等待的读写线程才能够继续访问读写锁，同时前次写线程的修改对后续的读写线程可见。
 
@@ -662,10 +649,10 @@ ReentrantReadWriteLock 的tryAcquire()相较于 ReentrantLock 来说，除了重
 
 1. 如果 writeState 不为0，并且持有该写锁的线程不是当前线程，则直接返回失败，否则尝试获得锁
 	1. 如果先获得了写锁，再尝试获取读锁则不会发生死锁，这和前面的先获得读锁，再获得写锁不同，之所以这么设计可以参考文档：
-		> Additionally, a writer can acquire the read lock, but not  
-		> vice-versa. Among other applications, reentrancy can be useful  
-		> when write locks are held during calls or callbacks to methods that  
-		> perform reads under read locks. If a reader tries to acquire the  
+		> Additionally, a writer can acquire the read lock, but not
+		> vice-versa. Among other applications, reentrancy can be useful
+		> when write locks are held during calls or callbacks to methods that
+		> perform reads under read locks. If a reader tries to acquire the
 		> write lock it will never succeed.
 2. 接下来判断当前线程是否需要阻塞：
 	1. 对于公平锁来说，只要队列中有前序节点则阻塞，因为只有读锁时，是不需要入队的，队列不为空，说明队列中存在或者存在过一个排它锁，这里直接入队等待
@@ -674,10 +661,8 @@ ReentrantReadWriteLock 的tryAcquire()相较于 ReentrantLock 来说，除了重
 4. 如果上述过程成功获得了锁，这里还有一道工序，就是保存当前线程的读锁持有数，本质上说通过一个 ThreadLocal 来保存这个读锁持有数即可，但是出于性能的考虑（ThreadLocal 性能不够好），这里另外增加了 firstReader 和 firstReaderHoldCount 来保存第一个获得读锁的线程重入数，此外还使用 cachedHoldCounter 来保存上一次调用时的线程的重入数，来达到加速的目的
 5. 当上述过程仍然没有获得锁时，进入 fullTryAcquireShared 逻辑
 
-```java
 protected final int tryAcquireShared(int unused) {
     /*
-     * Walkthrough:
      * 1. If write lock held by another thread, fail.
      * 2. Otherwise, this thread is eligible for
      *    lock wrt state, so ask if it should block
@@ -690,6 +675,7 @@ protected final int tryAcquireShared(int unused) {
      * 3. If step 2 fails either because thread
      *    apparently not eligible or CAS fails or count
      *    saturated, chain to version with full retry loop.
+```java
      */
     Thread current = Thread.currentThread();
     int c = getState();
@@ -700,7 +686,9 @@ protected final int tryAcquireShared(int unused) {
     int r = sharedCount(c);
     // 根据是不是公平锁，做出阻塞决定，读锁数是否溢出，检查通过的话通过 cas 加锁
     if (!readerShouldBlock() &&
+```
         r < MAX_COUNT &&
+```java
         compareAndSetState(c, c + SHARED_UNIT)) {
         if (r == 0) {
             firstReader = current;
@@ -723,18 +711,22 @@ protected final int tryAcquireShared(int unused) {
 /**
  * Returns {@code true} if the apparent first queued thread, if one
  * exists, is waiting in exclusive mode.  If this method returns
+```
  * {@code true}, and the current thread is attempting to acquire in
  * shared mode (that is, this method is invoked from {@link
  * #tryAcquireShared}) then it is guaranteed that the current thread
  * is not the first queued thread.  Used only as a heuristic in
  * ReentrantReadWriteLock.
+```java
  */
 final boolean apparentlyFirstQueuedIsExclusive() {
     Node h, s;
     return (h = head) != null &&
+```
         (s = h.next)  != null &&
         !s.isShared()         &&
-        s.thread != null;
+```java
+s.thread != null;
 }
 
 static final int SHARED_SHIFT   = 16;
@@ -785,6 +777,8 @@ final int fullTryAcquireShared(Thread current) {
      * tryAcquireShared but is simpler overall by not
      * complicating tryAcquireShared with interactions between
      * retries and lazily reading hold counts.
+```
+```javascript
      */
     HoldCounter rh = null;
     for (;;) {
@@ -900,67 +894,29 @@ public class LockTest{
 
 ## 参考内容
 
-\[1\] [linux 2.6 互斥锁的实现-源码分析](https://www.jianshu.com/p/a7ddb2998b3b)  
-\[2\] [深入解析条件变量(condition variables)](https://www.cnblogs.com/harlanc/p/8596211.html)  
-\[3\] [Linux下Condition Vairable和Mutext合用的小细节](http://lday.me/2017/11/19/0017_condition_variable_and_mutex_together/)  
-\[4\] [从ReentrantLock的实现看AQS的原理及应用](https://tech.meituan.com/2019/12/05/aqs-theory-and-apply.html)  
-\[5\] [不可不说的Java“锁”事](https://mp.weixin.qq.com/s?__biz=MjM5NjQ5MTI5OA==&mid=2651749434&idx=3&sn=5ffa63ad47fe166f2f1a9f604ed10091&chksm=bd12a5778a652c61509d9e718ab086ff27ad8768586ea9b38c3dcf9e017a8e49bcae3df9bcc8&scene=38#wechat_redirect)  
-\[6\] [从源码层面解析yield、sleep、wait、park](https://juejin.im/post/5dfc31c5f265da33a7674376)  
-\[7\] [LockSupport中的park与unpark原理](https://cloud.tencent.com/developer/article/1460321)  
-\[8\] [Thread.sleep、Object.wait、LockSupport.park 区别](https://blog.csdn.net/u013332124/article/details/84647915)  
-\[9\] [从AQS到futex-二-JVM的Thread和Parker](http://kexianda.info/2017/08/16/%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97-4-%E4%BB%8EAQS%E5%88%B0futex-%E4%BA%8C-JVM%E7%9A%84Thread%E5%92%8CParker/)  
-\[10\] [Java的LockSupport.park()实现分析](https://blog.csdn.net/hengyunabc/article/details/28126139)  
-\[11\] [JVM源码分析之Object.wait/notify实现](https://www.jianshu.com/p/f4454164c017)  
-\[12\] [Java线程源码解析之interrupt](https://www.jianshu.com/p/1492434f2810)  
-\[13\] [Thread.interrupt()相关源码分析](http://www.fanyilun.me/2016/11/19/Thread.interrupt\(\)%E7%9B%B8%E5%85%B3%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/)  
-\[14\] [Java CAS 原理剖析](https://juejin.im/post/5a73cbbff265da4e807783f5)  
-\[15\] [源码解析 Java 的 compareAndSwapObject 到底比较的是什么](https://blog.csdn.net/qq_40697071/article/details/103374783)  
-\[16\] 《Java并发编程的艺术》  
-\[17\] 《实战 Java 高并发程序设计》  
-\[18\] [volatile关键字深入学习](https://blog.nowcoder.net/n/6b9ccfdb9dac45bbbb9762b17c7c502a)  
-\[19\] [为什么Netty的FastThreadLocal速度快](https://juejin.im/post/5da45be5f265da5b86013552)  
-\[20\] [线程池ThreadPoolExecutor实现原理](https://juejin.im/post/5aeec0106fb9a07ab379574f)  
-\[21\] [深入理解Java线程池：ThreadPoolExecutor](http://www.ideabuffer.cn/2017/04/04/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%9AThreadPoolExecutor/)  
-\[22\] [ConcurrentHashMap 详解一](https://yq.aliyun.com/articles/673765)  
-\[23\] [ConcurrentHashMap 详解二](https://yq.aliyun.com/articles/673766?spm=a2c4e.11153940.0.0.78e55ba9w7HT0v)  
-\[24\] [JUC中Atomic class之lazySet的一点疑惑](http://ifeve.com/juc-atomic-class-lazyset-que/)  
-\[25\] [The JSR-133 Cookbook for Compiler Writers](http://gee.cs.oswego.edu/dl/jmm/cookbook.html)  
-\[26\] [就是要你懂Java中volatile关键字实现原理](https://www.cnblogs.com/xrq730/p/7048693.html)
-
-END
-
-引言
-
-锁的种类
-
-悲观锁与乐观锁
-
-乐观锁实现
-
-乐观锁的问题
-
-阻塞锁与自旋锁
-
-公平锁和非公平锁
-
-可重入和不可重入
-
-独占锁和共享锁
-
-死锁
-
-参考内容
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[1] [linux 2.6 互斥锁的实现-源码分析](https://www.jianshu.com/p/a7ddb2998b3b)
+[2] [深入解析条件变量(condition variables)](https://www.cnblogs.com/harlanc/p/8596211.html)
+[3] [Linux下Condition Vairable和Mutext合用的小细节](http://lday.me/2017/11/19/0017_condition_variable_and_mutex_together/)
+[4] [从ReentrantLock的实现看AQS的原理及应用](https://tech.meituan.com/2019/12/05/aqs-theory-and-apply.html)
+[5] [不可不说的Java“锁”事](https://mp.weixin.qq.com/s?__biz=MjM5NjQ5MTI5OA==&mid=2651749434&idx=3&sn=5ffa63ad47fe166f2f1a9f604ed10091&chksm=bd12a5778a652c61509d9e718ab086ff27ad8768586ea9b38c3dcf9e017a8e49bcae3df9bcc8&scene=38#wechat_redirect)
+[6] [从源码层面解析yield、sleep、wait、park](https://juejin.im/post/5dfc31c5f265da33a7674376)
+[7] [LockSupport中的park与unpark原理](https://cloud.tencent.com/developer/article/1460321)
+[8] [Thread.sleep、Object.wait、LockSupport.park 区别](https://blog.csdn.net/u013332124/article/details/84647915)
+[9] [从AQS到futex-二-JVM的Thread和Parker](http://kexianda.info/2017/08/16/%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97-4-%E4%BB%8EAQS%E5%88%B0futex-%E4%BA%8C-JVM%E7%9A%84Thread%E5%92%8CParker/)
+[10] [Java的LockSupport.park()实现分析](https://blog.csdn.net/hengyunabc/article/details/28126139)
+[11] [JVM源码分析之Object.wait/notify实现](https://www.jianshu.com/p/f4454164c017)
+[12] [Java线程源码解析之interrupt](https://www.jianshu.com/p/1492434f2810)
+[13] [Thread.interrupt()相关源码分析](http://www.fanyilun.me/2016/11/19/Thread.interrupt\(\)%E7%9B%B8%E5%85%B3%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/)
+[14] [Java CAS 原理剖析](https://juejin.im/post/5a73cbbff265da4e807783f5)
+[15] [源码解析 Java 的 compareAndSwapObject 到底比较的是什么](https://blog.csdn.net/qq_40697071/article/details/103374783)
+[16] 《Java并发编程的艺术》
+[17] 《实战 Java 高并发程序设计》
+[18] [volatile关键字深入学习](https://blog.nowcoder.net/n/6b9ccfdb9dac45bbbb9762b17c7c502a)
+[19] [为什么Netty的FastThreadLocal速度快](https://juejin.im/post/5da45be5f265da5b86013552)
+[20] [线程池ThreadPoolExecutor实现原理](https://juejin.im/post/5aeec0106fb9a07ab379574f)
+[21] [深入理解Java线程池：ThreadPoolExecutor](http://www.ideabuffer.cn/2017/04/04/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%9AThreadPoolExecutor/)
+[22] [ConcurrentHashMap 详解一](https://yq.aliyun.com/articles/673765)
+[23] [ConcurrentHashMap 详解二](https://yq.aliyun.com/articles/673766?spm=a2c4e.11153940.0.0.78e55ba9w7HT0v)
+[24] [JUC中Atomic class之lazySet的一点疑惑](http://ifeve.com/juc-atomic-class-lazyset-que/)
+[25] [The JSR-133 Cookbook for Compiler Writers](http://gee.cs.oswego.edu/dl/jmm/cookbook.html)
+[26] [就是要你懂Java中volatile关键字实现原理](https://www.cnblogs.com/xrq730/p/7048693.html)

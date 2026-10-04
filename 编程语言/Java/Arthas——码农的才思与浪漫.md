@@ -10,29 +10,13 @@ tags:
 ---
 CAINIAO
 
-粉丝 14影响力 292
 
-** 270
 
-** 695
 
-** 30
 
-** 原创文章
 
-发表到圈儿
 
-[千牛旺旺技术团队](https://ata.atatech.org/community/team/46) / [工具和经验](https://ata.atatech.org/community/team/46?cid=201) (首发)
 
-**
-
-[赵情融](https://ata.atatech.org/users/11000022437)
-
-** 字号
-
-** 笔记
-
-** 分享 **
 
 ## 一、 Arthas
 
@@ -64,7 +48,7 @@ Attach机制是什么？说简单点就是jvm提供一种jvm进程间通信的�
 
 Attach对应的JVM实现在(AttachListener.cpp)，如下：
 
-```
+```java
 static AttachOperationFunctionInfo funcs[] = {
     { "agentProperties",  get_agent_properties },
     { "datadump",         data_dump },
@@ -88,7 +72,7 @@ static AttachOperationFunctionInfo funcs[] = {
 
 下面以jstack的实现来说明Attach Listener是如何被创建的，jstack命令的实现在Jstack.java，它属于JVMTI工具箱。
 
-```
+```java
 private static void runThreadDump(String pid, String args[]) throws Exception {
     VirtualMachine vm = null;
     try {
@@ -129,7 +113,6 @@ private static void runThreadDump(String pid, String args[]) throws Exception {
 
 请注意VirtualMachine.Attach(pid);这行代码，触发Attach pid的关键，如果是在linux下会走到下面的构造函数。
 
-```
 LinuxVirtualMachine(AttachProvider provider, String vmid)
     throws AttachNotSupportedException, IOException
 {
@@ -205,7 +188,11 @@ LinuxVirtualMachine(AttachProvider provider, String vmid)
 }
 ```
 
+```
+
 下面是Signal Dispatcher线程的entry实现：
+
+```java
 
 ```
 static void signal_thread_entry(JavaThread* thread, TRAPS) {
@@ -251,16 +238,18 @@ static void signal_thread_entry(JavaThread* thread, TRAPS) {
             }
             break;
           }
-                ….
+```java
+                // ....
           }
         }
     }
 }
-```
-
-当信号是SIGBREAK(在jvm里做了#define，其实就是SIGQUIT)的时候，就会触发 AttachListener::is\_init\_trigger()的执行。
 
 ```
+
+当信号是SIGBREAK(在jvm里做了#define，其实就是SIGQUIT)的时候，就会触发 AttachListener::is_init_trigger()的执行。
+
+```java
 bool AttachListener::is_init_trigger() {
   if (init_at_startup() || is_initialized()) {
     return false;               // initialized at startup or already initialized
@@ -287,9 +276,9 @@ bool AttachListener::is_init_trigger() {
 }
 ```
 
-一开始会判断当前进程目录下是否有个.Attach\_pid文件（前面提到了），如果没有就会在/tmp下创建一个/tmp/.Attach\_pid，当那个文件的uid和自己的uid是一致的情况下（为了安全）再调用init方法。
+一开始会判断当前进程目录下是否有个.Attach_pid文件（前面提到了），如果没有就会在/tmp下创建一个/tmp/.Attach_pid，当那个文件的uid和自己的uid是一致的情况下（为了安全）再调用init方法。
 
-```
+```java
 void AttachListener::init() {
   EXCEPTION_MARK;
   klassOop k = SystemDictionary::resolve_or_fail(vmSymbols::java_lang_Thread(), true, CHECK);
@@ -319,7 +308,7 @@ void AttachListener::init() {
                         thread_oop,             // ARG 1
                         CHECK);
 
-  { 
+  {
       MutexLocker mu(Threads_lock);
         JavaThread* listener_thread = new JavaThread(&Attach_listener_thread_entry);
 
@@ -341,15 +330,14 @@ void AttachListener::init() {
 
 此时水落石出了，看到创建了一个线程，并且取名为Attach Listener。再看看其子类LinuxAttachListener的init方法。
 
-```
+```java
 int LinuxAttachListener::init() {
       char path[UNIX_PATH_MAX];          // socket file
       char initial_path[UNIX_PATH_MAX];  // socket file during setup
       int listener;                      // listener socket (file descriptor)
-    
+
       // register function to cleanup
       ::atexit(listener_cleanup);
-    
       int n = snprintf(path, UNIX_PATH_MAX, "%s/.java_pid%d",
                        os::get_temp_directory(), os::current_process_id());
       if (n < (int)UNIX_PATH_MAX) {
@@ -358,13 +346,13 @@ int LinuxAttachListener::init() {
       if (n >= (int)UNIX_PATH_MAX) {
         return -1;
       }
-    
+
       // create the listener socket
       listener = ::socket(PF_UNIX, SOCK_STREAM, 0);
       if (listener == -1) {
         return -1;
       }
-    
+
       // bind socket
       struct sockaddr_un addr;
       addr.sun_family = AF_UNIX;
@@ -375,7 +363,7 @@ int LinuxAttachListener::init() {
         RESTARTABLE(::close(listener), res);
         return -1;
       }
-    
+
       // put in listen mode, set permissions, and rename into place
       res = ::listen(listener, 5);
       if (res == 0) {
@@ -391,33 +379,33 @@ int LinuxAttachListener::init() {
       }
       set_path(path);
       set_listener(listener);
-    
+
       return 0;
     }
 ```
 
-看到其创建了一个监听套接字，并创建了一个文件/tmp/.java\_pid，这个文件就是客户端之前一直在轮询等待的文件，随着这个文件的生成，意味着Attach的过程圆满结束了。
+看到其创建了一个监听套接字，并创建了一个文件/tmp/.java_pid，这个文件就是客户端之前一直在轮询等待的文件，随着这个文件的生成，意味着Attach的过程圆满结束了。
 
 ### 2.2 Attach Listener接收请求
 
-看看它的entry实现Attach\_listener\_thread\_entry
+看看它的entry实现Attach_listener_thread_entry
 
-```
+```java
 static void Attach_listener_thread_entry(JavaThread* thread, TRAPS) {
       os::set_priority(thread, NearMaxPriority);
       thread->record_stack_base_and_size();
-    
+
       if (AttachListener::pd_init() != 0) {
         return;
       }
       AttachListener::set_initialized();
-    
+
       for (;;) {
         AttachOperation* op = AttachListener::dequeue();
         if (op == NULL) {
           return;   // dequeue failed or shutdown
         }
-        
+
     ResourceMark rm;
     bufferedStream st;
     jint res = JNI_OK;
@@ -457,11 +445,11 @@ static void Attach_listener_thread_entry(JavaThread* thread, TRAPS) {
 }
 ```
 
-从代码来看就是从队列里不断取AttachOperation，然后找到请求命令对应的方法进行执行，比如我们一开始说的jstack命令，找到 { “threaddump”, thread\_dump }的映射关系，然后执行thread\_dump方法
+从代码来看就是从队列里不断取AttachOperation，然后找到请求命令对应的方法进行执行，比如我们一开始说的jstack命令，找到 { “threaddump”, thread_dump }的映射关系，然后执行thread_dump方法
 
 再来看看其要调用的AttachListener::dequeue()，
 
-```
+```java
 AttachOperation* AttachListener::dequeue() {
   JavaThread* thread = JavaThread::current();
   ThreadBlockInVM tbivm(thread);
@@ -481,7 +469,7 @@ AttachOperation* AttachListener::dequeue() {
 
 最终调用的是LinuxAttachListener::dequeue()，
 
-```
+```c
 LinuxAttachOperation* LinuxAttachListener::dequeue() {
   for (;;) {
     int s;
@@ -537,10 +525,8 @@ LinuxAttachOperation* LinuxAttachListener::dequeue() {
 
 为了使用动态instrument，开发者需要编写一个含有“agentmain”函数的 Java 类：
 
-```
-public static void agentmain (String agentArgs, Instrumentation inst);          [1] 
+public static void agentmain (String agentArgs, Instrumentation inst);          [1]
 public static void agentmain (String agentArgs);              [2]
-```
 
 为了使用这个java类，开发者必须在 manifest 文件里面设置“Agent-Class”来指定包含 agentmain 函数的类。
 
@@ -554,27 +540,27 @@ Attach API 很简单，只有 2 个主要的类，都在 com.sun.tools.attach �
 
 首先，我们有一个简单的类，TransClass， 可以通过一个静态方法返回一个整数 1。
 
-```
-public class TransClass { 
-     public int getNumber() { 
-     return 1; 
-    } 
+```java
+public class TransClass {
+     public int getNumber() {
+     return 1;
+    }
 }
 ```
 
 然后写一个测试用例来加载TransClass：
 
-```
-public class TestMainInJar { 
-public static void main(String[] args) throws InterruptedException { 
-        System.out.println(new TransClass().getNumber()); 
-        int count = 0; 
-        while (true) { 
-            Thread.sleep(500); 
-            int number = new TransClass().getNumber(); 
-            System.out.println(number); 
-        } 
-    } 
+```java
+public class TestMainInJar {
+public static void main(String[] args) throws InterruptedException {
+        System.out.println(new TransClass().getNumber());
+        int count = 0;
+        while (true) {
+            Thread.sleep(500);
+            int number = new TransClass().getNumber();
+            System.out.println(number);
+        }
+    }
  }
 ```
 
@@ -582,9 +568,9 @@ public static void main(String[] args) throws InterruptedException {
 
 那么我们将 TransClass 的 getNumber 方法改成如下:
 
-```
-public int getNumber() { 
-    return 2; 
+```java
+public int getNumber() {
+    return 2;
 }
 ```
 
@@ -592,53 +578,53 @@ public int getNumber() {
 
 接下来，我们建立一个Transformer 类：
 
-```
-import java.io.File; 
-import java.io.FileInputStream; 
-import java.io.IOException; 
-import java.io.InputStream; 
-import java.lang.instrument.ClassFileTransformer; 
-import java.lang.instrument.IllegalClassFormatException; 
-import java.security.ProtectionDomain; 
+```java
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
 
-class Transformer implements ClassFileTransformer { 
-   public static final String classNumberReturns2 = "TransClass.class.2"; 
+class Transformer implements ClassFileTransformer {
+   public static final String classNumberReturns2 = "TransClass.class.2";
 
-   public static byte[] getBytesFromFile(String fileName) { 
-       try { 
-           // precondition 
-           File file = new File(fileName); 
-           InputStream is = new FileInputStream(file); 
-           long length = file.length(); 
-           byte[] bytes = new byte[(int) length]; 
+   public static byte[] getBytesFromFile(String fileName) {
+       try {
+           // precondition
+           File file = new File(fileName);
+           InputStream is = new FileInputStream(file);
+           long length = file.length();
+           byte[] bytes = new byte[(int) length];
 
-           // Read in the bytes 
-           int offset = 0; 
-           int numRead = 0; 
-           while (offset <bytes.length 
-                   && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) { 
-               offset += numRead; 
-           } 
+           // Read in the bytes
+           int offset = 0;
+           int numRead = 0;
+           while (offset <bytes.length
+                   && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+               offset += numRead;
+           }
 
-           if (offset < bytes.length) { 
-               throw new IOException("Could not completely read file " + file.getName()); 
-                           } 
-               is.close(); 
-               return bytes; 
-           } catch (Exception e) { 
-               System.out.println("error occurs in _ClassTransformer!"+ e.getClass().getName()); 
-               return null; 
-           } 
-       } 
-   
-       public byte[] transform(ClassLoader l, String className, Class<?> c, 
-               ProtectionDomain pd, byte[] b) throws IllegalClassFormatException { 
-           if (!className.equals("TransClass")) { 
-               return null; 
-           } 
-           return getBytesFromFile(classNumberReturns2); 
-   
-       } 
+           if (offset < bytes.length) {
+               throw new IOException("Could not completely read file " + file.getName());
+                           }
+               is.close();
+               return bytes;
+           } catch (Exception e) {
+               System.out.println("error occurs in _ClassTransformer!"+ e.getClass().getName());
+               return null;
+           }
+       }
+
+       public byte[] transform(ClassLoader l, String className, Class<?> c,
+               ProtectionDomain pd, byte[] b) throws IllegalClassFormatException {
+           if (!className.equals("TransClass")) {
+               return null;
+           }
+           return getBytesFromFile(classNumberReturns2);
+
+       }
     }
 ```
 
@@ -646,19 +632,19 @@ class Transformer implements ClassFileTransformer {
 
 接着我们编写一个含有 agentmain 的 AgentMain 类：
 
-```
-import java.lang.instrument.ClassDefinition; 
-import java.lang.instrument.Instrumentation; 
-import java.lang.instrument.UnmodifiableClassException; 
+```java
+import java.lang.instrument.ClassDefinition;
+import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 
-public class AgentMain { 
-   public static void agentmain(String agentArgs, Instrumentation inst) 
-           throws ClassNotFoundException, UnmodifiableClassException, 
-           InterruptedException { 
-       inst.addTransformer(new Transformer (), true); 
-       inst.retransformClasses(TransClass2.class); 
-       System.out.println("Agent Main Done"); 
-   } 
+public class AgentMain {
+   public static void agentmain(String agentArgs, Instrumentation inst)
+           throws ClassNotFoundException, UnmodifiableClassException,
+           InterruptedException {
+       inst.addTransformer(new Transformer (), true);
+       inst.retransformClasses(TransClass2.class);
+       System.out.println("Agent Main Done");
+   }
 }
 ```
 
@@ -666,60 +652,58 @@ addTransformer 方法并没有指明要转换哪个类。转换发生在 premain
 
 然后把AgentMain类、Transformer类、TransClass2.class打成TestInstrument1.Jar包，并在Manifest指定agentmain方法所在的类，如下：
 
-```
-Manifest-Version: 1.0 
+Manifest-Version: 1.0
 Agent-Class: AgentMain
-```
 
 现在有了运行着测试用例TestMainInJar的虚拟机，有了准备替换的TestInstrument1.Jar，为了实现动态替换，需要将TestInstrument1.Jar attach到TestMainInJar虚拟机上。
 
-```
-import com.sun.tools.attach.VirtualMachine; 
- import com.sun.tools.attach.VirtualMachineDescriptor; 
+import com.sun.tools.attach.VirtualMachine;
+ import com.sun.tools.attach.VirtualMachineDescriptor;
  ……
+```java
  // 一个运行 Attach API 的线程子类
- static class AttachThread extends Thread { 
-        
- private final List<VirtualMachineDescriptor> listBefore; 
+ static class AttachThread extends Thread {
 
-    private final String jar; 
+ private final List<VirtualMachineDescriptor> listBefore;
 
-    AttachThread(String attachJar, List<VirtualMachineDescriptor> vms)   { 
+    private final String jar;
+
+    AttachThread(String attachJar, List<VirtualMachineDescriptor> vms)   {
         listBefore = vms;  // 记录程序启动时的 VM 集合
-        jar = attachJar; 
-    } 
+        jar = attachJar;
+    }
 
-    public void run() { 
-        VirtualMachine vm = null; 
-        List<VirtualMachineDescriptor> listAfter = null; 
-        try { 
-            int count = 0; 
-            while (true) { 
-                listAfter = VirtualMachine.list(); 
-                for (VirtualMachineDescriptor vmd : listAfter) { 
-                    if (!listBefore.contains(vmd)) { 
+    public void run() {
+        VirtualMachine vm = null;
+        List<VirtualMachineDescriptor> listAfter = null;
+        try {
+            int count = 0;
+            while (true) {
+                listAfter = VirtualMachine.list();
+                for (VirtualMachineDescriptor vmd : listAfter) {
+                    if (!listBefore.contains(vmd)) {
                      // 如果 VM 有增加，我们就认为是被监控的 VM 启动了
-                     // 这时，我们开始监控这个 VM 
-                            vm = VirtualMachine.attach(vmd); 
-                            break; 
-                        } 
-                    } 
-                    Thread.sleep(500); 
-                    count++; 
-                    if (null != vm || count >= 10) { 
-                        break; 
-                    } 
-                } 
-                vm.loadAgent(jar); 
-                vm.detach(); 
-            } catch (Exception e) { 
-                 ignore 
-            } 
-        } 
-    } 
-……
- public static void main(String[] args) throws InterruptedException {      
-     new AttachThread("TestInstrument1.jar", VirtualMachine.list()).start(); 
+                     // 这时，我们开始监控这个 VM
+                            vm = VirtualMachine.attach(vmd);
+                            break;
+                        }
+                    }
+                    Thread.sleep(500);
+                    count++;
+                    if (null != vm || count >= 10) {
+                        break;
+                    }
+                }
+                vm.loadAgent(jar);
+                vm.detach();
+            } catch (Exception e) {
+                 ignore
+            }
+        }
+    }
+
+ public static void main(String[] args) throws InterruptedException {
+     new AttachThread("TestInstrument1.jar", VirtualMachine.list()).start();
  }
 ```
 
@@ -735,7 +719,7 @@ import com.sun.tools.attach.VirtualMachine;
 
 分析Arthas的启动脚本——as.sh，其启动的main函数为ArthasLauncher::main，其中主要实现在，
 
-```
+```java
 private void attachAgent(Configure configure) throws Exception {
     final ClassLoader loader = Thread.currentThread().getContextClassLoader();
     final Class<?> vmdClass = loader.loadClass("com.sun.tools.attach.VirtualMachineDescriptor");
@@ -765,10 +749,13 @@ private void attachAgent(Configure configure) throws Exception {
 }
 ```
 
-注意其中两行，vmObj = vmClass.getMethod("attach", vmdClass).invoke(null, attachVmdObj);  
+注意其中两行，vmObj = vmClass.getMethod("attach", vmdClass).invoke(null, attachVmdObj);
 vmClass.getMethod("loadAgent", String.class, String.class).invoke(vmObj, configure.getArthasAgent(), configure.getArthasCore() + ";" + configure.toString());
+```
 
 至此已经一清二楚，Arthas在启动的时候会attach到指定pid的虚拟机上，并通知该虚拟机加载configure.getArthasAgent()，而configure.getArthasAgent()主要是com.taobao.arthas.agent.AgentLauncher。
+
+```
 
 查看com.taobao.arthas.agent.AgentLauncher的代码，果然它是一个Instrumentation的agent，有一个agentmain入口函数，一切的奥秘皆从此开始。
 
@@ -776,14 +763,16 @@ vmClass.getMethod("loadAgent", String.class, String.class).invoke(vmObj, configu
 
 ## 2、命令的处理
 
-ArthasLauncher被目标虚拟机加载之后，主要总能有三个：  
-\* 把Arthas所包含的jar包加入到目标java进程的BootstrapClassLoader中；  
-\* 生成一个Arthas专用的classloader来加载Arthas类；  
-\* 使用Arthas专用classloader来加载一些必须的类，其中最重要的是com.taobao.arthas.core.server.ArthasServer
+ArthasLauncher被目标虚拟机加载之后，主要总能有三个：
+* 把Arthas所包含的jar包加入到目标java进程的BootstrapClassLoader中；
+* 生成一个Arthas专用的classloader来加载Arthas类；
+* 使用Arthas专用classloader来加载一些必须的类，其中最重要的是com.taobao.arthas.core.server.ArthasServer
 
 Arthas支持远程调试，可以在远程服务器上启动Arthas，然后通过Arthas Console Client来远程调试目标服务器，com.taobao.arthas.core.server.ArthasServer就是来实现这个功能,在目标服务器上直接调试时相当于./as.sh [12356@127.0.0.1](mailto:12356@127.0.0.1):3658，这里我们不关心它的具体实现。
 
 直接看ArthasServer::read，即接收命令之后的处理过程：
+
+```java
 
 ```
 private void doRead(final ByteBuffer byteBuffer, SelectionKey key) {
@@ -835,11 +824,9 @@ private void doRead(final ByteBuffer byteBuffer, SelectionKey key) {
         ...
     }
 }
-```
 
 命令的处理在CommandHandler.handleCommand(...)中，略过中间流程，直接来到AbstractCommandHandler::execute(...)，至此我们已经来到命令处理的核心入口，
 
-```
 protected void execute(final Session session, final Command command, final String cmd) throws ArthasExecuteException, IOException {
     // TODO 此处后续还可以优化，避免每次生成CommandPrinter对象
     final Command.Printer printer = new CommandPrinter(cmd, session);
@@ -904,12 +891,11 @@ protected void execute(final Session session, final Command command, final Strin
     // 跑任务
     jobRunning(session, printer);
 }
-```
 
-好啦，Arthas所支持的命令有三大类：  
-\* 一类是纯观察JVM信息或者操作Arthas的命令如：VersionCommand、JvmCommand、QuitCommand；  
-\* 一类是命令会对JVM或者类造成影响，需要进行记录，如：ThreadCommand、DumpClassCommand、JadCommand；  
-\* 一类是需要对命令的目标进行代理增强，如：WatchCommand、TraceCommand。
+好啦，Arthas所支持的命令有三大类：
+* 一类是纯观察JVM信息或者操作Arthas的命令如：VersionCommand、JvmCommand、QuitCommand；
+* 一类是命令会对JVM或者类造成影响，需要进行记录，如：ThreadCommand、DumpClassCommand、JadCommand；
+* 一类是需要对命令的目标进行代理增强，如：WatchCommand、TraceCommand。
 
 下面会对一些有代表性的命令结合其用法来进行实现分析，了解原理，主要有JvmCommand、WatchCommand。
 
@@ -935,7 +921,7 @@ WatchCommand是一个比较重要和常用的命令，也是一个实现比较�
 
 我们再回到AbstractCommandHandler::execute(...)，只关注Command.GetEnhancerAction（WatchCommand属于GetEnhancerAction），
 
-```
+```java
 protected void execute(final Session session, final Command command, final String cmd) throws ArthasExecuteException, IOException {
     //...
     try {
@@ -986,10 +972,8 @@ GetEnhancerAction处理的过程中，首先会获取Commond.action的GetEnhance
 
 有了打印回调方法，那这些方法怎么被调用的？奥秘在Enhancer中，Enhancer是ClassFileTransformer的子类，重写了transform(...)方法，transform中会对指定类进行增强。
 
-```
 final ClassReader cr;
 cr.accept(new AdviceWeaver(adviceId, isTracing, cr.getClassName(), methodNameMatcher, affect, cw), EXPAND_FRAMES);
-```
 
 好啦，现在来到所有秘密的核心，由于使用了ASM，对ASM不熟悉的人还是很难理解的，我也是一知半解，只能从AdviceWeaver略知一二。
 
@@ -1005,7 +989,7 @@ AdviceWeaver的代码实在太过玄妙，ASM也不想花很多时间去研究�
 
 WatchCommand的观察表达式是groovy的，所以只要是合法的groovy的表达是都可以被支持。
 
-```
+```java
 class GroovyExpress implements Express {
     private final Binding bind;
 
@@ -1046,7 +1030,7 @@ TraceCommand也是使用了和WatchCommand类似的实现，TraceCommand命令�
 
 ## 五、回顾&彩蛋
 
-现在我们用一张图来回顾下Arthas的整个过程  
+现在我们用一张图来回顾下Arthas的整个过程
 
 ![enter image description here](https://oss-ata.alibaba.com/article/2023/11/392360e1-456f-4a61-8dfb-012f76bf6a35.png?x-oss-process=image/resize,m_lfit,w_1600/auto-orient,1/quality,Q_80/format,avif/ignore-error,1)
 
@@ -1056,57 +1040,13 @@ enter image description here
 
 在Arthas的实现代码中有一段奇怪的代码：
 
-```
+```java
 // don't ask why
 if ($(cmd)) {
-        WriteUtils.write(socketChannel, wrap($$()));
+    WriteUtils.write(socketChannel, wrap($$()));
     WriteUtils.writePrompt(session);
     return true;
 }
 ```
 
 don't ask why！试试“july”命令吧！码农也是非常浪漫的！
-
-END
-
-一、 Arthas
-
-二、 JVM - attach
-
-1、Attach
-
-2、Attach的JVM实现
-
-2.1 Attach Listener线程的创建
-
-2.2 Attach Listener接收请求
-
-三、 Agent & Instrumentation
-
-1、虚拟机启动后的动态 instrument
-
-2、agentmain-agent的具体实现
-
-四、 Arthas的具体实现
-
-1、一切的开始
-
-2、命令的处理
-
-3、JvmCommand
-
-4、WatchCommand
-
-WatchCommand的问题
-
-五、回顾&彩蛋
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

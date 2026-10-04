@@ -10,67 +10,20 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 3.1k影响力 26k
 
-** 16
 
-** 9
 
-** 3
 
-** 原创文章
-
-** AI辅助创作 50%
-
-** 内部资料
 
 参与征文
 
-[百炼成技：FY27 S1总结征文及实战征集令](https://ata.atatech.org/articles/11020778417)
-
-[阿里技术编辑部·招募计划](https://ata.atatech.org/articles/11020698413)
-
-发表到圈儿
-
-[ATA之家](https://ata.atatech.org/community/group/45) (首发)
-
-[智能引擎技术](https://ata.atatech.org/community/group/271)
-
-[AI Agent前沿技术交流圈](https://ata.atatech.org/community/group/1000154)
-
-[AI 提效俱乐部](https://ata.atatech.org/community/group/1000096)
-
-[AI情报社](https://ata.atatech.org/community/group/1000072)
-
-[悦读社](https://ata.atatech.org/community/group/3446)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-[翰林院](https://ata.atatech.org/community/group/3390)
-
-[蚂蚁数据智能](https://ata.atatech.org/community/group/3310)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-[数据那点事儿](https://ata.atatech.org/community/group/647)
-
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152)
-
-**
-
-[姜剑(飞樰)](https://ata.atatech.org/users/11000429133)
 
 4 分钟前发表3 分钟前更新285次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 背景
 
@@ -90,13 +43,9 @@ tags:
 
 在这种情况下，通常我们有两种做法。第一种做法，是直接用大模型。我们写一段 Prompt，要求它做一个分类或者路由的任务，并且强制要求它的 Output 必须是一个结构化的格式，比如直接输出分类结果，或者通过 JSON、YAML 的结构化形式输出。然后让工程代码去解析这个结果，再映射到我们想要调度的那个 Agent 上。但这种基于大模型的做法，效率其实并不高，经常遇到几个痛点：
 
-●
+- 速度慢。 因为大模型要推理嘛。你要想让它分得准，往往就得开启 "Thinking"（思考模式）。如果你不开思考，速度可能会快一点，但如果你的 Prompt 写得很长、要求很复杂，它输出整个 JSON 的过程依然会很漫长。
 
-速度慢。 因为大模型要推理嘛。你要想让它分得准，往往就得开启 "Thinking"（思考模式）。如果你不开思考，速度可能会快一点，但如果你的 Prompt 写得很长、要求很复杂，它输出整个 JSON 的过程依然会很漫长。
-
-●
-
-指令遵循不稳定。 某些情况下，它还是很可能会输出错误的 JSON 结构，或者不按照你预期的字段来输出。这种情况虽然偶发，但确实存在。哪怕我们加了一些 Format 约束，让模型按约定解码，也难免会出岔子。
+- 指令遵循不稳定。 某些情况下，它还是很可能会输出错误的 JSON 结构，或者不按照你预期的字段来输出。这种情况虽然偶发，但确实存在。哪怕我们加了一些 Format 约束，让模型按约定解码，也难免会出岔子。
 
 第二种做法，是为了追求极致的速度和稳定性，去训练一个小参数模型。我们可以把大模型的结果进行蒸馏，或者通过人工标注，快速训练一个小的 LLM。目的就是为了节省推理时间，加快速度，同时提高准确性。在更极致的场景下，甚至可以训练一些像 BERT 这样的传统机器学习模型。这样能在毫秒级就输出一个分类结果以及对应的置信度（Logits）。有了这个置信度，我们就可以通过阈值来灵活控制。比如，我可以设定置信度 90% 以上才认为是某种决策，或者 80% 以上。这个阈值可以根据业务需求动态调整，这是 BERT 这类模型的一个优势。
 
@@ -128,7 +77,17 @@ tags:
 
 那既然，Jev 与 LLM 差异挺大的，那我们就先来做一下对比。为了更直观，我整理了一个表格：
 
-<table><colgroup><col width="127"> <col width="304"> <col width="325"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>对比项</p></td><td rowspan="1" colspan="1"><p>LLM (大语言模型)</p></td><td rowspan="1" colspan="1"><p>Jev (System One Model)</p></td></tr><tr><td rowspan="1" colspan="1"><p>输入/输出</p></td><td rowspan="1" colspan="1"><p>输入：非结构化数据（文本），侧重连续对话消息；输出：非结构化字符串，灵活但需专门约束，仍可能不遵循指令</p></td><td rowspan="1" colspan="1"><p>输入：可以非结构化描述任务要求，但侧重结构化格式（如 Instruction/Criteria）；输出：类型安全的结构化数据，所有输出结构预定义，无类型错误，结果在候选范围内，且附带校准过的概率分布</p></td></tr><tr><td rowspan="1" colspan="1"><p>优化方法</p></td><td rowspan="1" colspan="1"><p>基于RLHF（人类反馈的强化学习） ，或 RLVR （基于可验证奖励的强化学习）</p></td><td rowspan="1" colspan="1"><p>RLCD（面向校准决策的强化学习）</p></td></tr><tr><td rowspan="1" colspan="1"><p>优化目标</p></td><td rowspan="1" colspan="1"><p>人类偏好：产出评分员更喜欢的文章和聊天回复；可验证奖励：通过程序验证输出对错（如 Coding、数学推理）</p></td><td rowspan="1" colspan="1"><p>校准后的决策：基于 System One 任务，给出诚实、可靠的概率答案</p></td></tr><tr><td rowspan="1" colspan="1"><p>采样方式</p></td><td rowspan="1" colspan="1"><p>串行：基于 Next Token Prediction，一次生成一个 Token，依赖前文</p></td><td rowspan="1" colspan="1"><p>并行：一次查询即可生成所有想要的类型结果，效率极高</p></td></tr><tr><td rowspan="1" colspan="1"><p>速度与成本</p></td><td rowspan="1" colspan="1"><p>速度慢、成本高</p></td><td rowspan="1" colspan="1"><p>速度快、成本极低</p></td></tr><tr><td rowspan="1" colspan="1"><p>置信度</p></td><td rowspan="1" colspan="1"><p>无原生置信度，难以判断准确性或自信程度，且往往过度自信</p></td><td rowspan="1" colspan="1"><p>每次输出均附带校准过的置信度，数值越高准确率越高，更稳定可靠</p></td></tr><tr><td rowspan="1" colspan="1"><p>适用场景</p></td><td rowspan="1" colspan="1"><p>需要人类参与的任务（聊天、Copilot、Coding Agent）、可验证场景（数学、内核优化）、快速 Demo 等难量化场景</p></td><td rowspan="1" colspan="1"><p>AI 驱动的 Workflow、需要 If/Else 判断的场景、对响应耗时要求极高的实时应用</p></td></tr></tbody></table>
+
+| 对比项   | LLM (大语言模型)                                                      | Jev (System One Model)                                                                              |
+| ----- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 输入/输出 | 输入：非结构化数据（文本），侧重连续对话消息；输出：非结构化字符串，灵活但需专门约束，仍可能不遵循指令              | 输入：可以非结构化描述任务要求，但侧重结构化格式（如 Instruction/Criteria）；输出：类型安全的结构化数据，所有输出结构预定义，无类型错误，结果在候选范围内，且附带校准过的概率分布 |
+| 优化方法  | 基于RLHF（人类反馈的强化学习） ，或 RLVR （基于可验证奖励的强化学习）                         | RLCD（面向校准决策的强化学习）                                                                                   |
+| 优化目标  | 人类偏好：产出评分员更喜欢的文章和聊天回复；可验证奖励：通过程序验证输出对错（如 Coding、数学推理）            | 校准后的决策：基于 System One 任务，给出诚实、可靠的概率答案                                                                |
+| 采样方式  | 串行：基于 Next Token Prediction，一次生成一个 Token，依赖前文                    | 并行：一次查询即可生成所有想要的类型结果，效率极高                                                                           |
+| 速度与成本 | 速度慢、成本高                                                          | 速度快、成本极低                                                                                            |
+| 置信度   | 无原生置信度，难以判断准确性或自信程度，且往往过度自信                                      | 每次输出均附带校准过的置信度，数值越高准确率越高，更稳定可靠                                                                      |
+| 适用场景  | 需要人类参与的任务（聊天、Copilot、Coding Agent）、可验证场景（数学、内核优化）、快速 Demo 等难量化场景 | AI 驱动的 Workflow、需要 If/Else 判断的场景、对响应耗时要求极高的实时应用                                                     |
+
 
 简单来说，LLM 更像是一个“全能选手”，适合和人打交道或者处理开放性问题；而 Jev 则像是一个“精密仪器”，专门为自动化流程中的那些需要快速、准确、结构化决策的环节而生。
 
@@ -136,13 +95,9 @@ tags:
 
 在 Jev 的官方文档和描述里，经常提到一个词：System One（系统1）。这个名字是怎么来的呢？它其实借用了心理学家 Daniel Kahneman 在其名著《思考，快与慢》（Thinking, Fast and Slow）中提出的概念。在这本书里，人类的思维被分为两种模式：
 
-●
+- 系统一（System 1）：快速、直觉式的思维。它能立即做出反应，省力且瞬时。
 
-系统一（System 1）：快速、直觉式的思维。它能立即做出反应，省力且瞬时。
-
-●
-
-系统二（System 2）：缓慢、审慎的思维。它需要经过深思熟虑和逻辑推理，费力且耗时。
+- 系统二（System 2）：缓慢、审慎的思维。它需要经过深思熟虑和逻辑推理，费力且耗时。
 
 ![](c188e3df-0fa4-40e4-94ad-e2e08e3083e0.png)
 
@@ -150,7 +105,15 @@ tags:
 
 我们也通过表格的方式简单对比一下这两者：
 
-<table><colgroup><col width="134"> <col width="311"> <col width="301"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>对比项</p></td><td rowspan="1" colspan="1"><p>系统1 (System 1)</p></td><td rowspan="1" colspan="1"><p>系统2（System 2)</p></td></tr><tr><td rowspan="1" colspan="1"><p>思维方式</p></td><td rowspan="1" colspan="1"><p>直觉的、瞬时判断的</p></td><td rowspan="1" colspan="1"><p>刻意的、多步推理的</p></td></tr><tr><td rowspan="1" colspan="1"><p>速度与成本</p></td><td rowspan="1" colspan="1"><p>快、省力</p></td><td rowspan="1" colspan="1"><p>慢、费力</p></td></tr><tr><td rowspan="1" colspan="1"><p>人类案例</p></td><td rowspan="1" colspan="1"><p>看到对方情绪立刻识别喜怒哀乐；快速认出熟人面孔</p></td><td rowspan="1" colspan="1"><p>计算复杂的数学题；使用公式进行逻辑推导</p></td></tr><tr><td rowspan="1" colspan="1"><p>AI 案例</p></td><td rowspan="1" colspan="1"><p>Jev 模型；或未开启思考模式的普通 LLM</p></td><td rowspan="1" colspan="1"><p>开启了 Reasoning/思维链 (CoT) 的 LLM</p></td></tr><tr><td rowspan="1" colspan="1"><p>擅长任务</p></td><td rowspan="1" colspan="1"><p>分类、打分、决策路由等“一眼就能判断”的任务</p></td><td rowspan="1" colspan="1"><p>数学逻辑证明、多步复杂规划</p></td></tr></tbody></table>
+
+| 对比项   | 系统1 (System 1)          | 系统2（System 2)                 |
+| ----- | ----------------------- | ----------------------------- |
+| 思维方式  | 直觉的、瞬时判断的               | 刻意的、多步推理的                     |
+| 速度与成本 | 快、省力                    | 慢、费力                          |
+| 人类案例  | 看到对方情绪立刻识别喜怒哀乐；快速认出熟人面孔 | 计算复杂的数学题；使用公式进行逻辑推导           |
+| AI 案例 | Jev 模型；或未开启思考模式的普通 LLM  | 开启了 Reasoning/思维链 (CoT) 的 LLM |
+| 擅长任务  | 分类、打分、决策路由等“一眼就能判断”的任务  | 数学逻辑证明、多步复杂规划                 |
+
 
 所以，“系统1”擅长的就是那些分类、打分、路由这类需要“一眼定乾坤”的任务；而“系统2”则更擅长处理数学、逻辑证明以及多步的复杂规划。
 
@@ -168,19 +131,26 @@ TypeSafe 这家公司预期，机器智能会走上和当年工业革命时期�
 
 那么，Jev 和 BERT、LLM 的关系就变得非常有意思了。我刚接触 Jev 的第一反应就是：这个模型其实是取了 BERT 和 LLM 各自的长处，来实现特定任务的。你会发现：
 
-●
+- 它能够像 BERT 一样，将输出收敛到结构化的类别和概率，不发散；
 
-它能够像 BERT 一样，将输出收敛到结构化的类别和概率，不发散；
-
-●
-
-它又能够像 LLM 一样，理解任意的自然语言，做到 Zero-shot（零样本） 调用。
+- 它又能够像 LLM 一样，理解任意的自然语言，做到 Zero-shot（零样本） 调用。
 
 ![](6923493d-a798-4dfa-a3e4-d96565359941.png)
 
 这意味着我们不需要去训练它，直接通过写 Instruction 的方式就能实现使用。这就解决了一个很大的痛点：我可以快速、低成本地用这样一个模型去解决问题，既不需要训练，又能拿到一个稳定、可用的结果。那么，下面我们把 BERT、LLM、Jev 三者再做一个详细对比：
 
-<table><colgroup><col width="136"> <col width="210"> <col width="227"> <col width="225"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>对比维度</p></td><td rowspan="1" colspan="1"><p>BERT (传统小模型)</p></td><td rowspan="1" colspan="1"><p>LLM (大语言模型)</p></td><td rowspan="1" colspan="1"><p>Jev (System One Model)</p></td></tr><tr><td rowspan="1" colspan="1"><p>输入</p></td><td rowspan="1" colspan="1"><p>任意文本</p></td><td rowspan="1" colspan="1"><p>任意文本</p></td><td rowspan="1" colspan="1"><p>结构化定义的任意文本（含 Instruction/Criteria）</p></td></tr><tr><td rowspan="1" colspan="1"><p>输出</p></td><td rowspan="1" colspan="1"><p>固定的分类标签 + 概率Logit</p></td><td rowspan="1" colspan="1"><p>任意的生成文本</p></td><td rowspan="1" colspan="1"><p>结构化的类别 + 校准后的置信度</p></td></tr><tr><td rowspan="1" colspan="1"><p>任务实现</p></td><td rowspan="1" colspan="1"><p>需专门训练：为每个任务训练分类的 CLS 头</p></td><td rowspan="1" colspan="1"><p>无需训练：通过 Prompt 实现 Zero-shot / Few-shot</p></td><td rowspan="1" colspan="1"><p>无需训练：通过写 Instruction 或临时定义 Criteria，实现 Zero-shot，选项可动态修改</p></td></tr><tr><td rowspan="1" colspan="1"><p>通用性/灵活性</p></td><td rowspan="1" colspan="1"><p>低：换一个任务就要重新训练</p></td><td rowspan="1" colspan="1"><p>极高：一个模型干所有事，但准确性/指令遵循有弊端</p></td><td rowspan="1" colspan="1"><p>高：一个模型加临时定义的要求，可覆盖多样需求，同时保证稳定性和准确性</p></td></tr><tr><td rowspan="1" colspan="1"><p>概率校准</p></td><td rowspan="1" colspan="1"><p>未校准：容易过度自信</p></td><td rowspan="1" colspan="1"><p>无概率输出，只有每个 Token 概率</p></td><td rowspan="1" colspan="1"><p>专门校准过：置信度越高，准确率越可靠</p></td></tr><tr><td rowspan="1" colspan="1"><p>幻觉风险</p></td><td rowspan="1" colspan="1"><p>基本不会：只输出已知的 CLS 标签</p></td><td rowspan="1" colspan="1"><p>会：可能编造内容或不遵循格式</p></td><td rowspan="1" colspan="1"><p>不会：数学上保证只给出固定选项内的结果</p></td></tr><tr><td rowspan="1" colspan="1"><p>速度与成本</p></td><td rowspan="1" colspan="1"><p>速度快，但训练成本高（需 GPU、数据集）</p></td><td rowspan="1" colspan="1"><p>速度慢，且推理成本高</p></td><td rowspan="1" colspan="1"><p>速度快，且成本低（无需训练，推理极快）</p></td></tr><tr><td rowspan="1" colspan="1"><p>适用场景</p></td><td rowspan="1" colspan="1"><p>定制训练：需要为每个任务定制分类器，对速度和准确率要求极高且可承担训练成本的场景</p></td><td rowspan="1" colspan="1"><p>通用场景：人机交互对话、内容生成、Coding、复杂需求实现</p></td><td rowspan="1" colspan="1"><p>决策函数场景：AI 驱动的 Workflow，需要快速、稳定实现 If/Else 逻辑判断的场景</p></td></tr></tbody></table>
+
+| 对比维度    | BERT (传统小模型)                             | LLM (大语言模型)                            | Jev (System One Model)                                   |
+| ------- | ---------------------------------------- | -------------------------------------- | -------------------------------------------------------- |
+| 输入      | 任意文本                                     | 任意文本                                   | 结构化定义的任意文本（含 Instruction/Criteria）                       |
+| 输出      | 固定的分类标签 + 概率Logit                        | 任意的生成文本                                | 结构化的类别 + 校准后的置信度                                         |
+| 任务实现    | 需专门训练：为每个任务训练分类的 CLS 头                   | 无需训练：通过 Prompt 实现 Zero-shot / Few-shot | 无需训练：通过写 Instruction 或临时定义 Criteria，实现 Zero-shot，选项可动态修改 |
+| 通用性/灵活性 | 低：换一个任务就要重新训练                            | 极高：一个模型干所有事，但准确性/指令遵循有弊端               | 高：一个模型加临时定义的要求，可覆盖多样需求，同时保证稳定性和准确性                       |
+| 概率校准    | 未校准：容易过度自信                               | 无概率输出，只有每个 Token 概率                    | 专门校准过：置信度越高，准确率越可靠                                       |
+| 幻觉风险    | 基本不会：只输出已知的 CLS 标签                       | 会：可能编造内容或不遵循格式                         | 不会：数学上保证只给出固定选项内的结果                                      |
+| 速度与成本   | 速度快，但训练成本高（需 GPU、数据集）                    | 速度慢，且推理成本高                             | 速度快，且成本低（无需训练，推理极快）                                      |
+| 适用场景    | 定制训练：需要为每个任务定制分类器，对速度和准确率要求极高且可承担训练成本的场景 | 通用场景：人机交互对话、内容生成、Coding、复杂需求实现         | 决策函数场景：AI 驱动的 Workflow，需要快速、稳定实现 If/Else 逻辑判断的场景         |
+
 
 简单来说，BERT 像是“特种兵”，每个任务都得单独练，练好了极快极准，但换任务就得重练；LLM 像是“全能博士”，什么都能聊，但干活慢、贵，还偶尔会“胡言乱语”；Jev 则像是“智能调度员”，既有博士的理解力（不用训练就能懂指令），又有特种兵的执行力（快、准、稳、便宜），专门为自动化流程中的决策环节而生。
 
@@ -196,39 +166,23 @@ TypeSafe 这家公司预期，机器智能会走上和当年工业革命时期�
 
 `type` 字段定义了你要让模型做什么样的决策，主要有三种类型：
 
-●
+- Choice（选择）：从一组选项中选出一个。输出选中的项（Choice）、每个选项的概率（Probability）以及置信度（Confidence）。典型场景有意图路由、文档分类、模型识别等。
 
-Choice（选择）：从一组选项中选出一个。输出选中的项（Choice）、每个选项的概率（Probability）以及置信度（Confidence）。典型场景有意图路由、文档分类、模型识别等。
+- Score（打分）：判断内容落在哪个等级或分数段。输出是具体的分数（Score）、等级标签（Legend）、概率和置信度。典型场景比如严重程度分级、敏感程度评估、情绪强度打分等。
 
-●
-
-Score（打分）：判断内容落在哪个等级或分数段。输出是具体的分数（Score）、等级标签（Legend）、概率和置信度。典型场景比如严重程度分级、敏感程度评估、情绪强度打分等。
-
-●
-
-Noul（是非判断）：判断这句话是真的吗？或者这件事是对还是错？输出0 到 1 之间的概率值。越接近 1 代表“是”，越接近 0 代表“否”。典型场景是二分类任务，比如“是否合规”等等。
+- Noul（是非判断）：判断这句话是真的吗？或者这件事是对还是错？输出0 到 1 之间的概率值。越接近 1 代表“是”，越接近 0 代表“否”。典型场景是二分类任务，比如“是否合规”等等。
 
 ## Instruction / Criteria：告诉模型“做什么”和“怎么选”
 
-●
+- Instruction：你具体要问的问题或任务描述。例如：“请判断用户的这句意图属于哪个分类。”
 
-Instruction：你具体要问的问题或任务描述。例如：“请判断用户的这句意图属于哪个分类。”
+- Criteria：可能的选项列表或评分标准。
 
-●
+- 如果是 Choice，这里写上分类 1、分类 2、分类 3 等选项列表。
 
-Criteria：可能的选项列表或评分标准。
+- 如果是 Score，这里写上分数段或等级的定义表。
 
-○
-
-如果是 Choice，这里写上分类 1、分类 2、分类 3 等选项列表。
-
-○
-
-如果是 Score，这里写上分数段或等级的定义表。
-
-○
-
-如果是 Noul，这里必须写清楚“是”代表什么，“否”代表什么。不过，需要注意的是，对于是非判断，你一定要在 Criteria 里明确定义。比如“客户是否有情绪异常”，你得说明 1 代表异常还是 0 代表异常。如果不写清楚，模型就不知道该往哪边分。
+- 如果是 Noul，这里必须写清楚“是”代表什么，“否”代表什么。不过，需要注意的是，对于是非判断，你一定要在 Criteria 里明确定义。比如“客户是否有情绪异常”，你得说明 1 代表异常还是 0 代表异常。如果不写清楚，模型就不知道该往哪边分。
 
 ## State：上下文数据导入
 
@@ -242,25 +196,17 @@ Criteria：可能的选项列表或评分标准。
 
 接下来，我们深入聊聊 Jev 背后的核心训练方法“RLCD”（Reinforcement Learning for Calibrated Decisions，面向校准决策的强化学习）。在介绍它之前，我们先回顾一下大模型后训练（Post-training）的两条主流路径，这样你就能明白为什么需要这个新算法了：
 
-●
+- RLHF（基于人类反馈的强化学习）：这是 OpenAI 推出 ChatGPT 时的招牌做法。它的优化目标是“人类偏好”，通过训练一个 Reward Model 来拟合人类的打分，让模型输出更像人、更讨喜的回复。但是，标注和训练 Reward Model 的成本极高，而且很难完全拟合人类的真实意图。
 
-RLHF（基于人类反馈的强化学习）：这是 OpenAI 推出 ChatGPT 时的招牌做法。它的优化目标是“人类偏好”，通过训练一个 Reward Model 来拟合人类的打分，让模型输出更像人、更讨喜的回复。但是，标注和训练 Reward Model 的成本极高，而且很难完全拟合人类的真实意图。
-
-●
-
-RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起，这种方法变得流行。它适合那些能通过程序化验证对错的场景（如代码、数学推理）。虽然速度慢一点，但效果精准，因为对错是客观可验证的，但适用场景有限。
+- RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起，这种方法变得流行。它适合那些能通过程序化验证对错的场景（如代码、数学推理）。虽然速度慢一点，但效果精准，因为对错是客观可验证的，但适用场景有限。
 
 ![](a1d375b0-cf4e-42d1-b596-55c9a0b4ad4f.png)
 
 而 Jev 采用的 RLCD 的优化目标非常明确：校准过的决策和概率。那么，什么是“校准”（Calibrated）？这里需要注意，很多人会混淆“概率”和“置信度”：
 
-●
+- 概率（Probability）：模型会对每个选项给出一个概率值。比如分类 1、2、3，模型会告诉你选 1 的概率是 60%，选 2 是 30%... 但这只是模型内部的倾向性，不代表它一定是对的。
 
-概率（Probability）：模型会对每个选项给出一个概率值。比如分类 1、2、3，模型会告诉你选 1 的概率是 60%，选 2 是 30%... 但这只是模型内部的倾向性，不代表它一定是对的。
-
-●
-
-置信度（Confidence）：这才是 RLCD 的核心。模型在输出概率的同时，还会输出一个置信度。所以校准的含义就是，如果模型给出的置信度是 0.2（20%），那么在大量同类样本中，它确实只有约 20% 的情况是答对的；如果置信度是 0.9，那它就有 90% 的把握是对的。简单来说，置信度越高，准确性就越高。 这就是经过“校准”的意义，让模型的自我评估与真实准确率对齐。
+- 置信度（Confidence）：这才是 RLCD 的核心。模型在输出概率的同时，还会输出一个置信度。所以校准的含义就是，如果模型给出的置信度是 0.2（20%），那么在大量同类样本中，它确实只有约 20% 的情况是答对的；如果置信度是 0.9，那它就有 90% 的把握是对的。简单来说，置信度越高，准确性就越高。 这就是经过“校准”的意义，让模型的自我评估与真实准确率对齐。
 
 那么，置信度又是怎么来的？它是基于概率分布计算出来的一个 0~1 的值（除了 Noul 类型外都有），如果分布越尖（集中在某一个结果上）：模型越自信，置信度越高；如果分布越平（各个选项概率差不多）：模型越不确定，置信度越低。这给了模型一个“承认我不确定”的机制。这对于构建可靠系统至关重要，高置信度 = 高可信度，可以直接自动化执行；而低置信度 = 低可信度，可能需要人工介入或触发备用方案。
 
@@ -274,51 +220,29 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 在官方的 “How to Build” 文档里，强调了几条非常实用的方法论，我总结了一下：
 
-1.
+1. 能用代码就别用模型：对于逻辑性强、规则明确的任务（比如日期阈值判断），直接用代码写死。不要试图让任何模型去算这个，代码永远比模型准且快。
 
-能用代码就别用模型：对于逻辑性强、规则明确的任务（比如日期阈值判断），直接用代码写死。不要试图让任何模型去算这个，代码永远比模型准且快。
+2. 精简 State，避免 Context Rot（上下文腐烂）：只把当前问题真正需要的上下文塞进 `state` 。无关信息不仅浪费 Token，还会引入噪声，拉低准确率。这就是所谓的“上下文腐烂”（Context Rot）。
 
-2.
+3. 精准引用字段： `state` 里的字段可以通过反引号或路径的方式，直接在 `instruction` 里引用。这样能让模型聚焦到具体的数据点上，而不是在一堆文本里大海捞针。
 
-精简 State，避免 Context Rot（上下文腐烂）：只把当前问题真正需要的上下文塞进 `state` 。无关信息不仅浪费 Token，还会引入噪声，拉低准确率。这就是所谓的“上下文腐烂”（Context Rot）。
+4. 拆解问题：问原子问题，别问大问题：这是最关键的一点。一定要在 Jev 里问最原子、最具体的问题。比如说不要问：“这封邮件是不是垃圾邮件？” 而是要问：“这封邮件是否在索要密码？”、“是否承诺了额外奖励？”、“发件人身份与内容是否矛盾？”让模型对这些小问题做精确判断，然后你再用代码去做综合的加权决策。这种“模型判断+代码聚合”的模式，效果远好于让模型直接给一个大结论。
 
-3.
+5. 结构化你的 Instruction 和 Criteria：复杂的指令或选项，别堆成一长串文字。用带命名字段的对象来组织，把每个选项的定义写清楚（属于什么、不属于什么），甚至可以加几个例子（Few-shot）。模型对结构化信息的理解力远强于大段自然语言。
 
-精准引用字段： `state` 里的字段可以通过反引号或路径的方式，直接在 `instruction` 里引用。这样能让模型聚焦到具体的数据点上，而不是在一堆文本里大海捞针。
-
-4.
-
-拆解问题：问原子问题，别问大问题：这是最关键的一点。一定要在 Jev 里问最原子、最具体的问题。比如说不要问：“这封邮件是不是垃圾邮件？” 而是要问：“这封邮件是否在索要密码？”、“是否承诺了额外奖励？”、“发件人身份与内容是否矛盾？”让模型对这些小问题做精确判断，然后你再用代码去做综合的加权决策。这种“模型判断+代码聚合”的模式，效果远好于让模型直接给一个大结论。
-
-5.
-
-结构化你的 Instruction 和 Criteria：复杂的指令或选项，别堆成一长串文字。用带命名字段的对象来组织，把每个选项的定义写清楚（属于什么、不属于什么），甚至可以加几个例子（Few-shot）。模型对结构化信息的理解力远强于大段自然语言。
-
-6.
-
-一次多问，并行处理：把同一个 `state` 相关的所有问题——哪怕有些你现在可能用不上——都打包放进一个请求里并行跑。比如用户对话进来，意图分类、情绪识别、风险检测可以一次性全做了。这样的效率最高，且多次调用和单次调用的答案是一致的，不会因为并行而降低准确率。最后根据返回的 `confidence` 来决定是否采纳结果即可。
+6. 一次多问，并行处理：把同一个 `state` 相关的所有问题——哪怕有些你现在可能用不上——都打包放进一个请求里并行跑。比如用户对话进来，意图分类、情绪识别、风险检测可以一次性全做了。这样的效率最高，且多次调用和单次调用的答案是一致的，不会因为并行而降低准确率。最后根据返回的 `confidence` 来决定是否采纳结果即可。
 
 虽然 Jev 很强，但它不是万能的。以下场景请谨慎使用或避开：
 
-●
+- 数学与日期计算：它算不准。这类任务请务必交给代码或专门的工具。
 
-数学与日期计算：它算不准。这类任务请务必交给代码或专门的工具。
+- 多跳推理与双重否定：涉及多层间接逻辑、双重否定等复杂语义理解时，准确性会下降。
 
-●
+- 庞大且嘈杂的 State：如果上下文过长、干扰项过多，模型的注意力会被稀释，准确率变差。
 
-多跳推理与双重否定：涉及多层间接逻辑、双重否定等复杂语义理解时，准确性会下降。
+- 对抗性内容：如果 `state` 里包含注入攻击或恶意诱导信息，可能导致决策失效。
 
-●
-
-庞大且嘈杂的 State：如果上下文过长、干扰项过多，模型的注意力会被稀释，准确率变差。
-
-●
-
-对抗性内容：如果 `state` 里包含注入攻击或恶意诱导信息，可能导致决策失效。
-
-●
-
-结构不变性不保证：同一个问题，你用 `noul` （是非）问和用 `choice` （选择）问，结果可能不完全一致。因为它们是独立校验的，决策路径不同，输出可能有差异。不要假设两种方式的输出必然等价。
+- 结构不变性不保证：同一个问题，你用 `noul` （是非）问和用 `choice` （选择）问，结果可能不完全一致。因为它们是独立校验的，决策路径不同，输出可能有差异。不要假设两种方式的输出必然等价。
 
 总的来说，Jev 是一个极其强大的决策函数，但它需要你像工程师一样去设计输入、拆解任务、并用代码兜底。把它当成一个“超级传感器”而非“全能大脑”，才能发挥它的最大价值。
 
@@ -334,103 +258,152 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 "state": {
 
-"source\_text": "最近右下腹剧痛，还有点发热、恶心难受"
+"source_text": "最近右下腹剧痛，还有点发热、恶心难受"
 
-},
-
+```java
 "questions": {
+    "department": {
+      "type": "choice",
+      "instructions": {
+        "question": "根据病人的症状描述，应该分到哪个诊室？",
+        "focus": "基于 source_text 中的核心症状进行科室路由判断"
+      },
+      "criteria": {
+        "外科": {
+          "what": "阑尾炎、外伤等可能需要外科评估或手术处理的情况",
+          "examples": [
+            "右下腹剧痛",
+            "刀割伤"
+          ]
+        },
+        "内科": {
+          "what": "感冒、普通发热、肠胃炎等通常不需要手术处理的情况",
+          "examples": [
+            "持续低烧",
+            "腹泻呕吐"
+          ]
+        },
+        "急诊科": {
+          "what": "可能危及生命、病情快速恶化或需要立即评估和处置的情况",
+          "examples": [
+            "意识模糊",
+            "大出血",
+            "呼吸困难"
+          ]
+        },
+        "皮肤科": {
+          "what": "皮疹、过敏、外观异常等皮肤相关问题",
+          "examples": [
+            "全身红疹",
+            "瘙痒起包"
+          ]
+        }
+      }
+    },
+    "is_emergency": {
+      "type": "noul",
+      "instructions": {
+        "question": "病人是否需要立即就医或接受紧急医学评估？",
+        "inspect": "source_text"
+      },
+      "criteria": {
+        "true": {
+          "what": "存在潜在危重情况、可能快速恶化，或延误可能造成明显伤害，需要立即就医",
+          "examples": [
+            "剧烈胸痛",
+            "昏迷",
+            "大量出血",
+            "突发或持续的剧烈腹痛伴发热、恶心"
+          ]
+        },
+        "false": {
+          "what": "症状轻微且稳定，没有明显危险信号，可安排常规门诊",
+          "examples": [
+            "短暂轻微腹痛",
+            "无其他危险信号的低烧",
+            "短暂轻度恶心"
+          ]
+        }
+      }
+    },
+    "severity": {
+      "type": "score",
+      "instructions": {
+        "question": "根据当前症状评估病情严重程度",
+        "inspect": "source_text",
+        "direction": "criteria 从轻到重排列"
+      },
+      "criteria": [
+        {
+          "summary": "轻微",
+          "signals": [
+            "症状轻微，不影响日常生活",
+            "无发热或仅低热",
+            "没有明显危险信号"
+          ]
+        },
+        {
+          "summary": "中等",
+          "signals": [
+            "症状明显但尚可忍受",
+            "伴有发热或持续不适",
+            "需要尽快门诊评估"
+          ]
+        },
+        {
+          "summary": "严重",
+          "signals": [
+            "症状剧烈、持续或正在加重",
+            "高热、剧烈疼痛或明显功能受限",
+            "需要立即就医或紧急评估"
+          ]
+        }
+      ]
+    }
+  }
+```
+"focus": "基于 source_text 中的核心症状进行科室路由判断"
 
-"department": {
-
-"type": "choice",
-
-"instructions": {
-
-"question": "根据病人的症状描述，应该分到哪个诊室？",
-
-"focus": "基于 source\_text 中的核心症状进行科室路由判断"
-
-},
-
+```java
 "criteria": {
-
-"外科": {
-
-"what": "阑尾炎、外伤等可能需要外科评估或手术处理的情况",
-
-"examples": \[
-
-"右下腹剧痛",
-
-"刀割伤"
-
-\]
-
-},
-
-"内科": {
-
-"what": "感冒、普通发热、肠胃炎等通常不需要手术处理的情况",
-
-"examples": \[
-
-"持续低烧",
-
-"腹泻呕吐"
-
-\]
-
-},
-
-"急诊科": {
-
-"what": "可能危及生命、病情快速恶化或需要立即评估和处置的情况",
-
-"examples": \[
-
-"意识模糊",
-
-"大出血",
-
-"呼吸困难"
-
-\]
-
-},
-
-"皮肤科": {
-
-经过真实的 `jev-1.13.0` API调用之后，我们就拿到了“结构化类别 + 校准置信度”的出参结构：
-
-{
-
-"model": "jev-1.13.0",
-
-"answers": {
-
-"department": {
-
-"type": "choice",
-
-"choice": "外科",
-
-"confidence": 0.96,
-
-"probabilities": {
-
-"内科": 0.0,
-
-"外科": 0.97,
-
-"皮肤科": 0.0,
-
-"急诊科": 0.03
-
+        "外科": {
+          "what": "阑尾炎、外伤等可能需要外科评估或手术处理的情况",
+          "examples": [
+            "右下腹剧痛",
+            "刀割伤"
+          ]
+        },
+        "内科": {
+          "what": "感冒、普通发热、肠胃炎等通常不需要手术处理的情况",
+          "examples": [
+            "持续低烧",
+            "腹泻呕吐"
+          ]
+        },
+        "急诊科": {
+          "what": "可能危及生命、病情快速恶化或需要立即评估和处置的情况",
+          "examples": [
+            "意识模糊",
+            "大出血",
+            "呼吸困难"
+          ]
+        },
+        "皮肤科": {
+          "what": "皮疹、过敏、外观异常等皮肤相关问题",
+          "examples": [
+            "全身红疹",
+            "瘙痒起包"
+          ]
+        }
+      }
+```
+```java
 }
 
 },
 
-"is\_emergency": {
+"is_emergency": {
+```
 
 "type": "noul",
 
@@ -452,7 +425,7 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 "summary": "轻微",
 
-"signals": \[
+"signals": [
 
 "症状轻微，不影响日常生活",
 
@@ -460,7 +433,7 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 "没有明显危险信号"
 
-\]
+]
 
 },
 
@@ -468,7 +441,7 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 "summary": "中等",
 
-"signals": \[
+"signals": [
 
 "症状明显但尚可忍受",
 
@@ -488,9 +461,9 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 ## Reference
 
-\[1\] Introducing System One Models & Jev： [https://typesafe.ai/blog/introducing-system-one-models-and-jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)
+[1] Introducing System One Models & Jev： [https://typesafe.ai/blog/introducing-system-one-models-and-jev](https://typesafe.ai/blog/introducing-system-one-models-and-jev)
 
-\[2\] TypeSafe Docs： [https://docs.typesafe.ai/introduction](https://docs.typesafe.ai/introduction)
+[2] TypeSafe Docs： [https://docs.typesafe.ai/introduction](https://docs.typesafe.ai/introduction)
 
 欢迎大家点击此处加入 [“AI Agent前沿技术交流群”](https://qr.dingtalk.com/action/joingroup?code=v1,k1,8NXOCeBlSZDURG3l49gr9pgfI/DC4FpOpgoRJGycvIE=&_dt_no_comment=1&origin=11?) ，或者手机扫码加群 👇🏻
 
@@ -500,144 +473,54 @@ RLVR（基于可验证奖励的强化学习）：随着 Coding Agent 的兴起�
 
 『AI方法论』：
 
-●
+- [从 Loop 到 Graph Engineering 的演进思考与实战](https://ata.atatech.org/articles/11020728011) 🔥
 
-[从 Loop 到 Graph Engineering 的演进思考与实战](https://ata.atatech.org/articles/11020728011) 🔥
+- [Agent到底如何评测？基本概念与经典方法](https://ata.atatech.org/articles/11020698840) 🔥🔥
 
-●
+- [Loop Engineering 概念解析、思考与实践](https://ata.atatech.org/articles/11020674841) 🔥🔥
 
-[Agent到底如何评测？基本概念与经典方法](https://ata.atatech.org/articles/11020698840) 🔥🔥
+- [如何更科学、方向可控的实现 Skill 的“自进化”?](https://ata.atatech.org/articles/11020655223) 🔥🔥
 
-●
+- [Agent 核心技术概念与范式发生了哪些演变以及背后的思考](https://ata.atatech.org/articles/11020644402) 🔥🔥
 
-[Loop Engineering 概念解析、思考与实践](https://ata.atatech.org/articles/11020674841) 🔥🔥
+- [Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
 
-●
+- [如何让 Agent 更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
 
-[如何更科学、方向可控的实现 Skill 的“自进化”?](https://ata.atatech.org/articles/11020655223) 🔥🔥
+- [如何构建和调优高可用性的 Agent ？浅谈阿里云服务领域 Agent 构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
 
-●
-
-[Agent 核心技术概念与范式发生了哪些演变以及背后的思考](https://ata.atatech.org/articles/11020644402) 🔥🔥
-
-●
-
-[Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
-
-●
-
-[如何让 Agent 更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
-
-●
-
-[如何构建和调优高可用性的 Agent ？浅谈阿里云服务领域 Agent 构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
-
-●
-
-[为什么一定要做 Agent 智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
+- [为什么一定要做 Agent 智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
 
 『项目解析』：
 
-●
+- [深度解析 Codex Harness 架构及其全新上下文压缩记忆体系的设计思路](https://ata.atatech.org/articles/11020779617) 🔥🔥
 
-[深度解析 Codex Harness 架构及其全新上下文压缩记忆体系的设计思路](https://ata.atatech.org/articles/11020779617) 🔥🔥
+- [深度解析 DeepSeek Harness 架构和 Cordis 插件体系的设计思路](https://ata.atatech.org/articles/11020768407) 🔥🔥
 
-●
+- [深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
 
-[深度解析 DeepSeek Harness 架构和 Cordis 插件体系的设计思路](https://ata.atatech.org/articles/11020768407) 🔥🔥
+- [深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
 
-●
+- [深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
 
-[深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
+- [从 LLM Wiki / Obsidian-Wiki / GBrain 来看 Agent时代知识的“自组织”与“自进化”](https://ata.atatech.org/articles/11020627647) 🔥🔥
 
-●
-
-[深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
-
-●
-
-[深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
-
-●
-
-[从 LLM Wiki / Obsidian-Wiki / GBrain 来看 Agent时代知识的“自组织”与“自进化”](https://ata.atatech.org/articles/11020627647) 🔥🔥
-
-●
-
-[Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
+- [Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
 
 『观点思考』：
 
-●
-
-[从技术视角剖析AI时代“蒸馏”的真相](https://ata.atatech.org/articles/11020688812) 🔥
+- [从技术视角剖析AI时代“蒸馏”的真相](https://ata.atatech.org/articles/11020688812) 🔥
 
 『业务落地』：
 
-●
+- [从 Multi-Agent 到 Skills：云小二 Aivis 如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
 
-[从 Multi-Agent 到 Skills：云小二 Aivis 如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
+- [MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
 
-●
+- [阿里云服务领域 Agent 平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
 
-[MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
+- [基于通义千问的阿里云小智服务领域 Agent 设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
 
-●
+- [基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
 
-[阿里云服务领域 Agent 平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
-
-●
-
-[基于通义千问的阿里云小智服务领域 Agent 设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
-
-●
-
-[基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
-
-●
-
-[基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
-
-END
-
-背景
-
-Agent 决策类任务的痛点
-
-Jev 的定位：专为结构化决策而生
-
-Jev 与 LLM 的核心差异对比
-
-什么是“系统1”？为何叫“Jev”？
-
-集 LLM 与 BERT 两者之长
-
-如何定义一个“决策函数”？
-
-ID：结果的“身份证”
-
-Type：三种决策类型
-
-Instruction / Criteria：告诉模型“做什么”和“怎么选”
-
-State：上下文数据导入
-
-RLCD：面向校准决策的强化学习
-
-官方最佳实践：如何用好 Jev？
-
-实战案例详解
-
-总结
-
-Reference
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+- [基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)

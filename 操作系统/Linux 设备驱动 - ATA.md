@@ -8,41 +8,16 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 190影响力 1.9k
-
-** 1
-
-**
-
-**
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
 ## Linux 设备驱动
-
-[陈阳(逸殊)](https://ata.atatech.org/users/11000967975)
 
 2021-01-11发表2022-09-16更新147次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 引言
 
-本文整理了 Linux 内核中设备驱动的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。  
+本文整理了 Linux 内核中设备驱动的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。
 
 ## 设备驱动
 
@@ -52,22 +27,22 @@ tags:
 2. 提供访问设备的方法，而且要尽可能采用统一方案
 3. 获取可用设备列表
 
-与外设的通信是层次化的，通过多层的抽象，使得上层应用在访问设备时，可以使用一套统一的接口。下图就展示了设备的分层抽象概念，我们可以看到，从最下层的设备开始，通过驱动程序作为粘合剂编入虚拟文件系统管理，从此设备在用户空间看来就是一个特殊的文件，而应用程序在访问各种设备时就如同访问一个个不同的文件一样，通过统一的文件读写接口，就实现了对各种设备的访问。  
+与外设的通信是层次化的，通过多层的抽象，使得上层应用在访问设备时，可以使用一套统一的接口。下图就展示了设备的分层抽象概念，我们可以看到，从最下层的设备开始，通过驱动程序作为粘合剂编入虚拟文件系统管理，从此设备在用户空间看来就是一个特殊的文件，而应用程序在访问各种设备时就如同访问一个个不同的文件一样，通过统一的文件读写接口，就实现了对各种设备的访问。
 
 ![[5a3b03ec-7f3c-4cdf-b533-60389522934d.png|device-abstract-level]]
 
 device-abstract-level
 
-  
+
 要知道，外设是不能直接连接到 CPU 的，它们需要通过总线连接起来，总线能够使设备与 CPU，设备与设备之间进行通信。Linux 支持的总线类型有很多，比如 PCI，ISA，USB 等。
 
-在系统中，一般都会有多条总线，这些总线之间互相连接以扩大连接设备的规模。以 PCI 为例，下图展示 2 个 PCI 总线以桥接方式连接的例子：  
+在系统中，一般都会有多条总线，这些总线之间互相连接以扩大连接设备的规模。以 PCI 为例，下图展示 2 个 PCI 总线以桥接方式连接的例子：
 
 ![[ec828771-7249-460c-893a-a4890f179762.png|pci-bridge]]
 
 pci-bridge
 
-  
+
 至此，我们初步了解了外设是如何连接到系统上的，那么系统是如何与这些设备通信的呢？这主要有 3 种方式：
 
 1. I/O 端口
@@ -85,7 +60,6 @@ pci-bridge
 
 根据外设与系统的交换数据方式，一般会划分为字符型设备和块设备，前者包括键盘等设备，而后者包括磁盘等设备。我们可以通过 `ls -l /dev` 来查看所有的设备，在访问权限之前的 b 和 c 分别代表该设备是块设备或字符设备。在用户、组后面的两个数字分别是主设备号，和从设备号。两者合并起来是一个唯一号码，内核借此来查找对应的驱动程序。最后面的文件名主要是为了帮助用户识别设备用的，内核还是通过主从设备号来管理设备。
 
-```bash
 ls -l /dev
 crw-------  1 root root     10，203 Oct 25 08:17 cuse
 drwxr-xr-x  8 root root         160 Oct 25 08:17 disk
@@ -94,7 +68,6 @@ brw-rw----  1 root disk    253，  1 Oct 25 08:17 dm-1
 brw-rw----  1 root disk      8，  0 Oct 25 08:17 sda
 brw-rw----  1 root disk      8，  1 Oct 25 08:17 sda1
 brw-rw----  1 root disk      8，  2 Oct 25 08:17 sda2
-```
 
 这里之所以采用主从两个设备号来标识，是因为系统可能包含多个同类设备，这些设备由同一个驱动程序管理。主设备号用于寻址设备驱动程序，如同上例的 `dm-0` ， `dm-1` 就是归属于同一个驱动程序，而从标号用于区分同一种类的各个不同的设备，值得注意的是如果硬盘分为多个区的话，每个区会有一个对应的设备项。
 
@@ -114,22 +87,22 @@ brw-rw----  1 root disk      8，  2 Oct 25 08:17 sda2
 
 ### 字符设备
 
-字符设备的硬件通常比较简单，而且相关的驱动程序也不难于实现。我们知道，字符设备的 inode 中最初只有打开设备文件这一个操作函数。当我们第一次调用该方法时，它会根据设备号，查找与之对应的驱动程序接下来根据从设备号在驱动程序中查找所有与该设备相关的文件操作函数，最后将这些文件操作函数加入 inode 中。在这个过程中，内核最初为 inode 注入的一般性函数（打开函数）逐渐被与设备特性相关的具体函数所替代。下图展示主设备号为 1 的各个从设备。  
+字符设备的硬件通常比较简单，而且相关的驱动程序也不难于实现。我们知道，字符设备的 inode 中最初只有打开设备文件这一个操作函数。当我们第一次调用该方法时，它会根据设备号，查找与之对应的驱动程序接下来根据从设备号在驱动程序中查找所有与该设备相关的文件操作函数，最后将这些文件操作函数加入 inode 中。在这个过程中，内核最初为 inode 注入的一般性函数（打开函数）逐渐被与设备特性相关的具体函数所替代。下图展示主设备号为 1 的各个从设备。
 
 ![[2fb54b6b-d662-4c97-9f09-851eeba00e57.png|device-primary-no-1]]
 
 device-primary-no-1
 
-  
-有一些设备，我们可以很熟悉，特别是 /dev/null。这里我们无须深入理解每个设备的意义，这里旨在介绍设备操作函数注入的过程。接下来的这张图，展示了根据主从设备号，来找到所有操作函数的过程。  
+
+有一些设备，我们可以很熟悉，特别是 /dev/null。这里我们无须深入理解每个设备的意义，这里旨在介绍设备操作函数注入的过程。接下来的这张图，展示了根据主从设备号，来找到所有操作函数的过程。
 ![[4027ad47-de01-4448-bd8c-bb4c7fc22e70.png|find-device-operations-by-device-no]]
 
 find-device-operations-by-device-no
 
-  
-/dev/null 对应的函数是 null\_fops，其中包括如下函数的指针：
 
-```cpp
+/dev/null 对应的函数是 null_fops，其中包括如下函数的指针：
+
+```java
 static struct file_operations null_fops = {
     .llseek         = null_lseek，
     .read           = read_null，
@@ -138,17 +111,19 @@ static struct file_operations null_fops = {
 };
 ```
 
-至此，虚拟文件已经和设备驱动程序代码之间建立了联系，null\_fops 中对应的函数就代表了驱动程序的函数指针。当我们通过标准库的读写操作，向内核发送一些系统调用时，最终就会调用上述的这些函数，这些函数的具体实现根据设备而各不相同。/dev/null 这种内存设备，实际上不会与实际的外设交互，其调用的函数由内核实现。
+至此，虚拟文件已经和设备驱动程序代码之间建立了联系，null_fops 中对应的函数就代表了驱动程序的函数指针。当我们通过标准库的读写操作，向内核发送一些系统调用时，最终就会调用上述的这些函数，这些函数的具体实现根据设备而各不相同。/dev/null 这种内存设备，实际上不会与实际的外设交互，其调用的函数由内核实现。
 
-```cpp
 static ssize_t read_null(struct file * file，char __user * buf，
                             size_t count，loff_t *ppos)
+```java
 {
     return 0;
 }
 
 static ssize_t write_null(struct file * file，const char __user * buf，
+```
                             size_t count，loff_t *ppos)
+```java
 {
     return count;
 }
@@ -168,15 +143,15 @@ static ssize_t write_null(struct file * file，const char __user * buf，
 
 块设备层不仅负责寻址块设备，为了提升块设备的性能，它还会负责预读部分，内核判断稍后应用可能会需要使用某些数据时，会提前将这部分数据读入内存，缓存起来。此外，块设备层还会保存经常用到的数据，以免重复地从硬件中读取。
 
-块设备层是介于虚拟文件系统与设备驱动之间的一层，下图就展示块设备层的各个成员。这里我们先不讨论关于缓存的内容，那部分我们会在后面的章节介绍。用户空间对设备文件的读写操作，最终会通过 inode 的操作函数指针指向块设备层的内核代码，在这里 I/O 操作并不是立即就得到处理的，而是转化为一个个读写 Request 保存在请求队列中，每个硬盘都有一个与之对应的请求队列，I/O 调度器会负责重排合并 I/O 请求，来让相邻的块操作尽可能一起进行处理，这样就能减少频繁寻址的时间消耗。当调度器觉得是时候进行实际的块设备访问时，就会结合通用磁盘中保存的分区数据以及底层驱动程序的函数指针，来发起实际的 I/O 操作。  
-![[a879ea8f-9c25-43f2-8bc1-64eb45210f33 1.png|block-io]]  
-这里我们着重介绍请求队列相关的内容，因为它是整个块设备层的核心。请求队列中的每个请求都有指明自己所要访问的数据所处的扇区，要传输的扇区数以及最关键的传输内容所处的内存页，这些要传输的内存页是通过 BIO 实例组织的，一个请求中可以包含多个 BIO 实例，它们以链表的形式组织，每个 BIO 实例中又包含了多个内存页。这些页用于从设备接收数据，或者向设备发送数据。  
+块设备层是介于虚拟文件系统与设备驱动之间的一层，下图就展示块设备层的各个成员。这里我们先不讨论关于缓存的内容，那部分我们会在后面的章节介绍。用户空间对设备文件的读写操作，最终会通过 inode 的操作函数指针指向块设备层的内核代码，在这里 I/O 操作并不是立即就得到处理的，而是转化为一个个读写 Request 保存在请求队列中，每个硬盘都有一个与之对应的请求队列，I/O 调度器会负责重排合并 I/O 请求，来让相邻的块操作尽可能一起进行处理，这样就能减少频繁寻址的时间消耗。当调度器觉得是时候进行实际的块设备访问时，就会结合通用磁盘中保存的分区数据以及底层驱动程序的函数指针，来发起实际的 I/O 操作。
+![[a879ea8f-9c25-43f2-8bc1-64eb45210f33 1.png|block-io]]
+这里我们着重介绍请求队列相关的内容，因为它是整个块设备层的核心。请求队列中的每个请求都有指明自己所要访问的数据所处的扇区，要传输的扇区数以及最关键的传输内容所处的内存页，这些要传输的内存页是通过 BIO 实例组织的，一个请求中可以包含多个 BIO 实例，它们以链表的形式组织，每个 BIO 实例中又包含了多个内存页。这些页用于从设备接收数据，或者向设备发送数据。
 
 ![[0c148067-fb0a-4dd5-b2cb-f3539019ab8e.png|bio-structure]]
 
 bio-structure
 
-  
+
 当内核需要提交一个 I/O 请求时，会创建一个 BIO 实例，然后将其嵌入到一个请求中，并将请求置于请求队列，随后内核会处理请求队列中的请求，如果有相邻的请求，则将它们合并成一个请求，此外还会按照操作的起始扇区号进行排序，以保证磁盘可以顺序寻址访问，而不至于反复移动磁头。当调度器觉得时机合适时，会真正落实 I/O 操作，通过调用驱动程序的函数，将读写请求发送给磁盘，磁盘处理完数据后会以中断的形式通知内核。
 
 上述的 I/O 调度方案，实际上就是电梯调度器。其主要通过合并和重排来提高磁盘访问的整体效率，但是其有一个缺点就是如果频繁的有新的 I/O 请求加入请求队列，并且这些请求都处于队列的靠近前端的位置时，会导致后端的 I/O 请求一直得不到处理的情况。
@@ -191,16 +166,15 @@ bio-structure
 
 ### 资源分配
 
-在设备驱动与设备之间通信的过程中，主要有两种系统资源被使用 I/O 端口和 I/O 内存。这两种资源的组织方式十分相似，首先资源会被分成很多部分，每一部分对应了一个设备或者总线，这些资源以树形结构组织，树上的每个节点都有一个父节点（USB 控制器插在 PCI 总线上，所以 USB 控制器的父节点就是 PCI 总线），一个父节点可以有多个子节点（PCI 总线可以插入多个 USB 控制器），统一父节点的所有子节点会通过链表联系起来。  
+在设备驱动与设备之间通信的过程中，主要有两种系统资源被使用 I/O 端口和 I/O 内存。这两种资源的组织方式十分相似，首先资源会被分成很多部分，每一部分对应了一个设备或者总线，这些资源以树形结构组织，树上的每个节点都有一个父节点（USB 控制器插在 PCI 总线上，所以 USB 控制器的父节点就是 PCI 总线），一个父节点可以有多个子节点（PCI 总线可以插入多个 USB 控制器），统一父节点的所有子节点会通过链表联系起来。
 
 ![[8778b18b-aebb-4d5d-8c05-5a86f53eacae.png|device-resource-tree]]
 
 device-resource-tree
 
-  
+
 I/O 内存不仅包括与外设通信直接使用的内存区域，还包括系统中可用的物理内存和 ROM 存储器。通过 `cat /proc/iomem` 即可查看内存的分配情况，其中的缩进关系就代表了上述的树形结构关系。
 
-```bash
 cat /proc/iomem
 00000000-00000fff : Reserved
 00001000-0009ffff : System RAM
@@ -240,20 +214,18 @@ cat /proc/iomem
         f2300000-f2303fff : 0000:05:00.0
       f2400000-f24fffff : PCI Bus 0000:04
         f2400000-f2403fff : 0000:04:00.0
-```
 
 在某些总线和处理器上，仅仅为设备分配内存还不行，还需要将设备的地址空间映射到内核地址空间上才能访问设备，这是通过 ioremap 从而适当地设置系统页表实现的。在完成映射之后，内核可以通过该段地址空间直接访问外设。
 
-下图展示了一些常用的访问 I/O 内存的函数，它们和普通内存的操作几乎没有差别。  
+下图展示了一些常用的访问 I/O 内存的函数，它们和普通内存的操作几乎没有差别。
 
 ![[90d0fd66-043d-46df-8535-079a30b1b0f9.png|io-memory-methods]]
 
 io-memory-methods
 
-  
+
 I/O 端口是设备与总线之间通信的流行方法，我们可以通过 `cat /proc/ioports` 来查看 I/O 端口的分配情况。
 
-```bash
 cat /proc/ioports
 0000-0cf7 : PCI Bus 0000:00
   0000-001f : dma1
@@ -273,9 +245,8 @@ cat /proc/ioports
   03f8-03ff : serial
   0400-0403 : ACPI PM1a_EVT_BLK
   0404-0405 : ACPI PM1a_CNT_BLK
-```
 
-在汇编程序层面上，端口的访问必须通过特殊的处理器命令来访问。因此内核提供了一套和 CPU 无关的一套接口来封装底层的差异性。  
+在汇编程序层面上，端口的访问必须通过特殊的处理器命令来访问。因此内核提供了一套和 CPU 无关的一套接口来封装底层的差异性。
 
 ![[255f05a8-75f9-4dc2-a8b0-870e2a84c8d4.png|io-port-methods]]
 
@@ -283,69 +254,37 @@ io-port-methods
 
 ## 参考内容
 
-\[1\]《Linux内核设计与实现》  
-\[2\]《Linux系统编程》  
-\[3\]《深入理解Linux内核》  
-\[4\]《深入Linux内核架构》  
-\[5\] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)  
-\[6\] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)  
-\[7\] [Linux中的物理内存管理 \[一\]](https://zhuanlan.zhihu.com/p/68465952)  
-\[8\] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)  
-\[9\] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)  
-\[10\] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)  
-\[11\] [linux内核学习笔记-struct vm\_area\_struct](https://blog.csdn.net/ywf861029/article/details/6114794)  
-\[12\] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)  
-\[13\] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)  
-\[14\] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)  
-\[15\] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)  
-\[16\] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)  
-\[17\] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)  
-\[18\] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)  
-\[18\] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)  
-\[19\] [页缓存page cache和地址空间address\_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)  
-\[20\] [rocketmq使用的系统参数（dirty\_background\_ration dirty\_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)  
-\[21\] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)  
-\[22\] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)  
-\[23\] [Linux中的内存回收\[一\]](https://zhuanlan.zhihu.com/p/70964195)  
-\[24\] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)  
-\[25\] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)  
-\[26\] [对 jiffies 溢出、回绕及 time\_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)  
-\[27\] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)  
-\[28\] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)  
-\[29\] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)  
-\[30\] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)  
-\[31\] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)  
-\[32\] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)  
-\[33\] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)
-
-END
-
-引言
-
-设备驱动
-
-访问设备
-
-接入文件系统
-
-字符设备
-
-块设备
-
-资源分配
-
-参考内容
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[1]《Linux内核设计与实现》
+[2]《Linux系统编程》
+[3]《深入理解Linux内核》
+[4]《深入Linux内核架构》
+[5] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)
+[6] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)
+[7] [Linux中的物理内存管理 [一]](https://zhuanlan.zhihu.com/p/68465952)
+[8] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)
+[9] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)
+[10] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)
+[11] [linux内核学习笔记-struct vm_area_struct](https://blog.csdn.net/ywf861029/article/details/6114794)
+[12] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)
+[13] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)
+[14] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)
+[15] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)
+[16] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)
+[17] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)
+[18] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)
+[18] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)
+[19] [页缓存page cache和地址空间address_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)
+[20] [rocketmq使用的系统参数（dirty_background_ration dirty_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)
+[21] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)
+[22] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)
+[23] [Linux中的内存回收[一]](https://zhuanlan.zhihu.com/p/70964195)
+[24] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)
+[25] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)
+[26] [对 jiffies 溢出、回绕及 time_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)
+[27] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)
+[28] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)
+[29] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)
+[30] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)
+[31] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)
+[32] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+[33] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)

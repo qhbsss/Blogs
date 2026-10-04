@@ -17,7 +17,7 @@ tags:
 
 我们经常听说 "天下武功，唯快不破"，大概意思是说 "任何一种武功的招数都是有拆招的，唯有速度快，快到对手根本来不及反应，你就将对手KO了，对手没有机会拆招，所以唯快不破"。 那么这与Apache Flink有什么关系呢?Apache Flink是Native Streaming(纯流式)计算引擎，在实时计算场景最关心的就是"快",也就是 "低延时"。
 
-就目前最热的两种流计算引擎Apache Spark和Apache Flink而言，谁最终会成为No1呢?单从 "低延时" 的角度看，Spark是Micro Batching(微批式)模式，\*\*\*延迟Spark能达到0.5~2秒左右，Flink是Native Streaming(纯流式)模式，\*\*\*延时能达到微秒。很显然是相对较晚出道的 Apache Flink 后来者居上。 那么为什么Apache Flink能做到如此之 "快"呢?根本原因是Apache Flink 设计之初就认为 "批是流的特例"，整个系统是Native Streaming设计，每来一条数据都能够触发计算。相对于需要靠时间来积攒数据Micro Batching模式来说，在架构上就已经占据了绝对优势。
+就目前最热的两种流计算引擎Apache Spark和Apache Flink而言，谁最终会成为No1呢?单从 "低延时" 的角度看，Spark是Micro Batching(微批式)模式，***延迟Spark能达到0.5~2秒左右，Flink是Native Streaming(纯流式)模式，***延时能达到微秒。很显然是相对较晚出道的 Apache Flink 后来者居上。 那么为什么Apache Flink能做到如此之 "快"呢?根本原因是Apache Flink 设计之初就认为 "批是流的特例"，整个系统是Native Streaming设计，每来一条数据都能够触发计算。相对于需要靠时间来积攒数据Micro Batching模式来说，在架构上就已经占据了绝对优势。
 
 那么为什么关于流计算会有两种计算模式呢?归其根本是因为对流计算的认知不同，是"流是批的特例" 和 "批是流的特例" 两种不同认知产物。
 
@@ -35,11 +35,11 @@ Native Streaming 计算模式认为 ""批是流的特例"，这个认知更贴�
 
 [![[df3e287cb45ff3e7467e6a9b01279b9b.jpg|Native Streaming 模式]]](https://s4.51cto.com/oss/201809/26/df3e287cb45ff3e7467e6a9b01279b9b.jpg)
 
-很明显Native Streaming模式占据了流计算领域 "低延时" 的核心竞争力，当然Native Streaming模式的实现框架是一个历史先河，\*\*\*个实现Native Streaming模式的流计算框架是\*\*\*个吃螃蟹的人，需要面临更多的挑战，后续章节我们会慢慢介绍。当然Native Streaming模式的框架实现上面很容易实现Micro-Batching和Batching模式的计算，Apache Flink就是Native Streaming计算模式的流批统一的计算引擎。
+很明显Native Streaming模式占据了流计算领域 "低延时" 的核心竞争力，当然Native Streaming模式的实现框架是一个历史先河，***个实现Native Streaming模式的流计算框架是***个吃螃蟹的人，需要面临更多的挑战，后续章节我们会慢慢介绍。当然Native Streaming模式的框架实现上面很容易实现Micro-Batching和Batching模式的计算，Apache Flink就是Native Streaming计算模式的流批统一的计算引擎。
 
 **三、丰富的部署模式**
 
-Apache Flink 按不同的需求支持Local，Cluster，Cloud三种部署模式，同时Apache Flink在部署上能够与其他成熟的生态产品进行\*\*\*集成，如 Cluster模式下可以利用YARN(Yet Another Resource Negotiator)/Mesos集成进行资源管理，在Cloud部署模式下可以与GCE(Google Compute Engine), EC2(Elastic Compute Cloud)进行集成。
+Apache Flink 按不同的需求支持Local，Cluster，Cloud三种部署模式，同时Apache Flink在部署上能够与其他成熟的生态产品进行***集成，如 Cluster模式下可以利用YARN(Yet Another Resource Negotiator)/Mesos集成进行资源管理，在Cloud部署模式下可以与GCE(Google Compute Engine), EC2(Elastic Compute Cloud)进行集成。
 
 **1\. Local 模式**
 
@@ -75,7 +75,7 @@ Apache Flink 按不同的需求支持Local，Cluster，Cloud三种部署模式�
 
 - At Most Once：最多消费一次，这种处理机制会存在数据丢失的可能。
 - At Least Once：最少消费一次，这种处理机制数据不会丢失，但是有可能重复消费。
-- Exactly Once：精确一次，无论何种情况下，数据都只会消费一次，这种机制是对数据准确性的\*\*\*要求，在金融支付，银行账务等领域必须采用这种模式。
+- Exactly Once：精确一次，无论何种情况下，数据都只会消费一次，这种机制是对数据准确性的***要求，在金融支付，银行账务等领域必须采用这种模式。
 
 **3\. Apache Flink的容错机制**
 
@@ -131,7 +131,7 @@ Apache Flink 要做到 End-to-End 的 Exactly Once 相对比较困难，如上�
 Apache Flink 在网络传输层面有两种数据传输模式：
 
 - PIPELINED模式 - 即一条数据被处理完成以后，立刻传输到下一个节点进行处理。
-- BATCH 模式 - 即一条数据被处理完成后，并不会立刻传输到下一个节点进行处理，而是写入到缓存区，如果缓存写满就持久化到本地硬盘上，\*\*\*当所有数据都被处理完成后，才将数据传输到下一个节点进行处理。
+- BATCH 模式 - 即一条数据被处理完成后，并不会立刻传输到下一个节点进行处理，而是写入到缓存区，如果缓存写满就持久化到本地硬盘上，***当所有数据都被处理完成后，才将数据传输到下一个节点进行处理。
 
 对于批任务而言同样可以利用PIPELINED模式，比如我要做count统计，利用PIPELINED模式能拿到更好的执行性能。只有在特殊情况，比如SortMergeJoin，这时候我们需要全局数据排序，才需要BATCH模式。大部分情况流与批可用统一的传输策略，只有特殊情况，才将批看做是流的一个特例继续特殊处理。
 
@@ -172,23 +172,23 @@ Apache Flink 之所以利用ANSI-SQL作为用户统一的开发语言，是因�
 [![[79900c75158228b871228557b4aca837.jpg]]](https://s4.51cto.com/oss/201809/26/79900c75158228b871228557b4aca837.jpg)
 
 - Declarative - 用户只需要表达我想要什么，不用关心如何计算。
-- Optimized - 查询优化器可以为用户的 SQL 生成\*\*\*的执行计划，获取\*\*\*的查询性能。
+- Optimized - 查询优化器可以为用户的 SQL 生成***的执行计划，获取***的查询性能。
 - Understandable - SQL语言被不同领域的人所熟知，用SQL 作为跨团队的开发语言可以很大地提高效率。
 - Stable - SQL 是一个拥有几十年历史的语言，是一个非常稳定的语言，很少有变动。
 - Unify - Apache Flink在引擎上对流与批进行统一，同时又利用ANSI-SQL在语法和语义层面进行统一。
 
-**4\. \*\*\*扩展的优化机制**
+**4\. ***扩展的优化机制**
 
 Apache Flink 利用Apache Calcite对SQL进行解析和优化，Apache Calcite采用Calcite是开源的一套查询引擎，实现了两套Planner：
 
 - HepPlanner - 是RBO(Rule Base Optimize)模式，基于规则的优化。
 - VolcanoPlanner - 是CBO(Cost Base Optimize)模式，基于成本的优化。
 
-Flink SQL会利用Calcite解析优化之后，最终转换为底层的DataStrem和Dataset。上图中 Batch rules和Stream rules可以根据优化需要\*\*\*添加优化规则。
+Flink SQL会利用Calcite解析优化之后，最终转换为底层的DataStrem和Dataset。上图中 Batch rules和Stream rules可以根据优化需要***添加优化规则。
 
 **七、丰富的类库和算子**
 
-Apache Flink 优秀的架构就像一座摩天大厦的地基一样为Apache Flink 持久的生命力打下了良好的基础，为打造Apache Flink丰富的功能生态留下\*\*\*的空间。
+Apache Flink 优秀的架构就像一座摩天大厦的地基一样为Apache Flink 持久的生命力打下了良好的基础，为打造Apache Flink丰富的功能生态留下***的空间。
 
 **1\. 类库**
 
@@ -221,11 +221,11 @@ Apache Flink 提供了丰富的功能算子，对于数据流的处理来讲，�
 
 **4\. 存在的问题**
 
-Apache Flink 目前的架构还存在很大的优化空间，比如前面提到的DataStreamAPI和DataSetAPI其实是流与批在API层面不统一的体现，同时看具体实现会发现DataStreamAPI会生成Transformation tree然后生成StreamGraph，\*\*\*生成JobGraph，底层对应StreamTask，但DataSetAPI会形成Operator tree，flink-optimize模块会对Batch Plan进行优化，形成Optimized Plan 后形成JobGraph,\*\*\*形成BatchTask。具体示意如下：
+Apache Flink 目前的架构还存在很大的优化空间，比如前面提到的DataStreamAPI和DataSetAPI其实是流与批在API层面不统一的体现，同时看具体实现会发现DataStreamAPI会生成Transformation tree然后生成StreamGraph，***生成JobGraph，底层对应StreamTask，但DataSetAPI会形成Operator tree，flink-optimize模块会对Batch Plan进行优化，形成Optimized Plan 后形成JobGraph,***形成BatchTask。具体示意如下：
 
 [![[1a6937f70db5e50ade9e43782e164daa.jpg]]](https://s2.51cto.com/oss/201809/26/1a6937f70db5e50ade9e43782e164daa.jpg)
 
-这种情况其实 DataStreamAPI到Runtime 和 DataSetAPI到Runtime的实现上并没有得到\*\*\*程度的统一和复用。在这一点上面Aalibab 对Apache Flink 的增强在架构和实现上都进行了进一步优化。
+这种情况其实 DataStreamAPI到Runtime 和 DataSetAPI到Runtime的实现上并没有得到***程度的统一和复用。在这一点上面Aalibab 对Apache Flink 的增强在架构和实现上都进行了进一步优化。
 
 **八、Alibaba对Apache Flink的增强架构**
 
@@ -254,7 +254,7 @@ Apache Flink执行层是流批统一的设计，在API和算子设计上面我�
 
 **十、小结**
 
-本篇概要的介绍了"批是流的特例"这一设计观点是Apache Flink的"命脉"，它决定了Apache Flink的运行模式是纯流式的，这在实时计算场景的"低延迟"需求上，相对于Micro Batching模式占据了架构的绝对优势，同时概要的向大家介绍了Apache Flink的部署模式，容错处理，引擎的统一性和Apache Flink的架构，\*\*\*和大家分享了Alibaba对Apache Flink的增强架构，以及对开源Apache Flink所作出的优化。
+本篇概要的介绍了"批是流的特例"这一设计观点是Apache Flink的"命脉"，它决定了Apache Flink的运行模式是纯流式的，这在实时计算场景的"低延迟"需求上，相对于Micro Batching模式占据了架构的绝对优势，同时概要的向大家介绍了Apache Flink的部署模式，容错处理，引擎的统一性和Apache Flink的架构，***和大家分享了Alibaba对Apache Flink的增强架构，以及对开源Apache Flink所作出的优化。
 
 本篇没有对具体技术进行详细展开，大家只要对Apache Flink有初步感知，头脑中知道Alibaba对Apache Flink进行了架构优化，增加了众多功能就可以了，至于Apache Flink的具体技术细节和实现原理，以及Alibaba对Apache Flink做了哪些架构优化和增加了哪些功能后续章节会展开介绍!
 

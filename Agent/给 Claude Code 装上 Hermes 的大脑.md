@@ -8,37 +8,13 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-淘天集团
-
-粉丝 3影响力 61
-
-** 7
-
-** 8
-
-** 1
-
-** 原创文章
-
 内部资料
 
-**
 
-[吴彪(春舟)](https://ata.atatech.org/users/11002710798)
 
-5月8日发表5月8日更新303次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
-
-** 分享 **
-
-朗读文章16:25
-
-**
 
 ## 记一次对 AI 编程助手的改造
 
@@ -70,11 +46,13 @@ tags:
 
 翻出来的结果有点出乎意料。Skill 自动改进、记忆自动提取、用户画像——这些功能 Anthropic 已经实现了，代码就在那里，完整的逻辑，完整的 prompt，甚至有单元测试。但它们统一被一套叫 GrowthBook 的 feature flag 系统锁住了，普通用户拿不到。
 
-```typescript
+```javascript
 // src/utils/hooks/skillImprovement.ts
 export function initSkillImprovement(): void {
-  if (
+    if (
+```
     feature('SKILL_IMPROVEMENT') &&
+```java
     getFeatureValue_CACHED_MAY_BE_STALE('tengu_copper_panda', false)
   ) {
     registerPostSamplingHook(createSkillImprovementHook())
@@ -84,13 +62,11 @@ export function initSkillImprovement(): void {
 
 `feature('SKILL_IMPROVEMENT')` 这个调用会去问 GrowthBook 的服务器：你有没有给这个用户开这个功能？答案默认是 no。而解锁的路只给 Anthropic 内部员工留着：
 
-```typescript
 // 只对 USER_TYPE=ant 的员工生效
 if (process.env.USER_TYPE === 'ant') {
   const raw = process.env.CLAUDE_INTERNAL_FC_OVERRIDES
   // 用环境变量强制覆盖 feature flag
 }
-```
 
 所以整件事变得很清晰：不需要移植 Hermes 的代码，只需要把 Claude Code 自己写好的代码解锁。
 
@@ -118,10 +94,10 @@ if (process.env.USER_TYPE === 'ant') {
 
 原代码：
 
-```typescript
 export function initSkillImprovement(): void {
   if (
     feature('SKILL_IMPROVEMENT') &&
+```java
     getFeatureValue_CACHED_MAY_BE_STALE('tengu_copper_panda', false)
   ) {
     registerPostSamplingHook(createSkillImprovementHook())
@@ -131,9 +107,9 @@ export function initSkillImprovement(): void {
 
 改后：
 
-```typescript
+```javascript
 export function initSkillImprovement(): void {
-  registerPostSamplingHook(createSkillImprovementHook())
+    registerPostSamplingHook(createSkillImprovementHook())
 }
 ```
 
@@ -143,7 +119,6 @@ export function initSkillImprovement(): void {
 
 Skill 改进的 prompt 设计得很克制，只找"用户明确表达的偏好"：
 
-```
 Look for:
 - Requests to add, change, or remove steps: "can you also ask me X"
 - Preferences about how steps should work
@@ -152,7 +127,6 @@ Look for:
 Ignore:
 - Routine conversation that doesn't generalize
 - Things the skill already does
-```
 
 这个边界很重要。如果不加限制，每次对话里随口说的话都会写进 Skill，很快就变成一团乱。Anthropic 的工程师在这里做了有意识的取舍。
 
@@ -172,7 +146,6 @@ Ignore:
 
 删掉 `feature('EXTRACT_MEMORIES')` 判断，同时把 `extractMemories` 模块的加载方式从条件 `require` 改成 static import——这步是后来测试时才发现必须做的，原来用 `feature()` 做条件 require 会被 bun 的 dead code elimination 把整个模块砍掉，导致运行时 null 调用崩溃（见后面踩坑记录）。
 
-```
 - const extractMemoriesModule = feature('EXTRACT_MEMORIES')
 
 -   ? require('../services/extractMemories/extractMemories.js')
@@ -195,22 +168,35 @@ Ignore:
 
 +   !toolUseContext.agentId &&
 
+```java
 +   isExtractModeActive()
-
 + ) {
 
 - void extractMemoriesModule!.executeExtractMemories(...)
-
-+ void executeExtractMemories(...)
-```
-
-**第二道门** — `src/memdir/paths.ts` ：
-
-```
-- export function isExtractModeActive(): boolean {
-
++ void executeExtractMemories(...) 
+ 第二道门 — src/memdir/paths.ts： - export function isExtractModeActive(): boolean {
 -   if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_passport_quail', false)) {
-
+-     return false
+-   }
+-   return (
+-     !getIsNonInteractiveSession() ||
+-     getFeatureValue_CACHED_MAY_BE_STALE('tengu_slate_thimble', false)
+-   )
+- }
++ export function isExtractModeActive(): boolean {
++   return !getIsNonInteractiveSession()
++ } 
+ 第三道门 — src/services/extractMemories/extractMemories.ts： - if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_passport_quail', false)) {
+-   if (process.env.USER_TYPE === 'ant' && !hasLoggedGateFailure) {
+-     hasLoggedGateFailure = true
+-     logEvent('tengu_extract_memories_gate_disabled', {})
+-   }
+-   return
+- } 
++ (getFeatureValue_CACHED_MAY_BE_STALE('tengu_bramble_lintel', null) ?? 3) 
+-   return getFeatureValue_CACHED_MAY_BE_STALE('tengu_session_memory', false)
+- }
+```
 -     return false
 
 -   }
@@ -230,11 +216,9 @@ Ignore:
 +   return !getIsNonInteractiveSession()
 
 + }
-```
 
 **第三道门** — `src/services/extractMemories/extractMemories.ts` ：
 
-```
 - if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_passport_quail', false)) {
 
 -   if (process.env.USER_TYPE === 'ant' && !hasLoggedGateFailure) {
@@ -248,17 +232,14 @@ Ignore:
 -   return
 
 - }
-```
 
 ### 提高提取频率
 
 原来的逻辑是"每次 stop 才跑一次提取"，实际上内部有个 throttle 参数 `tengu_bramble_lintel` ，默认值是 1（即每 1 个合格 turn 才提取一次）。改成 3，让它每 3 轮对话提取一次：
 
-```
 - (getFeatureValue_CACHED_MAY_BE_STALE('tengu_bramble_lintel', null) ?? 1)
 
 + (getFeatureValue_CACHED_MAY_BE_STALE('tengu_bramble_lintel', null) ?? 3)
-```
 
 3 是个平衡点——太频繁会在每次短对话后都跑一个后台模型，cost 飙升；太稀疏则失去"实时感知"的意义。Hermes 是每 turn 都跑，退了一步但保留了高频感。
 
@@ -281,7 +262,6 @@ Ignore:
 
 这个功能在代码里叫 `tengu_session_memory` ，同样被 flag 锁住：
 
-```
 - function isSessionMemoryGateEnabled(): boolean {
 
 -   return getFeatureValue_CACHED_MAY_BE_STALE('tengu_session_memory', false)
@@ -293,11 +273,9 @@ Ignore:
 +   return true
 
 + }
-```
 
 SessionMemory 和记忆提取不一样。记忆提取是在对话结束后把"值得长期记住的信息"写入分类文件；SessionMemory 是在对话进行中，每隔一段时间维护一个结构化的 session 摘要，存在 `session-memory/summary.md` 里，格式是固定模板：
 
-```markdown
 # Session Title
 # Current State
 # Task specification
@@ -308,7 +286,6 @@ SessionMemory 和记忆提取不一样。记忆提取是在对话结束后把"�
 # Learnings
 # Key results
 # Worklog
-```
 
 触发条件也有门槛：对话 token 总量需要超过 10000 才初始化，之后每累计 3 次 tool call 更新一次。短对话不会触发。这个文件对跨 session 搜索很有价值，因为它比原始 JSONL 更结构化，信噪比高得多。
 
@@ -336,13 +313,15 @@ Hermes 用了同样的解法：维护两张 FTS5 表，一张普通，一张 tri
 
 ### 核心实现
 
-```python
 def extract_text(content):
     """提取消息内容，处理字符串和 block 数组两种格式。"""
+```java
     if isinstance(content, str):
         return content
     if isinstance(content, list):
+```
         parts = []
+```java
         for block in content:
             if isinstance(block, dict):
                 if block.get("type") == "text":
@@ -357,10 +336,10 @@ def extract_text(content):
 
 增量索引用文件 mtime 做判断，不重复扫描没变过的文件：
 
-```python
 mtime = datetime.fromtimestamp(jsonl_path.stat().st_mtime).isoformat()
 row = conn.execute(
     "SELECT last_indexed FROM sessions WHERE session_id=?", (session_id,)
+```java
 ).fetchone()
 if row and row[0] >= mtime:
     return 0  # 没变，跳过
@@ -370,7 +349,6 @@ if row and row[0] >= mtime:
 
 每次对话结束后，通过 `settings.json` 的 Stop hook 触发索引更新：
 
-```json
 "hooks": {
   "Stop": [
     {
@@ -384,7 +362,6 @@ if row and row[0] >= mtime:
     }
   ]
 }
-```
 
 `&` 让它在后台跑，不阻塞 Claude Code 的响应。
 
@@ -421,7 +398,7 @@ if row and row[0] >= mtime:
 
 `/skillify` 是 Anthropic 内置的一个交互式 Skill 生成工具，被硬编码锁在内部员工账号下：
 
-```typescript
+```javascript
 // src/skills/bundled/skillify.ts
 export function registerSkillifySkill(): void {
   if (process.env.USER_TYPE !== 'ant') {
@@ -433,7 +410,6 @@ export function registerSkillifySkill(): void {
 
 把那个 if 删掉：
 
-```
 - export function registerSkillifySkill(): void {
 
 -   if (process.env.USER_TYPE !== 'ant') {
@@ -447,7 +423,6 @@ export function registerSkillifySkill(): void {
 + export function registerSkillifySkill(): void {
 
 +   registerBundledSkill({
-```
 
 解锁后可以在任意对话末尾调用 `/skillify` ，它会通过多轮 `AskUserQuestion` 交互，把这次对话的完整步骤提炼成 SKILL.md，包括参数定义、成功标准、工具权限等。
 
@@ -463,7 +438,6 @@ export function registerSkillifySkill(): void {
 
 判断 prompt 的核心约束：
 
-```
 决定这个对话是否值得保存为可复用 Skill，标准：
 1. 有清晰的可重复步骤，适用于类似的未来任务
 2. 不和已有的 auto-generated skill 重复
@@ -471,7 +445,6 @@ export function registerSkillifySkill(): void {
 4. 至少有 3 个有意义的步骤
 
 保守策略——不确定就输出 NO
-```
 
 这个"保守策略"很重要。如果模型每次对话都创建 Skill，很快就堆成一堆垃圾。宁可漏掉，不要乱创建。
 
@@ -479,12 +452,12 @@ export function registerSkillifySkill(): void {
 
 在 `src/query/stopHooks.ts` 的 `!isBareMode()` 块里追加：
 
-```typescript
+```javascript
 import { executeAutoSkillify } from '../utils/hooks/autoSkillify.js'
 
 // 在 executeAutoDream 之后追加
 if (!toolUseContext.agentId) {
-  void executeAutoSkillify(stopHookContext, toolUseContext.appendSystemMessage)
+    void executeAutoSkillify(stopHookContext, toolUseContext.appendSystemMessage)
 }
 ```
 
@@ -494,7 +467,6 @@ if (!toolUseContext.agentId) {
 
 写到 `~/.claude/skills/auto-generated/<name>/SKILL.md` ，格式和手写 Skill 一致：
 
-```markdown
 ---
 name: hermes-source-analysis
 description: 分析开源 Agent 框架源码并提取核心设计模式
@@ -515,7 +487,6 @@ when_to_use: Use when analyzing a GitHub repository's architecture. Examples: '�
 
 ### 2. 读取关键文件
 ...
-```
 
 用户可以直接编辑这个文件精修，或者用 `/skillify` 重新走交互式生成流程得到更完整的版本。
 
@@ -527,17 +498,14 @@ when_to_use: Use when analyzing a GitHub repository's architecture. Examples: '�
 
 这个机制在大多数地方是透明的——删掉 if 条件就等于解锁。但 `extractMemories` 的加载方式特殊：它用了条件 require：
 
-```typescript
 const extractMemoriesModule = feature('EXTRACT_MEMORIES')
   ? require('../services/extractMemories/extractMemories.js')
   : null
-```
 
 bun 把 `feature('EXTRACT_MEMORIES')` 替换成 `false` ，整个三元表达式变成 `null` ，同时把 `extractMemories` 模块当死代码一起砍掉——连 `executeExtractMemories` 函数都不在 dist 里了。我们删掉 if 条件之后，调用的还是 null，必然 TypeError，而且因为是 `void` 调用（fire-and-forget）错误被静默吞掉。
 
 解法是改成 static import，让 bun 无论如何都把模块打进 dist：
 
-```
 - const extractMemoriesModule = feature('EXTRACT_MEMORIES')
 
 -   ? require('../services/extractMemories/extractMemories.js')
@@ -545,7 +513,6 @@ bun 把 `feature('EXTRACT_MEMORIES')` 替换成 `false` ，整个三元表达式
 -   : null
 
 + import { executeExtractMemories } from '../services/extractMemories/extractMemories.js'
-```
 
 ---
 
@@ -561,7 +528,7 @@ bun 把 `feature('EXTRACT_MEMORIES')` 替换成 `false` ，整个三元表达式
 
 ### 坑三：JSONL 里 content 字段的格式
 
-Claude Code 的消息格式有两种：content 是字符串（早期简单消息），或者 content 是 block 数组（tool\_use、tool\_result、text 混在一起）。最开始只处理了字符串格式，导致有大量对话的实际内容没有被索引进去。把 `extract_text` 函数改成处理 block 数组之后才正常。
+Claude Code 的消息格式有两种：content 是字符串（早期简单消息），或者 content 是 block 数组（tool_use、tool_result、text 混在一起）。最开始只处理了字符串格式，导致有大量对话的实际内容没有被索引进去。把 `extract_text` 函数改成处理 block 数组之后才正常。
 
 ### 坑四：autoSkillify 的 } 多了一个
 
@@ -580,119 +547,3 @@ Claude Code 的消息格式有两种：content 是字符串（早期简单消息
 对 Anthropic 的工程师来说，这些功能可能还在内测阶段，还没准备好面向所有用户开放。但代码质量很高，设计也很扎实——特别是记忆提取那套"forked agent + ephemeral injection + prompt cache 保护"的组合，每个决策背后都有明确的理由。能读到这个级别的内部实现，比 Hermes 给的那套外部接口学到的东西多得多。
 
 有时候最好的"开源替代品"就在闭源工具的源码里藏着，差的只是一把钥匙。
-
-END
-
-记一次对 AI 编程助手的改造
-
-前言：为什么不直接换 Hermes
-
-关于"源码在本地"这件事
-
-发现：功能已经写好了，只是没开放
-
-整体架构：改了什么，加了什么
-
-第一步：解锁 Skill 自动改进
-
-它做什么
-
-怎么改的
-
-内部实现值得细看
-
-第二步：解锁记忆自动提取
-
-三层锁的结构
-
-提高提取频率
-
-记忆的分类结构
-
-第三步：解锁 SessionMemory
-
-第四步：构建 FTS5 跨 session 搜索
-
-为什么原来没有
-
-数据流
-
-双表设计的原因
-
-核心实现
-
-自动更新：Stop Hook
-
-使用方式
-
-效果对比
-
-和 Hermes 的差距还剩多少
-
-第五步：Skill 自动创建
-
-解锁 /skillify
-
-自动 Skill 创建（autoSkillify.ts）
-
-挂入 stop hook
-
-生成的 Skill 长什么样
-
-技术细节：bun 的 dead code elimination 和条件 require
-
-踩过的坑
-
-坑一：以为只有一层 flag
-
-坑二：CJK 搜索失效
-
-坑三：JSONL 里 content 字段的格式
-
-坑四：autoSkillify 的 } 多了一个
-
-坑五：条件 require 被 bun DCE 删掉
-
-最后
-
-有什么问题，和我聊聊吧～
-
-**
-
-添加收藏
-
-你可以选择分类或直接 取消收藏
-
-**
-
-** 新建分类
-
-未分类
-
-（22）
-
-收藏
-
-业务学习
-
-（7）
-
-收藏
-
-技术学习
-
-（118）
-
-已收藏
-
-新人配置
-
-（38）
-
-收藏
-
-内部资料
-
-INTERNAL
-
-495838

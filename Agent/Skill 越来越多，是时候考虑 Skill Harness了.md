@@ -8,39 +8,13 @@ description:
 tags:
   - "clippings"
 ---
-国际数字商业集团
-
-粉丝 47影响力 1.0k
-
-** 41
-
-** 35
-
-** 4
-
-** 原创文章
-
 内部资料
 
-发表到圈儿
 
-**
 
-[李晓伟(三觉)](https://ata.atatech.org/users/11000011869)
 
-4月7日发表4月7日更新1.9k浏览
 
-** 朗读
 
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章08:37
-
-**
 
 > 本文纯手搓，AI 含量无（有张配图由 Gemini 润色了样式），抛砖引玉，欢迎评论区交流。
 
@@ -50,9 +24,7 @@ Harness Engineering 不在于又造了个新词，而在于把这个之前很多
 
 ## 背景
 
-●
-
-团队在 Aone 开放平台探索和沉淀了不少 AI 提效相关工具，这些 Skill 涵盖广泛的工作环节、适用业务场景迥然不同，具体质量也是千差万别。
+- 团队在 Aone 开放平台探索和沉淀了不少 AI 提效相关工具，这些 Skill 涵盖广泛的工作环节、适用业务场景迥然不同，具体质量也是千差万别。
 
 ![[5a1275ca-544d-48d7-adf7-7113932e2b4d.png]] ●
 
@@ -66,21 +38,13 @@ Harness Engineering 不在于又造了个新词，而在于把这个之前很多
 
 上面几个场景，能看到一些非常显著的问题，或者说是机会点：
 
-●
+- 效率问题贯穿工作方方面面，如何快速从 0 到 1 创建高质量 Skill？
 
-效率问题贯穿工作方方面面，如何快速从 0 到 1 创建高质量 Skill？
+- Skill 规模爆炸后如何找到场景高度匹配、拿来即用且能真正解决实际问题的 Skill？
 
-●
+- 个人在特定场景使用 Skill 发现的新问题、新经验如何快速扩展为团队可复用知识？
 
-Skill 规模爆炸后如何找到场景高度匹配、拿来即用且能真正解决实际问题的 Skill？
-
-●
-
-个人在特定场景使用 Skill 发现的新问题、新经验如何快速扩展为团队可复用知识？
-
-●
-
-随着业务和代码的发展演进，Skill 如何对抗熵增，越用越好用？
+- 随着业务和代码的发展演进，Skill 如何对抗熵增，越用越好用？
 
 要回答这些问题，需要看看业界发生了什么？
 
@@ -94,9 +58,7 @@ Skill 规模爆炸后如何找到场景高度匹配、拿来即用且能真正�
 
 趋势三：针对 Skill 的 Harness 已经形成三个重点方向：
 
-●
-
-自动生成：现在的主流 AI 工具都支持让它把对话的业务流程自动创建 Skill，但需要一些规范（我把 A 厂 Skill 最佳时间包装了一个 [Skill](https://open.aone.alibaba-inc.com/skill/skill-authoring-best-practice) ，增加了一些 checklist，包括前面案例中团队同学增加的 MCP 工具在沙箱外执行约束），或者直接用 A 厂官方的 skill-creator（ [分析文档](https://aliyuque.antfin.com/lkk4c3/xoy73g/lqap2nw46imggyro?singleDoc#%20%E3%80%8Askill-creator%E5%88%86%E6%9E%90%E3%80%8B) ），2.0 版本已经从生成扩展到了评估和持续迭代，这个在各大工具的技能市场已经是标配了。
+- 自动生成：现在的主流 AI 工具都支持让它把对话的业务流程自动创建 Skill，但需要一些规范（我把 A 厂 Skill 最佳时间包装了一个 [Skill](https://open.aone.alibaba-inc.com/skill/skill-authoring-best-practice) ，增加了一些 checklist，包括前面案例中团队同学增加的 MCP 工具在沙箱外执行约束），或者直接用 A 厂官方的 skill-creator（ [分析文档](https://aliyuque.antfin.com/lkk4c3/xoy73g/lqap2nw46imggyro?singleDoc#%20%E3%80%8Askill-creator%E5%88%86%E6%9E%90%E3%80%8B) ），2.0 版本已经从生成扩展到了评估和持续迭代，这个在各大工具的技能市场已经是标配了。
 
 ![[84403112-27d3-450b-8d64-e8c4c2698779.png]] ●
 
@@ -120,25 +82,17 @@ Skill 规模爆炸后如何找到场景高度匹配、拿来即用且能真正�
 
 ## 基于业务场景查找
 
-●
+- 根据自然语言，从团队 Skill 中挑选最合适的推荐，并基于评估质量分做 ranking
 
-根据自然语言，从团队 Skill 中挑选最合适的推荐，并基于评估质量分做 ranking
+- 查询到的 SKILL，可以通过 aone-kit 命令一键批量安装到本地
 
-●
-
-查询到的 SKILL，可以通过 aone-kit 命令一键批量安装到本地
-
-●
-
-提供团队增强版的 find-skill SKILL（ [链接](https://open.aone.alibaba-inc.com/skill/buyer-base-find-skill) ），可以直接在 IDE/Claw/Work/CLI 中集成
+- 提供团队增强版的 find-skill SKILL（ [链接](https://open.aone.alibaba-inc.com/skill/buyer-base-find-skill) ），可以直接在 IDE/Claw/Work/CLI 中集成
 
 ![[c7c2f813-ac08-4404-bc96-03461c027e4d.png]] ![[77f2488d-6aaa-44e9-931b-2ce7d273adc9.png]]
 
 ## Skill 评估&优化
 
-●
-
-指定环境说明、评估模式和 Checklist 跑评估任务，给出整体质量分，Checklist 通过报告以及优化建议（基于 Aone Agent 实现）。
+- 指定环境说明、评估模式和 Checklist 跑评估任务，给出整体质量分，Checklist 通过报告以及优化建议（基于 Aone Agent 实现）。
 
 ![[d0fc0746-7202-4d64-b805-f21f58f84d85.png]] ●
 
@@ -167,31 +121,3 @@ bash buyer-base-memory-hook/install.sh --target aone-copilot # 只为 aone copil
 ## 最后
 
 以上只是当前阶段的小尝试，有了 AI Coding 可以更快验证想法。上周末重新思考，还有一些矫正和迭代，比如 Local First 替代中心化的评估和记忆、比如如何指挥多 Agent 工作而降低 Human 的 Context 切换困扰，这方面正在进行新的实践，后续整理再分享。
-
-END
-
-背景
-
-趋势
-
-思路
-
-特性
-
-基于业务场景查找
-
-Skill 评估&优化
-
-让 Skill 越用越好用
-
-最后
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

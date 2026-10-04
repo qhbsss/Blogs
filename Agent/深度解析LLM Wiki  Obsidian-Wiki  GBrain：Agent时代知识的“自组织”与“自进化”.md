@@ -10,59 +10,21 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 1.4k影响力 14k
 
-** 59
 
-** 68
-
-** 6
-
-** 原创文章
 
 内部资料
 
 AI 辅助创作
 
-发表到圈儿
-
-[ATA之家](https://ata.atatech.org/community/group/45) (首发)
-
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152)
-
-[云智能技术服务圈](https://ata.atatech.org/community/team/619)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-[蚂蚁数据智能](https://ata.atatech.org/community/group/3310)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-[悦读社](https://ata.atatech.org/community/group/3446)
-
-[AI情报社](https://ata.atatech.org/community/group/1000072)
-
-[AI 提效俱乐部](https://ata.atatech.org/community/group/1000096)
-
-**
-
-[姜剑(飞樰)](https://ata.atatech.org/users/11000429133)
 
 10:46发表13 分钟前更新978次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章1:05:37
-
-**
 
 本文是「项目深度解析」系列的第4篇，也欢迎阅读其他几篇：
 
@@ -80,19 +42,15 @@ AI 辅助创作
 
 ## 从“知识堆积”到“结构化记忆”
 
-前段时间，Andrej Karpathy（OpenAI联合创始人）开源了一个名为“LLM-Wiki”的项目\[1\]，核心其是就一个 Markdown文件，目标是指导大模型Agent进行知识的更新与结构化，整个过程如下图所示\[2\]。这个项目的本质，其实是解决了一个长期困扰我们的痛点：如何让 Agent 自动将非结构化的资料转化为 “AI能理解”、“有结构”的知识库。另外，今天还会介绍一个项目叫做“Gbrain”\[3\]，它是由 Y Combinator 总裁兼 CEO Garry Tan 构建的，一个思想和 LLM-Wiki 类似但更工程化一点的知识库项目。
+前段时间，Andrej Karpathy（OpenAI联合创始人）开源了一个名为“LLM-Wiki”的项目[1]，核心其是就一个 Markdown文件，目标是指导大模型Agent进行知识的更新与结构化，整个过程如下图所示[2]。这个项目的本质，其实是解决了一个长期困扰我们的痛点：如何让 Agent 自动将非结构化的资料转化为 “AI能理解”、“有结构”的知识库。另外，今天还会介绍一个项目叫做“Gbrain”[3]，它是由 Y Combinator 总裁兼 CEO Garry Tan 构建的，一个思想和 LLM-Wiki 类似但更工程化一点的知识库项目。
 
 ![](https://oss-ata.alibaba.com/article/2026/04/359398d0-95a9-4bdb-bec0-b1b8d7930570.png)
 
 这背后折射出的，是人类在知识管理上的天然短板。人类其实非常擅长“无脑堆积”知识——看到好的文章就收藏，遇到有用的文档就保存（此刻，可以打开看下你的网页收藏夹、各类APP的收藏夹，以及混乱的电脑桌面文件，是不是有很多已经“落灰”很久了，哈哈哈~）。这说明人类很不擅长“组织”知识。要把这些零散的信息梳理成体系化的结构，不仅耗时耗力，更因为缺乏统一的整理标准而变得很困难，容易拖延，拖着拖着就算了。无论是从个人层面看，收藏信息、文件是真的杂乱；还是从企业层面看，以我在阿里云售后做智能客服相关算法多年的经验，企业级知识库的维护成本更是非常之高，这主要体现在两个维度：
 
-●
+- 时效性与动态维护。知识是有生命周期的，它会随着产品迭代、业务变更而过时或失效。如何精准识别并剔除失效知识，同时无缝接入新知识，本身就是一个巨大的挑战。
 
-时效性与动态维护。知识是有生命周期的，它会随着产品迭代、业务变更而过时或失效。如何精准识别并剔除失效知识，同时无缝接入新知识，本身就是一个巨大的挑战。
-
-●
-
-组织结构的复杂性。知识该如何分类？以我们阿里云的服务领域来看，是按产品维度？问题场景维度？还是按关键词维度？比如，“镜像”主要集中在ECS、轻量应用服务器这些产品，而OpenClaw的相关知识就可能横跨多个产品线，简单的树状层级结构很难刻画这种复杂的网状关系。这种多维度的交叉关联，使得人工构建和维护一个完美的类似知识图谱之类的方案几乎成为不可能完成的任务。
+- 组织结构的复杂性。知识该如何分类？以我们阿里云的服务领域来看，是按产品维度？问题场景维度？还是按关键词维度？比如，“镜像”主要集中在ECS、轻量应用服务器这些产品，而OpenClaw的相关知识就可能横跨多个产品线，简单的树状层级结构很难刻画这种复杂的网状关系。这种多维度的交叉关联，使得人工构建和维护一个完美的类似知识图谱之类的方案几乎成为不可能完成的任务。
 
 而在 AI 时代，尤其是对于 Agent 而言，知识的质量直接决定了效果的上限。正如我在前文中说过的，Context 不仅仅包含当前的对话指令和历史记录，更核心的组成部分是外部注入的知识。这里的“知识”是一个广义的概念，它主要包含经验性知识，也就是完成特定任务所需的策略、步骤和隐性经验；事实性知识，比如领域内的客观信息、文档、FAQ 等静态数据。
 
@@ -126,31 +84,19 @@ GBrain 的创始人 Garry Tan 甚至使用了一个词叫“Skillify”，也有
 
 到了后面就是2023年，随着大模型的兴起，进入到了“RAG时代”，RAG成为主流技术。核心逻辑就是是“前置小模型检索 + 后置大模型生成”。但是，我在之前的文章 [《Agent / Skills / Teams架构演进过程及技术选型之道》](https://ata.atatech.org/articles/11020589335) 里提到过，虽然RAG解决了海量知识的存储和召回问题，但存在几个问题：
 
-●
+- 模型能力断层：前置的检索模型通常比较小，语义理解能力有限，容易漏召或误召关键信息，导致后端大模型“无米之炊”。
 
-模型能力断层：前置的检索模型通常比较小，语义理解能力有限，容易漏召或误召关键信息，导致后端大模型“无米之炊”。
+- 搜索独立性：每次交互都是独立的检索过程。即使上一次成功找到了答案，下一次面对相似问题时，仍需重新搜索。这不仅浪费算力，更带来了结果的不确定性，导致“上次搜得准，下次未必准”。
 
-●
-
-搜索独立性：每次交互都是独立的检索过程。即使上一次成功找到了答案，下一次面对相似问题时，仍需重新搜索。这不仅浪费算力，更带来了结果的不确定性，导致“上次搜得准，下次未必准”。
-
-●
-
-知识未沉淀：为了解决这些问题，在 Agent 时代出现了Agentic RAG，虽然可以通过让大模型反复优化搜索关键词来提升召回率，但这本质上是在用昂贵的推理成本去弥补检索能力的不足，并且且依然无法解决“知识未沉淀”的问题。
+- 知识未沉淀：为了解决这些问题，在 Agent 时代出现了Agentic RAG，虽然可以通过让大模型反复优化搜索关键词来提升召回率，但这本质上是在用昂贵的推理成本去弥补检索能力的不足，并且且依然无法解决“知识未沉淀”的问题。
 
 而相比于RAG，LLM Wiki 和 GBrain 的核心优势就在于“一次学习，永久可用”：
 
-●
+- 消除重复搜索：当新知识被录入并结构化后，它就成为了 Agent 内部知识库的一部分。下次遇到类似问题，Agent 直接读取已整理的知识，无需再次触发外部检索，极大地提升了稳定性和响应速度。
 
-消除重复搜索：当新知识被录入并结构化后，它就成为了 Agent 内部知识库的一部分。下次遇到类似问题，Agent 直接读取已整理的知识，无需再次触发外部检索，极大地提升了稳定性和响应速度。
+- 全链路大模型参与：从知识的解析、结构化到最终的调用，主要由大模型主导。大模型像阅读一本书的目录一样，根据上下文动态决定加载哪部分知识（就是渐进式披露），避免了小模型检索带来的语义偏差。
 
-●
-
-全链路大模型参与：从知识的解析、结构化到最终的调用，主要由大模型主导。大模型像阅读一本书的目录一样，根据上下文动态决定加载哪部分知识（就是渐进式披露），避免了小模型检索带来的语义偏差。
-
-●
-
-知识的累积效应：每一次交互都在丰富知识库，Agent 越用越聪明，形成了真正的“飞轮效应”。
+- 知识的累积效应：每一次交互都在丰富知识库，Agent 越用越聪明，形成了真正的“飞轮效应”。
 
 简而言之，如果说 RAG 是让大模型“带着书本进考场”，那么 Skillify 则是让大模型“把书读透并记成整理后的笔记”。前者依赖临场发挥、现找资料，后者依赖深厚积累、精准定位。对于追求高稳定性、高准确率的复杂 Agent 场景而言，构建这种基于渐进式披露的持久化知识库，或许是现阶段比单纯优化 RAG 检索策略更本质的解法。
 
@@ -170,101 +116,86 @@ This is an idea file, it is designed to be copy pasted to your own LLM Agent (e.
 
 Most people's experience with LLMs and documents looks like RAG: you upload a collection of files, the LLM retrieves relevant chunks at query time, and generates an answer. This works, but the LLM is rediscovering knowledge from scratch on every question. There's no accumulation. Ask a subtle question that requires synthesizing five documents, and the LLM has to find and piece together the relevant fragments every time. Nothing is built up. NotebookLM, ChatGPT file uploads, and most RAG systems work this way.
 
-The idea here is different. Instead of just retrieving from raw documents at query time, the LLM \*\*incrementally builds and maintains a persistent wiki\*\* — a structured, interlinked collection of markdown files that sits between you and the raw sources. When you add a new source, the LLM doesn't just index it for later retrieval. It reads it, extracts the key information, and integrates it into the existing wiki — updating entity pages, revising topic summaries, noting where new data contradicts old claims, strengthening or challenging the evolving synthesis. The knowledge is compiled once and then \*kept current\*, not re-derived on every query.
+The idea here is different. Instead of just retrieving from raw documents at query time, the LLM **incrementally builds and maintains a persistent wiki** — a structured, interlinked collection of markdown files that sits between you and the raw sources. When you add a new source, the LLM doesn't just index it for later retrieval. It reads it, extracts the key information, and integrates it into the existing wiki — updating entity pages, revising topic summaries, noting where new data contradicts old claims, strengthening or challenging the evolving synthesis. The knowledge is compiled once and then *kept current*, not re-derived on every query.
 
-This is the key difference: \*\*the wiki is a persistent, compounding artifact.\*\* The cross-references are already there. The contradictions have already been flagged. The synthesis already reflects everything you've read. The wiki keeps getting richer with every source you add and every question you ask.
+This is the key difference: **the wiki is a persistent, compounding artifact.** The cross-references are already there. The contradictions have already been flagged. The synthesis already reflects everything you've read. The wiki keeps getting richer with every source you add and every question you ask.
 
 You never (or rarely) write the wiki yourself — the LLM writes and maintains all of it. You're in charge of sourcing, exploration, and asking the right questions. The LLM does all the grunt work — the summarizing, cross-referencing, filing, and bookkeeping that makes a knowledge base actually useful over time. In practice, I have the LLM agent open on one side and Obsidian open on the other. The LLM makes edits based on our conversation, and I browse the results in real time — following links, checking the graph view, reading the updated pages. Obsidian is the IDE; the LLM is the programmer; the wiki is the codebase.
 
 This can apply to a lot of different contexts. A few examples:
 
-\- \*\*Personal\*\*: tracking your own goals, health, psychology, self-improvement — filing journal entries, articles, podcast notes, and building up a structured picture of yourself over time.
+\- **Personal**: tracking your own goals, health, psychology, self-improvement — filing journal entries, articles, podcast notes, and building up a structured picture of yourself over time.
 
-\- \*\*Research\*\*: going deep on a topic over weeks or months — reading papers, articles, reports, and incrementally building a comprehensive wiki with an evolving thesis.
+\- **Research**: going deep on a topic over weeks or months — reading papers, articles, reports, and incrementally building a comprehensive wiki with an evolving thesis.
 
-\- \*\*Reading a book\*\*: filing each chapter as you go, building out pages for characters, themes, plot threads, and how they connect. By the end you have a rich companion wiki. Think of fan wikis like \[Tolkien Gateway\](https://tolkiengateway.net/wiki/Main\_Page) — thousands of interlinked pages covering characters, places, events, languages, built by a community of volunteers over years. You could build something like that personally as you read, with the LLM doing all the cross-referencing and maintenance.
+\- **Reading a book**: filing each chapter as you go, building out pages for characters, themes, plot threads, and how they connect. By the end you have a rich companion wiki. Think of fan wikis like [Tolkien Gateway](https://tolkiengateway.net/wiki/Main_Page) — thousands of interlinked pages covering characters, places, events, languages, built by a community of volunteers over years. You could build something like that personally as you read, with the LLM doing all the cross-referencing and maintenance.
 
-\- \*\*Business/team\*\*: an internal wiki maintained by LLMs, fed by Slack threads, meeting transcripts, project documents, customer calls. Possibly with humans in the loop reviewing updates. The wiki stays current because the LLM does the maintenance that no one on the team wants to do.
+\- **Business/team**: an internal wiki maintained by LLMs, fed by Slack threads, meeting transcripts, project documents, customer calls. Possibly with humans in the loop reviewing updates. The wiki stays current because the LLM does the maintenance that no one on the team wants to do.
 
-\- \*\*Competitive analysis, due diligence, trip planning, course notes, hobby deep-dives\*\* — anything where you're accumulating knowledge over time and want it organized rather than scattered.
+\- **Competitive analysis, due diligence, trip planning, course notes, hobby deep-dives** — anything where you're accumulating knowledge over time and want it organized rather than scattered.
 
 \## Architecture
 
 There are three layers:
 
-\*\*Raw sources\*\* — your curated collection of source documents. Articles, papers, images, data files. These are immutable — the LLM reads from them but never modifies them. This is your source of truth.
+**Raw sources** — your curated collection of source documents. Articles, papers, images, data files. These are immutable — the LLM reads from them but never modifies them. This is your source of truth.
 
-\*\*The wiki\*\* — a directory of LLM-generated markdown files. Summaries, entity pages, concept pages, comparisons, an overview, a synthesis. The LLM owns this layer entirely. It creates pages, updates them when new sources arrive, maintains cross-references, and keeps everything consistent. You read it; the LLM writes it.
+**The wiki** — a directory of LLM-generated markdown files. Summaries, entity pages, concept pages, comparisons, an overview, a synthesis. The LLM owns this layer entirely. It creates pages, updates them when new sources arrive, maintains cross-references, and keeps everything consistent. You read it; the LLM writes it.
 
-\*\*The schema\*\* — a document (e.g. CLAUDE.md for Claude Code or AGENTS.md for Codex) that tells the LLM how the wiki is structured, what the conventions are, and what workflows to follow when ingesting sources, answering questions, or maintaining the wiki. This is the key configuration file — it's what makes the LLM a disciplined wiki maintainer rather than a generic chatbot. You and the LLM co-evolve this over time as you figure out what works for your domain.
+**The schema** — a document (e.g. CLAUDE.md for Claude Code or AGENTS.md for Codex) that tells the LLM how the wiki is structured, what the conventions are, and what workflows to follow when ingesting sources, answering questions, or maintaining the wiki. This is the key configuration file — it's what makes the LLM a disciplined wiki maintainer rather than a generic chatbot. You and the LLM co-evolve this over time as you figure out what works for your domain.
 
 \## Operations
 
 LLM Wiki 提出了一个和 RAG 很不同的方法：不是在查询时从原始文档中检索，而是让 LLM 渐进式地构建和维护一个持久的 Wiki——一个结构化的、相互链接的 Markdown 文件集合。这就像编译型语言 vs 解释型语言：知识被“编译”一次，然后保持更新，而非每次查询时重新“解释”。关键的几个区别：
 
-<table><colgroup><col width="178"> <col width="284"> <col width="310"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>对比项</p></td><td rowspan="1" colspan="1"><p>传统 RAG</p></td><td rowspan="1" colspan="1"><p>LLM Wiki</p></td></tr><tr><td rowspan="1" colspan="1"><p>知识检索</p></td><td rowspan="1" colspan="1"><p>每次查询重新检索原始文档</p></td><td rowspan="1" colspan="1"><p>知识被提前编译到 Wiki 中</p></td></tr><tr><td rowspan="1" colspan="1"><p>交叉引用</p></td><td rowspan="1" colspan="1"><p>交叉引用在运行时发现</p></td><td rowspan="1" colspan="1"><p>交叉引用已经建立好了</p></td></tr><tr><td rowspan="1" colspan="1"><p>知识矛盾</p></td><td rowspan="1" colspan="1"><p>矛盾需要每次重新发现</p></td><td rowspan="1" colspan="1"><p>矛盾已经被标记了</p></td></tr><tr><td rowspan="1" colspan="1"><p>综合分析</p></td><td rowspan="1" colspan="1"><p>综合分析每次重新推导</p></td><td rowspan="1" colspan="1"><p>综合分析随着每个来源的添加而丰富</p></td></tr></tbody></table>
+
+| 对比项  | 传统 RAG       | LLM Wiki         |
+| ---- | ------------ | ---------------- |
+| 知识检索 | 每次查询重新检索原始文档 | 知识被提前编译到 Wiki 中  |
+| 交叉引用 | 交叉引用在运行时发现   | 交叉引用已经建立好了       |
+| 知识矛盾 | 矛盾需要每次重新发现   | 矛盾已经被标记了         |
+| 综合分析 | 综合分析每次重新推导   | 综合分析随着每个来源的添加而丰富 |
+
 
 ## LLM Wiki的三层架构和操作过程
 
 他的核心思路其实非常直观且优雅：将所有的知识沉淀为一个纯粹的 Markdown 文件集合体。然后，这个系统主要由三层架构构成：
 
-1.
+1. 原始资料层（Raw Sources）：只读的存档区，存放未经处理的原始输入（如文章、文档、笔记等）。
 
-原始资料层（Raw Sources）：只读的存档区，存放未经处理的原始输入（如文章、文档、笔记等）。
+2. Wiki层（The Wiki）：中间层，按照主题、人物、概念等维度组织起来的结构化知识页面。
 
-2.
-
-Wiki层（The Wiki）：中间层，按照主题、人物、概念等维度组织起来的结构化知识页面。
-
-3.
-
-索引层（The Schema）：顶层逻辑，定义整个系统如何运行、如何更新以及如何校验知识的元指令。
+3. 索引层（The Schema）：顶层逻辑，定义整个系统如何运行、如何更新以及如何校验知识的元指令。
 
 LLM Wiki 的重点不在于“大规模摄入知识”，而在于“高质量整理知识”。它不仅仅是一个问答工具，更是一套具备自我维护能力的知识管理体系。其工作流程形成了一个完整的闭环：
 
-●
+- 摄入（Ingest）：当一个新的知识源被添加时，LLM Wiki 不会简单存入文件夹，而是执行深度处理：LLM 阅读原始资料，提取关键要点，生成摘要页面，并自动更新全局索引及相关实体页面。值得注意的是，一个单一来源往往能联动更新 10-15 个相关 Wiki 页面。这种在摄入阶段就完成知识深度关联与重组的能力，正是其区别于传统 RAG “只存不整”的关键所在。
 
-摄入（Ingest）：当一个新的知识源被添加时，LLM Wiki 不会简单存入文件夹，而是执行深度处理：LLM 阅读原始资料，提取关键要点，生成摘要页面，并自动更新全局索引及相关实体页面。值得注意的是，一个单一来源往往能联动更新 10-15 个相关 Wiki 页面。这种在摄入阶段就完成知识深度关联与重组的能力，正是其区别于传统 RAG “只存不整”的关键所在。
+- 查询（Query）：用户提问时，LLM 像专家一样工作：先定位相关 Wiki 页面，阅读后综合出带引用的答案。更精妙的是，如果问答产生了新洞察，系统可将高质量答案归档为新页面。这意味着，你的每一次探索都在为知识库做增量贡献，实现了知识的自我累积与反哺，让 Agent 越用越聪明。
 
-●
-
-查询（Query）：用户提问时，LLM 像专家一样工作：先定位相关 Wiki 页面，阅读后综合出带引用的答案。更精妙的是，如果问答产生了新洞察，系统可将高质量答案归档为新页面。这意味着，你的每一次探索都在为知识库做增量贡献，实现了知识的自我累积与反哺，让 Agent 越用越聪明。
-
-●
-
-维护（Lint）：为防止知识库杂乱，LLM Wiki 引入了类似代码静态检查的“Lint”机制，定期让 LLM进行健康检查：识别事实矛盾、清理过时声明、发现无入链的“孤儿页面”以及补全缺失的交叉引用。通过这三种操作，LLM Wiki 构建了一个具备自我进化能力的知识操作系统。
+- 维护（Lint）：为防止知识库杂乱，LLM Wiki 引入了类似代码静态检查的“Lint”机制，定期让 LLM进行健康检查：识别事实矛盾、清理过时声明、发现无入链的“孤儿页面”以及补全缺失的交叉引用。通过这三种操作，LLM Wiki 构建了一个具备自我进化能力的知识操作系统。
 
 LLM Wiki 还设计了两个特殊的 Markdown 文件来帮助导航：
 
-●
+- index.md（面向内容）：Wiki 中所有页面的目录，按类别组织。LLM 回答查询时先读索引找到相关页面。在中等规模（约 100 个来源、数百个页面）下效果比较好。
 
-index.md（面向内容）：Wiki 中所有页面的目录，按类别组织。LLM 回答查询时先读索引找到相关页面。在中等规模（约 100 个来源、数百个页面）下效果比较好。
-
-●
-
-log.md（面向时间）：什么时候发生了什么的追加记录。给 Wiki 一个演化时间线。
+- log.md（面向时间）：什么时候发生了什么的追加记录。给 Wiki 一个演化时间线。
 
 为什么这种模式有效？维护知识库的繁琐部分不是阅读或思考，其实是“记账”。更新交叉引用、保持摘要最新、注意新数据何时与旧声明矛盾、维护数十个页面的一致性。人类放弃 Wiki 是因为维护负担增长得比价值更快。但是 LLM 并不会觉得无聊，也不会忘记更新交叉引用，可以一次性处理 15 个文件。Wiki 保持维护的状态，是因为维护成本接近零。人类的工作是策划来源、引导分析、提出好问题、思考意义。LLM 的工作是处理一切其他的事情。并且这种设计的最大优势在于透明性与可解释性。Markdown 格式是人类可读、可编辑、可审查且易于迁移的。你可以随时打开文件查看 Agent “记住”了什么，甚至手动修正错误的知识。
 
 ## Obsidian-Wiki：从想法到系统的工程化实现
 
-LLM Wiki 其实就只是一个 Markdown 文件，其实是一篇思想文章，把这个理念扔给 Agent，主要是交给你的 Agent 来帮你实现更多的细节。但是，实际用起来的时候，你会发现人去管理这些知识，如果仅仅是基于原生“文件系统”，其实还是不太方便的，总感觉少了些什么。那么，Karpathy 推荐使用 Obsidian 这个软件来管理，也有一个 Obsidian-Wiki \[4\]。
+LLM Wiki 其实就只是一个 Markdown 文件，其实是一篇思想文章，把这个理念扔给 Agent，主要是交给你的 Agent 来帮你实现更多的细节。但是，实际用起来的时候，你会发现人去管理这些知识，如果仅仅是基于原生“文件系统”，其实还是不太方便的，总感觉少了些什么。那么，Karpathy 推荐使用 Obsidian 这个软件来管理，也有一个 Obsidian-Wiki [4]。
 
 ![](https://oss-ata.alibaba.com/article/2026/04/9ba91fa6-1f97-48f4-b9fe-c77049f9e986.png)
 
 Obsidian-Wiki 是一个基于 Skill 的多 Agent 框架，并且实现了 Andrej Karpathy 的 LLM Wiki 模式，它的核心设计理念是：
 
-●
+- Agent 无关：支持 9+ 种 Agent（比如Claude Code、Cursor、Windsurf、Codex、OpenClaw、Hermes、Gemini CLI、Kiro 等等）
 
-Agent 无关：支持 9+ 种 Agent（比如Claude Code、Cursor、Windsurf、Codex、OpenClaw、Hermes、Gemini CLI、Kiro 等等）
+- Skill 驱动：所有操作通过标准化的 Markdown Skill 文件定义
 
-●
-
-Skill 驱动：所有操作通过标准化的 Markdown Skill 文件定义
-
-●
-
-Obsidian 原生：利用 Obsidian 的 wikilink、图谱视图、Dataview 等功能
+- Obsidian 原生：利用 Obsidian 的 wikilink、图谱视图、Dataview 等功能
 
 ## Obsidian-Wiki的架构增强
 
@@ -272,25 +203,15 @@ Obsidian 原生：利用 Obsidian 的 wikilink、图谱视图、Dataview 等功�
 
 Obsidian-Wiki 相比 LLM-Wiki 在原始的三层架构基础上都做了增强，主要是：
 
-●
+- Delta 追踪（差异追踪）：这是 Obsidian-Wiki 相比LLM-Wiki原始模式最重要的创新之一。使用`.manifest.json` 文件跟踪所有已摄入的知识来源，每个来源用 SHA-256 哈希追踪。当你运行 `wiki-status` 时，系统就会扫描所有来源位置，然后对比 manifest 中的哈希，并将来源分类为：new（新的）、modified（内容变化）、touched（元数据变化）、unchanged（未变）、deleted（已删除）等等。这就意味着系统知道哪些来源需要重新处理，避免重复工作。
 
-Delta 追踪（差异追踪）：这是 Obsidian-Wiki 相比LLM-Wiki原始模式最重要的创新之一。使用`.manifest.json` 文件跟踪所有已摄入的知识来源，每个来源用 SHA-256 哈希追踪。当你运行 `wiki-status` 时，系统就会扫描所有来源位置，然后对比 manifest 中的哈希，并将来源分类为：new（新的）、modified（内容变化）、touched（元数据变化）、unchanged（未变）、deleted（已删除）等等。这就意味着系统知道哪些来源需要重新处理，避免重复工作。
+- 来源可信度边界：这是Obsidian-Wiki 引入了一个关键的安全概念。来源文档被视为不可信的，LLM 永远不应该执行来源中的命令。这防止了通过恶意文档注入指令的攻击（prompt injection through documents）。
 
-●
+- 溯源标记系统：每条知识都标记其来源可靠性，比如 `^[extracted]` 是直接从来源提取； `^[inferred]` 是基于来源推断； `^[ambiguous]` 是存在歧义或多种解释，这基于让人和LLM都能知道每条信息的可信度。
 
-来源可信度边界：这是Obsidian-Wiki 引入了一个关键的安全概念。来源文档被视为不可信的，LLM 永远不应该执行来源中的命令。这防止了通过恶意文档注入指令的攻击（prompt injection through documents）。
+- 可见性标签：支持 `visibility/internal` 和 `visibility/pii` 标签，允许在查询时过滤敏感内容
 
-●
-
-溯源标记系统：每条知识都标记其来源可靠性，比如 `^[extracted]` 是直接从来源提取； `^[inferred]` 是基于来源推断； `^[ambiguous]` 是存在歧义或多种解释，这基于让人和LLM都能知道每条信息的可信度。
-
-●
-
-可见性标签：支持 `visibility/internal` 和 `visibility/pii` 标签，允许在查询时过滤敏感内容
-
-●
-
-hot.md 热缓存：一个 500 字的语义快照，记录最近活动。这为 LLM 提供了快速上下文感知，无需读取完整的 log.md
+- hot.md 热缓存：一个 500 字的语义快照，记录最近活动。这为 LLM 提供了快速上下文感知，无需读取完整的 log.md
 
 ## Obsidian-Wiki的自动知识摄入和图谱化
 
@@ -302,35 +223,21 @@ Obsidian-Wiki 定义了 20+ 个标准化的 Skill，每个都是一个详细的 
 
 这种设计打破了数据孤岛，让不同工具间的记忆得以互通。例如：
 
-●
+- Claude & Codex：可以自动读取 `~/.claude/` 和 `~/.codex/` 下的 CLI 会话（JSONL）、桌面应用会话及 Memory 文件，捕捉编程与对话中的隐性经验。
 
-Claude & Codex：可以自动读取 `~/.claude/` 和 `~/.codex/` 下的 CLI 会话（JSONL）、桌面应用会话及 Memory 文件，捕捉编程与对话中的隐性经验。
-
-●
-
-OpenClaw & Hermes Agent：深度集成各家生态，优先解析 `MEMORY.md` 、 `DREAMS.md` 等高价值长期记忆文件，其次才是每日笔记和会话转录。
+- OpenClaw & Hermes Agent：深度集成各家生态，优先解析 `MEMORY.md` 、 `DREAMS.md` 等高价值长期记忆文件，其次才是每日笔记和会话转录。
 
 并且，这些知识的处理流程非常严谨且高效：
 
-●
+- 增量扫描：仅计算与上次摄取的差异，避免重复处理。
 
-增量扫描：仅计算与上次摄取的差异，避免重复处理。
+- 优先级解析：遵循 `Memory 文件 > 近期笔记 > 会话记录` 的权重，确保核心认知优先入库。
 
-●
+- 隐私过滤：自动剔除 API Key、密码等敏感信息，保障数据安全。
 
-优先级解析：遵循 `Memory 文件 > 近期笔记 > 会话记录` 的权重，确保核心认知优先入库。
+- 主题聚类：不按时间或会话拆分，而是按语义主题进行重组，打破线性记录的局限。
 
-●
-
-隐私过滤：自动剔除 API Key、密码等敏感信息，保障数据安全。
-
-●
-
-主题聚类：不按时间或会话拆分，而是按语义主题进行重组，打破线性记录的局限。
-
-●
-
-蒸馏沉淀：最终将清洗后的信息蒸馏为标准的 Wiki 页面。
+- 蒸馏沉淀：最终将清洗后的信息蒸馏为标准的 Wiki 页面。
 
 ### 知识图谱Skills
 
@@ -344,47 +251,27 @@ OpenClaw & Hermes Agent：深度集成各家生态，优先解析 `MEMORY.md` �
 
 在理解了 LLM Wiki 和 Obsidian-Wiki 的核心机制后，我们需要清醒地认识到它的“能力边界”。它并不是万能的神器，而是在特定场景下极具威力的工具，比如所适合的场景有：
 
-●
+- 个人深度研究：适合需要长期跟踪、渐进式构建知识体系的主题研究。你可以像写书一样，随着研究的深入不断补充和修正章节。
 
-个人深度研究：适合需要长期跟踪、渐进式构建知识体系的主题研究。你可以像写书一样，随着研究的深入不断补充和修正章节。
+- 结构化读书笔记：为每一本好书建立一个专属的伴侣 Wiki，将书中的概念、人物、观点拆解并关联，形成可复用的知识资产。
 
-●
+- 项目知识管理（PKM）：跟踪技术决策日志（ADR）、架构演变路径以及团队的经验教训（Post-mortem），让项目历史变得可追溯、可查询。
 
-结构化读书笔记：为每一本好书建立一个专属的伴侣 Wiki，将书中的概念、人物、观点拆解并关联，形成可复用的知识资产。
+- AI Agent 记忆固化：这是其最独特的价值点——从 Claude、Hermes、OpenClaw 等 Agent 的交互历史中自动提取隐性知识，防止“对话即遗忘”。
 
-●
-
-项目知识管理（PKM）：跟踪技术决策日志（ADR）、架构演变路径以及团队的经验教训（Post-mortem），让项目历史变得可追溯、可查询。
-
-●
-
-AI Agent 记忆固化：这是其最独特的价值点——从 Claude、Hermes、OpenClaw 等 Agent 的交互历史中自动提取隐性知识，防止“对话即遗忘”。
-
-●
-
-小型团队内部 Wiki：对于初创团队或小型项目组，由 LLM 维护的低成本知识库，比搭建复杂的 Confluence 或 Notion 更轻量、更灵活。
+- 小型团队内部 Wiki：对于初创团队或小型项目组，由 LLM 维护的低成本知识库，比搭建复杂的 Confluence 或 Notion 更轻量、更灵活。
 
 然而，LLM Wiki 的设计哲学也决定了它的局限性也很强，主要体现在以下几个方面：
 
-1.
+1. 无数据库依赖：纯 Markdown 文件存储意味着搜索主要依赖 `index.md` + `grep` 或 `QMD` 。这在数据量小时速度极快，但缺乏复杂查询能力。
 
-无数据库依赖：纯 Markdown 文件存储意味着搜索主要依赖 `index.md` + `grep` 或 `QMD` 。这在数据量小时速度极快，但缺乏复杂查询能力。
+2. 规模天花板明显：基于 `index.md` 驱动的检索在数百到低千页面时效果极佳，一旦超过这个阈值，目录膨胀会导致模型定位困难，性能显著下降。此时需要引入更强的向量搜索或图数据库基础设施。
 
-2.
+3. 无自动化调度：系统没有内建的 Cron Job 或定时任务机制，所有摄取、Lint 操作都需要用户手动触发或通过外部脚本调用。这对于追求“全自动”的用户来说是一个门槛。
 
-规模天花板明显：基于 `index.md` 驱动的检索在数百到低千页面时效果极佳，一旦超过这个阈值，目录膨胀会导致模型定位困难，性能显著下降。此时需要引入更强的向量搜索或图数据库基础设施。
+4. 弱结构化图谱：虽然 `wikilink` 提供了链接，但它缺乏类型化的边（Typed Edges）。它无法直接表达“A 投资了 B”或“C 工作在 D”这样的语义关系，限制了复杂推理的能力。
 
-3.
-
-无自动化调度：系统没有内建的 Cron Job 或定时任务机制，所有摄取、Lint 操作都需要用户手动触发或通过外部脚本调用。这对于追求“全自动”的用户来说是一个门槛。
-
-4.
-
-弱结构化图谱：虽然 `wikilink` 提供了链接，但它缺乏类型化的边（Typed Edges）。它无法直接表达“A 投资了 B”或“C 工作在 D”这样的语义关系，限制了复杂推理的能力。
-
-5.
-
-非实时实体检测： `cross-linker` 等维护技能需要手动触发，并非 Always-on 状态。这意味着新知识的关联可能存在延迟，无法做到毫秒级的即时响应。
+5. 非实时实体检测： `cross-linker` 等维护技能需要手动触发，并非 Always-on 状态。这意味着新知识的关联可能存在延迟，无法做到毫秒级的即时响应。
 
 总的来说，LLM Wiki 是一个“小而美”的个人/小团队知识操作系统。它在轻量化、透明度和可控性上做到了极致，但在规模化、自动化和复杂语义处理上存在天然瓶颈。随着知识量的积累，Markdown 文件和目录结构会急剧膨胀。当目录变得过于庞大时，模型在海量文件中定位特定信息的难度增加，准确率下降，这类似于传统软件开发中的“Skill 爆炸”问题，当Skill库过大时，检索和调用的效率都会显著降低。为了解决这个规模化的难题，就有了另一种更灵活、更具扩展性的方案应运而生，那就是 GBrain。
 
@@ -402,7 +289,13 @@ GBrain认为最差的Agent系统总是会把错误的工作放在错误的一边
 
 有点抽象哈，实际上，我举个例子大家就懂了，比如让LLM 判断“这条信息是不是应该属于某个人的页面”，这个就要“做什么”，就是“潜在空间”，然后使用代码去确定性地构建交叉验证链接、验证引用格式，这就属于“确定性”。这个是 GBrain 架构中，比较深刻的一个洞察，他们的对比如下：
 
-<table><colgroup><col width="160"> <col width="285"> <col width="303"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>对比</p></td><td rowspan="1" colspan="1"><p>潜在空间（Latent Space）</p></td><td rowspan="1" colspan="1"><p>确定性（Deterministic）</p></td></tr><tr><td rowspan="1" colspan="1"><p>特点</p></td><td rowspan="1" colspan="1"><p>智能——阅读、解释、决策</p></td><td rowspan="1" colspan="1"><p>信任——相同输入总是产生相同输出</p></td></tr><tr><td rowspan="1" colspan="1"><p>适合场景</p></td><td rowspan="1" colspan="1"><p>判断、分析、综合</p></td><td rowspan="1" colspan="1"><p>SQL、计算、链接构建</p></td></tr><tr><td rowspan="1" colspan="1"><p>由谁来做</p></td><td rowspan="1" colspan="1"><p>由 LLM 处理</p></td><td rowspan="1" colspan="1"><p>由代码处理</p></td></tr></tbody></table>
+
+| 对比   | 潜在空间（Latent Space） | 确定性（Deterministic） |
+| ---- | ------------------ | ------------------ |
+| 特点   | 智能——阅读、解释、决策       | 信任——相同输入总是产生相同输出   |
+| 适合场景 | 判断、分析、综合           | SQL、计算、链接构建        |
+| 由谁来做 | 由 LLM 处理           | 由代码处理              |
+
 
 ## 混合检索架构：向量过滤 + 文件披露
 
@@ -418,7 +311,12 @@ GBrain认为最差的Agent系统总是会把错误的工作放在错误的一边
 
 这种设计不仅大幅降低了 Token 消耗，更引导模型遵循“先结论、后证据”的认知路径，显著提升了回答的逻辑性和准确性。相比之下，传统 RAG 往往直接将所有召回片段拼接，容易导致模型陷入细节噪音而忽略全局脉络。GBrain 的这一机制，正是对“渐进式披露”理念在检索环节的完美落地。从效果来看，GBrain 在 240 页富文本语料库的Benchmark上的测试结果如下：
 
-<table><colgroup><col width="155"> <col width="206"> <col width="194"> <col width="175"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>指标</p></td><td rowspan="1" colspan="1"><p>GBrain（带图谱）</p></td><td rowspan="1" colspan="1"><p>仅混合搜索（无图谱）</p></td><td rowspan="1" colspan="1"><p>差距</p></td></tr><tr><td rowspan="1" colspan="1"><p>P@5</p></td><td rowspan="1" colspan="1"><p>49.1%</p></td><td rowspan="1" colspan="1"><p>17.7%</p></td><td rowspan="1" colspan="1"><p>+31.4 pp</p></td></tr><tr><td rowspan="1" colspan="1"><p>R@5</p></td><td rowspan="1" colspan="1"><p>97.9%</p></td><td rowspan="1" colspan="1"><p>—</p></td><td rowspan="1" colspan="1"><p>—</p></td></tr></tbody></table>
+
+| 指标  | GBrain（带图谱） | 仅混合搜索（无图谱） | 差距       |
+| --- | ----------- | ---------- | -------- |
+| P@5 | 49.1%       | 17.7%      | +31.4 pp |
+| R@5 | 97.9%       | —          | —        |
+
 
 这里面，图谱加权的 back-link boost 是带来效果提升的最主要来源，连接良好的实体使得在搜索的排名中更高。那这个图谱具体是怎么做的呢，马上就讲。
 
@@ -430,39 +328,23 @@ GBrain 的另一大核心创新，在于它构建了一个轻量级但具备完�
 
 GBrain 的图谱构建过程像一条自动化的Pipline，分为四个步骤：
 
-1.
+1. 实体抽取（Entity Extraction）：当你发送消息或写入页面时，后台会启动一个轻量级助手，利用正则表达式和关键词模式匹配，从文本中抽取出人名、公司名、会议等关键实体。这个不是传统N的ER（命名实体识别），而是用正则表达式匹配 Markdown 链接和 wikilink（ `[[people/xxx]]` ），用关键词模式匹配关系动词（比如“founded”、“invested in”），而且有个“值不值得建页”的过滤：只给你真正打过交道的实体去建页面，随口提一嘴的不管
 
-实体抽取（Entity Extraction）：当你发送消息或写入页面时，后台会启动一个轻量级助手，利用正则表达式和关键词模式匹配，从文本中抽取出人名、公司名、会议等关键实体。这个不是传统N的ER（命名实体识别），而是用正则表达式匹配 Markdown 链接和 wikilink（ `[[people/xxx]]` ），用关键词模式匹配关系动词（比如“founded”、“invested in”），而且有个“值不值得建页”的过滤：只给你真正打过交道的实体去建页面，随口提一嘴的不管
+2. 页面生成（Page Generation）：为每个识别出的实体自动生成对应的 Markdown 页面（如 `people/xxx.md` 、 `companies/xxx.md` ），作为图谱中的节点。
 
-2.
+3. 关系分类（Relation Classification）：系统通过关键词匹配（而不是通过 AI 模型）判断实体间的关系类型，例如 `works_at` 、 `founded` 、 `invested_in` 、 `advises` 等。这种基于规则的判断虽然简单，但在特定领域内具有极高的准确性和可解释性。
 
-页面生成（Page Generation）：为每个识别出的实体自动生成对应的 Markdown 页面（如 `people/xxx.md` 、 `companies/xxx.md` ），作为图谱中的节点。
-
-3.
-
-关系分类（Relation Classification）：系统通过关键词匹配（而不是通过 AI 模型）判断实体间的关系类型，例如 `works_at` 、 `founded` 、 `invested_in` 、 `advises` 等。这种基于规则的判断虽然简单，但在特定领域内具有极高的准确性和可解释性。
-
-4.
-
-反向链接强制化（Backlink Enforcement）：这是 GBrain 的一个硬性设计——如果 A 提到了 B，系统会自动在 B 的页面上添加一条指向 A 的反向链接。这种双向连接确保了图谱的连通性和完整性，“没得商量”，从而避免了孤立节点的产生。
+4. 反向链接强制化（Backlink Enforcement）：这是 GBrain 的一个硬性设计——如果 A 提到了 B，系统会自动在 B 的页面上添加一条指向 A 的反向链接。这种双向连接确保了图谱的连通性和完整性，“没得商量”，从而避免了孤立节点的产生。
 
 看到这里，很多人可能会质疑：这个实现和以前传统的知识图谱是一回事吗？这一堆 Markdown 链接也算知识图谱吗？事实上，GBrain 是拥有完整的图数据结构的：
 
-●
+- 节点（Nodes）：每个实体页面（人、公司、概念等）即为一个节点。
 
-节点（Nodes）：每个实体页面（人、公司、概念等）即为一个节点。
+- 边（Edges）：存储在专门的 `links` 表中，记录形式为 `(Source, Relation_Type, Target)` ，例如 `(Alice, works_at, Alibaba)` 。
 
-●
+- 关系类型（Relation Types）：支持多种语义化的关系标签，超越了简单的“相关”。
 
-边（Edges）：存储在专门的 `links` 表中，记录形式为 `(Source, Relation_Type, Target)` ，例如 `(Alice, works_at, Alibaba)` 。
-
-●
-
-关系类型（Relation Types）：支持多种语义化的关系标签，超越了简单的“相关”。
-
-●
-
-图遍历（Graph Traversal）：支持多跳查询命令，如 `graph-query <slug> --depth N` ，可以沿着关系链进行深度探索。
+- 图遍历（Graph Traversal）：支持多跳查询命令，如 `graph-query <slug> --depth N` ，可以沿着关系链进行深度探索。
 
 不过，它没有采用 RDF 三元组等学术标准格式（传统基于三元组的知识图谱，维护的复杂度非常高的，其实也不一定适合Agent时代），但其本质完全符合知识图谱的定义：节点 + 有类型的边 + 可遍历性。这可以使得 Agent 不仅能检索文档，还能执行比如“查找所有由张三投资且李四任职的公司”这样的复杂推理任务。这种将非结构化文本转化为结构化图数据的能力，正是 GBrain 区别于传统 RAG 和LLM-Wiki 的核心竞争力所在。
 
@@ -486,160 +368,66 @@ GBrain 的另一个与 LLM-Wiki 不同的点在于对多模态数据的支持。
 
 ## References
 
-\[1\] LLM-Wiki： [https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+[1] LLM-Wiki： [https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
 
-\[2\] AI Maker： [How I Took Karpathy's LLM Wiki and Built an AI-Powered Second Brain in Obsidian](https://aimaker.substack.com/p/llm-wiki-obsidian-knowledge-base-andrej-karphaty)
+[2] AI Maker： [How I Took Karpathy's LLM Wiki and Built an AI-Powered Second Brain in Obsidian](https://aimaker.substack.com/p/llm-wiki-obsidian-knowledge-base-andrej-karphaty)
 
-\[3\] GBrain： [https://github.com/garrytan/gbrain](https://github.com/garrytan/gbrain)
+[3] GBrain： [https://github.com/garrytan/gbrain](https://github.com/garrytan/gbrain)
 
-\[4\] Obsidian-Wiki： [https://github.com/ar9av/obsidian-wiki](https://github.com/ar9av/obsidian-wiki)
+[4] Obsidian-Wiki： [https://github.com/ar9av/obsidian-wiki](https://github.com/ar9av/obsidian-wiki)
 
-\[5\] Medium： [LLM Wiki: From Storing Knowledge to Compiling Understanding](https://medium.com/@ml-point/llm-wiki-from-storing-knowledge-to-compiling-understanding-94f448bfc917)
+[5] Medium： [LLM Wiki: From Storing Knowledge to Compiling Understanding](https://medium.com/@ml-point/llm-wiki-from-storing-knowledge-to-compiling-understanding-94f448bfc917)
 
 📢 欢迎大家来阅读我的AI / Agent / LLM系列文章：
 
 『项目解析』：
 
-●
+- [深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
 
-[深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
+- [深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
 
-●
+- [深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
 
-[深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
-
-●
-
-[深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
-
-●
-
-[Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
+- [Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
 
 『AI方法论』：
 
-●
+- [Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
 
-[Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
+- [如何让Agent更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
 
-●
+- [如何构建和调优高可用性的Agent？浅谈阿里云服务领域Agent构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
 
-[如何让Agent更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
-
-●
-
-[如何构建和调优高可用性的Agent？浅谈阿里云服务领域Agent构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
-
-●
-
-[为什么一定要做Agent智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
+- [为什么一定要做Agent智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
 
 『业务落地』：
 
-●
+- [从Multi-Agent到Skills：云小二Aivis如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
 
-[从Multi-Agent到Skills：云小二Aivis如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
+- [MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
 
-●
+- [阿里云服务领域Agent平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
 
-[MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
+- [基于通义千问的阿里云小智服务领域Agent设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
 
-●
+- [基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
 
-[阿里云服务领域Agent平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
-
-●
-
-[基于通义千问的阿里云小智服务领域Agent设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
-
-●
-
-[基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
-
-●
-
-[基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
+- [基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
 
 『技术干货』：
 
-●
+- [如何最大化发挥大模型LLM的效果？来看看OpenAI的技术分享干货吧](https://ata.atatech.org/articles/11020141673) 🔥
 
-[如何最大化发挥大模型LLM的效果？来看看OpenAI的技术分享干货吧](https://ata.atatech.org/articles/11020141673) 🔥
+- [通义千问2技术报告（Qwen2 Technical Report）解读](https://ata.atatech.org/articles/11020284419) 🔥
 
-●
+- [通义千问技术报告（Qwen Technical Report）解读](https://ata.atatech.org/articles/11020088844) 🔥
 
-[通义千问2技术报告（Qwen2 Technical Report）解读](https://ata.atatech.org/articles/11020284419) 🔥
+- [像打字机一样！大模型流式推理输出与部署的原理与实践](https://ata.atatech.org/articles/11000267465)
 
-●
+- [Temperature和TopP是什么？大模型常用超参数原理介绍与调参实践](https://ata.atatech.org/articles/11000267891)
 
-[通义千问技术报告（Qwen Technical Report）解读](https://ata.atatech.org/articles/11020088844) 🔥
+- [模型太大显存放不下？EAS多卡部署大模型实践](https://ata.atatech.org/articles/11020076048)
 
-●
+- [大模型生成太慢？使用FlashAttention优化LLMs推理性能的EAS部署实践](https://ata.atatech.org/articles/11020093226)
 
-[像打字机一样！大模型流式推理输出与部署的原理与实践](https://ata.atatech.org/articles/11000267465)
-
-●
-
-[Temperature和TopP是什么？大模型常用超参数原理介绍与调参实践](https://ata.atatech.org/articles/11000267891)
-
-●
-
-[模型太大显存放不下？EAS多卡部署大模型实践](https://ata.atatech.org/articles/11020076048)
-
-●
-
-[大模型生成太慢？使用FlashAttention优化LLMs推理性能的EAS部署实践](https://ata.atatech.org/articles/11020093226)
-
-●
-
-[给大模型提速！使用vLLM加速大模型推理部署实践](https://ata.atatech.org/articles/11020197762)
-
-END
-
-背景
-
-从“知识堆积”到“结构化记忆”
-
-Skillify：渐进式披露式的“知识形态”
-
-LLM Wiki：三层架构的知识闭环
-
-LLM Wiki的三层架构和操作过程
-
-Obsidian-Wiki：从想法到系统的工程化实现
-
-Obsidian-Wiki的架构增强
-
-Obsidian-Wiki的自动知识摄入和图谱化
-
-Agent历史摄入Skills
-
-知识图谱Skills
-
-非结构化知识摄入Skills
-
-GBrain：混合检索架构与图谱关系演进
-
-潜在空间 vs 确定性
-
-混合检索架构：向量过滤 + 文件披露
-
-图谱构建与实体关系抽取
-
-图谱构建Pipline：从文本到图结构
-
-多模态支持与闭环的运营
-
-总结
-
-References
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+- [给大模型提速！使用vLLM加速大模型推理部署实践](https://ata.atatech.org/articles/11020197762)

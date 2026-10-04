@@ -10,47 +10,19 @@ tags:
 ---
 蚂蚁集团
 
-粉丝 2影响力 42
 
-** 20
 
-** 26
 
-** 1
 
-** 原创文章
-
-** AI 辅助创作
-
-[本文正在参加《ATA FY26年终总结征文 | 主题一：我的FY26技术进化年》征文活动](https://ata.atatech.org/articles/11020572828)
 
 收录于专题
 
-[AI4All](https://ata.atatech.org/specials/10000003909)
 
-开放访问
 
-**
 
-复制专用链接
 
-**
 
-[王锦策(万襜)](https://ata.atatech.org/users/12002167795)
 
-2月14日发表2月27日更新694次浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章12:16
-
-**
 
 ## 2026 Agent 框架大爆发：深度解析三大框架的架构进化
 
@@ -79,7 +51,6 @@ DeepAgents 的架构分为三层，每一层都解决了一个特定的痛点：
 
 来，直接上代码。这是 DeepAgents 的 Hello World：
 
-```python
 from typing import Literal
 from tavily import TavilyClient
 from deepagents import create_deep_agent
@@ -88,10 +59,12 @@ from deepagents import create_deep_agent
 tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 
 def internet_search(
+```java
     query: str,
     max_results: int = 5,
     topic: Literal["general", "news", "finance"] = "general",
 ):
+```
     """Run a web search"""
     return tavily_client.search(query, max_results=max_results, topic=topic)
 
@@ -116,7 +89,6 @@ result = agent.invoke({
         "content": "What is LangGraph and why is it important for agents?"
     }]
 })
-```
 
 就这么简单？是的。但神奇的是，这个 Agent 会自动做这些事：
 
@@ -141,14 +113,15 @@ LangChain 团队在最近几个月推出了几个重磅功能：
 
 现在支持了多种 Sandbox 后端：
 
-```python
 from langchain_modal import ModalSandbox
 import modal
 
 # 创建一个隔离的沙箱环境
+```java
 app = modal.App.lookup("your-app")
 modal_sandbox = modal.Sandbox.create(app=app)
 backend = ModalSandbox(sandbox=modal_sandbox)
+```
 
 agent = create_deep_agent(
     system_prompt="You are a Python coding assistant with sandbox access.",
@@ -163,7 +136,6 @@ result = agent.invoke({
 })
 
 modal_sandbox.terminate()  # 用完就销毁
-```
 
 支持 Modal、Runloop、Daytona 三种沙箱。这对于需要 Agent 真正写代码、跑测试的场景来说，是革命性的。
 
@@ -171,7 +143,6 @@ modal_sandbox.terminate()  # 用完就销毁
 
 Agent 的一个痛点是"不可控"。DeepAgents 现在可以针对不同工具设置不同级别的控制：
 
-```python
 from deepagents import create_deep_agent
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -197,7 +168,6 @@ agent = create_deep_agent(
     },
     checkpointer=checkpointer
 )
-```
 
 你可以配置：
 
@@ -209,16 +179,17 @@ agent = create_deep_agent(
 
 不再需要自己写正则解析了。DeepAgents 现在直接支持 Pydantic schema，返回结构化数据：
 
-```python
 from pydantic import BaseModel, Field
 from deepagents import create_deep_agent
 
 class WeatherReport(BaseModel):
     """A structured weather report"""
+```java
     location: str = Field(description="Location for this report")
     temperature: float = Field(description="Temperature in Celsius")
     condition: str = Field(description="Weather condition")
     forecast: str = Field(description="24h forecast")
+```
 
 agent = create_deep_agent(
     response_format=WeatherReport,  # 强制返回这个结构
@@ -234,7 +205,6 @@ result = agent.invoke({
 
 print(result["structured_response"])
 # 输出：WeatherReport(location='San Francisco', temperature=18.3, ...)
-```
 
 ---
 
@@ -252,7 +222,6 @@ Google ADK 的核心理念是： **不要重复造轮子** 。它不试图做一
 
 ### 2.2 代码实战：30 秒跑通一个 Agent
 
-```bash
 # 第一步：安装
 pip install google-adk
 
@@ -261,9 +230,7 @@ adk create my_agent
 cd my_agent
 
 # 第三步：定义 Agent
-```
 
-```python
 # my_agent/agent.py
 from google.adk.agents.llm_agent import Agent
 
@@ -282,11 +249,9 @@ root_agent = Agent(
 # 第四步：运行
 adk run my_agent
 # 或者启动 Web UI：adk web --port 8000
-```
 
 就这么简单。但 ADK 的真正威力在于 **多 Agent 协作** ：
 
-```python
 from google.adk.agents.llm_agent import Agent
 
 # 定义子 Agent
@@ -307,7 +272,6 @@ root_agent = Agent(
     instruction="You delegate tasks to researcher and writer.",
     delegation_targets=[researcher, writer]  # 委托目标
 )
-```
 
 ### 2.3 Agent 团队协作流程
 
@@ -323,7 +287,6 @@ Google ADK 虽然发布相对较晚，但进步很快：
 
 企业最担心的是 Agent "失控"。你可以在调用工具之前自行实现参数校验：
 
-```python
 # Hypothetical callback function
 def validate_tool_params(
     callback_context: CallbackContext, # Correct context type
@@ -358,7 +321,6 @@ root_agent = LlmAgent( # Use specific agent type
       # e.g., query_tool_instance
     ]
 )
-```
 
 #### 特性二：企业级部署支持
 
@@ -379,17 +341,17 @@ Claude Agent SDK 的核心定位是： **让 Claude 自主处理代码库和文�
 
 **与传统 Client SDK 的区别：**
 
-```python
 # Client SDK：你需要自己实现工具循环
+```java
 response = client.messages.create(...)
 while response.stop_reason == "tool_use":
     result = your_tool_executor(response.tool_use)
     response = client.messages.create(tool_result=result, **params)
+```
 
 # Agent SDK：Claude 自主处理工具调用
 async for message in query(prompt="Fix the bug in auth.py"):
     print(message)
-```
 
 ### 3.2 内置工具（开箱即用）
 
@@ -409,7 +371,6 @@ Claude Agent SDK 包含丰富的内置工具：
 
 **示例：代码审查 Agent**
 
-```python
 import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions
 
@@ -417,6 +378,7 @@ async def main():
     async for message in query(
         prompt="Find all TODO comments and create a summary",
         options=ClaudeAgentOptions(allowed_tools=["Read", "Glob", "Grep"]),
+```java
     ):
         if hasattr(message, "result"):
             print(message.result)
@@ -434,7 +396,6 @@ asyncio.run(main())
 
 **示例：记录所有文件变更到审计日志**
 
-```python
 import asyncio
 from datetime import datetime
 from claude_agent_sdk import query, ClaudeAgentOptions, HookMatcher
@@ -456,6 +417,7 @@ async def main():
                 ]
             },
         ),
+```java
     ):
         if hasattr(message, "result"):
             print(message.result)
@@ -469,7 +431,6 @@ asyncio.run(main())
 
 **示例：定义一个代码审查 Agent**
 
-```python
 import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions, AgentDefinition
 
@@ -486,6 +447,7 @@ async def main():
                 )
             },
         ),
+```java
     ):
         if hasattr(message, "result"):
             print(message.result)
@@ -499,7 +461,6 @@ asyncio.run(main())
 
 **示例：通过 Playwright 实现浏览器自动化**
 
-```python
 import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions
 
@@ -507,10 +468,13 @@ async def main():
     async for message in query(
         prompt="Open example.com and describe what you see",
         options=ClaudeAgentOptions(
+```java
             mcp_servers={
                 "playwright": {"command": "npx", "args": ["@playwright/mcp@latest"]}
             }
+```
         ),
+```java
     ):
         if hasattr(message, "result"):
             print(message.result)
@@ -531,7 +495,6 @@ asyncio.run(main())
 
 **示例：捕获会话 ID 并恢复**
 
-```python
 import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions
 
@@ -550,6 +513,7 @@ async def main():
     async for message in query(
         prompt="Now find all places that call it",  # "it" = auth module
         options=ClaudeAgentOptions(resume=session_id),
+```java
     ):
         if hasattr(message, "result"):
             print(message.result)
@@ -563,7 +527,6 @@ asyncio.run(main())
 
 **示例：创建只读 Agent**
 
-```python
 import asyncio
 from claude_agent_sdk import query, ClaudeAgentOptions
 
@@ -574,6 +537,7 @@ async def main():
             allowed_tools=["Read", "Glob", "Grep"],
             permission_mode="bypassPermissions"
         ),
+```java
     ):
         if hasattr(message, "result"):
             print(message.result)
@@ -659,85 +623,3 @@ Agent 的时代才刚刚开始。🚀
 - **DeepAgents**: [https://docs.langchain.com/oss/python/deepagents/overview](https://docs.langchain.com/oss/python/deepagents/overview)
 - **Google ADK**: [https://google.github.io/adk-docs/get-started/](https://google.github.io/adk-docs/get-started/)
 - **Claude Agent SDK**: [https://platform.claude.com/docs/en/agent-sdk/overview](https://platform.claude.com/docs/en/agent-sdk/overview)
-
-END
-
-2026 Agent 框架大爆发：深度解析三大框架的架构进化
-
-一、DeepAgents：开箱即用的"数字管家"
-
-1.1 核心架构：三层设计
-
-1.2 代码实战：一个会规划的研究 Agent
-
-1.3 流程图：Agent 的自我进化
-
-1.4 2026 Q1 的三大新特性
-
-特性一：Sandbox 隔离执行
-
-特性二：Human-in-the-loop 细粒度控制
-
-特性三：Structured Output 原生支持
-
-二、Google ADK：多语言的"大厂范儿"
-
-2.1 核心设计：极简主义 + 生态整合
-
-2.2 代码实战：30 秒跑通一个 Agent
-
-2.3 Agent 团队协作流程
-
-2.4 Google ADK 的特性
-
-特性一：安全回调机制
-
-特性二：企业级部署支持
-
-三、Claude Agent SDK：代码库自动化专家
-
-3.1 核心定位
-
-3.2 内置工具（开箱即用）
-
-3.3 核心扩展能力
-
-Hooks：生命周期钩子
-
-Subagents：子 Agent 系统
-
-MCP：外部系统集成
-
-Sessions：会话管理
-
-Permissions：权限控制
-
-3.4 适用场景
-
-四、Agent 研发的发展趋势
-
-趋势一：从"单点智能"到"团队协作"
-
-趋势二：从"玩具"到"生产级"
-
-趋势三：从"Prompt 工程"到"架构工程"
-
-趋势四：从"通用"到"垂直化"
-
-五、怎么选？
-
-参考文档
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

@@ -10,33 +10,15 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 1.3k影响力 14k
 
-** 8
 
-** 24
-
-**
-
-** 原创文章
 
 内部资料
 
-发表到圈儿
 
-[全球技术服务部](https://ata.atatech.org/community/team/66) / [阿里云售后技术](https://ata.atatech.org/community/team/66?cid=292) (首发)
 
-**
 
-[姜剑(飞樰)](https://ata.atatech.org/users/11000429133)
-
-** 字号
-
-** 笔记
-
-** 分享 **
 
 ## 一、前言
 
@@ -58,7 +40,7 @@ NLP领域的发展路径众说纷纭，本文仅简单的记录几个关键节�
 
 那么，最简单的一种Embedding的方法，就是OneHot编码，他的基本原理就是将词(或者字)列入一个词典，假如词的个数有V个（也就是词典的大小），那么每个词编码之后的维数也是V个，因为OneHot是将每个词所在的位置标记为1，其他位置标记为0，实现每个词的唯一编码，示例如下图：
 
-比如将“域名如何续费”这句话做Embedding向量化，“域名”这个词存在词典的第1位（序号0），那么产生的向量中，第一个词的向量就是\[1 0 0 0 0...\]，除了第一位是1，后面都是0。以此类推，可以得到一个句子的向量。但是这种向量维数很高且很稀疏，所以需要后面的各种NLP深度学习技术去做降维。
+比如将“域名如何续费”这句话做Embedding向量化，“域名”这个词存在词典的第1位（序号0），那么产生的向量中，第一个词的向量就是[1 0 0 0 0...]，除了第一位是1，后面都是0。以此类推，可以得到一个句子的向量。但是这种向量维数很高且很稀疏，所以需要后面的各种NLP深度学习技术去做降维。
 
 ## 四、NLP深度学习关键技术
 
@@ -94,42 +76,10 @@ Encoder和Decoder的 **内部结构** 如下图所示：
 
 1\. Tomas Mikolov, et al. Efficient estimation of word representations in vector space. ICLR Workshop, 2013
 
-2\. Peters Matthew E, et al. Deep contextualized word representations\[J\]. ICLR 2018 /NAACL 2018
+2\. Peters Matthew E, et al. Deep contextualized word representations[J]. ICLR 2018 /NAACL 2018
 
-3\. A, Shazeer N, Parmar N, et al. Attention Is All You Need\[C\]. NIPS 2017.
+3\. A, Shazeer N, Parmar N, et al. Attention Is All You Need[C]. NIPS 2017.
 
-4\. Devlin J, et al. Bert: Pre-training of deep bidirectional transformers for language understanding\[C\]. NAACL 2018
+4\. Devlin J, et al. Bert: Pre-training of deep bidirectional transformers for language understanding[C]. NAACL 2018
 
 注：本文中的部分图片来自网络与相关论文。
-
-END
-
-一、前言
-
-二、NLP发展历程
-
-三、深度学习解决NLP问题
-
-四、NLP深度学习关键技术
-
-4.1 Word2Vec
-
-4.2 ELMo
-
-4.3 Transformer
-
-4.4 BERT
-
-五、总结
-
-六、参考文献
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

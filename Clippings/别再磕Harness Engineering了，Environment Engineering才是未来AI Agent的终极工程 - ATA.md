@@ -10,53 +10,23 @@ tags:
 ---
 云智能集团
 
-粉丝 192影响力 4.2k
 
-** 21
 
-** 25
 
-** 11
-
-** 原创文章
 
 AI 辅助创作
 
-发表到圈儿
-
-[ATA之家](https://ata.atatech.org/community/group/45) (首发)
-
-[互联网业界思考](https://ata.atatech.org/community/group/104)
-
-[技术发展](https://ata.atatech.org/community/group/1481)
-
-[翰林院](https://ata.atatech.org/community/group/3390)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-**
 
 ## 别再磕Harness Engineering了，Environment Engineering才是未来AI Agent的终极工程
 
-[袁鹏(鹏赋)](https://ata.atatech.org/users/11001448732)
 
-4月2日发表968次浏览
 
-** 朗读
 
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章29:46
 
 Powered by 通义语音合成
 
 通义语音合成
 
-**
 
 > 三年之内，构建LLM应用的方式经历了四次范式跃迁——Prompt Engineering → Context Engineering → Harness Engineering → Environment Engineering。每一次跃迁都在回答同一个问题： **当模型本身不再是瓶颈时，工程师的价值到底在哪里？**
 
@@ -230,7 +200,7 @@ Anthropic在2025年8月披露了一个严峻的事实：一个威胁行为者利
 
 沙箱技术已经成为关键基础设施：
 
-- \*\*Docker Desktop 4.60+\*\*以微虚拟机（microVM）的隔离级别运行AI编程Agent——超越了容器级别的隔离，每个Agent拥有独立的守护进程、文件系统和网络。
+- **Docker Desktop 4.60+**以微虚拟机（microVM）的隔离级别运行AI编程Agent——超越了容器级别的隔离，每个Agent拥有独立的守护进程、文件系统和网络。
 - **OpenAI的Codex** 是唯一一个默认启用沙箱的主流Agent（使用Landlock + seccomp）。
 - **E2B** 的Agent沙箱会话数从2024年3月的40,000增长到2025年3月的 **1,500万** ，大约一半的财富500强企业在运行Agent工作负载。
 - Kubernetes Agent Sandbox项目提供了CRD来管理基于gVisor或Kata Containers后端的隔离Agent工作负载。
@@ -352,61 +322,3 @@ AI工程范式的进化遵循一个清晰的范围扩张逻辑：
 - Swyx, “Agent Engineering,” Latent.Space, 2025
 - Dario Amodei, Council on Foreign Relations 2025; Davos 2026 remarks
 - Sam Altman, “Reflections,” blog.samaltman.com, January 2025
-
-END
-
-引言：一个被忽视的事实
-
-第一次进化：Prompt Engineering——“说什么”的艺术
-
-起源与核心技术
-
-根本性脆弱
-
-第二次进化：Context Engineering——“模型看见什么”的系统工程
-
-概念的爆发式传播
-
-七大组成要素
-
-与Prompt Engineering的本质区别
-
-第三次进化：Harness Engineering——“系统如何运作”的全栈工程
-
-概念的结晶
-
-核心公式与组件
-
-三层范式的层级关系
-
-第四次进化：Environment Engineering——为什么它才是终极工程
-
-从编排逻辑到运行世界
-
-概念的浮现
-
-为什么Environment Engineering是终极工程：五个核心论证
-
-四层范式的对比全景
-
-思想领袖的声音：从Vibe Coding到Agentic Engineering
-
-前瞻：Environment Engineering的未来形态
-
-Agent-Native Infrastructure的兴起
-
-结语：四层之上，环境为基
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

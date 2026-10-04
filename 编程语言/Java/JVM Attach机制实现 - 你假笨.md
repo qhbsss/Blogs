@@ -13,7 +13,6 @@ tags:
 
   在讲这个之前，我们先来点大家都知道的东西，当我们感觉线程一直卡在某个地方，想知道卡在哪里，首先想到的是进行线程dump，而常用的命令是jstack ，我们就可以看到如下线程栈了
 
-```
 2014-06-18 12:56:14
 Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.51-b03 mixed mode):
 
@@ -73,7 +72,6 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.51-b03 mixed mode):
 "GC task thread#7 (ParallelGC)" prio=5 tid=0x00007fb0c4022800 nid=0x3303 runnable
 
 "VM Periodic Task Thread" prio=5 tid=0x00007fb0c5845000 nid=0x5503 waiting on condition
-```
 
   大家是否注意过上面圈起来的两个线程，”Attach Listener”和“Signal Dispatcher”，这两个线程是我们这次要讲的Attach机制的关键，先偷偷告诉各位，其实Attach Listener这个线程在jvm起来的时候可能并没有的，后面会细说。
 
@@ -83,7 +81,7 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.51-b03 mixed mode):
 
   总结起来说，比如内存dump，线程dump，类信息统计(比如加载的类及大小以及实例个数等)，动态加载agent(使用过btrace的应该不陌生)，动态设置vm flag(但是并不是所有的flag都可以设置的，因为有些flag是在jvm启动过程中使用的，是一次性的)，打印vm flag，获取系统属性等，这些对应的源码(AttachListener.cpp)如下
 
-```
+```java
 static AttachOperationFunctionInfo funcs[] = {
   { "agentProperties",  get_agent_properties },
   { "datadump",         data_dump },
@@ -105,9 +103,9 @@ static AttachOperationFunctionInfo funcs[] = {
 
 ### Attach Listener线程的创建
 
-  前面也提到了，jvm在启动过程中可能并没有启动Attach Listener这个线程，可以通过jvm参数来启动，代码 （Threads::create\_vm）如下：
+  前面也提到了，jvm在启动过程中可能并没有启动Attach Listener这个线程，可以通过jvm参数来启动，代码 （Threads::create_vm）如下：
 
-```
+```java
 if (!DisableAttachMechanism) {
     if (StartAttachListener || AttachListener::init_at_startup()) {
       AttachListener::init();
@@ -120,22 +118,20 @@ bool AttachListener::init_at_startup() {
     return false;
   }
 }
-```
 
   其中DisableAttachMechanism，StartAttachListener ，ReduceSignalUsage均默认是false(globals.hpp)
-
 ```
+
 product(bool, DisableAttachMechanism, false,                              \
-         "Disable mechanism that allows tools to Attach to this VM”)   
+         "Disable mechanism that allows tools to Attach to this VM”)
 product(bool, StartAttachListener, false,                                 \
-          "Always start Attach Listener at VM startup")  
+          "Always start Attach Listener at VM startup")
 product(bool, ReduceSignalUsage, false,                                   \
           "Reduce the use of OS signals in Java and/or the VM”)
-```
 
   因此AttachListener::init()并不会被执行，而Attach Listener线程正是在此方法里创建的
 
-```
+```java
 // Starts the Attach Listener thread
 void AttachListener::init() {
   EXCEPTION_MARK;
@@ -149,21 +145,25 @@ void AttachListener::init() {
   // Initialize thread_oop to put it into the system threadGroup
   Handle thread_group (THREAD, Universe::system_thread_group());
   JavaValue result(T_VOID);
+```
   JavaCalls::call_special(&result, thread_oop,
                        klass,
                        vmSymbols::object_initializer_name(),
                        vmSymbols::threadgroup_string_void_signature(),
+```java
                        thread_group,
                        string,
                        CHECK);
 
   KlassHandle group(THREAD, SystemDictionary::ThreadGroup_klass());
+```
   JavaCalls::call_special(&result,
                         thread_group,
                         group,
                         vmSymbols::add_method_name(),
                         vmSymbols::thread_void_signature(),
                         thread_oop,             // ARG 1
+```java
                         CHECK);
 
   { MutexLocker mu(Threads_lock);
@@ -171,7 +171,9 @@ void AttachListener::init() {
 
     // Check that thread and osthread were created
     if (listener_thread == NULL || listener_thread->osthread() == NULL) {
+```
       vm_exit_during_initialization("java.lang.OutOfMemoryError",
+```java
                                     "unable to create new native thread");
     }
 
@@ -189,7 +191,7 @@ void AttachListener::init() {
 
   下面以jstack的实现来说明触发Attach这一机制进行的过程，jstack命令的实现其实是一个叫做JStack.java的类，查看jstack代码后会走到下面的方法里
 
-```
+```java
 private static void runThreadDump(String pid, String args[]) throws Exception {
         VirtualMachine vm = null;
         try {
@@ -203,7 +205,9 @@ private static void runThreadDump(String pid, String args[]) throws Exception {
             }
             if ((x instanceof AttachNotSupportedException) &&
                 (loadSAClass() != null)) {
+```
                 System.err.println("The -F option can be used when the target " +
+```java
                     "process is not responding");
             }
             System.exit(1);
@@ -226,11 +230,9 @@ private static void runThreadDump(String pid, String args[]) throws Exception {
         in.close();
         vm.detach();
     }
-```
 
   请注意VirtualMachine.Attach(pid);这行代码，触发Attach pid的关键，如果是在linux下会走到下面的构造函数
 
-```
 LinuxVirtualMachine(AttachProvider provider, String vmid)
         throws AttachNotSupportedException, IOException
     {
@@ -282,7 +284,9 @@ LinuxVirtualMachine(AttachProvider provider, String vmid)
                 } while (i <= retries && path == null);
                 if (path == null) {
                     throw new AttachNotSupportedException(
+```
                         "Unable to open socket file: target process not responding " +
+```java
                         "or HotSpot VM not loaded");
                 }
             } finally {
@@ -306,9 +310,9 @@ LinuxVirtualMachine(AttachProvider provider, String vmid)
     }
 ```
 
-  这里要解释下代码了，首先看到调用了createAttachFile方法在目标进程的cwd目录下创建了一个文件/proc/ /cwd/.Attach\_pid ，这个在后面的信号处理过程中会取出来做判断(为了安全)，另外我们知道在linux下线程是用进程实现的，在jvm启动过程中会创建很多线程，比如我们上面的信号线程，也就是会看到很多的pid(应该是LWP)，那么如何找到这个信号处理线程呢，从上面实现来看是找到我们传进去的pid的父进程，然后给它的所有子进程都发送一个SIGQUIT信号，而jvm里除了信号线程，其他线程都设置了对此信号的屏蔽，因此收不到该信号，于是该信号就传给了“Signal Dispatcher”，在传完之后作轮询等待看目标进程是否创建了某个文件，AttachTimeout默认超时时间是5000ms，可通过设置系统变量sun.tools.Attach.AttachTimeout来指定，下面是Signal Dispatcher线程的entry实现
+  这里要解释下代码了，首先看到调用了createAttachFile方法在目标进程的cwd目录下创建了一个文件/proc/ /cwd/.Attach_pid ，这个在后面的信号处理过程中会取出来做判断(为了安全)，另外我们知道在linux下线程是用进程实现的，在jvm启动过程中会创建很多线程，比如我们上面的信号线程，也就是会看到很多的pid(应该是LWP)，那么如何找到这个信号处理线程呢，从上面实现来看是找到我们传进去的pid的父进程，然后给它的所有子进程都发送一个SIGQUIT信号，而jvm里除了信号线程，其他线程都设置了对此信号的屏蔽，因此收不到该信号，于是该信号就传给了“Signal Dispatcher”，在传完之后作轮询等待看目标进程是否创建了某个文件，AttachTimeout默认超时时间是5000ms，可通过设置系统变量sun.tools.Attach.AttachTimeout来指定，下面是Signal Dispatcher线程的entry实现
 
-```
+```java
 static void signal_thread_entry(JavaThread* thread, TRAPS) {
   os::set_priority(thread, NearMaxPriority);
   while (true) {
@@ -352,16 +356,18 @@ static void signal_thread_entry(JavaThread* thread, TRAPS) {
         }
         break;
       }
+```
       ….
+```java
       }
     }
   }
 }
 ```
 
-  当信号是SIGBREAK(在jvm里做了#define，其实就是SIGQUIT)的时候，就会触发 AttachListener::is\_init\_trigger()的执行，
+  当信号是SIGBREAK(在jvm里做了#define，其实就是SIGQUIT)的时候，就会触发 AttachListener::is_init_trigger()的执行，
 
-```
+```java
 bool AttachListener::is_init_trigger() {
   if (init_at_startup() || is_initialized()) {
     return false;               // initialized at startup or already initialized
@@ -372,7 +378,9 @@ bool AttachListener::is_init_trigger() {
   struct stat64 st;
   RESTARTABLE(::stat64(fn, &st), ret);
   if (ret == -1) {
+```
     snprintf(fn, sizeof(fn), "%s/.Attach_pid%d",
+```java
              os::get_temp_directory(), os::current_process_id());
     RESTARTABLE(::stat64(fn, &st), ret);
   }
@@ -388,9 +396,9 @@ bool AttachListener::is_init_trigger() {
 }
 ```
 
-  一开始会判断当前进程目录下是否有个.Attach\_pid 文件（前面提到了），如果没有就会在/tmp下创建一个/tmp/.Attach\_pid ，当那个文件的uid和自己的uid是一致的情况下（为了安全）再调用init方法
+  一开始会判断当前进程目录下是否有个.Attach_pid 文件（前面提到了），如果没有就会在/tmp下创建一个/tmp/.Attach_pid ，当那个文件的uid和自己的uid是一致的情况下（为了安全）再调用init方法
 
-```
+```java
 // Starts the Attach Listener thread
 void AttachListener::init() {
   EXCEPTION_MARK;
@@ -404,21 +412,25 @@ void AttachListener::init() {
   // Initialize thread_oop to put it into the system threadGroup
   Handle thread_group (THREAD, Universe::system_thread_group());
   JavaValue result(T_VOID);
+```
   JavaCalls::call_special(&result, thread_oop,
                        klass,
                        vmSymbols::object_initializer_name(),
                        vmSymbols::threadgroup_string_void_signature(),
+```java
                        thread_group,
                        string,
                        CHECK);
 
   KlassHandle group(THREAD, SystemDictionary::ThreadGroup_klass());
+```
   JavaCalls::call_special(&result,
                         thread_group,
                         group,
                         vmSymbols::add_method_name(),
                         vmSymbols::thread_void_signature(),
                         thread_oop,             // ARG 1
+```java
                         CHECK);
 
   { MutexLocker mu(Threads_lock);
@@ -426,7 +438,9 @@ void AttachListener::init() {
 
     // Check that thread and osthread were created
     if (listener_thread == NULL || listener_thread->osthread() == NULL) {
+```
       vm_exit_during_initialization("java.lang.OutOfMemoryError",
+```java
                                     "unable to create new native thread");
     }
 
@@ -442,7 +456,7 @@ void AttachListener::init() {
 
   此时水落石出了，看到创建了一个线程，并且取名为Attach Listener。再看看其子类LinuxAttachListener的init方法
 
-```
+```java
 int LinuxAttachListener::init() {
   char path[UNIX_PATH_MAX];          // socket file
   char initial_path[UNIX_PATH_MAX];  // socket file during setup
@@ -450,8 +464,10 @@ int LinuxAttachListener::init() {
 
   // register function to cleanup
   ::atexit(listener_cleanup);
+```
 
   int n = snprintf(path, UNIX_PATH_MAX, "%s/.java_pid%d",
+```c
                    os::get_temp_directory(), os::current_process_id());
   if (n < (int)UNIX_PATH_MAX) {
     n = snprintf(initial_path, UNIX_PATH_MAX, "%s.tmp", path);
@@ -497,13 +513,13 @@ int LinuxAttachListener::init() {
 }
 ```
 
-  看到其创建了一个监听套接字，并创建了一个文件/tmp/.java\_pid ，这个文件就是客户端之前一直在轮询等待的文件，随着这个文件的生成，意味着Attach的过程圆满结束了。
+  看到其创建了一个监听套接字，并创建了一个文件/tmp/.java_pid ，这个文件就是客户端之前一直在轮询等待的文件，随着这个文件的生成，意味着Attach的过程圆满结束了。
 
 ### Attach listener接收请求
 
-  看看它的entry实现Attach\_listener\_thread\_entry
+  看看它的entry实现Attach_listener_thread_entry
 
-```
+```java
 static void Attach_listener_thread_entry(JavaThread* thread, TRAPS) {
   os::set_priority(thread, NearMaxPriority);
 
@@ -559,11 +575,11 @@ static void Attach_listener_thread_entry(JavaThread* thread, TRAPS) {
 }
 ```
 
-  从代码来看就是从队列里不断取AttachOperation，然后找到请求命令对应的方法进行执行，比如我们一开始说的jstack命令，找到 { “threaddump”, thread\_dump }的映射关系，然后执行thread\_dump方法
+  从代码来看就是从队列里不断取AttachOperation，然后找到请求命令对应的方法进行执行，比如我们一开始说的jstack命令，找到 { “threaddump”, thread_dump }的映射关系，然后执行thread_dump方法
 
   再来看看其要调用的AttachListener::dequeue()，
 
-```
+```java
 AttachOperation* AttachListener::dequeue() {
   JavaThread* thread = JavaThread::current();
   ThreadBlockInVM tbivm(thread);
@@ -583,7 +599,7 @@ AttachOperation* AttachListener::dequeue() {
 
   最终调用的是LinuxAttachListener::dequeue()，
 
-```
+```c
 LinuxAttachOperation* LinuxAttachListener::dequeue() {
   for (;;) {
     int s;

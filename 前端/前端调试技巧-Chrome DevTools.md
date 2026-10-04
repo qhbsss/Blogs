@@ -10,29 +10,12 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 2影响力 72
 
-** 32
 
-** 34
 
-** 2
 
-发表到圈儿
 
-[数据技术及产品部](https://ata.atatech.org/community/team/288) / [数据平台技术-体验技术](https://ata.atatech.org/community/team/288?cid=2271) (首发)
-
-**
-
-[陈健(辞树)](https://ata.atatech.org/users/11000669717)
-
-** 字号
-
-** 笔记
-
-** 分享 **
 
 从事前端项目的开发工作，难免会遇到一些问题，如何做到快速的定位并解决问题，这就需要一些调试上的技巧，好的调试技巧能够帮你事半功倍的找出问题所在，高效地解决问题，这也是技术经验积累的体现。
 
@@ -84,9 +67,7 @@ Elements 面板左侧部分为元素面板、右侧部分为样式面板。
 
 并在控制台输入代码对其属性进行修改，
 
-```js
 document.getElementsByClassName('application-main ')[0].setAttribute('id', 'main');
-```
 
 回车时，就会自动触发断点，暂停代码执行，并跳到修改属性的代码所在的位置。
 
@@ -151,7 +132,7 @@ Console 面板提供的 tab 项，主要是用于对控制台打印的信息进�
 - 停止和启动分析器
 - 监听 DOM 事件
 
-#### $\_
+#### $_
 
 `$_` 返回最近一次执行的表达式的值。
 
@@ -159,15 +140,15 @@ Console 面板提供的 tab 项，主要是用于对控制台打印的信息进�
 
 `$0` 、 `$1` 、 `$2` 、 `$3` 和 `$4` 命令作为对 Elements 面板中检查的最后 5 个 DOM 元素或 Profiles 面板中选择的最后 5 个 JavaScript 堆对象的历史引用。 `$0` 返回最近选中的元素或 JavaScript 对象， `$1` 返回第二最近选中的元素，依此类推。
 
-#### $(selector, \[startNode\])
+#### $(selector, [startNode])
 
 `$(selector)` 返回指定 CSS 选择器的第一个 DOM 元素的引用。当用一个参数调用时，这个函数是 `document.querySelector()` 函数的别名。
 
-#### (selector, \[startNode\])
+#### (selector, [startNode])
 
 `(selector)` 返回一个数组元素匹配给定的 CSS 选择器。该命令相当于调用 `document.querySelectorAll()` 。
 
-#### $x(path, \[startNode\])
+#### $x(path, [startNode])
 
 `$x(path)` 返回与给定 XPath 表达式匹配的 DOM 元素数组。
 
@@ -215,15 +196,15 @@ XPath（XML Path Language）使用路径表达式来选取 XML 文档中的节�
 
 使用 `unmonitor(function)` 停止监视。
 
-#### monitorEvents(object\[, events\])
+#### monitorEvents(object[, events])
 
 `monitorEvents(object[, events])` 当指定对象上发生指定的事件之一时，该事件对象将在控制台打印。可以指定要监视的单个事件、事件数组或映射到预定义事件集合的通用事件“类型”之一。
 
 `unmonitorEvents(object[, events])` 停止监视指定对象和事件的事件。
 
-#### profile(\[name\])
+#### profile([name])
 
-`profile()` 用一个可选的名称启动一个 JavaScript CPU 分析会话。  
+`profile()` 用一个可选的名称启动一个 JavaScript CPU 分析会话。
 `profileEnd()` 完成 profile 并在 Profile 面板中显示结果。
 
 #### queryObjects(Constructor)
@@ -236,7 +217,7 @@ XPath（XML Path Language）使用路径表达式来选取 XML 文档中的节�
 
 `queryObjects()` 的范围是控制台中当前选择的执行上下文。
 
-#### table(data\[, columns\])
+#### table(data[, columns])
 
 通过传入带可选列标题的数据对象，记录带有表格式的对象数据。
 
@@ -276,7 +257,7 @@ Sources 面板的三部分
 
 代码行断点是最常用的断点类型，如何设置就不做展开了，这里补充一点，也可以使用 `debugger` 实现代码行断点。区别在于，这种方法是在你的代码里设置断点的，而不是在 DevTools 中。
 
-```
+```javascript
 console.log('a');
 console.log('b');
 debugger;
@@ -321,7 +302,7 @@ console.log('c');
 
 > 需要注意的一点：指定的目标函数，需要在当前作用域中，否则会抛出异常。
 
-```js
+```javascript
 (function () {
   function hey() {
     console.log('hey');
@@ -439,32 +420,32 @@ Force script execution
 
 单击请求表的“Name”列下的请求的URL，选择“Timing” tab，可以看到关于每个阶段的时间信息。
 
-- Queueing.  
+- Queueing.
 	当以下情况发生时，浏览器会将请求排队：
 	- 有优先级更高的请求
 		- 对于这个源，已经有 6 个 TCP 连接打开，仅针对 HTTP/1.0 或 HTTP/1.1 连接
 		- 浏览器正在磁盘缓存中短暂分配空间
-- Stalled  
+- Stalled
 	Queueing 中描述的任何原因，请求都可能被 Stalled。
-- DNS Lookup  
+- DNS Lookup
 	浏览器正在解析请求的IP地址。
-- Initial connection  
+- Initial connection
 	浏览器正在建立连接，包括 TCP 握手/重试和协商 SSL。
-- Proxy negotiation  
+- Proxy negotiation
 	浏览器正在与代理服务器协商请求。
-- Request sent  
+- Request sent
 	正在发送请求。
-- ServiceWorker Preparation  
+- ServiceWorker Preparation
 	浏览器正在启动service worker。
-- Request to ServiceWorker  
+- Request to ServiceWorker
 	请求正在被发送到service worker。
-- Waiting(TTFB)  
+- Waiting(TTFB)
 	浏览器正在等待响应的第一个字节。TTFB 表示到第一个字节的时间。这个计时包括一个来回的延迟和服务器准备响应的时间。
-- Content Download  
+- Content Download
 	浏览器正在接收响应。
-- Receiving Push  
+- Receiving Push
 	浏览器正在通过 HTTP/2 服务器推送接收此响应的数据。
-- Reading Push  
+- Reading Push
 	浏览器正在读取先前接收的本地数据。
 
 ### 请求的发起者和依赖项
@@ -488,17 +469,17 @@ DOMContentLoaded and load events in the Network panel
 简单说明这两个事件的区别：
 
 - `DOMContentLoaded` 事件会在初始 HTML 文档完全加载和解析后触发，而不需要等待样式表、图像和子 frame 完成加载。
-	```js
+```javascript
 	window.addEventListener('DOMContentLoaded', (event) => {
 	console.log('DOM fully loaded and parsed');
 	});
-	```
+```
 - `load` 事件应该只用于检测一个完全加载的页面。一个常见的错误是在 `DOMContentLoaded` 更合适的地方使用 `load` 。
-	```js
+```javascript
 	window.addEventListener('load', (event) => {
 	 console.log('page is fully loaded');
 	});
-	```
+```
 
 ## Performance 面板
 
@@ -584,133 +565,3 @@ Memory 面板分析结果中底部展示的一部分就是对象保留树。
 ## 参考链接
 
 - [Chrome 开发者工具](https://developers.google.com/web/tools/chrome-devtools)
-
-END
-
-Elements 面板
-
-Force state 调试特殊状态的元素
-
-Break on 设置 DOM 断点
-
-巧用 setTimeout 与 debugger
-
-Style 面板中的一些小技巧
-
-让 Minified 样式文件可读
-
-快速修改样式面板中的数值
-
-选择要添加规则的样式表
-
-Console 面板
-
-执行表达式
-
-$\_
-
-1, 3, $4
-
-$(selector, \[startNode\])
-
-(selector, \[startNode\])
-
-$x(path, \[startNode\])
-
-clear()
-
-copy(object)
-
-debug(function)
-
-dir(object)
-
-dirxml(object)
-
-inspect(object/function)
-
-getEventListeners(object)
-
-keys(object)
-
-monitor(function)
-
-monitorEvents(object\[, events\])
-
-profile(\[name\])
-
-queryObjects(Constructor)
-
-table(data\[, columns\])
-
-实时表达式
-
-Sources 面板
-
-断点类型
-
-代码行断点
-
-条件代码行断点
-
-DOM 断点
-
-XHR/Fetch 断点
-
-事件监听断点
-
-异常断点
-
-函数断点
-
-快速执行代码到指定行
-
-重启调用堆栈的顶层函数
-
-强制脚本执行
-
-设置脚本黑名单
-
-直接编辑脚本
-
-Snippet
-
-Network 面板
-
-请求处于队列中或停滞状态
-
-Time To First Byte (TTFB) 很慢
-
-内容下载很慢
-
-请求的时间分解
-
-请求的发起者和依赖项
-
-DOMContentLoaded 与 load 事件
-
-Performance 面板
-
-Memory 面板
-
-内存相关术语
-
-对象大小
-
-Shallow Size & Retained Size
-
-对象保留树（Objects retaining tree）
-
-内存泄漏识别
-
-参考链接
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

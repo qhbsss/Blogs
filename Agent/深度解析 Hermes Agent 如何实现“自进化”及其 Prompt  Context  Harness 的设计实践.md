@@ -10,73 +10,27 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 1.3k影响力 13k
 
-** 449
 
-** 618
-
-** 39
-
-** 原创文章
 
 内部资料
 
 AI 辅助创作
 
-[本文正在参加《虾王争霸赛 | OpenClaw 实战经验征集令》征文活动](https://ata.atatech.org/articles/11020603712)
 
-发表到圈儿
 
-[云智能技术服务圈](https://ata.atatech.org/community/team/619) (首发)
 
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152)
 
-[AI 提效俱乐部](https://ata.atatech.org/community/group/1000096)
 
-[AI情报社](https://ata.atatech.org/community/group/1000072)
-
-[悦读社](https://ata.atatech.org/community/group/3446)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-[蚂蚁数据智能](https://ata.atatech.org/community/group/3310)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-[阿里云全球交付中心](https://ata.atatech.org/community/team/479)
-
-[全球技术服务部](https://ata.atatech.org/community/team/66)
-
-[ATA之家](https://ata.atatech.org/community/group/45)
-
-**
-
-[姜剑(飞樰)](https://ata.atatech.org/users/11000429133)
-
-4月13日发表4月13日更新9.7k浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章56:00
-
-**
 
 本文是「项目深度解析」系列的第3篇，也欢迎阅读： [《深度解析OpenClaw》](https://ata.atatech.org/articles/11020608010) [《深度解析Claude Code》](https://ata.atatech.org/articles/11020605711)
 
 ## 背景
 
-不知道大家有没有同感，自从进入2026年，AI这个行业仿佛被开了N倍速，近几个月的技术迭代速度感觉都超过了过去好几年，AI领域真正开始进入“技术爆炸”阶段。 就比如最近，你是否在雪山救过一只狐狸🦊？（额，不对，皮一下，哈哈哈~~~） 你是否刷到了一款名为 Hermes Agent 的项目？ 这不是包包， 是一款由 Nous Research（一家美国的开源人工智能研究机构）在2月底推出的开源Agent项目\[1\]。
+不知道大家有没有同感，自从进入2026年，AI这个行业仿佛被开了N倍速，近几个月的技术迭代速度感觉都超过了过去好几年，AI领域真正开始进入“技术爆炸”阶段。 就比如最近，你是否在雪山救过一只狐狸🦊？（额，不对，皮一下，哈哈哈~~~） 你是否刷到了一款名为 Hermes Agent 的项目？ 这不是包包， 是一款由 Nous Research（一家美国的开源人工智能研究机构）在2月底推出的开源Agent项目[1]。
 
-自从发布以来，Hermes Agent 在 GitHub 上已经狂揽4万颗Star了 \[2\]，而且版本更新的速度超过了许多商业化的Agent产品。那他为什么突然火了起来呢？我们先看下它官网的介绍，翻译成中文就是：
+自从发布以来，Hermes Agent 在 GitHub 上已经狂揽4万颗Star了 [2]，而且版本更新的速度超过了许多商业化的Agent产品。那他为什么突然火了起来呢？我们先看下它官网的介绍，翻译成中文就是：
 
 > “Hermes Agent 并不是一个绑定在集成开发环境（IDE）中的编程Copilot，也不是仅封装了单一API的聊天机器人外壳，它是一个部署在服务器上的自主智能体，能够记住所学内容，并且运行时间越长，能力就越强”。
 
@@ -118,17 +72,11 @@ Hermes Agent之所以可以做到“自进化”，最主要就是依赖于两�
 
 而 Hermes 将 Skill 变成了一种动态的、可进化的资产。它主要实现了：
 
-●
+- 自动生成：Hermes 能够基于自身的Agent运行轨迹（Trajectory），自动生成新的Skill来沉淀。
 
-自动生成：Hermes 能够基于自身的Agent运行轨迹（Trajectory），自动生成新的Skill来沉淀。
+- 持续优化：如果在后续执行新任务时发现了更优的路径或新的边界情况、“踩坑”情况，Hermes 会继续更新完善这个已有的Skill。
 
-●
-
-持续优化：如果在后续执行新任务时发现了更优的路径或新的边界情况、“踩坑”情况，Hermes 会继续更新完善这个已有的Skill。
-
-●
-
-持续积累：随着对话越来越多，相应的 Skill 也会越用越多，Agent 的能力库越来越丰富
+- 持续积累：随着对话越来越多，相应的 Skill 也会越用越多，Agent 的能力库越来越丰富
 
 这样，当 Hermes 下次遇到类似问题的时候，Agent也就不再是从零开始探索，而是直接读取并复用已有的沉淀好的Skill。通过这种方式，Hermes 实现了真正的“吃一堑，长一智”。其他 Agent 可能会无休止地重复相同的错误，而 Hermes 则将每一次执行都转化为成长的“养分”，通过不断沉淀和优化 Skill，建立起属于自己的、动态增长的知识库。这也是 Hermes 在长期运行中，效果能够持续“自进化”的秘诀之一。
 
@@ -140,17 +88,11 @@ Hermes Agent之所以可以做到“自进化”，最主要就是依赖于两�
 
 每当主 Agent 完成对用户的回复后，对于用户而言，交互似乎就此结束。但在后台，Hermes 通过 `_spawn_background_review` 会在后台异步启动一个 审查 Agent。这是一个异步处理机制，系统会立即 Fork 出一个新的轻量级 Agent 实例，专门负责对刚刚结束的对话进行深度复盘。这个后台 Agent 不会干扰前台的用户体验，而是从三个维度对此次交互进行全方位审查的Prompt：
 
-●
+- 记忆审查（ `_MEMORY_REVIEW_PROMPT` ）：这段对话有什么值得记住的经验？判断这段对话中是否蕴含值得长期保留的关键经验或事实，提炼初长期记忆，存入 Agent 的记忆库
 
-记忆审查（ `_MEMORY_REVIEW_PROMPT` ）：这段对话有什么值得记住的经验？判断这段对话中是否蕴含值得长期保留的关键经验或事实，提炼初长期记忆，存入 Agent 的记忆库
+- 技能审查（ `_SKILL_REVIEW_PROMPT` ）：这个任务模式是否值得变成Skill？分析当前的任务解决路径是否具有通用性，是否值得被抽象并固化为一个可复用的Skill
 
-●
-
-技能审查（ `_SKILL_REVIEW_PROMPT` ）：这个任务模式是否值得变成Skill？分析当前的任务解决路径是否具有通用性，是否值得被抽象并固化为一个可复用的Skill
-
-●
-
-综合审查（ `_COMBINED_REVIEW_PROMPT` ）：有什么可以改进的？反思整个执行过程中是否存在优化空间或潜在的错误模式。
+- 综合审查（ `_COMBINED_REVIEW_PROMPT` ）：有什么可以改进的？反思整个执行过程中是否存在优化空间或潜在的错误模式。
 
 这是一种“前台即时响应、后台异步进化”的设计，用户看到的是 Agent 秒回，背后审查 Agent 慢慢整理经验。这种设计就让Hermes 确保了每一次交互不仅解决了当下问题，更为未来的智能化积累了数据沉淀。
 
@@ -158,27 +100,19 @@ Hermes Agent之所以可以做到“自进化”，最主要就是依赖于两�
 
 虽然通过动态生成 Skill 沉淀实现的“外挂式”进化在时效性和可解释性上表现优异 —— 毕竟明文记录的 Markdown 文件允许人工进来进行干预和纠偏，确保 Agent 不会在错误的道路上越走越远 —— 但我们必须承认一个事实：这并不是真正意义上的“自进化”或者“自我学习”。因为无论 Agent 积累了多少 Skill，其底层的“模型权重”始终没变。它只是在不断地检索外部知识库，而非将经验内化为自身的直觉与能力。对于追求极致性能、或在特定垂直领域需要突破通用模型瓶颈的场景来说，这种基于Context Engineering的优化方式依然存在着天花板。
 
-因此，Hermes 引入了第二条更深层、更直接的进化路径：基于强化学习（RL）的模型训练闭环。如果说 Skill 生成是“记笔记”，那么 RL 训练就是“练内功”，它就是在通过改变模型权重，实现真正的能力“自进化”。这个部分比较像Andrej Karpathy之前时间提出的开源项目AutoResearch\[3\]，可以在单GPU上做自动化的RL模型训练，但Hermes相比而言做的更加完善和成熟。
+因此，Hermes 引入了第二条更深层、更直接的进化路径：基于强化学习（RL）的模型训练闭环。如果说 Skill 生成是“记笔记”，那么 RL 训练就是“练内功”，它就是在通过改变模型权重，实现真正的能力“自进化”。这个部分比较像Andrej Karpathy之前时间提出的开源项目AutoResearch[3]，可以在单GPU上做自动化的RL模型训练，但Hermes相比而言做的更加完善和成熟。
 
 Hermes 在项目的 README.md文件中有个说法是 "Research-Ready"（研究就绪）的自动化训练框架。为什么不直接叫“Model Fine-Tuning”或者“Model Training”呢？这就恰恰反映出了 Hermes 的一个细节了，它是构建一套从数据合成、质量筛选、RL训练环境构建、小规模实验、正式训练及自动化评估的一个完整闭环，所以如果只强调是“模型训练”，反而把格局变小了。
 
 整个RL训练过程分阶段来看，主要是下面几个部分：
 
-●
+- 任务定义：用户可以指定具体的训练目标，例如“提升数学推理能力”或“优化特定业务问题”的成功率。系统会根据目标去选择可用的训练数据、Benchmark或者让用户提供相应数据集。
 
-任务定义：用户可以指定具体的训练目标，例如“提升数学推理能力”或“优化特定业务问题”的成功率。系统会根据目标去选择可用的训练数据、Benchmark或者让用户提供相应数据集。
+- 轨迹捕获 & 批量数据合成：Hermes 内置了批量处理模块 `batch_runner.py` ，能够自动去合成Agent的运行轨迹（Trajectory），并且筛选过滤出高质量的数据集。然后将这些轨迹数据清洗并转换为标准的 ShareGPT 格式，为后续的模型训练提供高质量的“原料”。在这个过程中，Hermes 通常会利用最强的旗舰模型（如 Claude Opus 4.6）作为“教师模型”来生成初始的高质量示范数据，确立一个高起点的Baseline。随后，系统会自动创建隔离的RL训练环境，并配置相应的超参数。
 
-●
+- 渐进式训练与自动评估：为了降低试错成本，Hermes 采用“小步快跑”策略：先使用小规模数据集进行实验性训练，验证可行性后，再启动正式的大规模训练。训练结束后，系统会自动评估（Evaluate），分析各项指标是否有显著提升。如果效果未达预期，反馈信号将指导下一轮的参数调整或数据优化；如果效果显著，则将该版本模型固化。
 
-轨迹捕获 & 批量数据合成：Hermes 内置了批量处理模块 `batch_runner.py` ，能够自动去合成Agent的运行轨迹（Trajectory），并且筛选过滤出高质量的数据集。然后将这些轨迹数据清洗并转换为标准的 ShareGPT 格式，为后续的模型训练提供高质量的“原料”。在这个过程中，Hermes 通常会利用最强的旗舰模型（如 Claude Opus 4.6）作为“教师模型”来生成初始的高质量示范数据，确立一个高起点的Baseline。随后，系统会自动创建隔离的RL训练环境，并配置相应的超参数。
-
-●
-
-渐进式训练与自动评估：为了降低试错成本，Hermes 采用“小步快跑”策略：先使用小规模数据集进行实验性训练，验证可行性后，再启动正式的大规模训练。训练结束后，系统会自动评估（Evaluate），分析各项指标是否有显著提升。如果效果未达预期，反馈信号将指导下一轮的参数调整或数据优化；如果效果显著，则将该版本模型固化。
-
-●
-
-领域内的局部最优解：这套机制的价值在于，它能让通用大模型在特定领域（Domain-Specific）实现超越基座模型的表現。通过强化学习中的奖励机制（Reward Model），模型不再仅仅依赖通用的概率预测，而是针对特定场景下的正确行为获得正向反馈，从而逐渐“学会”该领域的专有逻辑，最终达到该场景下的局部最优解。
+- 领域内的局部最优解：这套机制的价值在于，它能让通用大模型在特定领域（Domain-Specific）实现超越基座模型的表現。通过强化学习中的奖励机制（Reward Model），模型不再仅仅依赖通用的概率预测，而是针对特定场景下的正确行为获得正向反馈，从而逐渐“学会”该领域的专有逻辑，最终达到该场景下的局部最优解。
 
 接下来，我们将详细拆解这一模型训练闭环过程的具体技术实现。
 
@@ -188,21 +122,18 @@ Agent轨迹（Trajectory）就是指的 Agent 完成一次任务的完整对话�
 
 Agent轨迹数据格式
 
-\[
+[
 
+```java
 {"from": "system", "value": "你是 Hermes Agent..."},
-
 {"from": "human", "value": "帮我部署这个应用"},
-
 {"from": "gpt", "value": "好的，我先检查环境..."},
-
-{"from": "tool", "value": "<tool\_call>execute\_code(...)</tool\_call>"},
-
-{"from": "tool", "value": "<tool\_response>成功</tool\_response>"},
-
+{"from": "tool", "value": "<tool_call>execute_code(...)</tool_call>"},
+{"from": "tool", "value": "<tool_response>成功</tool_response>"},
 {"from": "gpt", "value": "部署完成！"}
+```
 
-\]
+]
 
 你可能会想问：为什么要用ShareGPT格式？而且现在LLM那么多，也不一定是训练GPT模型，为什么要用 `"gpt"` 这个标签，而不是改成 `"assistant"` 或 `"model"` ？那如果我要训练Qwen、Kimi、LLama这些模型，使用 `"gpt"` 标签会不会对模型理解有影响？
 
@@ -218,7 +149,7 @@ Agent轨迹数据格式
 
 {
 
-"conversations": \[...\], // ShareGPT格式的对话
+"conversations": [...], // ShareGPT格式的对话
 
 "timestamp": "2025-04-11T10:30:00",
 
@@ -234,37 +165,31 @@ Agent轨迹数据格式
 
 负责批量生成数据的是 `batch_runner.py` ，这是Hermes“自进化”的主力数据工厂，它能并行处理大量提示词，为每个提示词运行一次完整的 Agent 对话，收集轨迹。这个过程的主要流程如下：
 
-●
+- 准备提示词：需要人工准备一批 JSONL 格式的提示词文件（如 `{"prompt": "请帮我搜索AI领域的最新进展"}` ），或从某些 Benchmark 数据集中去采集（比如GSM8K、HumanEval等数据集）
 
-准备提示词：需要人工准备一批 JSONL 格式的提示词文件（如 `{"prompt": "请帮我搜索AI领域的最新进展"}` ），或从某些 Benchmark 数据集中去采集（比如GSM8K、HumanEval等数据集）
+- 并行处理： `batch_runner.py` 用线程池并行处理每条提示词，每条提示词创建一个独立的 Agent 实例
 
-●
+- Teacher 模型生成：默认使用 `anthropic/claude-opus-4.6` 作为 Teacher 模型，执行完整的 Agent 对话（包含工具调用、推理、搜索等）
 
-并行处理： `batch_runner.py` 用线程池并行处理每条提示词，每条提示词创建一个独立的 Agent 实例
+- 录制轨迹：将 Teacher 模型的完整对话过程转化为 ShareGPT 格式的训练数据
 
-●
+- 工具集随机采样：这是一个比较巧妙的设计，不是每次都用同样的工具配置，而是随机采样不同的工具组合。这样训练数据中就包含了各种工具搭配的场景，模型学会的不是死记硬背一种配置，而是灵活运用各种工具。
 
-Teacher 模型生成：默认使用 `anthropic/claude-opus-4.6` 作为 Teacher 模型，执行完整的 Agent 对话（包含工具调用、推理、搜索等）
+- 零推理过滤的质量控制：通过 `_extract_reasoning_stats` 来统计 `<REASONING_SCRATCHPAD> ` 和 `reasoning` 字段的出现次数，如果两者都为零的话，那这条样本被丢弃。为什么呢？ 因为，如果 Agent 在整个对话中完全没有进行显式推理，说明它可能只是在机械地执行操作，没有“思考过程”。这样的样本对训练是没有价值。
 
-●
-
-录制轨迹：将 Teacher 模型的完整对话过程转化为 ShareGPT 格式的训练数据
-
-●
-
-工具集随机采样：这是一个比较巧妙的设计，不是每次都用同样的工具配置，而是随机采样不同的工具组合。这样训练数据中就包含了各种工具搭配的场景，模型学会的不是死记硬背一种配置，而是灵活运用各种工具。
-
-●
-
-零推理过滤的质量控制：通过 `_extract_reasoning_stats` 来统计 `<REASONING_SCRATCHPAD> ` 和 `reasoning` 字段的出现次数，如果两者都为零的话，那这条样本被丢弃。为什么呢？ 因为，如果 Agent 在整个对话中完全没有进行显式推理，说明它可能只是在机械地执行操作，没有“思考过程”。这样的样本对训练是没有价值。
-
-除此之外，还有一种数据合成的方法是Hindsight-Guided On-Policy Distillation (OPD)，这是一种最精细的 Teacher-Student 机制，基于 Princeton 大学 2026 年的 OpenClaw-RL 论文《OpenClaw-RL: Train Any Agent Simply by Talking》\[4\]，详情可以看下 `environments/agentic_opd_env.py` 里面的实现。
+除此之外，还有一种数据合成的方法是Hindsight-Guided On-Policy Distillation (OPD)，这是一种最精细的 Teacher-Student 机制，基于 Princeton 大学 2026 年的 OpenClaw-RL 论文《OpenClaw-RL: Train Any Agent Simply by Talking》[4]，详情可以看下 `environments/agentic_opd_env.py` 里面的实现。
 
 #### SWE任务数据生成
 
 除了刚刚讲的 `batch_runner.py` ，还有一个 `mini_swe_runner.py` ，这是一个垂直领域的的数据生成器，专门用来处理SWE Benchmark（软件工程基准测试）任务的场景。这与批量数据生成的区别：
 
-<table><colgroup><col width="188"> <col width="219"> <col width="398"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>文件</p></td><td rowspan="1" colspan="1"><p>batch_runner.py</p></td><td rowspan="1" colspan="1"><p>mini_swe_runner.py</p></td></tr><tr><td rowspan="1" colspan="1"><p>用途</p></td><td rowspan="1" colspan="1"><p>通用数据的批量生成</p></td><td rowspan="1" colspan="1"><p>SWE Benchmark任务</p></td></tr><tr><td rowspan="1" colspan="1"><p>任务类型</p></td><td rowspan="1" colspan="1"><p>任意提示词</p></td><td rowspan="1" colspan="1"><p>代码修复/实现</p></td></tr><tr><td rowspan="1" colspan="1"><p>完成信号</p></td><td rowspan="1" colspan="1"><p>对话自然结束</p></td><td rowspan="1" colspan="1"><div><code>echo "MINI_SWE_AGENT_FINAL_OUTPUT"</code></div></td></tr></tbody></table>
+
+| 文件   | batch_runner.py | mini_swe_runner.py                   |
+| ---- | --------------- | ------------------------------------ |
+| 用途   | 通用数据的批量生成       | SWE Benchmark任务                      |
+| 任务类型 | 任意提示词           | 代码修复/实现                              |
+| 完成信号 | 对话自然结束          | `echo "MINI_SWE_AGENT_FINAL_OUTPUT"` |
+
 
 ### Agent轨迹压缩
 
@@ -276,17 +201,17 @@ Teacher 模型生成：默认使用 `anthropic/claude-opus-4.6` 作为 Teacher �
 
 class CompressionConfig:
 
-tokenizer\_name = "moonshotai/kimi-k2.5" # 精确 Token 计数器
+tokenizer_name = "moonshotai/kimi-k2.5" # 精确 Token 计数器
 
-target\_max\_tokens = 15250 # 压缩后的目标上限
+target_max_tokens = 15250 # 压缩后的目标上限
 
-summary\_target\_tokens = 750 # 摘要的 Token 预算
+summary_target_tokens = 750 # 摘要的 Token 预算
 
-protect\_last\_n\_turns = 4 # 保护最后 4 轮对话
+protect_last_n_turns = 4 # 保护最后 4 轮对话
 
-summarization\_model = "google/gemini-3-flash" # 轻量级的摘要模型
+summarization_model = "google/gemini-3-flash" # 轻量级的摘要模型
 
-max\_concurrent\_requests = 50 # 并发摘要请求数
+max_concurrent_requests = 50 # 并发摘要请求数
 
 那么，压缩算法的执行过程是怎样的呢？整个压缩流程分为几个步骤：
 
@@ -294,21 +219,15 @@ max\_concurrent\_requests = 50 # 并发摘要请求数
 
 如果需要压缩，系统会进入核心的区域识别阶段，将对话划分为三个部分：
 
-1.
+1. 头部保护区（Head Protection）：这是任务的“锚点”，包含第一条系统指令（System Prompt）、第一条人类消息（原始任务定义）、第一条 GPT 回复（初始思路）以及第一次工具交互。这部分内容定义了任务的初衷和起始状态，绝不被压缩。
 
-头部保护区（Head Protection）：这是任务的“锚点”，包含第一条系统指令（System Prompt）、第一条人类消息（原始任务定义）、第一条 GPT 回复（初始思路）以及第一次工具交互。这部分内容定义了任务的初衷和起始状态，绝不被压缩。
+2. 尾部保护区（Tail Protection）：这是任务的“结果”，包含最后 4 轮对话。它们承载了最终的结论、输出结果和验证信息，是评估任务完成度的关键，同样绝不被压缩。
 
-2.
-
-尾部保护区（Tail Protection）：这是任务的“结果”，包含最后 4 轮对话。它们承载了最终的结论、输出结果和验证信息，是评估任务完成度的关键，同样绝不被压缩。
-
-3.
-
-中间压缩区（Compression Zone）：介于头尾之间的大量中间步骤、反复的工具调用和纠错过程。这部分虽然记录了探索路径，但往往存在大量冗余，是压缩的主要对象。
+3. 中间压缩区（Compression Zone）：介于头尾之间的大量中间步骤、反复的工具调用和纠错过程。这部分虽然记录了探索路径，但往往存在大量冗余，是压缩的主要对象。
 
 在确定压缩区后，系统会计算需要节省的 Token 目标值（ `tokens_to_save` ），并从中间压缩区的起始位置开始，逐轮累积待压缩的内容，直到满足节省目标。随后， Hermes 将这些被选中的“冗余”片段发送给一个轻量级、速度快的模型（比如 Gemini Flash），指令其生成一段以 `[CONTEXT SUMMARY]:` 开头的精炼摘要。这段摘要旨在用极简的语言概括中间过程的逻辑脉络，而非罗列细节。
 
-最后，系统将头部保护区 + \[生成的摘要\] + 尾部保护区重新拼接，构建出一条结构完整、逻辑连贯但体积大幅缩减的新轨迹。为什么保护头和尾？因为头部包含任务定义，没有它，模型不知道在做什么。尾部通常包含最终答案，没有它，训练信号不完整。而中间则是大量试错和探索，就可以用一句话概括摘要。通过这种方式，Hermes 既确保了模型在训练或推理时能够捕捉到任务的头（起因）和尾（结果），又通过摘要保留了中间探索的大致方向，同时有效控制了上下文长度，实现了数据质量与计算效率的平衡。
+最后，系统将头部保护区 + [生成的摘要] + 尾部保护区重新拼接，构建出一条结构完整、逻辑连贯但体积大幅缩减的新轨迹。为什么保护头和尾？因为头部包含任务定义，没有它，模型不知道在做什么。尾部通常包含最终答案，没有它，训练信号不完整。而中间则是大量试错和探索，就可以用一句话概括摘要。通过这种方式，Hermes 既确保了模型在训练或推理时能够捕捉到任务的头（起因）和尾（结果），又通过摘要保留了中间探索的大致方向，同时有效控制了上下文长度，实现了数据质量与计算效率的平衡。
 
 ### RL强化学习训练
 
@@ -316,11 +235,11 @@ max\_concurrent\_requests = 50 # 并发摘要请求数
 
 RL训练配置
 
-RL\_MAX\_ITERATIONS = 200 # 最大迭代次数（训练流程较长）
+RL_MAX_ITERATIONS = 200 # 最大迭代次数（训练流程较长）
 
-DEFAULT\_MODEL = "anthropic/claude-opus-4.6" # 使用强模型指导训练
+DEFAULT_MODEL = "anthropic/claude-opus-4.6" # 使用强模型指导训练
 
-RL\_TOOLSETS = \["terminal", "web", "rl"\] # 可用的工具集
+RL_TOOLSETS = ["terminal", "web", "rl"] # 可用的工具集
 
 为了确保强化学习（RL）训练的可控性与可复现性，Hermes 将复杂的模型调优过程抽象为一套标准化的训练过程。这套过程通过严格的步骤约束，避免了因配置错误导致的资源浪费。
 
@@ -346,25 +265,23 @@ GRPO算法的一个关键优势是不需要单独训练一个奖励模型（Rewa
 
 Hermes项目设计了 多维度的组合奖励，不是只看一个指标。以下是从Hermes的源码的 `basic_grpo_training.py` 中找到的核心奖励维度设计：
 
-<table><colgroup><col width="168"> <col width="186"> <col width="462"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>维度</p></td><td rowspan="1" colspan="1"><p>权重</p></td><td rowspan="1" colspan="1"><p>衡量什么</p></td></tr><tr><td rowspan="1" colspan="1"><p>正确性</p></td><td rowspan="1" colspan="1"><p>2.0（最高）</p></td><td rowspan="1" colspan="1"><p>最终答案是否正确</p></td></tr><tr><td rowspan="1" colspan="1"><p>格式规范</p></td><td rowspan="1" colspan="1"><p>0.5</p></td><td rowspan="1" colspan="1"><div>是否遵循 <code><reasoning>...<answer></code> 结构</div></td></tr><tr><td rowspan="1" colspan="1"><p>渐进格式</p></td><td rowspan="1" colspan="1"><p>0~0.5</p></td><td rowspan="1" colspan="1"><p>部分符合格式也给分（比如只写了开标签）</p></td></tr></tbody></table>
+
+| 维度   | 权重      | 衡量什么                |
+| ---- | ------- | ------------------- |
+| 正确性  | 2.0（最高） | 最终答案是否正确            |
+| 格式规范 | 0.5     | 是否遵循 `...` 结构       |
+| 渐进格式 | 0~0.5   | 部分符合格式也给分（比如只写了开标签） |
+
 
 那么，同时我也从 `/skills/mlops/training/grpo-rl-training/SKILL.md` 中找到了奖励函数设计的黄金法则：
 
-1.
+1. 组合 3~5 个奖励函数，每个函数管一个方面
 
-组合 3~5 个奖励函数，每个函数管一个方面
+2. 权重要合理：正确性最高（2.0），格式次之（0.5~1.0）
 
-2.
+3. 给部分分：比如写了 <reasoning> 但没闭合，也给 0.125 分
 
-权重要合理：正确性最高（2.0），格式次之（0.5~1.0）
-
-3.
-
-给部分分：比如写了 <reasoning> 但没闭合，也给 0.125 分
-
-4.
-
-先单独测试每个奖励函数，再合起来用
+4. 先单独测试每个奖励函数，再合起来用
 
 另外，在强化学习的环境中，奖励函数也不是只做一些规则类的字符串匹配。通过 `ToolContext` 机制，奖励函数也可以执行终端命令：比如编译代码验证正确性；读取文件：检查 Agent 是否真的修改了文件；访问网络：验证搜索结果是否真实；使用浏览器：检查网页内容等等。这就意味着奖励函数可以做“真实验证”，而不仅仅是文本匹配。比如在训练 Agent 写代码时，奖励函数可以直接编译运行代码来判断对错。
 
@@ -380,13 +297,9 @@ Hermes项目设计了 多维度的组合奖励，不是只看一个指标。以�
 
 其实，如果真要做到“用着用着就变聪明了”这种体验，理论上的确是需要把用户的高质量对话轨迹收集回来做训练。但这个项目明确不建议这么做，原因我理解应该是主要是两方面：
 
-●
+- 隐私问题：用户对话可能包含敏感信息，用户不一定想要将其训进去
 
-隐私问题：用户对话可能包含敏感信息，用户不一定想要将其训进去
-
-●
-
-质量问题：这个也是最关键的一个，用户对话质量参差不齐，直接拿来训练可能让模型变差，按照之前我们训练模型的实际经验，直接用历史对话数据训练模型，大概率会把模型“训废”
+- 质量问题：这个也是最关键的一个，用户对话质量参差不齐，直接拿来训练可能让模型变差，按照之前我们训练模型的实际经验，直接用历史对话数据训练模型，大概率会把模型“训废”
 
 如果你的需求就是要基于之前的历史对话轨迹来提升模型的能力，那么，其实也是可以做到的，就是在前面第二部批量数据构造的时候，将历史对话数据作为一个数据源由人工导入进去，在Teacher Model参考下做数据合成，同时也在质量上把把关，才能最终给到RL模型去使用。
 
@@ -406,7 +319,7 @@ Hermes项目设计了 多维度的组合奖励，不是只看一个指标。以�
 
 工具指导Prompt配置
 
-配置项 agent.tool\_use\_enforcement 可以是：
+配置项 agent.tool_use_enforcement 可以是：
 
 ├── "auto"（默认）→ 根据模型名自动判断
 
@@ -414,15 +327,11 @@ Hermes项目设计了 多维度的组合奖励，不是只看一个指标。以�
 
 ├── false → 不注入
 
-└── \["gpt", "gemini"\] → 只对列表中的模型注入
+└── ["gpt", "gemini"] → 只对列表中的模型注入
 
-●
+- 对GPT 专属指导：必须用工具的场景：写文件、执行代码、终端命令、网页搜索；禁止幻觉：不能编造文件路径、API 地址；执行后验证：修改文件后要确认、测试代码要验证输出
 
-对GPT 专属指导：必须用工具的场景：写文件、执行代码、终端命令、网页搜索；禁止幻觉：不能编造文件路径、API 地址；执行后验证：修改文件后要确认、测试代码要验证输出
-
-●
-
-对Gemini/Gemma的专属指导：始终使用绝对路径（不用相对路径）；编辑前先读取文件确认内容；多个独立操作要并行调用工具
+- 对Gemini/Gemma的专属指导：始终使用绝对路径（不用相对路径）；编辑前先读取文件确认内容；多个独立操作要并行调用工具
 
 说白了就是给不同的大模型单独设计了一些特定的Prompt，这个其实也算Harness设计的范畴了，不过因为主要是加了一些提示词，就先放在这里讲吧。
 
@@ -430,17 +339,11 @@ Hermes项目设计了 多维度的组合奖励，不是只看一个指标。以�
 
 其次，也是 Hermes 最具竞争力的设计亮点，在于其极低的用户迁移成本。Hermes 在 System Prompt 的拼装逻辑中，刻意保留了对主流 Agent框架配置文件的全面兼容：
 
-1.
+1. 兼容 OpenClaw 生态：它能够直接读取并解析 OpenClaw 的 `AGENT.md` 、 `SOUL.md` 、 `USER.md` 等核心配置文件。这意味着用户可以零成本地将现有的 OpenClaw 工作流无缝迁移至 Hermes 平台，实现从“旧架构”到“新进化体”的平滑升级。
 
-兼容 OpenClaw 生态：它能够直接读取并解析 OpenClaw 的 `AGENT.md` 、 `SOUL.md` 、 `USER.md` 等核心配置文件。这意味着用户可以零成本地将现有的 OpenClaw 工作流无缝迁移至 Hermes 平台，实现从“旧架构”到“新进化体”的平滑升级。
+2. 兼容 AI Coding 主流规范：对于使用 Cursor、Claude Code 等编码助手的开发者，Hermes 同样支持读取 `CLAUDE.md` 或`.cursorrules` 、`.cursor/rules/*.mdc` 等描述文件。这使得 Hermes 能够迅速融入现有的 AI 编程工作流，理解项目上下文规则，无需重新编写大量的项目指引。
 
-2.
-
-兼容 AI Coding 主流规范：对于使用 Cursor、Claude Code 等编码助手的开发者，Hermes 同样支持读取 `CLAUDE.md` 或`.cursorrules` 、`.cursor/rules/*.mdc` 等描述文件。这使得 Hermes 能够迅速融入现有的 AI 编程工作流，理解项目上下文规则，无需重新编写大量的项目指引。
-
-3.
-
-兼容多平台 IM 协议：针对 WhatsApp、Slack 等不同即时通讯平台的特性，Hermes 内置了相应的适配提示词，确保 Agent 在不同交互界面下都能保持得体的语气和规范的行为。
+3. 兼容多平台 IM 协议：针对 WhatsApp、Slack 等不同即时通讯平台的特性，Hermes 内置了相应的适配提示词，确保 Agent 在不同交互界面下都能保持得体的语气和规范的行为。
 
 可以看到，Hermes 的 Prompt Engineering 其实是一个连接了不同模型与不同平台的枢纽。它通过动态适配解决模型能力的短板，通过广泛兼容降低用户的切换门槛，真正实现了“拿来即用，用即高效”的工程化目标。
 
@@ -454,21 +357,17 @@ Hermes项目设计了 多维度的组合奖励，不是只看一个指标。以�
 
 第一个差异，是在实时上下文压缩机制上，Hermes 展现出了与 OpenClaw 不太一样的触发逻辑，这也是两者在工程实现上的一个显著差异点：
 
-●
+- OpenClaw 的绝对阈值触发：OpenClaw 通常设定一个固定的 Token 数量边界，例如当上下文总Token是 20K，边界预留2k Tokens 时，那么等Token数达到 18K，就会触发压缩机制。这种方式简单直接，但在不同模型、不同窗口大小的场景下，可能需要频繁调整配置。
 
-OpenClaw 的绝对阈值触发：OpenClaw 通常设定一个固定的 Token 数量边界，例如当上下文总Token是 20K，边界预留2k Tokens 时，那么等Token数达到 18K，就会触发压缩机制。这种方式简单直接，但在不同模型、不同窗口大小的场景下，可能需要频繁调整配置。
-
-●
-
-Hermes 的相对阈值触发：Hermes 引入了一种更为动态和自适应的比例阈值机制，具体可以参考文件 `agent/context_compressor.py` 。它不关注具体的 Token 绝对数量，而是监控当前上下文占用总窗口容量的比例。例如，当上下文长度达到模型总窗口阈值的 50% 时，系统便会自动触发压缩流程。举个例子：
+- Hermes 的相对阈值触发：Hermes 引入了一种更为动态和自适应的比例阈值机制，具体可以参考文件 `agent/context_compressor.py` 。它不关注具体的 Token 绝对数量，而是监控当前上下文占用总窗口容量的比例。例如，当上下文长度达到模型总窗口阈值的 50% 时，系统便会自动触发压缩流程。举个例子：
 
 上下文压缩逻辑
 
-context\_length = 200,000 tokens（模型的最大窗口）
+context_length = 200,000 tokens（模型的最大窗口）
 
-threshold\_percent = 0.50（50%时触发压缩）
+threshold_percent = 0.50（50%时触发压缩）
 
-threshold\_tokens = 200,000 × 0.50 = 100,000 tokens
+threshold_tokens = 200,000 × 0.50 = 100,000 tokens
 
 当前对话 Token 数 ≥ 100,000 → 触发压缩！
 
@@ -476,25 +375,26 @@ threshold\_tokens = 200,000 × 0.50 = 100,000 tokens
 
 然后就是裁剪，具体执行裁剪时，Hermes 采用了与 OpenClaw 类似的“头尾保留、中间摘要”策略：
 
-1.
+1. 头部保护：保留系统指令、初始任务定义等关键引导信息。
 
-头部保护：保留系统指令、初始任务定义等关键引导信息。
+2. 尾部保护：保留最近的几轮对话，确保短期记忆的连贯性。
 
-2.
+3. 中间压缩：对中间冗长的工具调用过程、推理步骤进行裁剪，并利用 LLM生成精炼的摘要（Summary）来替代原始细节。
 
-尾部保护：保留最近的几轮对话，确保短期记忆的连贯性。
-
-3.
-
-中间压缩：对中间冗长的工具调用过程、推理步骤进行裁剪，并利用 LLM生成精炼的摘要（Summary）来替代原始细节。
-
-4.
-
-通过压缩+裁剪机制，Hermes 既避免了上下文爆炸导致的运行错误，又最大程度地保留了任务执行的关键脉络，实现了上下文管理的高效性与智能化。
+4. 通过压缩+裁剪机制，Hermes 既避免了上下文爆炸导致的运行错误，又最大程度地保留了任务执行的关键脉络，实现了上下文管理的高效性与智能化。
 
 还记得在Self-Evolving的RL训练部分，我们还提到了轨迹压缩，这两种压缩也可以对比一下：
 
-<table><colgroup><col width="199"> <col width="260"> <col width="334"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>特性</p></td><td rowspan="1" colspan="1"><p>上下文实时压缩</p><p>(Context Compressor)</p></td><td rowspan="1" colspan="1"><p>离线Agent轨迹压缩</p><p>(Trajectory Compressor)</p></td></tr><tr><td rowspan="1" colspan="1"><p>运行时机</p></td><td rowspan="1" colspan="1"><p>对话进行中</p></td><td rowspan="1" colspan="1"><p>对话结束后</p></td></tr><tr><td rowspan="1" colspan="1"><p>目的</p></td><td rowspan="1" colspan="1"><p>保持对话可继续</p></td><td rowspan="1" colspan="1"><p>准备高质量训练数据</p></td></tr><tr><td rowspan="1" colspan="1"><p>Token 目标</p></td><td rowspan="1" colspan="1"><p>降到上下文窗口的50%以下</p></td><td rowspan="1" colspan="1"><p>精确到 15250（固定值）</p></td></tr><tr><td rowspan="1" colspan="1"><p>Token 计数</p></td><td rowspan="1" colspan="1"><p>粗略估算（4字符≈1Token）</p></td><td rowspan="1" colspan="1"><p>通过HuggingFace Tokenizer 精确计数</p></td></tr><tr><td rowspan="1" colspan="1"><p>总结器</p></td><td rowspan="1" colspan="1"><p>同模型或配置模型</p></td><td rowspan="1" colspan="1"><p>Gemini Flash（更轻量高效）</p></td></tr><tr><td rowspan="1" colspan="1"><p>保护策略</p></td><td rowspan="1" colspan="1"><p>保留前10条 + 尾部动态</p></td><td rowspan="1" colspan="1"><p>保留首轮系统/人类/助手/工具 + 最后4轮</p></td></tr></tbody></table>
+
+| 特性       | 上下文实时压缩 (Context Compressor) | 离线Agent轨迹压缩 (Trajectory Compressor) |
+| -------- | ---------------------------- | ----------------------------------- |
+| 运行时机     | 对话进行中                        | 对话结束后                               |
+| 目的       | 保持对话可继续                      | 准备高质量训练数据                           |
+| Token 目标 | 降到上下文窗口的50%以下                | 精确到 15250（固定值）                      |
+| Token 计数 | 粗略估算（4字符≈1Token）             | 通过HuggingFace Tokenizer 精确计数        |
+| 总结器      | 同模型或配置模型                     | Gemini Flash（更轻量高效）                 |
+| 保护策略     | 保留前10条 + 尾部动态                | 保留首轮系统/人类/助手/工具 + 最后4轮              |
+
 
 ### Memory：内外双驱的混合架构
 
@@ -504,13 +404,9 @@ threshold\_tokens = 200,000 × 0.50 = 100,000 tokens
 
 首先，Hermes 保留了轻量级的本地文件存储机制，主要通过 `MEMORY.md` 或 `USER.md` 等 Markdown 文件来维护 Agent 的“核心认知”。
 
-●
+- 存储内容：主要记录长期的、相对静态的事实性知识（如用户偏好、项目背景、关键约束等）。
 
-存储内容：主要记录长期的、相对静态的事实性知识（如用户偏好、项目背景、关键约束等）。
-
-●
-
-特点：它不像日志那样记录每一轮交互，而是侧重于对关键信息的提炼与持久化。这种方式简单、透明且易于人工编辑，确保了 Agent 拥有一份稳定可靠的“基础档案”。
+- 特点：它不像日志那样记录每一轮交互，而是侧重于对关键信息的提炼与持久化。这种方式简单、透明且易于人工编辑，确保了 Agent 拥有一份稳定可靠的“基础档案”。
 
 同时，当从记忆中召回内容时，系统会用特殊标签包裹，以避免模型搞不清哪些是来自Memory：
 
@@ -518,9 +414,9 @@ Memory注入Prompt
 
 <memory-context>
 
-\[System note: The following is recalled memory context,
+[System note: The following is recalled memory context,
 
-NOT new user input. Treat as informational background data.\]
+NOT new user input. Treat as informational background data.]
 
 用户偏好使用 Python 和 TypeScript。
 
@@ -530,13 +426,9 @@ NOT new user input. Treat as informational background data.\]
 
 其次，在对话持久化（Conversation Persistence）方面，Hermes 采用了和OpenClaw一样的 SQLite 数据库，不同的是它直接用来存储所有的每日对话历史，而不是像OpenClaw一样存储的是Memory的Chunk索引。这样做的目的：
 
-1.
+1. 结构化数据资产：数据库化的存储使得对话历史不再是孤立的文本片段，而是可查询、可索引的结构化数据。这为后续的复杂操作（如按主题检索、按时间回溯）提供了极大便利。
 
-结构化数据资产：数据库化的存储使得对话历史不再是孤立的文本片段，而是可查询、可索引的结构化数据。这为后续的复杂操作（如按主题检索、按时间回溯）提供了极大便利。
-
-2.
-
-赋能自我进化闭环：正如前文所述，Hermes 的核心竞争力在于其自进化能力。存储在 SQLite 中的高质量对话轨迹，是生成 Skill 和后续做 RL 训练的最原始素材。通过数据库，就可以高效地提取、清洗和格式化这些轨迹。相比之下，非结构化的日志文件在处理大规模数据提取时效率低下且容易出错。
+2. 赋能自我进化闭环：正如前文所述，Hermes 的核心竞争力在于其自进化能力。存储在 SQLite 中的高质量对话轨迹，是生成 Skill 和后续做 RL 训练的最原始素材。通过数据库，就可以高效地提取、清洗和格式化这些轨迹。相比之下，非结构化的日志文件在处理大规模数据提取时效率低下且容易出错。
 
 #### 外部记忆：接入第三方记忆服务的弹性扩展
 
@@ -550,15 +442,21 @@ NOT new user input. Treat as informational background data.\]
 
 Hermes 在有个挺有意思的设计是上下文注入（Context Injection），这展现了其以“工程效率”为核心的设计哲学。Hermes 通过引入了一种不同于 OpenClaw 的交互范式 —— 通过 `@` 符号就可以快速资源挂载。这与OpenClaw 或 Claude Code 的方式有着本质区别：
 
-●
+- 传统模式（被动检索）：用户发出指令 -> Agent 识别意图 -> 调用工具（比如 `read_file` 或 `browser_use` ）-> 获取结果 -> 拼接到上下文。这一过程涉及多轮推理和工具执行，耗时较长。
 
-传统模式（被动检索）：用户发出指令 -> Agent 识别意图 -> 调用工具（比如 `read_file` 或 `browser_use` ）-> 获取结果 -> 拼接到上下文。这一过程涉及多轮推理和工具执行，耗时较长。
+- Hermes 模式（主动注入）：用户通过 `@` 符号直接指定资源，系统立即将其内容“硬注入”到当前的 Prompt 上下文中。我列举一些：
 
-●
 
-Hermes 模式（主动注入）：用户通过 `@` 符号直接指定资源，系统立即将其内容“硬注入”到当前的 Prompt 上下文中。我列举一些：
+| 语法                         | 作用         | 效果                      |
+| -------------------------- | ---------- | ----------------------- |
+| `@file:main.py`            | 读取整个文件     | 注入 main.py 的完整内容        |
+| `@file:src/utils.py:10-20` | 读取指定行      | 只注入第10-20行              |
+| `@folder:src/`             | 列出目录树      | 显示文件大小、修改时间             |
+| `@diff`                    | Git 未暂存的更改 | 等同于 `git diff`          |
+| `@staged`                  | Git 已暂存的更改 | 等同于 `git diff --staged` |
+| `@git:3`                   | 最近3次提交     | 包含完整补丁                  |
+| `@url:https://...\`        | 抓取网页内容     | 转为 Markdown             |
 
-<table><colgroup><col width="294"> <col width="219"> <col width="306"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>语法</p></td><td rowspan="1" colspan="1"><p>作用</p></td><td rowspan="1" colspan="1"><p>效果</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>@file:main.py</code></div></td><td rowspan="1" colspan="1"><p>读取整个文件</p></td><td rowspan="1" colspan="1"><p>注入 main.py 的完整内容</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>@file:src/utils.py:10-20</code></div></td><td rowspan="1" colspan="1"><p>读取指定行</p></td><td rowspan="1" colspan="1"><p>只注入第10-20行</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>@folder:src/</code></div></td><td rowspan="1" colspan="1"><p>列出目录树</p></td><td rowspan="1" colspan="1"><p>显示文件大小、修改时间</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>@diff</code></div></td><td rowspan="1" colspan="1"><p>Git 未暂存的更改</p></td><td rowspan="1" colspan="1"><div>等同于 <code>git diff</code></div></td></tr><tr><td rowspan="1" colspan="1"><div><code>@staged</code></div></td><td rowspan="1" colspan="1"><p>Git 已暂存的更改</p></td><td rowspan="1" colspan="1"><div>等同于 <code>git diff --staged</code></div></td></tr><tr><td rowspan="1" colspan="1"><div><code>@git:3</code></div></td><td rowspan="1" colspan="1"><p>最近3次提交</p></td><td rowspan="1" colspan="1"><p>包含完整补丁</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>@url:https://...\</code></div></td><td rowspan="1" colspan="1"><p>抓取网页内容</p></td><td rowspan="1" colspan="1"><p>转为 Markdown</p></td></tr></tbody></table>
 
 这种机制的本质，是将“工具调用”转化为“上下文预加载”。它省去了 Agent 思考“是否需要调用工具”以及“执行工具”的中间环节，让模型在接收用户指令的瞬间，就已经拥有了完成任务所需的全部背景信息。这不仅大幅提升了交互的响应速度，更显著降低了因多轮对话产生的 Token 消耗，是一种典型的以用户体验为导向的工程优化。
 
@@ -572,7 +470,19 @@ Hermes 模式（主动注入）：用户通过 `@` 符号直接指定资源，�
 
 跟OpenClaw、Claude Code一样，Hermes 提供了一套完整的生命周期钩子（Hook）系统。开发者可以在 Agent 运行的各个关键节点（如任务启动前、工具调用后、响应生成前等）注入自定义的逻辑或约束。这种机制赋予了系统极高的可定制性，使得用户能够根据业务需求，在不修改核心代码的情况下，动态地插入日志记录、权限校验或特定的业务规则，实现了对 Agent 行为的全流程精细化管控。一些钩子的示例如下：
 
-<table><colgroup><col width="322"> <col width="429"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>钩子</p></td><td rowspan="1" colspan="1"><p>触发时机</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_agent_start()</code></div></td><td rowspan="1" colspan="1"><p>Agent 初始化时</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_tool_call()</code></div></td><td rowspan="1" colspan="1"><p>工具执行前</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_tool_result()</code></div></td><td rowspan="1" colspan="1"><p>工具返回后</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_agent_end()</code></div></td><td rowspan="1" colspan="1"><p>Agent 关闭时</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_turn_start()</code></div></td><td rowspan="1" colspan="1"><p>每轮开始时</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_pre_compress()</code></div></td><td rowspan="1" colspan="1"><p>压缩前，可以在消息被丢弃前提取有用信息</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_memory_write()</code></div></td><td rowspan="1" colspan="1"><p>写入内置记忆时</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_delegation()</code></div></td><td rowspan="1" colspan="1"><p>子Agent完成任务后</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>on_session_end()</code></div></td><td rowspan="1" colspan="1"><p>会话结束</p></td></tr></tbody></table>
+
+| 钩子                  | 触发时机                |
+| ------------------- | ------------------- |
+| `on_agent_start()`  | Agent 初始化时          |
+| `on_tool_call()`    | 工具执行前               |
+| `on_tool_result()`  | 工具返回后               |
+| `on_agent_end()`    | Agent 关闭时           |
+| `on_turn_start()`   | 每轮开始时               |
+| `on_pre_compress()` | 压缩前，可以在消息被丢弃前提取有用信息 |
+| `on_memory_write()` | 写入内置记忆时             |
+| `on_delegation()`   | 子Agent完成任务后         |
+| `on_session_end()`  | 会话结束                |
+
 
 ## 结构化的错误分类与自愈体系
 
@@ -580,7 +490,24 @@ Hermes 模式（主动注入）：用户通过 `@` 符号直接指定资源，�
 
 具体的，在 `agent/error_classifier.py` 文件中，列出了这14种类型的错误：
 
-<table><colgroup><col width="275"> <col width="240"> <col width="246"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>错误类型</p></td><td rowspan="1" colspan="1"><p>含义</p></td><td rowspan="1" colspan="1"><p>典型场景</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>auth</code></div></td><td rowspan="1" colspan="1"><p>认证失败</p></td><td rowspan="1" colspan="1"><p>API Key 无效</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>auth_permanent</code></div></td><td rowspan="1" colspan="1"><p>永久认证失败</p></td><td rowspan="1" colspan="1"><p>账号被封禁</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>billing</code></div></td><td rowspan="1" colspan="1"><p>账单问题</p></td><td rowspan="1" colspan="1"><p>额度用完</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>rate_limit</code></div></td><td rowspan="1" colspan="1"><p>请求过多</p></td><td rowspan="1" colspan="1"><p>被限流</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>overloaded</code></div></td><td rowspan="1" colspan="1"><p>服务器过载</p></td><td rowspan="1" colspan="1"><p>服务器忙</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>server_error</code></div></td><td rowspan="1" colspan="1"><p>服务器错误</p></td><td rowspan="1" colspan="1"><p>5xx 错误</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>timeout</code></div></td><td rowspan="1" colspan="1"><p>请求超时</p></td><td rowspan="1" colspan="1"><p>网络问题</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>context_overflow</code></div></td><td rowspan="1" colspan="1"><p>上下文溢出</p></td><td rowspan="1" colspan="1"><p>消息太长</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>payload_too_large</code></div></td><td rowspan="1" colspan="1"><p>请求体太大</p></td><td rowspan="1" colspan="1"><p>413 错误</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>model_not_found</code></div></td><td rowspan="1" colspan="1"><p>模型不存在</p></td><td rowspan="1" colspan="1"><p>模型名错误</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>format_error</code></div></td><td rowspan="1" colspan="1"><p>请求格式错误</p></td><td rowspan="1" colspan="1"><p>参数问题</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>thinking_signature</code></div></td><td rowspan="1" colspan="1"><p>思考签名错误</p></td><td rowspan="1" colspan="1"><p>Anthropic 特有</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>long_context_tier</code></div></td><td rowspan="1" colspan="1"><p>长上下文限制</p></td><td rowspan="1" colspan="1"><p>Anthropic 特有</p></td></tr><tr><td rowspan="1" colspan="1"><div><code>unknown</code></div></td><td rowspan="1" colspan="1"><p>未知错误</p></td><td rowspan="1" colspan="1"><p>需要重试</p></td></tr></tbody></table>
+
+| 错误类型                 | 含义     | 典型场景         |
+| -------------------- | ------ | ------------ |
+| `auth`               | 认证失败   | API Key 无效   |
+| `auth_permanent`     | 永久认证失败 | 账号被封禁        |
+| `billing`            | 账单问题   | 额度用完         |
+| `rate_limit`         | 请求过多   | 被限流          |
+| `overloaded`         | 服务器过载  | 服务器忙         |
+| `server_error`       | 服务器错误  | 5xx 错误       |
+| `timeout`            | 请求超时   | 网络问题         |
+| `context_overflow`   | 上下文溢出  | 消息太长         |
+| `payload_too_large`  | 请求体太大  | 413 错误       |
+| `model_not_found`    | 模型不存在  | 模型名错误        |
+| `format_error`       | 请求格式错误 | 参数问题         |
+| `thinking_signature` | 思考签名错误 | Anthropic 特有 |
+| `long_context_tier`  | 长上下文限制 | Anthropic 特有 |
+| `unknown`            | 未知错误   | 需要重试         |
+
 
 ## 受控的子 Agent 机制
 
@@ -592,23 +519,23 @@ Hermes 模式（主动注入）：用户通过 `@` 符号直接指定资源，�
 
 \# 子Agent不能使用的工具（防止权限升级）
 
-DELEGATE\_BLOCKED\_TOOLS = {
+DELEGATE_BLOCKED_TOOLS = {
 
-"delegate\_task", # 防止递归委派（子Agent不能再创建子子Agent）
+"delegate_task", # 防止递归委派（子Agent不能再创建子子Agent）
 
 "clarify", # 防止嵌套提问循环
 
 "memory", # 防止操纵记忆
 
-"send\_message", # 防止消息劫持
+"send_message", # 防止消息劫持
 
-"execute\_code" # 防止代码执行权限升级
+"execute_code" # 防止代码执行权限升级
 
 }
 
-MAX\_CONCURRENT\_CHILDREN = 3 # 最多 3 个并行子Agent
+MAX_CONCURRENT_CHILDREN = 3 # 最多 3 个并行子Agent
 
-MAX\_DEPTH = 2 # 最多 2 层嵌套
+MAX_DEPTH = 2 # 最多 2 层嵌套
 
 ## 开放的插件系统与生态扩展
 
@@ -618,13 +545,9 @@ Hermes 内置了强大的插件系统（Plugin System），允许第三方开发
 
 在生产环境中，安全性是不可逾越的红线。Hermes 构建了多层防御体系：
 
-●
+- 防 Prompt 注入：内置专门的检测机制，识别并拦截恶意的提示词注入攻击，防止用户通过特殊指令绕过系统限制。
 
-防 Prompt 注入：内置专门的检测机制，识别并拦截恶意的提示词注入攻击，防止用户通过特殊指令绕过系统限制。
-
-●
-
-Skill 安全扫描：对于动态生成或外部引入的 Skill 文件，系统会在加载前进行静态代码分析和安全扫描，确保其中不包含恶意逻辑或敏感操作。
+- Skill 安全扫描：对于动态生成或外部引入的 Skill 文件，系统会在加载前进行静态代码分析和安全扫描，确保其中不包含恶意逻辑或敏感操作。
 
 综上所述，Hermes 的 Harness Engineering 不仅仅是一个Agent的运行环境，更是一个集监控、自愈、隔离、扩展与安全于一体的综合管控体系。它通过标准化的错误处理和严格的子任务隔离，解决了 Agent 落地中最头疼的稳定性问题；通过开放的插件体系和严密的安全护栏，平衡了灵活性与合规性。正是这些看似“幕后”的工程细节，构成了 Hermes 能够从容应对复杂场景的核心底气。
 
@@ -636,17 +559,11 @@ Skill 安全扫描：对于动态生成或外部引入的 Skill 文件，系统�
 
 如果我们将 Agent 的发展阶段做一个简单的类比：
 
-●
+- 早期Agent：都是是被动式的，依赖用户明确的指令触发，一问一答，无法执行复杂、长周期任务
 
-早期Agent：都是是被动式的，依赖用户明确的指令触发，一问一答，无法执行复杂、长周期任务
+- 自主Agent：OpenClaw、Claude Code等当代主流 Agent，能够自主规划路径、调用工具，独立完成复杂、长周期任务
 
-●
-
-自主Agent：OpenClaw、Claude Code等当代主流 Agent，能够自主规划路径、调用工具，独立完成复杂、长周期任务
-
-●
-
-自进化Agent：Hermes 又是一个里程碑，它迈向了自进化（Self-Evolving），它不仅能自主执行，还能在执行中学习，在学中变强。
+- 自进化Agent：Hermes 又是一个里程碑，它迈向了自进化（Self-Evolving），它不仅能自主执行，还能在执行中学习，在学中变强。
 
 这种从“自主”到“自进化”的跨越，正是当前 AI 系统架构演进的最显著特征。与此同时，底层基座模型也在飞速突破 —— 如近期备受关注的Claude Mythos等模型，已在多项基准测试中展现出碾压级的能力。“更强基座模型” + “更优自进化架构”的双轮驱动，让我们比以往任何时候都更接近 AGI（通用人工智能）的曙光。
 
@@ -656,180 +573,62 @@ Skill 安全扫描：对于动态生成或外部引入的 Skill 文件，系统�
 
 ## References
 
-\[1\] Hermes Agent 官网： [https://hermes-agent.nousresearch.com/](https://hermes-agent.nousresearch.com/)
+[1] Hermes Agent 官网： [https://hermes-agent.nousresearch.com/](https://hermes-agent.nousresearch.com/)
 
-\[2\] Hermes Agent GitHub地址： [https://github.com/nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent)
+[2] Hermes Agent GitHub地址： [https://github.com/nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent)
 
-\[3\] AutoResearch GitHub地址： [https://github.com/karpathy/autoresearch](https://github.com/karpathy/autoresearch)
+[3] AutoResearch GitHub地址： [https://github.com/karpathy/autoresearch](https://github.com/karpathy/autoresearch)
 
-\[4\] Y Wang, X Chen, et al. 《OpenClaw-RL: Train Any Agent Simply by Talking》
+[4] Y Wang, X Chen, et al. 《OpenClaw-RL: Train Any Agent Simply by Talking》
 
 📢 欢迎大家来阅读我的AI / Agent / LLM系列文章：
 
 『项目解析』：
 
-●
+- [深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥
 
-[深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥
+- [深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥
 
-●
-
-[深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥
-
-●
-
-[Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
+- [Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
 
 『AI方法论』：
 
-●
+- [Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
 
-[Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
+- [如何让Agent更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
 
-●
+- [如何构建和调优高可用性的Agent？浅谈阿里云服务领域Agent构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
 
-[如何让Agent更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
-
-●
-
-[如何构建和调优高可用性的Agent？浅谈阿里云服务领域Agent构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
-
-●
-
-[为什么一定要做Agent智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
+- [为什么一定要做Agent智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
 
 『业务落地』：
 
-●
+- [从Multi-Agent到Skills：云小二Aivis如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
 
-[从Multi-Agent到Skills：云小二Aivis如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
+- [MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
 
-●
+- [阿里云服务领域Agent平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
 
-[MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
+- [基于通义千问的阿里云小智服务领域Agent设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
 
-●
+- [基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
 
-[阿里云服务领域Agent平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
-
-●
-
-[基于通义千问的阿里云小智服务领域Agent设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
-
-●
-
-[基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
-
-●
-
-[基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
+- [基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
 
 『技术干货』：
 
-●
+- [如何最大化发挥大模型LLM的效果？来看看OpenAI的技术分享干货吧](https://ata.atatech.org/articles/11020141673) 🔥
 
-[如何最大化发挥大模型LLM的效果？来看看OpenAI的技术分享干货吧](https://ata.atatech.org/articles/11020141673) 🔥
+- [通义千问2技术报告（Qwen2 Technical Report）解读](https://ata.atatech.org/articles/11020284419) 🔥
 
-●
+- [通义千问技术报告（Qwen Technical Report）解读](https://ata.atatech.org/articles/11020088844) 🔥
 
-[通义千问2技术报告（Qwen2 Technical Report）解读](https://ata.atatech.org/articles/11020284419) 🔥
+- [像打字机一样！大模型流式推理输出与部署的原理与实践](https://ata.atatech.org/articles/11000267465)
 
-●
+- [Temperature和TopP是什么？大模型常用超参数原理介绍与调参实践](https://ata.atatech.org/articles/11000267891)
 
-[通义千问技术报告（Qwen Technical Report）解读](https://ata.atatech.org/articles/11020088844) 🔥
+- [模型太大显存放不下？EAS多卡部署大模型实践](https://ata.atatech.org/articles/11020076048)
 
-●
+- [大模型生成太慢？使用FlashAttention优化LLMs推理性能的EAS部署实践](https://ata.atatech.org/articles/11020093226)
 
-[像打字机一样！大模型流式推理输出与部署的原理与实践](https://ata.atatech.org/articles/11000267465)
-
-●
-
-[Temperature和TopP是什么？大模型常用超参数原理介绍与调参实践](https://ata.atatech.org/articles/11000267891)
-
-●
-
-[模型太大显存放不下？EAS多卡部署大模型实践](https://ata.atatech.org/articles/11020076048)
-
-●
-
-[大模型生成太慢？使用FlashAttention优化LLMs推理性能的EAS部署实践](https://ata.atatech.org/articles/11020093226)
-
-●
-
-[给大模型提速！使用vLLM加速大模型推理部署实践](https://ata.atatech.org/articles/11020197762)
-
-END
-
-背景
-
-Self-Evolving：“内外”双路径驱动的“自进化”
-
-动态Skill生成：从“一次性执行”到“经验沉淀”
-
-触发机制
-
-后台审查Agent
-
-RL训练闭环：“权重内化”的终极“自进化”
-
-Agent轨迹组织
-
-批量数据生成
-
-通用数据生成
-
-SWE任务数据生成
-
-Agent轨迹压缩
-
-RL强化学习训练
-
-GRPO算法思路
-
-奖励函数的设计
-
-思考：为什么不直接从用户数据中学习？
-
-Prompt Engineering：模型异构与无缝迁移的“兼容主义”
-
-工具使用强制指导
-
-兼容各AI产品生态
-
-Context Engineering：比例阈值压缩与记忆持久化
-
-压缩：上下文的动态阈值压缩
-
-Memory：内外双驱的混合架构
-
-内部记忆：基于文件的长期事实沉淀
-
-外部记忆：接入第三方记忆服务的弹性扩展
-
-上下文注入：从“工具调用”到“即时挂载”的效率提升
-
-Harness Engineering：约束与运行保障
-
-全生命周期的 Hook 机制
-
-结构化的错误分类与自愈体系
-
-受控的子 Agent 机制
-
-开放的插件系统与生态扩展
-
-多层级的安全护栏（Guardrails）
-
-总结
-
-References
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+- [给大模型提速！使用vLLM加速大模型推理部署实践](https://ata.atatech.org/articles/11020197762)

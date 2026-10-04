@@ -8,43 +8,12 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-淘天集团
-
-粉丝 0影响力 15
-
-**
-
-**
-
-**
-
-** 原创文章
-
-** AI辅助优化 30%
-
-** 内部资料
-
-发表到圈儿
-
-[淘天业务技术](https://ata.atatech.org/community/team/68) (首发)
-
-**
-
-[李海宏(至曜)](https://ata.atatech.org/users/11002130190)
-
 昨天20:50发表8次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章22:08
-
-**
 
 ## 写在前面：
 
@@ -97,7 +66,7 @@ tags:
 
 ![image.png](redirect_43.png)
 
-- **L1 交互与意图理解层** ：提取结构化参数（userId、orderId、timestamp、scene\_tag），识别问题类型，判断是否在能力边界内。关键机制有三个—— `userId 补全` （缺失时用昵称反查）、 `边界守卫` （拒绝非会员业务）、 `SOP 路由` （把典型场景映射到标准流程）。
+- **L1 交互与意图理解层** ：提取结构化参数（userId、orderId、timestamp、scene_tag），识别问题类型，判断是否在能力边界内。关键机制有三个—— `userId 补全` （缺失时用昵称反查）、 `边界守卫` （拒绝非会员业务）、 `SOP 路由` （把典型场景映射到标准流程）。
 - **L2 RAG 知识与规则层** ：为工具调用和结果解读提供权威依据，是 Agent 行为的"宪法"。核心是 **查询模板库** （SLS/Holo 的唯一合法模板，只允许替换占位符）、 **业务规则字典** 、 **工具契约** 。
 - **L3 原子工具与诊断能力层** ：按业务域划分为五大工具簇（信息查询、资格活动、交易退款、系统排查、规则判断），共 20+ 原子能力。
 - **L4 诊断推理与输出层** ：两种推理模式（SOP 驱动 / Self-Plan 自主规划），统一的三分归因框架（ **业务规则 / 系统异常 / 用户理解偏差** ），以及强制的五要素结构化输出（问题概述、归因结论、关键证据、建议动作、不确定性说明）。
@@ -110,7 +79,7 @@ tags:
 | --- | --- | --- |
 | **天猫积分** | 以 Self-Plan 为主 | 知识库着重描述"工具的用途与边界"， **不告诉模型排查步骤** ，由模型根据工具用途自主编排顺序 |
 | **开续卡 + 权益** | SOP + Self-Plan | 复杂长链路（如海外收银台）走 SOP；单一工具即可解决的走 Self-Plan，甚至无需调用工具、按规则文档解释 |
-| **消费券** | 以 SOP/Skill 为主 | 低成本运行态层（默认先用）：query\_consume\_crowd（消费券预查询）、sls\_log\_tool（领取日志）、query\_vip\_level\_change\_record（等级变更）、query\_black\_vip\_info（会员信息）。用于确认「是否领取成功 / 领取时间 / 等级变更 / 会员与卡程状态」。 |
+| **消费券** | 以 SOP/Skill 为主 | 低成本运行态层（默认先用）：query_consume_crowd（消费券预查询）、sls_log_tool（领取日志）、query_vip_level_change_record（等级变更）、query_black_vip_info（会员信息）。用于确认「是否领取成功 / 领取时间 / 等级变更 / 会员与卡程状态」。 |
 |  |  | 高成本配置态层（按门控触发，非每次调用）：88VIP排查skill-IDEA。内含多个下层配置查询 skill（活动配置、券模板反查、拉菲投放/库存、人群依赖、巡检），单次调用重、耗时长。 |
 | **活动玩法** | 以Skill为主 | 排查链路单一，结构化了查询口径表，由运营同学每日维护 |
 
@@ -175,17 +144,16 @@ tags:
 
 > 这种"编排层 + 本体"的分工，让 **业务定制** （工单场景怎么接、结果怎么呈现）与 **核心排查能力** （怎么查账号、怎么归因）解耦：本体可以被多个应用层（Tickets、VOC 舆情）复用，而每个应用层可以独立演进自己的入口和输出。
 
-`**ticketSmartAgent**` **（工单智能助手-增强型，应用层/编排型）**  
+`**ticketSmartAgent**` **（工单智能助手-增强型，应用层/编排型）**
 ![image.png](redirect_47.png)
 
-`**memberCheckAnswer**` **（会员排查 Agent 本体）**  
+`**memberCheckAnswer**` **（会员排查 Agent 本体）**
 ![image.png](redirect_48.png)
 
 ### 2.5 结果回传：钉钉互动卡片
 
 诊断结论通过钉钉互动卡片推送到运营群。核心方法 `sendDingTalkInteractiveCard` ：
 
-```
 getAccessToken(appKey, appSecret)
   → createAndDeliver(
         cardTemplateId,          // 资源位配置（高频变更）
@@ -194,7 +162,6 @@ getAccessToken(appKey, appSecret)
         openSpaceId,             // 资源位配置，决定发到哪个群
         robotCode,               // 机器人须已在该群内
         cardData.cardParamMap)
-```
 
 > **关键设计：** `**outTrackId**` **直接复用** `**aiConfigCode**` **。** 钉钉回调只带 `outTrackId` ，两者相同即可用它直接反查记录， **无需额外映射表** ；卡片更新接口也用它定位卡片。
 
@@ -232,9 +199,9 @@ getAccessToken(appKey, appSecret)
 - **落库** ：复用 `vip_ai_config` 单表， `type = tickets_work_order_enhanced` ， `data` 字段用 **JSON 承载全部业务数据** （新增字段时 DTO/Adapter/DAL/前端协议全都不用改，这是本方案的关键设计）。
 - **HSF 查询/管理服务** （ `member-ai-client` 协议）： `TicketsDiagnosisQueryService` （queryPage / queryByCode / queryStat）供 OneDay 仪表盘； `TicketsDiagnosisManageService` （updateFeedback / deleteByCode）支持后台补录与删除。后台管理接口 **完全不依赖 Stream** ，是回调链路的天然兜底。
 - **离线报表** ： `vip_ai_config → ODPS DWD → ADS → BI 报表` ，每日全量快照重刷。排序键用 `gmtCreate` 而非 `gmtModified` （后者会被追加评论刷新）。
-- **人工采纳打标** ：业务最终在 **群聊卡片按钮** 或 \[Tickets 工单智能助手管理后台\] 上完成诊断采纳打标，这些反馈既是效果度量，也是 Agent Loop 的人工信号源。
+- **人工采纳打标** ：业务最终在 **群聊卡片按钮** 或 [Tickets 工单智能助手管理后台] 上完成诊断采纳打标，这些反馈既是效果度量，也是 Agent Loop 的人工信号源。
 
-\[Tickets 工单智能助手管理后台\]界面示意图：
+[Tickets 工单智能助手管理后台]界面示意图：
 
 从效果上来看：
 
@@ -246,22 +213,22 @@ getAccessToken(appKey, appSecret)
 
 成本估算：每条工单花费token约等于200万，<=0.5元
 
-诊断明细：  
+诊断明细：
 ![image.png](redirect_52.png)
 
-准确率指标：  
+准确率指标：
 ![image.png](redirect_53.png)
 
-诊断详情：  
+诊断详情：
 ![image.png](redirect_54.png)
 
-诊断耗时指标：  
+诊断耗时指标：
 ![image.png](redirect_55.png)
 
-提效指标：  
+提效指标：
 ![image.png](redirect_56.png)
 
-成本估算：  
+成本估算：
 ![image.png](redirect_57.png) ![image.png](redirect_58.png)
 
 ---
@@ -278,9 +245,9 @@ getAccessToken(appKey, appSecret)
 
 **核心结论：会员排查 Agent 的工具不是"直连底层"，而是由** `**xinxuan-setup**` **的** `**setup-service**` **统一自建了一层 HSF Provider 做封装聚合，最终由idelab工具箱进行注册（底层本质其实也是一个MCP服务）。**
 
-这样做的价值：\*\*把散落在交易、大会员、积分、消费券等多个二方系统的能力，收敛成一组语义清晰、入参规范、结果可控、且做过脱敏的"排查专用工具"\*\*，Agent 只需面对统一的工具契约，而不必理解每个底层系统的协议差异。
+这样做的价值：**把散落在交易、大会员、积分、消费券等多个二方系统的能力，收敛成一组语义清晰、入参规范、结果可控、且做过脱敏的"排查专用工具"**，Agent 只需面对统一的工具契约，而不必理解每个底层系统的协议差异。
 
-目前原子工具已接入 \*\*20+\*\*，统一归类在"舆情诊断 Agent 工具箱"，按业务域可分为五大工具簇：详情见： [《AI答疑/排查架构&进展》](https://alidocs.dingtalk.com/i/nodes/14lgGw3P8vxjwogPCgGx0b45V5daZ90D?utm_scene=person_space&iframeQuery=anchorId%3Duu_mrsr4ndx98nazgwvpnk)
+目前原子工具已接入 **20+**，统一归类在"舆情诊断 Agent 工具箱"，按业务域可分为五大工具簇：详情见： [《AI答疑/排查架构&进展》](https://alidocs.dingtalk.com/i/nodes/14lgGw3P8vxjwogPCgGx0b45V5daZ90D?utm_scene=person_space&iframeQuery=anchorId%3Duu_mrsr4ndx98nazgwvpnk)
 
 | 工具簇 | 代表工具 | 底层来源 |
 | --- | --- | --- |
@@ -340,7 +307,7 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 ![image.png](redirect_62.png)
 
-#### ① 执行链日志归档（执行链日志归档\_21718）
+#### ① 执行链日志归档（执行链日志归档_21718）
 
 - **做什么** ：采集 AI Studio 问题排查 Agent（appCode `UmggMXyACZh` ） **上一整点小时** 的执行链日志，下钻每个 IDEAs 子 Agent 的完整调用链，按日期归档到文件库。
 - **产物长什么样** ：每条归档日志（如 `279ff1bd-...md` ）包含——会话元信息（appCode、sessionId、messageId、耗时、tokens、费用、子 Agent conversationId）、用户提问原文、最终回答、以及 **IDEAs 子 Agent 内部完整执行链路** （每一步的 role、耗时、推理内容、调用了哪些工具、入参、工具返回，敏感入参已脱敏）。
@@ -350,9 +317,9 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 ![image.png](redirect_63.png)
 
-#### ② GoldSet样例提炼（金标准样例提炼\_22526）
+#### ② GoldSet样例提炼（金标准样例提炼_22526）
 
-- **做什么** ：按 sessionId 抓取执行链日志，提炼成\*\*金标准样例（goldSet）\*\*写入标准样例集。
+- **做什么** ：按 sessionId 抓取执行链日志，提炼成**金标准样例（goldSet）**写入标准样例集。
 - **goldSet 的结构** （对齐 README schema）：样例元信息与溯源、输入、 **标准结论** （核心归因/口径修正/关键证据）、 **标准执行路径** （期望的工具调用序列与入参）、 **评分锚点与红线** （加分项/红线/可优化点）、关联资源。
 - **两种类型** ： **正向金标准** （诊断正确、路径规范、证据闭环，综合期望 ≥9.0，作为"应该怎么做"的正例）和 **反例** （典型错误会话，标注错误点与正确做法）。
 - **价值** ：goldSet 是整个 Loop 的"标尺"——既是自动评测的 **对照锚点** ，也是 Agent 迭代后的 **回归验证跑分基准** ，还是版本发布前的 **质量基线** 。
@@ -361,7 +328,7 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 ![image.png](redirect_64.png)
 
-#### ③ 会话评测（会话评测\_22150）
+#### ③ 会话评测（会话评测_22150）
 
 - **做什么** ：对某条执行链会话做 **四方交叉评测** —— `执行链日志 × memberCheckAnswer Agent × vipSentimentKnowledgeBase 知识库 × 88VIP 代码仓库` ，输出质量评测报告并推送到指定钉钉频道。
 - **为什么是"四方" **：这正好呼应了前三部分的产物——用** 执行链日志** 看 Agent 实际怎么跑的，用 **memberCheckAnswer** 核对它本应具备哪些能力（如"漏用了 queryPointDetail"），用 **知识库** 验证归因是否有权威依据，用 **代码仓库** 做机制级的终极佐证（如从 `TmallPointAddMoneyBuyRefundOrderListener` 监听器代码证实"无退款单则回退逻辑永不触发"）。
@@ -379,7 +346,7 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 把三个 sub-agent 串起来，Agent Loop 的完整逻辑是：
 
 1. **感知** ：线上每一次真实诊断（ `memberCheckAnswer` ）都带着落库时生成的 sessionId； `执行链日志归档` 定时把这些执行链下钻、归档到 ideaGoal 云端文件库， **让执行可回溯** 。
-2. **立标** ： `金标准样例提炼` 把优质会话固化为 goldSet，\*\*沉淀"什么是好的诊断"\*\*。
+2. **立标** ： `金标准样例提炼` 把优质会话固化为 goldSet，**沉淀"什么是好的诊断"**。
 3. **度量** ： `会话评测` 基于 Agent 的全部产物（提示词、知识库、few-shot、工具、MCP、skill）做四方交叉评测，对照 goldSet 打分， **指出差距与改进方向** 。
 4. **进化** ：评测建议反哺到提示词 / SOP / 知识库 / 构建样例 / 工具的迭代；改完后再用 goldSet 回归跑分， **验证是否引入退化** ——若通过，则成为新的发布基线，进入下一轮。
 
@@ -425,81 +392,3 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 IdeaLAB：张海山、本末、风业、树石、宵途
 
 Tickets：薛宣
-
-END
-
-写在前面：
-
-一、Agent 架构层级介绍
-
-1.1 应用层：面向"受众场景"的定制编排
-
-1.2 能力层：会员排查本体的 7 大能力
-
-能力内部的四层诊断模型（L1–L4）
-
-SOP 与 Self-Plan 的动态切换
-
-1.3 上下文与工具原子能力层：最稳定的地基
-
-1.4 三层架构总览
-
-二、外部交互链路介绍
-
-2.1 全链路时序图
-
-2.2 入口：消息接入（这是整条链路的起点）
-
-2.3 主流程：增强处理器的 7 步
-
-2.4 双 Agent 协作：编排层 → 排查本体
-
-2.5 结果回传：钉钉互动卡片
-
-2.6 卡片回调：Stream 长连接
-
-2.7 落库、报表与人工打标
-
-三、知识上下文组织介绍
-
-3.1 数据源如何接入：工具在代码仓库中的来源
-
-3.2 知识如何分层：排查知识库 + 规则知识库
-
-3.3 agent 与 skill 的能力分层
-
-四、Agent Loop 实现
-
-4.1 为什么需要 Agent Loop
-
-4.2 ideaGoal 云端文件库：Loop 的物理载体
-
-4.3 三个 sub-agent 构成的进化闭环
-
-① 执行链日志归档（执行链日志归档\_21718）
-
-② GoldSet样例提炼（金标准样例提炼\_22526）
-
-③ 会话评测（会话评测\_22150）
-
-4.4 闭环如何"合拢"：从产物到进化
-
-4.5 一张图收束全篇
-
-结语
-
-致谢
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

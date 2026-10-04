@@ -8,41 +8,16 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 190影响力 1.9k
-
-** 2
-
-** 2
-
-**
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
 ## Linux Ext 文件系统
-
-[陈阳(逸殊)](https://ata.atatech.org/users/11000967975)
 
 2021-01-11发表2023-03-28更新200次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 引言
 
-本文整理了 Linux 内核中 Ext 文件系统的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。  
+本文整理了 Linux 内核中 Ext 文件系统的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。
 
 ## 文件系统种类
 
@@ -70,22 +45,22 @@ Ext 文件系统这里主要介绍 Ext2 和 Ext3，它们的特性如下：
 - 有些文件系统存储在面向块的设备上，与设备之间的数据传输都以块为单位进行，不会传输单个字符。
 - 另一方面，Ext2 文件系统是一种基于块的文件系统，它将硬盘划分为若干块，每个块的长度都相同，按块管理元数据和文件内容。这意味着底层存储介质的结构影响到了文件系统的结构，这很自然也会影响到所用的算法和数据结构的设计。
 
-在将硬盘划分为固定长度的块时，特别重要的一个方面是文件占用的存储空间只能是块长度的整数倍。这会对存储空间的利用造成一定的影响，我们以下例来介绍这种影响，假定块长为5个单位。我们需要存储 3 个文件，它们的长度分别是 11，4，2 个单位。  
+在将硬盘划分为固定长度的块时，特别重要的一个方面是文件占用的存储空间只能是块长度的整数倍。这会对存储空间的利用造成一定的影响，我们以下例来介绍这种影响，假定块长为5个单位。我们需要存储 3 个文件，它们的长度分别是 11，4，2 个单位。
 
 ![[0af1a2b1-47b6-4678-99cf-247dbcab0846.png|block-file-system-example]]
 
 block-file-system-example
 
-  
+
 很明显，上面的方案空间利用率更高，但是它有个缺点，就是需要保存不同文件的边界，这部分管理数据实际上也会很大，这就抵消了这种方案节省的空间。所以，Ext 文件系统采用的是下面的方案，每个文件占用的存储空间不仅包括数据的实际长度，还要根据块长度向上取整到块长的整数倍。Ext2 的块长是可指定的，活用块长配置可以在不同的场景（许多大文件或许多小文件）提高文件系统的效率。
 
-理解了块的概念后，我们看一看块组，它是 Ext2 的基本成分，容纳了文件系统的其他结构。  
+理解了块的概念后，我们看一看块组，它是 Ext2 的基本成分，容纳了文件系统的其他结构。
 
 ![[708b0334-f3be-494a-806c-8d12bfaa624f.png|block-group]]
 
 block-group
 
-  
+
 块组中各个结构的介绍：
 
 - 超级块是用于存储文件系统自身元数据的核心结构。其中的信息包括空闲与已使用块的数目、块长度、当前文件系统状态(在启动时用于检测前一次崩溃)、各种时间戳(例如，上一次装载文件系统的时间以及上一次写入操作的时间)，它还包括一个表示文件系统类型的魔数，这样 mount 能够确认文件系统的类型是否正确。内核只使用第一个块组的超级块读取文件系统的元信息，即使在多个超级块中都有数据时，也是如此，这是一种数据冗余。
@@ -94,13 +69,13 @@ block-group
 - inode 表包含了块组中所有的 inode，inode 用于保存文件系统中与各个文件和目录相关的所有元数据。
 - 顾名思义，数据块部分包含了文件系统中的文件的有用数据。
 
-每个文件系统都由大量的块组组成，在硬盘上相继排布，就如下图所示。  
+每个文件系统都由大量的块组组成，在硬盘上相继排布，就如下图所示。
 
 ![[6d50cd82-f7d5-48ed-93dc-924161defaa4.png|lots-of-block-group]]
 
 lots-of-block-group
 
-  
+
 启动扇区是硬盘上的一个区域，在系统加电启动时，其内容由 BIOS 自动装载并执行。它包含一个启动装载程序，用于从计算机安装的操作系统中选择一个启动，还负责继续启动过程。显然，该区域不可能填充文件系统的数据。启动装载程序并非在所有系统上都是必须的。在需要启动装载程序的系统上，它们通常位于硬盘的起始处，以避免影响其后的分区。
 
 磁盘上剩余的空间由连续的许多块组占用，存储了文件系统元数据和各个文件的有用数据。从前面的块组内部构造中，你会看到每个块组都包含超级块数据，这实际上冗余的。它存在的价值主要有如下两点：
@@ -114,49 +89,49 @@ lots-of-block-group
 
 文件占用的数据块不见得是连续的(虽然出于性能考虑，连续数据块是我们想要的一种情况)，也可能散布到整个硬盘上。如果我们将文件涉及的所有块的块号都存在 inode 中，那么一个 inode 中能够存放的块数量肯定是有最大限制的，否则 inode 就会过大。所以，inode 通过一种间接的方式来组织一个文件散布在整个硬盘上的所以数据块。
 
-在 inode 中有少量字节存储直接块号，它们用来表示长度较小的文件。对较大的文件，指向文件内容的各个数据块的指针(块号)是间接存储的，如下图所示。这种方法容许对大小文件的灵活存储，因为用于存储块号的区域的长度，将随文件实际长度的变化而动态变化。inode 本身长度是固定的，用于间接引用的其他数据块是动态分配的。  
+在 inode 中有少量字节存储直接块号，它们用来表示长度较小的文件。对较大的文件，指向文件内容的各个数据块的指针(块号)是间接存储的，如下图所示。这种方法容许对大小文件的灵活存储，因为用于存储块号的区域的长度，将随文件实际长度的变化而动态变化。inode 本身长度是固定的，用于间接引用的其他数据块是动态分配的。
 
 ![[eadf786f-7246-48f3-ac06-50ae2cd9bf1f.png|inode-store-block]]
 
 inode-store-block
 
-  
-因为 inode 中最多包含 15 个块号（12 个直接块号，3 个间接寻址块），所以 inode 的长度是固定的，而且占用的硬盘空间比较小。当文件较小时，这些 inode 中的直接块号指向的就是文件全部数据块，当文件较大时，通过间接寻址块，就能拓展 inode 管理的文件最大容量。这里每个块号是 4 个字节，当一个块的大小是 b 时，一级寻址块内就能存放 `b/4` 个块号，同理二级间接寻址能够存放 `(b / 4) * (b / 4)` ，三级间接寻址能够存放 `(b / 4) * (b / 4) * (b / 4)` 个块号。总结一下就是 Ext2 文件系统中一个文件的最大大小等于 `(b/4)3+(b/4)2+b/4+12` 块，b 为块的大小，下表展示了对于不同的块大小，Ext2 所能管理的最大单个文件的尺寸。  
+
+因为 inode 中最多包含 15 个块号（12 个直接块号，3 个间接寻址块），所以 inode 的长度是固定的，而且占用的硬盘空间比较小。当文件较小时，这些 inode 中的直接块号指向的就是文件全部数据块，当文件较大时，通过间接寻址块，就能拓展 inode 管理的文件最大容量。这里每个块号是 4 个字节，当一个块的大小是 b 时，一级寻址块内就能存放 `b/4` 个块号，同理二级间接寻址能够存放 `(b / 4) * (b / 4)` ，三级间接寻址能够存放 `(b / 4) * (b / 4) * (b / 4)` 个块号。总结一下就是 Ext2 文件系统中一个文件的最大大小等于 `(b/4)3+(b/4)2+b/4+12` 块，b 为块的大小，下表展示了对于不同的块大小，Ext2 所能管理的最大单个文件的尺寸。
 ![[4cba8796-282f-4cb1-9c67-8676e73f69d0.png|ext2-max-file-size]]
 
 ext2-max-file-size
 
-  
+
 仔细回想一下，内核在管理内存页时用到的页表也是采用的相同的思路，通过这种间接存储块号的方式，可以有效地减少 inode 的大小，但是因为必须通过间接寻址才能得到最终的数据块，所以势必会造成性能上的损失（越大的文件，访问速度越慢），不过这也是一种折中。
 
-此外，磁盘存储的块管理和内存的管理上类似，也存在碎片问题。随着时间的推移，文件系统中许多文件从磁盘随机位置删除，又添加了新的文件，这使得空闲磁盘空间变成长度不同的存储区，因此碎片不可避免地出现了。  
+此外，磁盘存储的块管理和内存的管理上类似，也存在碎片问题。随着时间的推移，文件系统中许多文件从磁盘随机位置删除，又添加了新的文件，这使得空闲磁盘空间变成长度不同的存储区，因此碎片不可避免地出现了。
 
 ![[3ff9f51d-f5f7-40e4-88ff-3ef04732a000.png|file-system-segment]]
 
 file-system-segment
 
-  
+
 尽管数据在磁盘上是散布在随机位置的，但是这些对用户来说是透明的，用户总能通过直接块号，一级二级三级间接块号，顺序的访问文件的所有数据，而不会考虑到磁盘上数据碎片的程度。但是，如果碎片严重的话，访问速度是会受到严重影响的，如果文件的所有块在磁盘上是连续的话，磁头读取数据时移动将降到最低，因此提高了数据传输速度。相反的，如果文件散布在磁盘的各个角落，那么磁头读取时，就需要不停地寻道，这就降低访问速度。因此 Ext2 会尽量防止碎片，在无法避免碎片时，它会尽可能将同一文件的块维持在一个块组中，此外像 defrag.ext2 这样的系统工具还可以用来重新整理磁盘块，将磁盘碎片重组成连续数据。
 
-然后，我们来讨论一下在 Ext2 中如何描述目录，它定义了文件系统的拓扑结构。在经典的 Unix 文件系统中，目录不过是一种特殊的文件，其 inode 指向的块中描述了该目录下所包含的所有文件和子目录的名称，以及它们对应的 inode 编号。下图展示的就是一个目录 inode 的块内容，前段存储了 inode 编号，后端存储了文件类型和文件名的内容。  
+然后，我们来讨论一下在 Ext2 中如何描述目录，它定义了文件系统的拓扑结构。在经典的 Unix 文件系统中，目录不过是一种特殊的文件，其 inode 指向的块中描述了该目录下所包含的所有文件和子目录的名称，以及它们对应的 inode 编号。下图展示的就是一个目录 inode 的块内容，前段存储了 inode 编号，后端存储了文件类型和文件名的内容。
 
 ![[365b8495-5f52-4278-bf4a-4bd929f58d4b.png|inode-store-directory]]
 
 inode-store-directory
 
-  
-前两项总是. 和.. 它们分别指向了当前目录和父目录。rec\_len 是文件名的长度，因为文件名必须为 4 的整数倍，所以空白的部分会用 `\0` 填充。文件类型并未定义在 inode 自身，而是定义在目录数据块的 file\_type 字段中。值得一提的是，只有目录和普通文件才会占用磁盘的数据块，而其他类型的文件都可以通过 inode 中的信息完全描述。
 
-- 目标路径长度小于 60 字节的符号链接，保存在原来用来保存目录块号的那 15 \* 4 字节中。
+前两项总是. 和.. 它们分别指向了当前目录和父目录。rec_len 是文件名的长度，因为文件名必须为 4 的整数倍，所以空白的部分会用 `\0` 填充。文件类型并未定义在 inode 自身，而是定义在目录数据块的 file_type 字段中。值得一提的是，只有目录和普通文件才会占用磁盘的数据块，而其他类型的文件都可以通过 inode 中的信息完全描述。
+
+- 目标路径长度小于 60 字节的符号链接，保存在原来用来保存目录块号的那 15 * 4 字节中。
 - 设备文件，命名管道，持久套接字。
 
-为提高块分配的性能，Ext2 文件系统采用了一种称之为预分配的机制。每当对一个文件请求许多新块时，不会只分配所需要的块数。能够用于连续分配的块，会另外被秘密标记出来，供后续使用。内核确保各个保留的区域是不重叠的。这在进行新的分配时可以节省时间以及防止碎片，特别是在有多个文件并发增长时。应该强调的是: 预分配并不会降低可用空间的利用率。由一个 inode 预分配的空间，如果有需要，那么随时可能被另一个 inode 覆盖。但内核会尽力避免这种做法，只有当迫不得已时才会分配保留区。文件系统使用红黑树来维护预留块的数据，根据预留窗口的边界，对节点进行排序，这样在需要确认某一块是否被预留时，能够快速地找到目标块所在的预分配区域。同时，在 inode 信息中也存储了预留空间的信息，这样在要为该 inode 代表的文件中分配新的块时可以检查是否有预留块，如果有的话则优先从预留块中分配。  
+为提高块分配的性能，Ext2 文件系统采用了一种称之为预分配的机制。每当对一个文件请求许多新块时，不会只分配所需要的块数。能够用于连续分配的块，会另外被秘密标记出来，供后续使用。内核确保各个保留的区域是不重叠的。这在进行新的分配时可以节省时间以及防止碎片，特别是在有多个文件并发增长时。应该强调的是: 预分配并不会降低可用空间的利用率。由一个 inode 预分配的空间，如果有需要，那么随时可能被另一个 inode 覆盖。但内核会尽力避免这种做法，只有当迫不得已时才会分配保留区。文件系统使用红黑树来维护预留块的数据，根据预留窗口的边界，对节点进行排序，这样在需要确认某一块是否被预留时，能够快速地找到目标块所在的预分配区域。同时，在 inode 信息中也存储了预留空间的信息，这样在要为该 inode 代表的文件中分配新的块时可以检查是否有预留块，如果有的话则优先从预留块中分配。
 
 ![[0fe8c12b-6803-4b92-8bf5-8353fae3630e.png|ext2-reserve-block]]
 
 ext2-reserve-block
 
-  
+
 最后我们针对，Ext2 文件系统中的主要操作行为进行总结，概述每种操作处理过程：
 
 - 创建文件系统：通过 mke2fs 用户空间工具创建，它初始化超级块，超级块中的魔数表明了该文件系统是 Ext2，并分配一个 inode 和数据块，初始化根目录，数据块中包括. 和.. 它们都指向根目录本身，此外还有一个 lost+found 的目录，它用来保存发现的坏块。
@@ -182,7 +157,7 @@ Ext3 的基本思想在于，将对文件系统元数据的每个操作都视为
 2. 顺序(ordered)模式，日志只记录对元数据的修改。但对实际数据的操作会群集起来，总是在对元数据的操作之前执行，因而该模式比回写模式稍慢.
 3. 日志模式，对元数据和实际数据的修改，都写入日志。这提供了最高等级的数据保护，但速度是最慢的。丢失数据的可能性降到最低。
 
-日志不仅可以存储在一个专门的文件中，也可以放置在一个独立的分区中。事务并不是一个整块的结构，由于文件系统的结构，必须将事务分解为更小的单位。  
+日志不仅可以存储在一个专门的文件中，也可以放置在一个独立的分区中。事务并不是一个整块的结构，由于文件系统的结构，必须将事务分解为更小的单位。
 ![[d94cd360-9570-4228-8327-2d2ba29857a1.png|ext3-transaction.png]]
 
 - 日志记录是可以记入日志的最小单位。每个记录表示对某个块的一个更新。
@@ -214,7 +189,6 @@ proc 文件系统（Process data filesystem，进程数据文件系统）是种�
 
 每个系统进程，无论当前状态如何，都有一个对应的子目录(与其 PID 同名)，包含了该进程的有关信息。顾名思义，进程数据系统(process data system，简称 proc)的初衷就是传递进程数据。特定于进程的目录保存了哪些信息？简单的一个 `ls -l` 命令，就能看到一些信息:
 
-```bash
 cd /proc/1
 ls -l
 total 0
@@ -268,11 +242,9 @@ dr-xr-xr-x 3 root root 0 Nov 18 16:45 task
 -rw-rw-rw- 1 root root 0 Nov 18 16:45 timerslack_ns
 -rw-r--r-- 1 root root 0 Nov 18 16:45 uid_map
 -r--r--r-- 1 root root 0 Nov 18 16:45 wchan
-```
 
 上例是 PID 为 1 的 systemd，我们可以通过 `cmdline` 文件查看其起始命令行。
 
-```bash
 cat cmdline
 /usr/lib/systemd/systemd--switched-root--system--deserialize22
 # od 命令可以显示分隔符 nul
@@ -283,11 +255,9 @@ od -t a cmdline
 0000060   m nul   -   -   d   e   s   e   r   i   a   l   i   z   e nul
 0000100   2   2 nul
 0000103
-```
 
 environ 表示进程的所有环境变量，maps 以文本形式列出了进程的所有库的内存映射。
 
-```bash
 cat maps
 55e5a4004000-55e5a4165000 r-xp 00000000 fd:00 391970                     /usr/lib/systemd/systemd
 55e5a4365000-55e5a4388000 r--p 00161000 fd:00 391970                     /usr/lib/systemd/systemd
@@ -315,11 +285,9 @@ cat maps
 7fb0c436b000-7fb0c436c000 r--p 00014000 fd:00 33622807                   /usr/lib64/libz.so.1.2.7
 7fb0c436c000-7fb0c436d000 rw-p 00015000 fd:00 33622807                   /usr/lib64/libz.so.1.2.7
 ...
-```
 
 status 包含了有关进程的一般信息：
 
-```bash
 cat status
 Name:systemd
 Umask:0000
@@ -375,7 +343,6 @@ Mems_allowed:00000000，00000000，00000000，00000000，00000000，00000000，0
 Mems_allowed_list:0
 voluntary_ctxt_switches:685576
 nonvoluntary_ctxt_switches:1178
-```
 
 其中不仅包括了 UID/GID 以及进程其他数值信息，还包含内存分配，进程能力，各个信号掩码的状态（待决，阻塞，等）。
 
@@ -387,7 +354,6 @@ stat 和 statm 以连串数字的形式，提供了进程及其内存消耗的�
 
 /proc 不仅包含进程的信息，还包含了一些一般性的内容，如 iomem 和 ioports 提供了用于设备通信的内存地址和端口的有关信息。
 
-```bash
 cat iomem
 00000000-00000fff : Reserved
 00001000-0009ffff : System RAM
@@ -448,13 +414,11 @@ cat ioports
     0580-059f : pnp 00:02
       0580-059f : i801_smbus
 ...
-```
 
 类似的，一些文件提供了当前内存管理状况的粗略概览。buddyinfo 和 slabinfo 提供了伙伴系统和 slab 分配器的当前使用状况，而 meminfo 给出了一般性的内存使用情况，总内存，空闲内存，已分配内存，交换内存，共享区域，回写内存等。vmstat 给出了内存管理的其他特征，包括当前内存管理各个子系统中内存页的数目。
 
 interrupts 保存了当前操作期间引发的中断的说明。其中不仅给出中断数目，还对每个中断号，给出了相关设备的名称或者中断处理程序。
 
-```bash
 cat interrupts
            CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7       CPU8       CPU9       CPU10      CPU11      CPU12      CPU13      CPU14      CPU15
   0:        120          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  IR-IO-APIC   2-edge      timer
@@ -504,7 +468,6 @@ MIS:          0
 PIN:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   Posted-interrupt notification event
 NPI:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   Nested posted-interrupt event
 PIW:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   Posted-interrupt wakeup event
-```
 
 最后，我们还得提一下两个重要的数据项 loadavg 和 uptime。前者给出了过去 60 秒，5 分钟，15 分钟的平均系统负荷，后者给出了系统的运行时间，从系统启动经过的时间。
 
@@ -516,7 +479,6 @@ PIW:          0          0          0          0          0          0          
 
 用于动态地检查和修改内核行为的系统控制参数，在 proc 文件系统的数据项中，属于最多的一部分。sysctl 参数由一个独立的子目录 /proc/sys 管理，它进一步划分为各种子目录，对应于内核的各个子系统。
 
-```bash
 ls -l
 total 0
 dr-xr-xr-x 1 root root 0 Nov 18 17:30 abi
@@ -529,11 +491,9 @@ dr-xr-xr-x 1 root root 0 Nov 18 17:29 net
 dr-xr-xr-x 1 root root 0 Nov 18 17:30 sunrpc
 dr-xr-xr-x 1 root root 0 Nov 18 17:30 user
 dr-xr-xr-x 1 root root 0 Nov 18 17:30 vm
-```
 
 各个子目录中包含了一系列文件，反映了对应的内核子系统的特征数据，例如 /proc/sys/vm 包含如下数据项：
 
-```bash
 ls -l
 total 0
 -rw-r--r-- 1 root root 0 Nov 18 17:34 admin_reserve_kbytes
@@ -548,7 +508,6 @@ total 0
 -rw-r--r-- 1 root root 0 Nov 18 17:34 dirty_writeback_centisecs
 -rw-r--r-- 1 root root 0 Nov 18 17:34 dirtytime_expire_seconds
 ...
-```
 
 不同于前面讨论的文件，这里的这些文件不仅可以读，还可以通过普通的文件操作，向其中写入新值，例如 `echo "80" > /proc/sys/vm/swappiness` 。
 
@@ -567,7 +526,7 @@ kobject（内核对象）包含在一个层次化的组织中。 它们可以有
 
 #### 扩展属性
 
-从文件系统用户的角度来看，一个扩展属性就是与文件系统对象关联的个“名称/值”对。名称是个普通的字符串，内核对值的内容不作限制。它可以是文本串，但也可以包含任意的二进制数据。属性可以定义，也可以不定义(如果文件没有关联属性，就是这种情形)。如果定义了属性，可以有值，也可以没有。属性名称会按命名空间细分。这意味着，访问属性也要给出命名空间。按照符号约定，用一个点来分隔命名空间和属性名(例如 user.mime\_type)。
+从文件系统用户的角度来看，一个扩展属性就是与文件系统对象关联的个“名称/值”对。名称是个普通的字符串，内核对值的内容不作限制。它可以是文本串，但也可以包含任意的二进制数据。属性可以定义，也可以不定义(如果文件没有关联属性，就是这种情形)。如果定义了属性，可以有值，也可以没有。属性名称会按命名空间细分。这意味着，访问属性也要给出命名空间。按照符号约定，用一个点来分隔命名空间和属性名(例如 user.mime_type)。
 
 内核提供了几个系统调用来读写扩展属性，它们都是作用于 inode：
 
@@ -584,7 +543,6 @@ POSIX 访问控制表 (ACL) 是 POSIX 标准定义的一种扩展，用于细化
 
 下面我们介绍一个 ACL 的例子，下列是某一文件的 getfacl 输出内容，这里面的 `user` `user:joe` 等就是前面提到的 ACL 扩展属性，而后面的 `rwx` 就是扩展属性的值，这里我们可以看到用户组 `group:cool` 的权限被限制为只读 `r--` ，有效属性是 `r-x` ，other 属性没有权限限制 `other::rwx` ，那么当我们以 cool 组的账号访问该文件时，ACL 会检查发现该组用户具有读权限，但是没有执行权限，写权限的 ACL 检查被跳过，但是由于 other 中存在该权限，所以最后 cool 组的用户也有写权限。这里要注意 ACL 检查和 other 检查结果是要相与的（ACL 检查 & other），只有所有条件都满足时，才能得到相应的权限。
 
-```
 1:  # file: somedir/
  2:  # owner: lisa
  3:  # group: staff
@@ -595,81 +553,40 @@ POSIX 访问控制表 (ACL) 是 POSIX 标准定义的一种扩展，用于细化
  8:  group:cool:r-- # 组 cool 的权限
  9:  mask::r-x # 有效权限(mask) 即用户（joe）或组（cool）所设置的权限必须要存在于 mask 的权限设置范围内才会生效，创建人，创建人所在的组，other 的检查不受 mask 的限制
 10:  other::rwx # 其他用户权限
-```
 
 ## 参考内容
 
-\[1\]《Linux内核设计与实现》  
-\[2\]《Linux系统编程》  
-\[3\]《深入理解Linux内核》  
-\[4\]《深入Linux内核架构》  
-\[5\] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)  
-\[6\] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)  
-\[7\] [Linux中的物理内存管理 \[一\]](https://zhuanlan.zhihu.com/p/68465952)  
-\[8\] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)  
-\[9\] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)  
-\[10\] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)  
-\[11\] [linux内核学习笔记-struct vm\_area\_struct](https://blog.csdn.net/ywf861029/article/details/6114794)  
-\[12\] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)  
-\[13\] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)  
-\[14\] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)  
-\[15\] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)  
-\[16\] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)  
-\[17\] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)  
-\[18\] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)  
-\[18\] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)  
-\[19\] [页缓存page cache和地址空间address\_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)  
-\[20\] [rocketmq使用的系统参数（dirty\_background\_ration dirty\_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)  
-\[21\] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)  
-\[22\] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)  
-\[23\] [Linux中的内存回收\[一\]](https://zhuanlan.zhihu.com/p/70964195)  
-\[24\] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)  
-\[25\] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)  
-\[26\] [对 jiffies 溢出、回绕及 time\_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)  
-\[27\] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)  
-\[28\] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)  
-\[29\] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)  
-\[30\] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)  
-\[31\] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)  
-\[32\] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)  
-\[33\] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)
-
-END
-
-引言
-
-文件系统种类
-
-Ext 文件系统
-
-Ext2
-
-Ext3
-
-无持久存储文件系统
-
-proc
-
-sysfs
-
-扩展属性和 ACL
-
-扩展属性
-
-ACL
-
-参考内容
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[1]《Linux内核设计与实现》
+[2]《Linux系统编程》
+[3]《深入理解Linux内核》
+[4]《深入Linux内核架构》
+[5] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)
+[6] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)
+[7] [Linux中的物理内存管理 [一]](https://zhuanlan.zhihu.com/p/68465952)
+[8] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)
+[9] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)
+[10] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)
+[11] [linux内核学习笔记-struct vm_area_struct](https://blog.csdn.net/ywf861029/article/details/6114794)
+[12] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)
+[13] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)
+[14] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)
+[15] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)
+[16] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)
+[17] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)
+[18] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)
+[18] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)
+[19] [页缓存page cache和地址空间address_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)
+[20] [rocketmq使用的系统参数（dirty_background_ration dirty_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)
+[21] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)
+[22] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)
+[23] [Linux中的内存回收[一]](https://zhuanlan.zhihu.com/p/70964195)
+[24] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)
+[25] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)
+[26] [对 jiffies 溢出、回绕及 time_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)
+[27] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)
+[28] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)
+[29] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)
+[30] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)
+[31] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)
+[32] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+[33] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)

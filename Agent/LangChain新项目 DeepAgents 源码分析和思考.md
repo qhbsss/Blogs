@@ -10,39 +10,17 @@ tags:
 ---
 蚂蚁集团
 
-粉丝 3影响力 139
 
-** 19
 
-** 23
 
-** 3
 
-** 原创文章
-
-发表到圈儿
-
-[蚂蚁数智引擎技术部](https://ata.atatech.org/community/team/716) (首发)
-
-[安全大数据技术](https://ata.atatech.org/community/team/100051)
-
-**
-
-[刘萌(浅斟)](https://ata.atatech.org/users/12000203476)
 
 2025-10-12发表2025-10-13更新549次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章15:19
-
-**
 
 ## 前言
 
@@ -64,17 +42,11 @@ Harrison在研究了Claude Code、OpenAI Deep Research 和来自中国的Manus �
 
 规划能力：可以将大型任务分解为可管理的子任务，并根据工作进展调整计划。别想的太高大上哈，这个规划能力的实现其实可以非常简单~ Claude Code 使用 [Todo 列表工具](https://claudelog.com/faqs/what-is-todo-list-in-claude-code/?ref=blog.langchain.com) ， 实际上是一个空操作 (no-op)，它只是一种让智能体保持正轨的上下文工程策略。而DeepAgents里面更加简单，仅仅使用了一个Markdown列表，存储在虚拟文件系统中。
 
-●
+- Sub-agent: 子Agent委派，深度代理可以启动专门的子代理来处理任务的重点部分。子Agent可以带来几个明显的好处：专注于子任务，消耗更多的token（思考更充分），DeepAgents里提出了一个对我而言很新颖的观点：子Agent的使用可以避免“上下文污染”，在Claude Code中更加极端的，子Agent不能访问主Agent的上下文，子 Agent 拥有自己独立的上下文窗口，与主 Agent 的上下文是隔离的。收到主Agent指令后，子Agent只会把最终、精炼、结构化的结果返回给主 Agent，主Agent将其添加到上下文中。
 
-Sub-agent: 子Agent委派，深度代理可以启动专门的子代理来处理任务的重点部分。子Agent可以带来几个明显的好处：专注于子任务，消耗更多的token（思考更充分），DeepAgents里提出了一个对我而言很新颖的观点：子Agent的使用可以避免“上下文污染”，在Claude Code中更加极端的，子Agent不能访问主Agent的上下文，子 Agent 拥有自己独立的上下文窗口，与主 Agent 的上下文是隔离的。收到主Agent指令后，子Agent只会把最终、精炼、结构化的结果返回给主 Agent，主Agent将其添加到上下文中。
+- 文件系统：这是一个“划时代”的重要概念，根据需要持久化和检索信息，实现了超越单个对话轮次的真正“记忆”。Claude Code 可以访问文件系统以完成任务和记笔记，它也作为所有智能体协作的共享工作区。 [Manus](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus?ref=blog.langchain.com) 也大量使用文件系统作为记忆。文件系统实现“引用”+“读写”机制代替完整上下文传递，可以减轻LLM的上下文负担。这个共享文件系统就像团队白板或项目文档库，记录了项目最终目标、计划&进度、中间产物。
 
-●
-
-文件系统：这是一个“划时代”的重要概念，根据需要持久化和检索信息，实现了超越单个对话轮次的真正“记忆”。Claude Code 可以访问文件系统以完成任务和记笔记，它也作为所有智能体协作的共享工作区。 [Manus](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus?ref=blog.langchain.com) 也大量使用文件系统作为记忆。文件系统实现“引用”+“读写”机制代替完整上下文传递，可以减轻LLM的上下文负担。这个共享文件系统就像团队白板或项目文档库，记录了项目最终目标、计划&进度、中间产物。
-
-●
-
-复杂系统提示词：深度智能体遵循明确的流程以确保一致性和可靠性，同时执行复杂的指令和示例。虽然模型的能力在增强，但是复杂任务中仍然需要数百甚至上千行提示词，包含明确定义工具使用规则、任务目标、期望行为、停止条件等等包含全栈逻辑知道，而非简化语言。
+- 复杂系统提示词：深度智能体遵循明确的流程以确保一致性和可靠性，同时执行复杂的指令和示例。虽然模型的能力在增强，但是复杂任务中仍然需要数百甚至上千行提示词，包含明确定义工具使用规则、任务目标、期望行为、停止条件等等包含全栈逻辑知道，而非简化语言。
 
 按照四大要素的设计思想，Harrison参考了 Claude Code 并使其更加通用，于是有了DeepAgents的项目。
 
@@ -88,13 +60,13 @@ Harrison参考了Claude Code用Todo list做规划工具，就是把任务写到�
 
 class PlanningMiddleware(AgentMiddleware):
 
-state\_schema = PlanningState
+state_schema = PlanningState
 
-tools = \[write\_todos\]
+tools = [write_todos]
 
-def modify\_model\_request(self, request: ModelRequest, agent\_state: PlanningState, runtime: Runtime) -> ModelRequest:
+def modify_model_request(self, request: ModelRequest, agent_state: PlanningState, runtime: Runtime) -> ModelRequest:
 
-request.system\_prompt = request.system\_prompt + "\\n\\n" + WRITE\_TODOS\_SYSTEM\_PROMPT
+request.system_prompt = request.system_prompt + "\\n\\n" + WRITE_TODOS_SYSTEM_PROMPT
 
 return request
 
@@ -110,11 +82,11 @@ description: str
 
 prompt: str
 
-tools: NotRequired\[list\[str\]\]
+tools: NotRequired[list[str]]
 
-model: NotRequired\[Union\[LanguageModelLike, dict\[str, Any\]\]\]
+model: NotRequired[Union[LanguageModelLike, dict[str, Any]]]
 
-middleware: NotRequired\[list\[AgentMiddleware\]\]
+middleware: NotRequired[list[AgentMiddleware]]
 
 class CustomSubAgent(TypedDict):
 
@@ -128,21 +100,21 @@ graph: Runnable
 
 子代理的使用
 
-research\_subagent = {
+research_subagent = {
 
 "name": "research-agent",
 
 "description": "Used to research more in depth questions",
 
-"prompt": sub\_research\_prompt,
+"prompt": sub_research_prompt,
 
-"tools": \[internet\_search\]
+"tools": [internet_search]
 
 }
 
-subagents = \[research\_subagent\]
+subagents = [research_subagent]
 
-agent = create\_deep\_agent(
+agent = create_deep_agent(
 
 tools,
 
@@ -156,15 +128,15 @@ subagents=subagents
 
 对于更复杂的使用场景，可以提供自己的预构建 LangGraph 图作为子代理：
 
-from langchain.agents import create\_agent
+from langchain.agents import create_agent
 
 \# Create a custom agent graph
 
-custom\_graph = create\_agent(
+custom_graph = create_agent(
 
-model=your\_model,
+model=your_model,
 
-tools=specialized\_tools,
+tools=specialized_tools,
 
 prompt="You are a specialized agent for data analysis..."
 
@@ -172,19 +144,19 @@ prompt="You are a specialized agent for data analysis..."
 
 \# Use it as a custom subagent
 
-custom\_subagent = {
+custom_subagent = {
 
 "name": "data-analyzer",
 
 "description": "Specialized agent for complex data analysis tasks",
 
-"graph": custom\_graph
+"graph": custom_graph
 
 }
 
-subagents = \[custom\_subagent\]
+subagents = [custom_subagent]
 
-agent = create\_deep\_agent(
+agent = create_deep_agent(
 
 tools,
 
@@ -204,47 +176,37 @@ subagents=subagents
 
 文件系统的Tools列表如下：
 
-●
+- `write_todos`: 用于编写待办事项的工具
 
-`write_todos`: 用于编写待办事项的工具
+- `write_file`: 用于在虚拟文件系统中写入文件的工具
 
-●
+- `read_file`:虚拟文件系统中读取文件的工具
 
-`write_file`: 用于在虚拟文件系统中写入文件的工具
+- `ls`: 虚拟文件系统中列出文件的工具
 
-●
-
-`read_file`:虚拟文件系统中读取文件的工具
-
-●
-
-`ls`: 虚拟文件系统中列出文件的工具
-
-●
-
-`edit_file`:虚拟文件系统中编辑文件的工具
+- `edit_file`:虚拟文件系统中编辑文件的工具
 
 ## 系统提示词
 
 毫无疑问，系统提示词是非常重要的，详细的提示词不代表冗余和低效，在当前的模型能力基础上，详细的提示词还是非常关键的，尤其是和上下文工程相互配合才可以发挥Agent的能力。我在开发agent的时候也花大量精力打磨提示词。哈哈，harrison直接在博客宣布，他的系统提示词大部分都是copy的Claude Code的系统提示词，可谓真实不装。
 
-DEEP\_AGENT\_SYSTEM\_PROMPT = """
+DEEP_AGENT_SYSTEM_PROMPT = """
 
 You are an expert research assistant capable of conducting thorough,
 
 multi-step investigations. Your capabilities include:
 
-PLANNING: Break complex tasks into subtasks using the todo\_write tool
+PLANNING: Break complex tasks into subtasks using the todo_write tool
 
-RESEARCH: Use internet\_search extensively to gather comprehensive information
+RESEARCH: Use internet_search extensively to gather comprehensive information
 
-DELEGATION: Spawn sub-agents for specialized tasks using the call\_subagent tool
+DELEGATION: Spawn sub-agents for specialized tasks using the call_subagent tool
 
 DOCUMENTATION: Maintain detailed notes using the file system tools
 
 When approaching a complex task:
 
-1\. First, create a plan using todo\_write
+1\. First, create a plan using todo_write
 
 2\. Research systematically, saving important findings to files
 
@@ -254,37 +216,37 @@ When approaching a complex task:
 
 Examples:
 
-\[Detailed few-shot examples follow...\]
+[Detailed few-shot examples follow...]
 
 """
 
 ## 人机协同
 
-DeepAgents 支持人机协同的执行审批， 可以配置特定的工具，在执行前需要人工审批。在tool\_configs里面加入allow\_respond、allow\_edit、allow\_accept三个参数。
+DeepAgents 支持人机协同的执行审批， 可以配置特定的工具，在执行前需要人工审批。在tool_configs里面加入allow_respond、allow_edit、allow_accept三个参数。
 
-from deepagents import create\_deep\_agent
+from deepagents import create_deep_agent
 
 from langgraph.checkpoint.memory import InMemorySaver
 
 \# Create agent with file operations requiring approval
 
-agent = create\_deep\_agent(
+agent = create_deep_agent(
 
-tools=\[your\_tools\],
+tools=[your_tools],
 
 instructions="Your instructions here",
 
-tool\_configs={
+tool_configs={
 
 \# You can specify a dictionary for fine grained control over what interrupt options exist
 
-"tool\_1": {
+"tool_1": {
 
-"allow\_respond": True,
+"allow_respond": True,
 
-"allow\_edit": True,
+"allow_edit": True,
 
-"allow\_accept":True,
+"allow_accept":True,
 
 },
 
@@ -292,7 +254,7 @@ tool\_configs={
 
 \# This is a shortcut for the same functionality as above
 
-"tool\_2": True,
+"tool_2": True,
 
 }
 
@@ -304,41 +266,40 @@ agent.checkpointer = checkpointer
 
 ## MCP
 
-DeepAgents库可以和MCP工具一起运行，通过langchain\_mcp\_adapters库来实现。
+DeepAgents库可以和MCP工具一起运行，通过langchain_mcp_adapters库来实现。
 
 import asyncio
 
-from langchain\_mcp\_adapters.client import MultiServerMCPClient
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
-from deepagents import create\_deep\_agent
+from deepagents import create_deep_agent
 
 async def main():
 
 \# Collect MCP tools
 
-mcp\_client = MultiServerMCPClient(...)
+mcp_client = MultiServerMCPClient(...)
 
-mcp\_tools = await mcp\_client.get\_tools()
+mcp_tools = await mcp_client.get_tools()
 
 \# Create agent
 
-agent = async\_create\_deep\_agent(tools=mcp\_tools,....)
+agent = async_create_deep_agent(tools=mcp_tools,....)
 
 \# Stream the agent
 
 async for chunk in agent.astream(
 
-{"messages": \[{"role": "user", "content": "what is langgraph?"}\]},
+{"messages": [{"role": "user", "content": "what is langgraph?"}]},
 
-stream\_mode="values"
+stream_mode="values"
 
+```java
 ):
-
 if "messages" in chunk:
-
-chunk\["messages"\]\[-1\].pretty\_print()
-
+chunk["messages"][-1].pretty_print()
 asyncio.run(main())
+```
 
 ## 使用案例
 
@@ -350,33 +311,31 @@ from typing import Literal
 
 from tavily import TavilyClient
 
-from deepagents import create\_deep\_agent
+from deepagents import create_deep_agent
 
-tavily\_client = TavilyClient(api\_key=os.environ\["TAVILY\_API\_KEY"\])
+tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 
 \# Search tool to use to do research
 
-def internet\_search(
+def internet_search(
 
+```java
 query: str,
-
-max\_results: int = 5,
-
-topic: Literal\["general", "news", "finance"\] = "general",
-
-include\_raw\_content: bool = False,
-
+max_results: int = 5,
+topic: Literal["general", "news", "finance"] = "general",
+include_raw_content: bool = False,
 ):
+```
 
 """Run a web search"""
 
-return tavily\_client.search(
+return tavily_client.search(
 
 query,
 
-max\_results=max\_results,
+max_results=max_results,
 
-include\_raw\_content=include\_raw\_content,
+include_raw_content=include_raw_content,
 
 topic=topic,
 
@@ -384,11 +343,11 @@ topic=topic,
 
 \# Prompt prefix to steer the agent to be an expert researcher
 
-research\_instructions = """You are an expert researcher. Your job is to conduct thorough research, and then write a polished report.
+research_instructions = """You are an expert researcher. Your job is to conduct thorough research, and then write a polished report.
 
 You have access to a few tools.
 
-\## \`internet\_search\`
+\## \`internet_search\`
 
 Use this to run an internet search for a given query. You can specify the number of results, the topic, and whether raw content should be included.
 
@@ -396,11 +355,11 @@ Use this to run an internet search for a given query. You can specify the number
 
 \# Create the agent
 
-agent = create\_deep\_agent(
+agent = create_deep_agent(
 
-\[internet\_search\],
+[internet_search],
 
-代码仓库examples/research/research\_agent.py 是一个更复杂的示例。
+代码仓库examples/research/research_agent.py 是一个更复杂的示例。
 
 ## 路线图
 
@@ -418,30 +377,10 @@ Harrison 给出了项目的RoadMap，现在项目已经成为了LangChain的官�
 
 ## 参考文档
 
-●
+- 项目地址： [https://github.com/langchain-ai/deepagents](https://github.com/langchain-ai/deepagents?tab=readme-ov-file)
 
-项目地址： [https://github.com/langchain-ai/deepagents](https://github.com/langchain-ai/deepagents?tab=readme-ov-file)
+- 上下文隔离： [https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html#context-quarantine](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html#context-quarantine)
 
-●
+- Manus的上下文工程： [https://manus.im/zh-cn/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus?ref=blog.langchain.com](https://manus.im/zh-cn/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus?ref=blog.langchain.com)
 
-上下文隔离： [https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html#context-quarantine](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html#context-quarantine)
-
-●
-
-Manus的上下文工程： [https://manus.im/zh-cn/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus?ref=blog.langchain.com](https://manus.im/zh-cn/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus?ref=blog.langchain.com)
-
-●
-
-Claude Code 逆向工程： [https://github.com/shareAI-lab/analysis\_claude\_code](https://github.com/shareAI-lab/analysis_claude_code)
-
-END
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+- Claude Code 逆向工程： [https://github.com/shareAI-lab/analysis_claude_code](https://github.com/shareAI-lab/analysis_claude_code)

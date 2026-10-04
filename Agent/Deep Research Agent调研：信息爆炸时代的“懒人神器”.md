@@ -10,53 +10,20 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 5影响力 233
 
-** 77
 
-** 129
-
-** 1
-
-** 原创文章
-
-发表到圈儿
-
-[论文研习社](https://ata.atatech.org/channels/80) / [精选文章](https://ata.atatech.org/channels/80/module/1051/) / [翰林院推荐](https://ata.atatech.org/channels/80/module/1051/) (首发)
 
 收录于专题
 
-[好文慢读-翰林院精选技术好文](https://ata.atatech.org/specials/10000000012)
 
-[一起读Paper｜ATA论文研习](https://ata.atatech.org/specials/10000004051)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[顾志皓(忻皓)](https://ata.atatech.org/users/11001285347)
 
 2025-07-30发表2025-08-14更新2.8k浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章30:26
-
-**
-
-[「本文正在参与ATA夏日论文研习活动」](https://ata.atatech.org/articles/11020437610)
 
 ## 引言
 
@@ -72,7 +39,7 @@ tags:
 
 ## 什么是Deep Research Agent
 
-严谨一些：它是由LLM驱动的AI Agent，集成了动态推理、自适应规划、多轮外部数据检索、工具使用等能力，能够为复杂研究任务生成全面的分析报告 \[1\]
+严谨一些：它是由LLM驱动的AI Agent，集成了动态推理、自适应规划、多轮外部数据检索、工具使用等能力，能够为复杂研究任务生成全面的分析报告 [1]
 
 直观一点：你可以把它想象成一个AI研究员，它不只是个搜索框，而是会像真人专家一样，自己去规划、去查找、去思考，最后直接给你一份逻辑清晰、内容详实的深度报告
 
@@ -90,21 +57,13 @@ tags:
 
 通过调用搜索引擎API（如Google, Bing）或专业数据库API（如arXiv, PubMed）来获取结构化信息
 
-●
+- `Gemini Deep Research`: 调用Google Search API和arXiv API，一次性可检索成百上千个网页或论文
 
-`Gemini Deep Research`: 调用Google Search API和arXiv API，一次性可检索成百上千个网页或论文
+- `Grok DeepSearch`: 持续通过新闻源API和Wikipedia API更新其知识索引，保证信息的时效性
 
-●
+- `AI Scientist`: 调用Semantic Scholar API来验证研究想法的新颖性和论文引用关系
 
-`Grok DeepSearch`: 持续通过新闻源API和Wikipedia API更新其知识索引，保证信息的时效性
-
-●
-
-`AI Scientist`: 调用Semantic Scholar API来验证研究想法的新颖性和论文引用关系
-
-●
-
-`Search-o1`: Bing Search API用于搜索，Jina Reader API用于对长文本进行摘要
+- `Search-o1`: Bing Search API用于搜索，Jina Reader API用于对长文本进行摘要
 
 缺点：
 
@@ -114,9 +73,7 @@ tags:
 
 在沙箱中操作浏览器，模拟点击、滚动、填写表单、执行JS等操作，实时提取网页内容。
 
-●
-
-以下为开源项目Browser-Use \[7\] 的Demo视频，视频中执行的任务为：Read my CV & find ML jobs, save them to a file, and then start applying for them in new tabs, if you need help, ask me.
+- 以下为开源项目Browser-Use [7] 的Demo视频，视频中执行的任务为：Read my CV & find ML jobs, save them to a file, and then start applying for them in new tabs, if you need help, ask me.
 
 <video src="https://oss-ata.alibaba.com/articleVideo/2025/07/a8cef022-2038-468f-a683-6692debca72a.mp4" controls=""></video>
 
@@ -130,33 +87,21 @@ tags:
 
 在沙箱环境中执行Python代码，通常用于数据处理、算法验证、模型模拟等计算任务
 
-●
+- 通过代码解释器对数据进行分析：自动计算均值、方差、中位数等；生成交互式可视化：创建图表、热力图等，帮助理解数据；提取数据并进行量化评估：从文本或表格中提取关键指标并进行比较。
 
-通过代码解释器对数据进行分析：自动计算均值、方差、中位数等；生成交互式可视化：创建图表、热力图等，帮助理解数据；提取数据并进行量化评估：从文本或表格中提取关键指标并进行比较。
+- `CoSearchAgent` ：集成SQL查询能力，对数据库进行聚合分析并生成报告
 
-●
-
-`CoSearchAgent` ：集成SQL查询能力，对数据库进行聚合分析并生成报告
-
-●
-
-`AutoGLM` ：能从网页的表格中直接提取结构化数据并进行分析
+- `AutoGLM` ：能从网页的表格中直接提取结构化数据并进行分析
 
 #### 多模态内容的处理
 
 让模型读取图像、音频和视频，并在输出中也加入多模内容
 
-●
+- 输入：用于分析图表中的数据趋势、识别视频中的关键帧、从地图图片中提取位置信息
 
-输入：用于分析图表中的数据趋势、识别视频中的关键帧、从地图图片中提取位置信息
+- 输出：创建数据可视化图表、生成流程图、3D轨迹图（如Grok DeepSearch）
 
-●
-
-输出：创建数据可视化图表、生成流程图、3D轨迹图（如Grok DeepSearch）
-
-●
-
-只有少数成熟的商业或开源项目支持，Manus, OWL, OpenAI Deep Resesarch, Gemini Deep Research, Grok DeepSearch 等都具备此能力。
+- 只有少数成熟的商业或开源项目支持，Manus, OWL, OpenAI Deep Resesarch, Gemini Deep Research, Grok DeepSearch 等都具备此能力。
 
 #### 操作计算机 (Computer Use)
 
@@ -192,13 +137,9 @@ Agent架构与工作流的设计，决定了它在复杂解决问题时，是遵
 
 OpenAI Deep Research 和 Gemini Deep Research 也被归类为单智能体架构（这是之前的论调，Deep Research技术是在不断发展的，现在这两句也不一定是单智能体结构）
 
-●
+- 优点： 易于进行端到端优化（如RL）。
 
-优点： 易于进行端到端优化（如RL）。
-
-●
-
-缺点： 对单个模型的能力要求极高。
+- 缺点： 对单个模型的能力要求极高。
 
 多智能体模式
 
@@ -210,13 +151,9 @@ OpenAI Deep Research 和 Gemini Deep Research 也被归类为单智能体架构�
 
 `OWL` ：采用“workforce-oriented model”，一个承担中央管理功能的Agent，协调多个执行智能体
 
-●
+- 优点：分工明确，降低了对单个模型的要求；可扩展性强，可以方便地增加新的Agent；适合处理复杂的、可并行的任务
 
-优点：分工明确，降低了对单个模型的要求；可扩展性强，可以方便地增加新的Agent；适合处理复杂的、可并行的任务
-
-●
-
-缺点：Agent之间的协调和通信开销大，系统复杂性高；难以进行有效的端到端优化（因为奖励信号需要分配给多个独立的智能体）
+- 缺点：Agent之间的协调和通信开销大，系统复杂性高；难以进行有效的端到端优化（因为奖励信号需要分配给多个独立的智能体）
 
 ### 4）能力调优：Agent的“进化之路”
 
@@ -252,13 +189,9 @@ OpenAI Deep Research 和 Gemini Deep Research 也被归类为单智能体架构�
 
 3） `Agent-R1` ：端到端优化，将RL应用于端到端的Agent训练，整合了API、搜索引擎和数据库等多种工具，实现了自主多步任务执行
 
-●
+- 奖励模型（Reward Model）： 大多数开源实现采用规则驱动的奖励（如答案是否正确）
 
-奖励模型（Reward Model）： 大多数开源实现采用规则驱动的奖励（如答案是否正确）
-
-●
-
-策略优化算法（Policy Optimization）：PPO，GRPO
+- 策略优化算法（Policy Optimization）：PPO，GRPO
 
 #### 非参数持续学习（Non-parametric Continual Learning）
 
@@ -286,13 +219,9 @@ OpenAI Deep Research 和 Gemini Deep Research 也被归类为单智能体架构�
 
 1） `Google Gemini系列` ：支持百万级Token的上下文窗口
 
-●
+- 优点：简单直观，理论上效果好。
 
-优点：简单直观，理论上效果好。
-
-●
-
-缺点：计算成本极高，在实际部署中可能导致资源利用效率低下
+- 缺点：计算成本极高，在实际部署中可能导致资源利用效率低下
 
 #### 压缩中间步骤
 
@@ -304,13 +233,9 @@ OpenAI Deep Research 和 Gemini Deep Research 也被归类为单智能体架构�
 
 例如在互联网搜索步骤中，先使用轻量级的模型，对网页内容进行总结和提炼关键点，再提供给LLM做后续的分析和整合
 
-●
+- 优点：显著提升处理效率和输出质量
 
-优点：显著提升处理效率和输出质量
-
-●
-
-缺点：有信息丢失的风险，可能会牺牲细节，从而影响后续推理的精确度
+- 缺点：有信息丢失的风险，可能会牺牲细节，从而影响后续推理的精确度
 
 #### 利用外部结构化存储
 
@@ -324,19 +249,24 @@ OpenAI Deep Research 和 Gemini Deep Research 也被归类为单智能体架构�
 
 4） `案例库` ： `Agentrxiv` 存储和检索其他代理的研究成果（类似于arXiv）
 
-●
+- 优点：极大地扩展了记忆容量，提升了检索速度和语义相关性，结构化方法在检索效率和准确性上更优
 
-优点：极大地扩展了记忆容量，提升了检索速度和语义相关性，结构化方法在检索效率和准确性上更优
-
-●
-
-缺点：需要精心设计数据结构，开发和维护成本更高
+- 缺点：需要精心设计数据结构，开发和维护成本更高
 
 ## 抛砖引玉 -- Deep Research核心应用场景一览
 
-这一部分是我用LLM从综述 \[2\] 中提取总结的，大家看一下就好，仅做抛砖引玉（AI味太浓了，不好意思让大家花太多时间看），具体应用还是需要看深入看业务场景的实际需求
+这一部分是我用LLM从综述 [2] 中提取总结的，大家看一下就好，仅做抛砖引玉（AI味太浓了，不好意思让大家花太多时间看），具体应用还是需要看深入看业务场景的实际需求
 
-<table><colgroup><col width="129"> <col width="675"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>应用领域</p></td><td rowspan="1" colspan="1"><p>核心应用场景</p></td></tr><tr><td rowspan="1" colspan="1"><p>学术研究</p></td><td rowspan="1" colspan="1"><p>• 文献综述： 自动分析海量文献，进行系统性综述，发现研究模式与空白点。• 假设生成： 依据现有理论生成新的研究假设，并进行初步评估。• 跨学科创新： 打通不同学科间的知识壁垒，促进研究方法融合与创新。</p></td></tr><tr><td rowspan="1" colspan="1"><p>科学发现</p></td><td rowspan="1" colspan="1"><p>• 数据模式识别： 分析大规模科学数据，识别异常模式与潜在规律。• 实验设计优化： 辅助优化实验方案，结合仿真工具加速理论验证。• 科学信息整合： 整合论文中的文本、图表和数据，形成更全面的理解。• 自主科学探索： 探索从提出假设到修正理论的自动化研究全流程。</p></td></tr><tr><td rowspan="1" colspan="1"><p>商业智能</p></td><td rowspan="1" colspan="1"><p>• 市场与竞争分析： 分析市场情报与竞品动态，洞察行业趋势与商业机会。• 战略决策支持： 为投资、风控等重大决策提供数据洞察与分析支持。• 业务流程优化： 分析行业最佳实践，为企业优化内部流程提供建议。</p></td></tr><tr><td rowspan="1" colspan="1"><p>金融分析</p></td><td rowspan="1" colspan="1"><p>• 投资研究与尽调： 整合多维度信息，对金融资产进行全面评估与尽职调查。• 趋势分析与风控： 识别多层次的金融市场趋势，进行深度风险评估与建模。</p></td></tr><tr><td rowspan="1" colspan="1"><p>教育应用</p></td><td rowspan="1" colspan="1"><p>• 个性化学习： 为学生动态生成个性化的学习路径、内容和定制化问答。• 教学内容开发： 辅助教师高效开发课程，创建图文并茂的教学材料。• 科研能力训练： 通过引导与反馈，训练学生和初学者的科研方法与思维。</p></td></tr><tr><td rowspan="1" colspan="1"><p>个人知识管理</p></td><td rowspan="1" colspan="1"><p>• 信息组织： 帮助个人构建知识库，自动整理信息、发现关联并生成摘要。• 学习与发展： 支持探索式学习，为个人技能提升提供规划与资源建议。• 个人决策辅助： 为职业规划、财务管理等复杂个人决策提供多维度分析。</p></td></tr></tbody></table>
+
+| 应用领域   | 核心应用场景                                                                                                                             |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 学术研究   | • 文献综述： 自动分析海量文献，进行系统性综述，发现研究模式与空白点。• 假设生成： 依据现有理论生成新的研究假设，并进行初步评估。• 跨学科创新： 打通不同学科间的知识壁垒，促进研究方法融合与创新。                              |
+| 科学发现   | • 数据模式识别： 分析大规模科学数据，识别异常模式与潜在规律。• 实验设计优化： 辅助优化实验方案，结合仿真工具加速理论验证。• 科学信息整合： 整合论文中的文本、图表和数据，形成更全面的理解。• 自主科学探索： 探索从提出假设到修正理论的自动化研究全流程。 |
+| 商业智能   | • 市场与竞争分析： 分析市场情报与竞品动态，洞察行业趋势与商业机会。• 战略决策支持： 为投资、风控等重大决策提供数据洞察与分析支持。• 业务流程优化： 分析行业最佳实践，为企业优化内部流程提供建议。                              |
+| 金融分析   | • 投资研究与尽调： 整合多维度信息，对金融资产进行全面评估与尽职调查。• 趋势分析与风控： 识别多层次的金融市场趋势，进行深度风险评估与建模。                                                           |
+| 教育应用   | • 个性化学习： 为学生动态生成个性化的学习路径、内容和定制化问答。• 教学内容开发： 辅助教师高效开发课程，创建图文并茂的教学材料。• 科研能力训练： 通过引导与反馈，训练学生和初学者的科研方法与思维。                             |
+| 个人知识管理 | • 信息组织： 帮助个人构建知识库，自动整理信息、发现关联并生成摘要。• 学习与发展： 支持探索式学习，为个人技能提升提供规划与资源建议。• 个人决策辅助： 为职业规划、财务管理等复杂个人决策提供多维度分析。                           |
+
 
 ## 群雄逐鹿 -- 巨头、初创与开源社区争相发力Deep Research
 
@@ -360,45 +290,45 @@ Clarifying Questions步骤使用的Prompt（ [原文链接](https://platform.ope
 
 使用的模型为 `gpt-4.1-2025-04-14`
 
-suggested\_clariying\_prompt = """"
+suggested_clariying_prompt = """"
 
 You will be given a research task by a user. Your job is NOT to complete the task yet, but instead to ask clarifying questions that would help you or another researcher produce a more specific, efficient, and relevant answer.
 
 GUIDELINES:
 
-1\. \*\*Maximize Relevance\*\*
+1\. **Maximize Relevance**
 
-\- Ask questions that are \*directly necessary\* to scope the research output.
+\- Ask questions that are *directly necessary* to scope the research output.
 
 \- Consider what information would change the structure, depth, or direction of the answer.
 
-2\. \*\*Surface Missing but Critical Dimensions\*\*
+2\. **Surface Missing but Critical Dimensions**
 
 \- Identify essential attributes that were not specified in the user’s request (e.g., preferences, time frame, budget, audience).
 
-\- Ask about each one \*explicitly\*, even if it feels obvious or typical.
+\- Ask about each one *explicitly*, even if it feels obvious or typical.
 
-3\. \*\*Do Not Invent Preferences\*\*
+3\. **Do Not Invent Preferences**
 
-\- If the user did not mention a preference, \*do not assume it\*. Ask about it clearly and neutrally.
+\- If the user did not mention a preference, *do not assume it*. Ask about it clearly and neutrally.
 
-4\. \*\*Use the First Person\*\*
+4\. **Use the First Person**
 
 \- Phrase your questions from the perspective of the assistant or researcher talking to the user (e.g., “Could you clarify...” or “Do you have a preference for...”)
 
-5\. \*\*Use a Bulleted List if Multiple Questions\*\*
+5\. **Use a Bulleted List if Multiple Questions**
 
 \- If there are multiple open questions, list them clearly in bullet format for readability.
 
-6\. \*\*Avoid Overasking\*\*
+6\. **Avoid Overasking**
 
-\- Prioritize the 3–6 questions that would most reduce ambiguity or scope creep. You don’t need to ask \*everything\*, just the most pivotal unknowns.
+\- Prioritize the 3–6 questions that would most reduce ambiguity or scope creep. You don’t need to ask *everything*, just the most pivotal unknowns.
 
-7\. \*\*Include Examples Where Helpful\*\*
+7\. **Include Examples Where Helpful**
 
 \- If asking about preferences (e.g., travel style, report format), briefly list examples to help the user answer.
 
-8\. \*\*Format for Conversational Use\*\*
+8\. **Format for Conversational Use**
 
 \- The output should sound helpful and conversational—not like a form. Aim for a natural tone while still being precise.
 
@@ -408,33 +338,33 @@ Rewriting步骤所使用的Prompt（ [原文链接](https://platform.openai.com/
 
 使用的模型为 `gpt-4.1-2025-04-14`
 
-suggested\_rewriting\_prompt = """
+suggested_rewriting_prompt = """
 
 You will be given a research task by a user. Your job is to produce a set of instructions for a researcher that will complete the task. Do NOT complete the task yourself, just provide instructions on how to complete it.
 
 GUIDELINES:
 
-1\. \*\*Maximize Specificity and Detail\*\*
+1\. **Maximize Specificity and Detail**
 
 \- Include all known user preferences and explicitly list key attributes or dimensions to consider.
 
 \- It is of utmost importance that all details from the user are included in the instructions.
 
-2\. \*\*Fill in Unstated But Necessary Dimensions as Open-Ended\*\*
+2\. **Fill in Unstated But Necessary Dimensions as Open-Ended**
 
 \- If certain attributes are essential for a meaningful output but the user has not provided them, explicitly state that they are open-ended or default to no specific constraint.
 
-3\. \*\*Avoid Unwarranted Assumptions\*\*
+3\. **Avoid Unwarranted Assumptions**
 
 \- If the user has not provided a particular detail, do not invent one.
 
 \- Instead, state the lack of specification and guide the researcher to treat it as flexible or accept all possible options.
 
-4\. \*\*Use the First Person\*\*
+4\. **Use the First Person**
 
 \- Phrase the request from the perspective of the user.
 
-5\. \*\*Tables\*\*
+5\. **Tables**
 
 \- If you determine that including a table will help illustrate, organize, or enhance the information in the research output, you must explicitly request that the researcher provide them.
 
@@ -448,17 +378,17 @@ Examples:
 
 Competitor Analysis (Work): When evaluating competitor products, request a table with key metrics, such as market share, pricing, and main differentiators.
 
-6\. \*\*Headers and Formatting\*\*
+6\. **Headers and Formatting**
 
 \- You should include the expected output format in the prompt.
 
 \- If the user is asking for content that would be best returned in a structured format (e.g. a report, plan, etc.), ask the researcher to format as a report with the appropriate headers and formatting that ensures clarity and structure.
 
-7\. \*\*Language\*\*
+7\. **Language**
 
 \- If the user input is in a language other than English, tell the researcher to respond in this language, unless the user query explicitly asks for the response in a different language.
 
-8\. \*\*Sources\*\*
+8\. **Sources**
 
 \- If specific sources should be prioritized, specify them in the prompt.
 
@@ -468,7 +398,7 @@ Deep Research Model所使用的Prompt（ [原文链接](https://platform.openai.
 
 使用的模型为 `o3-deep-research`
 
-system\_message = """
+system_message = """
 
 You are a professional researcher preparing a structured, data-driven report on behalf of a global health economics team. Your task is to analyze the health question the user poses.
 
@@ -514,7 +444,7 @@ Be analytical, avoid generalities, and ensure that each section supports data-ba
 
 #### Qwen Deep Research
 
-体验地址： [https://chat.qwen.ai/?inputFeature=deep\_research](https://chat.qwen.ai/?inputFeature=deep_research)
+体验地址： [https://chat.qwen.ai/?inputFeature=deep_research](https://chat.qwen.ai/?inputFeature=deep_research)
 
 特点：
 
@@ -546,25 +476,39 @@ Be analytical, avoid generalities, and ensure that each section supports data-ba
 
 #### assafelovic/gpt-researcher
 
-<table><colgroup><col width="289"> <col width="289"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>整体框架图</p></td><td rowspan="1" colspan="1"><p>备注</p></td></tr><tr><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/07/adb4b2ca-8762-4f50-8993-85e4d4eb34e8.png"></td><td rowspan="1" colspan="1"><p>Github Star数量：22.5k</p><p>是一个非常全面的项目，配套有完整的前端、后端和存储，展示效果好，开箱方便</p><p>整体思路是Planner + Researcher，由Planner将问题进行拆解，针对每一个子问题，触发对应的爬虫去搜索相应的信息，最终将所有信息整合为一份报告</p></td></tr></tbody></table>
+
+| 整体框架图 | 备注                                                                                                                                         |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+|       | Github Star数量：22.5k 是一个非常全面的项目，配套有完整的前端、后端和存储，展示效果好，开箱方便 整体思路是Planner + Researcher，由Planner将问题进行拆解，针对每一个子问题，触发对应的爬虫去搜索相应的信息，最终将所有信息整合为一份报告 |
+
 
 #### google-gemini/gemini-fullstack-langgraph
 
-<table><colgroup><col width="289"> <col width="289"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>整体框架图</p></td><td rowspan="1" colspan="1"><p>备注</p></td></tr><tr><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/07/0b7c7abd-a78c-4f17-8fbd-2e318a94428d.png"></td><td rowspan="1" colspan="1"><p>Github Star数量：15.9k</p><p>整体项目的代码结构非常简单，容易理解和上手，建议可以先从这个项目开始阅读源码，理解Deep Research的整体流程和LangGraph的用法，大部分的开源项目都使用LangGraph搭建Agent状态转移图</p><p>先将用户问题扩写为多个搜索词句，然后逐个进入“搜索-->反思-->生成新问题”的循环，当反思模块认为收集到了足够的信息，整合所有的信息生成报告</p><p>其中生成报告时采用的Citation Replace操作是一个常用的技巧（各类LLM联网搜索功能中都有用到），它将原本很长的URL变为 [Source X-N] 的短标记，生成完毕后，再通过后处理将短标记更换回URL，可以有效节约token数量和LLM在总结报告时URL抄写出错的情况， <a href="https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart/blob/main/backend/src/agent/graph.py#L128">参考代码</a></p></td></tr></tbody></table>
 
-#### langchain-ai/open\_deep\_research
+| 整体框架图 | 备注                                                                                                                                                                                                                                                                                                                                                         |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|       | Github Star数量：15.9k 整体项目的代码结构非常简单，容易理解和上手，建议可以先从这个项目开始阅读源码，理解Deep Research的整体流程和LangGraph的用法，大部分的开源项目都使用LangGraph搭建Agent状态转移图 先将用户问题扩写为多个搜索词句，然后逐个进入“搜索-->反思-->生成新问题”的循环，当反思模块认为收集到了足够的信息，整合所有的信息生成报告 其中生成报告时采用的Citation Replace操作是一个常用的技巧（各类LLM联网搜索功能中都有用到），它将原本很长的URL变为 [Source X-N] 的短标记，生成完毕后，再通过后处理将短标记更换回URL，可以有效节约token数量和LLM在总结报告时URL抄写出错的情况， 参考代码 |
 
-<table><colgroup><col width="289"> <col width="289"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>整体框架图</p></td><td rowspan="1" colspan="1"><p>备注</p></td></tr><tr><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/07/cd2e3bb1-d211-44a0-afc1-557c6a98db05.png"></td><td rowspan="1" colspan="1"><p>Github Star数量：6.5k</p><p>整体项目结构也相对简单，新版本的Deep Research在调用工具时采用了大量LangChain和LangGraph的高层次API以及异步API，如果不太了解这些API的实现逻辑，调试起来比其他几个项目麻烦一些</p></td></tr></tbody></table>
+
+#### langchain-ai/open_deep_research
+
+
+| 整体框架图 | 备注                                                                                                                            |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------- |
+|       | Github Star数量：6.5k 整体项目结构也相对简单，新版本的Deep Research在调用工具时采用了大量LangChain和LangGraph的高层次API以及异步API，如果不太了解这些API的实现逻辑，调试起来比其他几个项目麻烦一些 |
+
 
 #### langchain-ai/local-deep-researcher
 
-<table><colgroup><col width="289"> <col width="289"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>整体框架</p></td><td rowspan="1" colspan="1"><p>备注</p></td></tr><tr><td rowspan="1" colspan="1"><img src="https://oss-ata.alibaba.com/article/2025/07/a8170673-a379-4ce1-8c22-419f88112f01.png"></td><td rowspan="1" colspan="1"><p>Github Star数量：7.9k</p><p>代码结构简洁，容易理解和上手</p><p>整体思路和langchain-ai/open_deep_research中提供的 <a href="https://github.com/langchain-ai/open_deep_research/blob/main/src/legacy/graph.py">Legacy版本</a> 比较相似，可以参考不同项目中，类似功能模块的Prompt写法</p></td></tr></tbody></table>
+
+| 整体框架 | 备注                                                                                                                 |
+| ---- | ------------------------------------------------------------------------------------------------------------------ |
+|      | Github Star数量：7.9k 代码结构简洁，容易理解和上手 整体思路和langchain-ai/open_deep_research中提供的 Legacy版本 比较相似，可以参考不同项目中，类似功能模块的Prompt写法 |
+
 
 ## 关键瓶颈 -- 当前Deep Research Agent的“阿喀琉斯之踵”
 
-●
-
-痛点一：信息来源受限，难以触及高价值的“内部信息”
+- 痛点一：信息来源受限，难以触及高价值的“内部信息”
 
 现有的Deep Research Agent大部分都依赖Web Search去搜索公开可用的网络内容，这使得它们无法触及企业内部的私域知识，结果就是，它做的研究报告，虽然看起来高大上，但跟咱们的实际业务贴不上边，没法直接用
 
@@ -574,9 +518,7 @@ Be analytical, avoid generalities, and ensure that each section supports data-ba
 
 3）专业的付费工具：对于金融、法律行业高度依赖特定付费终端（如彭博、万得、路透、LexisNexis），现有的系统难以连接、难以配置
 
-●
-
-痛点二：不透明、难控制的“黑盒”式推理
+- 痛点二：不透明、难控制的“黑盒”式推理
 
 当前研究Agent的内部工作机制，包括它的推理、决策和执行路径，对用户来说几乎是完全不透明的
 
@@ -594,108 +536,18 @@ Be analytical, avoid generalities, and ensure that each section supports data-ba
 
 ## 参考文献
 
-\[1\] Huang, Yuxuan, et al. "Deep Research Agents: A Systematic Examination And Roadmap." arXiv, 2024, arXiv:2406.18096, [https://arxiv.org/abs/2406.18096](https://arxiv.org/abs/2406.18096).
+[1] Huang, Yuxuan, et al. "Deep Research Agents: A Systematic Examination And Roadmap." arXiv, 2024, arXiv:2406.18096, [https://arxiv.org/abs/2406.18096](https://arxiv.org/abs/2406.18096).
 
-\[2\] Xu, Renjun, and Jingwen Peng. "A Comprehensive Survey of Deep Research: Systems, Methodologies, and Applications." arXiv, 2024, arXiv:2406.12594, [https://arxiv.org/abs/2406.12594](https://arxiv.org/abs/2406.12594).
+[2] Xu, Renjun, and Jingwen Peng. "A Comprehensive Survey of Deep Research: Systems, Methodologies, and Applications." arXiv, 2024, arXiv:2406.12594, [https://arxiv.org/abs/2406.12594](https://arxiv.org/abs/2406.12594).
 
-\[3\] Google Team. Introducing gemini deep research. [https://gemini.google/overview/deep-research/](https://gemini.google/overview/deep-research/)
+[3] Google Team. Introducing gemini deep research. [https://gemini.google/overview/deep-research/](https://gemini.google/overview/deep-research/)
 
-\[4\] OpenAI. Introducing deep research. [https://openai.com/index/introducing-deep-research/](https://openai.com/index/introducing-deep-research/)
+[4] OpenAI. Introducing deep research. [https://openai.com/index/introducing-deep-research/](https://openai.com/index/introducing-deep-research/)
 
-\[5\] OpenAI. Introduction to deep research api. [https://cookbook.openai.com/examples/deep\_research\_api/introduction\_to\_deep\_research\_api](https://cookbook.openai.com/examples/deep_research_api/introduction_to_deep_research_api)
+[5] OpenAI. Introduction to deep research api. [https://cookbook.openai.com/examples/deep_research_api/introduction_to_deep_research_api](https://cookbook.openai.com/examples/deep_research_api/introduction_to_deep_research_api)
 
-\[6\] xAI Team. Introducing grok deepsearch. [https://x.ai/news/grok-3](https://x.ai/news/grok-3)
+[6] xAI Team. Introducing grok deepsearch. [https://x.ai/news/grok-3](https://x.ai/news/grok-3)
 
-\[7\] Browser-use. [https://github.com/browser-use/browser-use](https://github.com/browser-use/browser-use)
+[7] Browser-use. [https://github.com/browser-use/browser-use](https://github.com/browser-use/browser-use)
 
-\[8\] Perplexity Team. Introducing perplexity deep research. [https://www.perplexity.ai/hub/blog/](https://www.perplexity.ai/hub/blog/)
-
-END
-
-引言
-
-什么是Deep Research Agent
-
-庖丁解牛 -- Deep Reserach的核心技术拆解
-
-1）信息获取：Agent的“眼睛”与“耳朵”
-
-基于API的检索
-
-基于浏览器的探索
-
-2）工具调用：Agent的“万能百宝箱”
-
-代码解释器（数据分析）
-
-多模态内容的处理
-
-操作计算机 (Computer Use)
-
-3）架构与工作流：Agent的“大脑与神经中枢”
-
-静态工作流
-
-动态工作流
-
-4）能力调优：Agent的“进化之路”
-
-提示词工程
-
-有监督微调 SFT
-
-强化学习
-
-非参数持续学习（Non-parametric Continual Learning）
-
-5）记忆管理：Agent的“记忆宫殿”
-
-扩展上下文窗口长度
-
-压缩中间步骤
-
-利用外部结构化存储
-
-抛砖引玉 -- Deep Research核心应用场景一览
-
-群雄逐鹿 -- 巨头、初创与开源社区争相发力Deep Research
-
-闭源项目：
-
-OpenAI Deep Research
-
-Google Gemini Deep Research
-
-Qwen Deep Research
-
-Perplexity Deep Research
-
-开源项目：
-
-assafelovic/gpt-researcher
-
-google-gemini/gemini-fullstack-langgraph
-
-langchain-ai/open\_deep\_research
-
-langchain-ai/local-deep-researcher
-
-关键瓶颈 -- 当前Deep Research Agent的“阿喀琉斯之踵”
-
-破局之道 —— 在Dify on DMS上，构建企业专属版Deep Research Agent
-
-参考文献
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[8] Perplexity Team. Introducing perplexity deep research. [https://www.perplexity.ai/hub/blog/](https://www.perplexity.ai/hub/blog/)

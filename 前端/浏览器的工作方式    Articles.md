@@ -15,7 +15,7 @@ tags:
 这本关于 WebKit 和 Gecko 内部运作的全面入门手册是以色列开发者 Tali Garsiel 经过大量研究后撰写的。几年来，她查看了所有已发布的有关浏览器内部结构的数据，并花了大量时间阅读 Web 浏览器源代码。她写道：
 
 > 作为 Web 开发者， **了解浏览器操作的内部机制有助于您做出更明智的决策，并了解开发最佳实践背后的理由** 。虽然本文档内容较长，但我们建议您花些时间仔细阅读。您会发现，这样做绝对是值得的。
-> 
+>
 > Paul Irish，Chrome 开发者关系团队
 
 ## 简介
@@ -167,21 +167,17 @@ Gecko 将采用视觉格式的元素的树称为“帧树”。每个元素都�
 
 例如，我们的语言将定义为：
 
-```
 INTEGER: 0|[1-9][0-9]*
 PLUS: +
 MINUS: -
-```
 
 如您所见，整数由正则表达式定义。
 
 语法通常采用名为 [BNF](http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form) 的格式进行定义。我们的语言将定义为：
 
-```
 expression :=  term  operation  term
 operation :=  PLUS | MINUS
 term := INTEGER | expression
-```
 
 我们曾说过，如果某种语言的语法是无上下文语法，则可以由正则解析器解析。无上下文语法的直观定义是：完全可以用 BNF 表示的语法。如需了解正式定义，请参阅 [Wikipedia 上关于无上下文语法的文章](http://en.wikipedia.org/wiki/Context-free_grammar)
 
@@ -246,11 +242,13 @@ DTD 有几个变体。严格模式仅符合规范，但其他模式支持浏览�
 
 DOM 与标记之间几乎是一对一的关系。例如：
 
-```
+```java
 <html>
   <body>
     <p>
+```
       Hello World
+```java
     </p>
     <div> <img src="example.png"/></div>
   </body>
@@ -295,13 +293,11 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 基本示例 - 对以下 HTML 进行令牌化：
 
-```
 <html>
   <body>
     Hello world
   </body>
 </html>
-```
 
 初始状态为“数据状态”。 遇到 `<` 字符时，状态会更改为 **“标记处于打开状态”** 。使用 `a-z` 字符会导致创建“开始标记令牌”，状态会更改为 **“标记名称状态”** 。我们会一直保持此状态，直到 `>` 字符被消耗完为止。每个字符都会附加到新令牌名称后面。在本例中，创建的令牌是 `html` 令牌。
 
@@ -319,13 +315,11 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 我们来看看示例输入的树构建过程：
 
-```
 <html>
   <body>
     Hello world
   </body>
 </html>
-```
 
 树构建阶段的输入是来自令牌化阶段的一系列令牌。第一种模式是 **“初始模式”** 。收到“html”令牌将导致系统切换到 **“html 之前”** 模式，并在该模式下重新处理令牌。这将导致创建 HTMLHtmlElement 元素，该元素将附加到根 Document 对象。
 
@@ -353,17 +347,17 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 以以下 HTML 为例：
 
-```
+```java
 <html>
   <mytag>
   </mytag>
   <div>
   <p>
   </div>
+```
     Really lousy HTML
   </p>
 </html>
-```
 
 我肯定违反了大约一百万条规则（“mytag”不是标准标记、“p”和“div”元素嵌套错误等），但浏览器仍然正确显示它，并且没有任何抱怨。因此，解析器代码的大部分内容都是用于修正 HTML 作者的错误。
 
@@ -390,7 +384,7 @@ HTML5 规范确实定义了其中一些要求。（WebKit 在 HTML 解析器类�
 
 代码：
 
-```
+```java
 if (t->isCloseTag(brTag) && m_document->inCompatMode()) {
      reportError(MalformedBRError);
      t->beginTag = true;
@@ -405,32 +399,28 @@ if (t->isCloseTag(brTag) && m_document->inCompatMode()) {
 
 例如：
 
-```
-<table>
-  <table>
-    <tr><td>inner table</td></tr>
-  </table>
+
+| inner table |
+| ----------- |
+
   <tr><td>outer table</td></tr>
 </table>
-```
 
 WebKit 将将层次结构更改为两个同级表：
 
-```
-<table>
-  <tr><td>outer table</td></tr>
-</table>
-<table>
-  <tr><td>inner table</td></tr>
-</table>
-```
+
+| outer table |
+| ----------- |
+
+
+| inner table |
+| ----------- |
+
 
 代码：
 
-```
 if (m_inStrayTableContent && localName == tableTag)
         popBlock(tableTag);
-```
 
 WebKit 会为当前元素内容使用一个堆栈：它会将内部表格从外部表格堆栈中弹出。这些表现在将是同级表。
 
@@ -440,7 +430,7 @@ WebKit 会为当前元素内容使用一个堆栈：它会将内部表格从外�
 
 代码：
 
-```
+```java
 if (!m_currentFormElement) {
         m_currentFormElement = new HTMLFormElement(formTag,    m_document);
 }
@@ -450,7 +440,7 @@ if (!m_currentFormElement) {
 
 评论本身就说明了一切。
 
-```
+```java
 bool HTMLParser::allowNestedRedundantTag(const AtomicString& tagName)
 {
 
@@ -466,10 +456,8 @@ return i != cMaxRedundantTagDepth;
 
 再次说明 - 评论本身就是最好的证明。
 
-```
 if (t->tagName == htmlTag || t->tagName == bodyTag )
         return;
-```
 
 因此，Web 作者请注意，除非您想在 WebKit 错误容错代码段中作为示例出现，否则请编写格式正确的 HTML。
 
@@ -481,21 +469,18 @@ if (t->tagName == htmlTag || t->tagName == bodyTag )
 
 词法语法（词汇）由每个令牌的正则表达式定义：
 
-```
-comment   \/\*[^*]*\*+([^/*][^*]*\*+)*\/
+comment   \/*[^*]**+([^/*][^*]**+)*\/
 num       [0-9]+|[0-9]*"."[0-9]+
 nonascii  [\200-\377]
 nmstart   [_a-z]|{nonascii}|{escape}
 nmchar    [_a-z0-9-]|{nonascii}|{escape}
 name      {nmchar}+
 ident     {nmstart}{nmchar}*
-```
 
 “ident”是标识符（例如类名称）的简称。“name”是元素 ID（通过“#”引用）
 
 语法语法在 BNF 中进行了说明。
 
-```
 ruleset
   : selector [ ',' S* selector ]*
     '{' S* declaration [ ';' S* declaration ]* '}' S*
@@ -520,13 +505,12 @@ attrib
 pseudo
   : ':' [ IDENT | FUNCTION S* [IDENT S*] ')' ]
   ;
-```
 
 说明：
 
 规则集的结构如下所示：
 
-```
+```java
 div.error, a.error {
   color:red;
   font-weight:bold;
@@ -535,12 +519,10 @@ div.error, a.error {
 
 `div.error` 和 `a.error` 是选择器。大括号内的部分包含此规则集应用的规则。此结构在以下定义中进行了正式定义：
 
-```
 ruleset
   : selector [ ',' S* selector ]*
     '{' S* declaration [ ';' S* declaration ]* '}' S*
   ;
-```
 
 这意味着规则集是一个选择器，或者可以是多个选择器（以英文逗号和空格分隔，S 代表空格）。规则集包含大括号，大括号内包含一个声明，或者可选地包含多个声明（以英文分号分隔）。 “声明”和“选择器”将在以下 BNF 定义中定义。
 
@@ -576,7 +558,7 @@ Firefox 将渲染树中的元素称为“帧”。WebKit 使用“渲染程序�
 
 WebKit 的 RenderObject 类（即渲染程序的基类）具有以下定义：
 
-```
+```java
 class RenderObject{
   virtual void layout();
   virtual void paint(PaintInfo);
@@ -591,7 +573,7 @@ class RenderObject{
 
 边框类型受与节点相关的样式属性的“display”值的影响（请参阅 [样式计算](#style_computation) 部分）。以下是用于根据 display 属性确定应为 DOM 节点创建哪种类型的渲染程序的 WebKit 代码：
 
-```
+```java
 RenderObject* RenderObject::createObject(Node* node, RenderStyle* style)
 {
     Document* doc = node->document();
@@ -662,11 +644,11 @@ RenderObject* RenderObject::createObject(Node* node, RenderStyle* style)
 1. 样式数据是一个非常大的结构，包含众多样式属性，这可能会导致内存问题。
 2. 如果未优化，系统在为每个元素查找匹配规则时可能会导致性能问题。对每个元素遍历整个规则列表以查找匹配项是一项繁重的工作。选择器可能具有复杂的结构，这可能会导致匹配过程从一个看似有希望的路径开始，但最终证明该路径无效，因此必须尝试其他路径。
 	例如，以下复合选择器：
-	```
+```java
 	div div div div{
 	...
 	}
-	```
+```
 	表示这些规则适用于 3 个 div 的后代 `<div>` 。假设您想检查该规则是否适用于给定的 `<div>` 元素。您可以选择树中的某个路径进行检查。您可能需要向上遍历节点树，才能发现只有两个 div，并且规则不适用。然后，您需要尝试树中的其他路径。
 3. 应用规则涉及定义规则层次结构的非常复杂的级联规则。
 
@@ -729,13 +711,15 @@ Firefox 还提供了两个额外的树来简化样式计算：规则树和样式
 
 我们来看一个示例：假设我们有以下 HTML
 
-```
+```java
 <html>
   <body>
     <div class="err" id="div1">
       <p>
+```
         this is a <span class="big"> big error </span>
         this is also a
+```java
         <span class="big"> very  big  error</span> error
       </p>
     </div>
@@ -746,7 +730,7 @@ Firefox 还提供了两个额外的树来简化样式计算：规则树和样式
 
 以及以下规则：
 
-```
+```java
 div {margin: 5px; color:black}
 .err {color:red}
 .big {margin-top:3px}
@@ -785,9 +769,7 @@ div span {margin-bottom:4px}
 
 例如，如果我们为段落中的字体添加了规则：
 
-```
 p {font-family: Verdana; font size: 10px; font-weight: bold}
-```
 
 然后，段落元素（是上下文树中 div 的子元素）可以与其父元素共享相同的字体结构。如果未为段落指定任何字体规则，则会出现这种情况。
 
@@ -811,7 +793,7 @@ p {font-family: Verdana; font size: 10px; font-weight: bold}
 
 例如，我们来看以下样式规则：
 
-```
+```java
 p.error {color: red}
 #messageDiv {height: 50px}
 div {margin: 5px}
@@ -821,18 +803,14 @@ div {margin: 5px}
 
 对于以下 HTML 代码段：
 
-```
 <p class="error">an error occurred</p>
 <div id=" messageDiv">this is a message</div>
-```
 
 我们先尝试找出 p 元素的规则。类映射将包含一个“error”键，在该键下可以找到“p.error”的规则。 div 元素在 ID 映射（键为 ID）和标记映射中将具有相关规则。因此，剩下的工作就是找出由键提取的哪些规则确实匹配。
 
 例如，如果 div 的规则为：
 
-```
 table div {margin: 5px}
-```
 
 它仍会从标记映射中提取，因为键是最右侧的选择器，但它与没有表祖先的 div 元素不匹配。
 
@@ -871,8 +849,8 @@ WebKit 和 Firefox 都会执行此操作。
 
 一些示例：
 
-```
 *             {}  /* a=0 b=0 c=0 d=0 -> specificity = 0,0,0,0 */
+```java
 li            {}  /* a=0 b=0 c=0 d=1 -> specificity = 0,0,0,1 */
 li:first-line {}  /* a=0 b=0 c=0 d=2 -> specificity = 0,0,0,2 */
 ul li         {}  /* a=0 b=0 c=0 d=2 -> specificity = 0,0,0,2 */
@@ -888,7 +866,7 @@ style=""          /* a=1 b=0 c=0 d=0 -> specificity = 1,0,0,0 */
 
 规则匹配后，系统会根据级联规则对其进行排序。WebKit 会对小列表使用冒泡排序，对大列表使用归并排序。WebKit 通过替换规则的 `>` 运算符来实现排序：
 
-```
+```java
 static bool operator >(CSSRuleData& r1, CSSRuleData& r2)
 {
     int spec1 = r1.selector()->specificity();
@@ -973,17 +951,13 @@ Firefox 布局的输出是一个“metrics”对象(nsHTMLReflowMetrics)。其�
 
 例如，以下 div 的宽度：
 
-```
 <div style="width: 30%"/>
-```
 
 将由 WebKit 按如下方式计算（类 RenderBox 方法 calcWidth）：
 
 - 容器宽度为容器的 availableWidth 和 0 中的较大者。在本例中，availableWidth 是 contentWidth，其计算方式如下：
 
-```
 clientWidth() - paddingLeft() - paddingRight()
-```
 
 clientWidth 和 clientHeight 表示对象的内部（不包括边框和滚动条）。
 
@@ -1044,10 +1018,8 @@ Firefox 通过不添加将被隐藏的元素（例如完全位于其他不透明
 
 浏览器主线程是一个事件循环。 这是一个无限循环，可让进程保持活跃状态。它会等待事件（例如布局和绘制事件），并对其进行处理。以下是主事件循环的 Firefox 代码：
 
-```
 while (!mExiting)
     NS_ProcessNextEvent(thread);
-```
 
 ## CSS2 视觉模型
 
@@ -1075,11 +1047,9 @@ while (!mExiting)
 
 示例：
 
-```
 block: generates a block box.
 inline: generates one or more inline boxes.
 none: no box is generated.
-```
 
 默认是内嵌，但浏览器样式表可能设置其他默认值。例如，“div”元素的默认显示方式为“块”。
 
@@ -1147,12 +1117,10 @@ none: no box is generated.
 
 浮动框会向线条的左侧或右侧偏移。有趣的是，其他框会围绕它流动。HTML：
 
-```
 <p>
   <img style="float: right" src="images/image.gif" width="100" height="100">
   Lorem ipsum dolor sit amet, consectetuer...
 </p>
-```
 
 将如下所示：
 
@@ -1178,7 +1146,7 @@ none: no box is generated.
 
 示例：
 
-```
+```java
 <style type="text/css">
   div {
     position: absolute;
@@ -1189,13 +1157,13 @@ none: no box is generated.
 
 <p>
   <div
+```
     style="z-index: 3;background-color:red; width: 1in; height: 1in; ">
   </div>
   <div
     style="z-index: 1;background-color:green;width: 2in; height: 2in;">
   </div>
 </p>
-```
 
 结果如下：
 

@@ -69,9 +69,7 @@ properties仅仅代表属性的声明，一个属性声明了，和他是否被�
 - provided是指线上已经提供了这个Jar包，打包的时候不需要在考虑他了，一般像servlet的包很多都是provided。
 - system和provided没什么太大的区别。
 - import只会出现在dependencyManagement标签内的依赖中，是为了解决Maven的单继承。引入了这个作用域的话，maven会把此依赖的所有的dependencyManagement内的元素加载到当前pom中的，但不会引入当前节点。如下图，并不会引入fastjson作为依赖管理的元素，只是会把fastjson文件定义的依赖管理引入进来。
-```xml
 <dependencyManagement><dependencies>  <dependency>    <groupId>com.alibaba</groupId>    <artifactId>fastjson</artifactId>    <version>1.2.24</version>    <scope>import</scope>  </dependency><dependencies><dependencyManagement>
-```
 
 ## 二 单个Pom树的依赖竞争
 
@@ -113,7 +111,7 @@ properties仅仅代表属性的声明，一个属性声明了，和他是否被�
 
 看到这里，想必大家已经了解了Maven的仲裁原则。但是在实际的工作中，光有原则还需要在代码中可以灵活的运用才能有属于自己的理解，这里笔者准备了5个场景，每个场景对应的答案都在后面，大家阅读时，可以自己尝试用Maven的原则来去推理，看看有没有哪里不符合预期的情况。
 
-### 场景一 难度(\*)
+### 场景一 难度(*)
 
 #### 场景描述
 
@@ -133,7 +131,7 @@ properties仅仅代表属性的声明，一个属性声明了，和他是否被�
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naLuhG7N3QAzCo20QpOQwIcxnqfhq4oSoricF1xHRPgKMApBjGle5iaiavwF0j8b12jzU8GUGBMiaTxCQQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=5)
 
-### 场景二 难度(\*\*)
+### 场景二 难度(**)
 
 在同一个主POM或者子POM中的dependencies中同时使用了Fastjson，第一个声明了1.2.24的版本，第二个声明了1.2.25版本。那么针对主POM或者子pom这棵树，最终会选择fastjson 1.2.24还是1.2.25呢？
 
@@ -145,7 +143,7 @@ properties仅仅代表属性的声明，一个属性声明了，和他是否被�
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naLuhG7N3QAzCo20QpOQwIcxBeH9s31S3utfs2mrCIO3r2TeZ8cuDfR5ZTYzLc410P5LWEOhm8fmNQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=7)
 
-### 场景三 难度(\*\*\*)
+### 场景三 难度(***)
 
 下图中左图为主POM文件内的dependencyManagement里的fastjson为1.2.77，这个时候子POM中显示声明自己的版本1.2.78。那么针对子POM这颗树，子POM会选择听从父命还是遵从内心呢？
 
@@ -157,7 +155,7 @@ properties仅仅代表属性的声明，一个属性声明了，和他是否被�
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naLuhG7N3QAzCo20QpOQwIcxBVkpnsBFmClooZhdMKrezsJnVGiciaufqJeVLNsibd0o1DAYuvT8PJxlQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=9)
 
-### 场景四 难度(\*\*\*\*)
+### 场景四 难度(****)
 
 主POM的dependencies **Fastjson:1.2.24** 主POM的dependencymanagent **Fastjson:1.2.77**
 
@@ -175,7 +173,7 @@ properties仅仅代表属性的声明，一个属性声明了，和他是否被�
 
 ![图片](https://mmbiz.qpic.cn/mmbiz_png/Z6bicxIx5naLuhG7N3QAzCo20QpOQwIcxjI9WoKF4K0icMHg6mgiaHMErYgRX6lBaxLGDq7CzsWLJKsicdojjibeTfQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=11)
 
-### 场景五 难度(\*\*\*\*\*)
+### 场景五 难度(*****)
 
 主POM的dependencies **Fastjson:1.2.24** 主POM的dependencymanagent **Fastjson:1.2.77**
 

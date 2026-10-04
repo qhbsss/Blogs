@@ -10,40 +10,19 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 0影响力 64
 
-** 18
 
-** 8
 
-**
 
-** 原创文章
 
-** AI辅助优化 30%
 
-**
 
-[付强(哲也)](https://ata.atatech.org/users/11000733960)
 
-5月28日发表5月28日更新160次浏览
 
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章12:55
-
-**
 
 > **推荐阅读**
-> 
+>
 > - [ADK-DeepAgent：面向分布式环境的通用智能体框架](https://ata.atatech.org/articles/11020532914?spm=ata.21736010.0.0.37027536FeKfQM) — DeepAgent 原始设计与核心原理
 > - [首个 Harness Framework 发布](https://ata.atatech.org/articles/11020626959?spm=ata.21736010.0.0.37027536FeKfQM) — AgentScope Harness 设计理念与框架能力
 
@@ -80,7 +59,6 @@ DeepAgent · 基于 AgentScope Harness 的五层技术架构
 
 继承与组合关系：
 
-```
 ReActAgent (推理内核, Project Reactor 非阻塞)
     ↑ 组合持有 (delegate)
 HarnessAgent (薄包装: bindRuntimeContext + forceCompactAndRetry)
@@ -88,7 +66,6 @@ HarnessAgent (薄包装: bindRuntimeContext + forceCompactAndRetry)
 DeepAgentBuilder (能力注入: APaaS + Store + Skill + Prompt + Hook)
     ↑ 工厂入口
 DeepAgents.from(HarnessAgent.Builder)
-```
 
 ### 2.2 DeepAgent 提供了什么
 
@@ -115,7 +92,7 @@ DeepAgent 需要在 ReAct 循环的多个阶段注入能力（沙箱生命周期
 HarnessAgent 通过组合持有 ReActAgent 作为 delegate，DeepAgent 在 Builder 层完成能力装配。运行时能力通过 Harness 的两个扩展通道注入：
 
 - **Hook** ：在 PreCall、PreReasoning、PostActing、PostCall 等事件节点插入逻辑
-- **Toolkit** ：向模型注册 shell\_execute、activate\_skill 等工具
+- **Toolkit** ：向模型注册 shell_execute、activate_skill 等工具
 
 各 Hook 之间不持有彼此引用，通过三个共享对象完成协作：
 
@@ -273,8 +250,10 @@ DeepAgent 面向 **长周期、分布式部署的复杂任务** ：通过文件�
     <artifactId>maas-agentscope-extension-deep-agent</artifactId>
     <version>${maas-agentscope-version}</version>
 </dependency>
+```
 
 <!-- 必须：agentscope-harness 运行时 -->
+```xml
 <dependency>
     <groupId>io.agentscope</groupId>
     <artifactId>agentscope-harness</artifactId>
@@ -304,7 +283,9 @@ HarnessAgent agent = DeepAgents.from(
         // .subagent(subagentSpec)                   // 可选
         // .toolkit(customToolkit)                   // 可选
         // .hook(customHook)                         // 可选
+```
     )
+```java
     // ── DeepAgent 专属配置 ──
     .workspace(workspace)                            // 推荐，从 classpath resources/workspace 加载
     .apaas(ApaasSandboxConfig.pre(bizType, ak))      // APaaS 沙箱模式必填
@@ -346,53 +327,3 @@ Mass-AgentScope 交流群
 ![一起定义 AI 的下一个主场](https://ata.atatech.org/router/file/redirect?url=https%3A%2F%2Foss-ata.alibaba.com%2Farticle%2F2026%2F05%2Fed42dd35-ba48-4170-ad8a-e56a442b2b67.jpg&kind=ARTICLE&process=image/auto-orient,1/resize,m_lfit,w_1600/quality,Q_80/format,webp)
 
 一起定义 AI 的下一个主场
-
-END
-
-一、背景与定位
-
-二、架构全景与框架优势
-
-2.1 五层架构
-
-2.2 DeepAgent 提供了什么
-
-三、核心设计决策
-
-决策一：组合式构建，不侵入推理循环
-
-决策二：Filesystem 双形态——隔离粒度按需选择
-
-四、核心能力详解
-
-4.1 APaaS 沙箱执行
-
-4.2 分布式存储与隔离
-
-4.3 Prompt 引擎
-
-4.4 Skill 系统
-
-五、接入指南
-
-5.1 什么场景选 DeepAgent
-
-5.2 前置条件
-
-5.3 引入依赖
-
-5.4 完整构建模板
-
-5.5 答疑与交流
-
-六、招聘彩蛋
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

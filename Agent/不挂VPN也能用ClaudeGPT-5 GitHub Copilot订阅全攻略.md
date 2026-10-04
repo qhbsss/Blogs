@@ -8,44 +8,6 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 0影响力 24** 12
-
-** 10
-
-** 2
-
-** 原创文章
-
-发表到圈儿
-
-[飞猪CTO线](https://ata.atatech.org/community/team/203) (首发)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[范栩(重叁)](https://ata.atatech.org/users/11001537397)
-
-4月11日发表560次浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章04:10
-
-**
-
 ## 为什么要订阅GitHub Copilot
 
 GitHub Copilot 模型能力强、使用门槛低
@@ -56,29 +18,17 @@ GitHub Copilot 模型能力强、使用门槛低
 
 GitHub Copilot支持的模型
 
-●
+- claude-opus-4.6
 
-claude-opus-4.6
+- claude-sonnet-4.6
 
-●
+- gpt-5.4
 
-claude-sonnet-4.6
+- gpt-5.3-codex
 
-●
+- gemini-3.1-pro-preview
 
-gpt-5.4
-
-●
-
-gpt-5.3-codex
-
-●
-
-gemini-3.1-pro-preview
-
-●
-
-此处省略20个其他模型
+- 此处省略20个其他模型
 
 当然如果懒得折腾，使用aone Copilot也是一个很好的选择，最近额度已经涨到2000次调用了
 
@@ -88,26 +38,29 @@ gemini-3.1-pro-preview
 
 国际信用卡，招商银行可办，感谢青也大哥支招
 
-<table><colgroup><col width="200"> <col width="200"> <col width="200"> <col width="199"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>1、搜visa</p><img src="https://oss-ata.alibaba.com/article/2026/04/94f8a384-c95a-4032-b9d6-b820bbd3f968.png"></td><td rowspan="1" colspan="1"><p>2、选国际信用卡（填写信息）</p><img src="https://oss-ata.alibaba.com/article/2026/04/126999bd-d49a-48f0-a31d-93a68b8c5712.png"></td><td rowspan="1" colspan="1"><p>3、下载掌上生活去【我的-资料管理-地址信息】维护邮卡地址</p><img src="https://oss-ata.alibaba.com/article/2026/04/e092c8ad-db3d-4db2-8b54-bb13f58cac32.png"></td><td rowspan="1" colspan="1"><p>4、等待邮寄即可，从办理到邮寄到北京大概2天</p><img src="https://oss-ata.alibaba.com/article/2026/04/b0492ad1-e9d8-4818-9853-263dcc6e56a5.png"></td></tr></tbody></table>
+
+| 1、搜visa | 2、选国际信用卡（填写信息） | 3、下载掌上生活去【我的-资料管理-地址信息】维护邮卡地址 | 4、等待邮寄即可，从办理到邮寄到北京大概2天 |
+| ------- | -------------- | ----------------------------- | ---------------------- |
+
 
 ## 购买订阅
 
 [GitHub Copilot · Plans & pricing](https://github.com/features/copilot/plans?ref_cta=See+pricing+and+plans&ref_loc=hero&ref_page=%2Ffeatures_copilot_copilot_ai_code_editor&cft=copilot_li.features_copilot)
 
 > ●
-> 
+>
 > 注册技巧：强烈推荐使用 阿里邮箱 (@alibaba-inc.com) 注册 GitHub 账号。
 
 > ○
-> 
+>
 > 优势：便于后续可能的企业版福利关联、找回密码更安全、符合公司身份认证规范。
 
 > ●
-> 
+>
 > 学生认证：如果有教育背景，如何利用学生身份免费获取 Pro 版权益。
 
 > ●
-> 
+>
 > 订阅档位选择：可根据自己的使用强度选择档位，pro 300次调用，pro+ 1500次调用
 
 接下来需要填写地址信息，这里的信息需要跟你的信用卡地址填写一致，又到了活用大模型的时候了。
@@ -156,7 +109,13 @@ gemini-3.1-pro-preview
 
 试了四种方案都失败了，应该是最近有更新协议，预计近期会解决掉，目前没找到好的解决方案，有能跑通的大佬能分享下就更好了
 
-<table><colgroup><col width="250"> <col width="250"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>copilot-api（业界先进）</p></td><td rowspan="1" colspan="1"><p><a href="https://github.com/ericc-ch/copilot-api/issues/222">‘max_tokens’ is not supported with this model · Issue #222 · ericc-ch/copilot-api</a></p></td></tr><tr><td rowspan="1" colspan="1"><p>cc switch（看着专业）</p></td><td rowspan="1" colspan="1"><p>来自路良的调研</p><img src="https://oss-ata.alibaba.com/article/2026/04/62cf3a89-8500-49d8-98af-dab0cd23776e.png"> <img src="https://oss-ata.alibaba.com/article/2026/04/82e78c27-1fe9-41e5-acfb-6a806c24c0a0.png"></td></tr><tr><td rowspan="1" colspan="1"><p>Agent Maestro（vs code插件代理）</p></td><td rowspan="1" colspan="1"></td></tr><tr><td rowspan="1" colspan="1"><p>VS Code Copilot Proxy（vs code插件代理）</p></td><td rowspan="1" colspan="1"></td></tr></tbody></table>
+
+| copilot-api（业界先进）                  | ‘max_tokens’ is not supported with this model · Issue #222 · ericc-ch/copilot-api |
+| ---------------------------------- | --------------------------------------------------------------------------------- |
+| cc switch（看着专业）                    | 来自路良的调研                                                                           |
+| Agent Maestro（vs code插件代理）         |                                                                                   |
+| VS Code Copilot Proxy（vs code插件代理） |                                                                                   |
+
 
 ## 效能评估与报销
 
@@ -172,8 +131,6 @@ gemini-3.1-pro-preview
 
 ## AI Coding采集方案
 
-[安装教程](https://ata.atatech.org/articles/11020522083?spm=21540d8c.2ef5001f.0.0.617ec9cajiWKQK#OWVhMjFl)
-
 需要按规范安装，支持的工具多
 
 可通过此网站查询使用情况： [https://charity-web.alibabafoundation.com/api/auth/code-detail](https://charity-web.alibabafoundation.com/api/auth/code-detail)
@@ -185,39 +142,3 @@ gemini-3.1-pro-preview
 最近在做应用的架构设计，和一个模型聊总怕聊的不够全面，尝试使用了golutra在架构设计场景做多Agent辩论，可使用 `opencode --model github-copilot/claude-sonnet-4.6` 命令使用不同的模型讨论，推荐一波。
 
 ![[03bb34e9-1da3-4d3d-baad-2867d388544b.png]]
-
-END
-
-为什么要订阅GitHub Copilot
-
-如何订阅GitHub Copilot
-
-前置准备
-
-购买订阅
-
-订阅完的第一件事
-
-接入编程工具
-
-Opencode（省心推荐）
-
-Claude code
-
-效能评估与报销
-
-AI Coding Analytics · 研效数据平台（报销需要）
-
-AI Coding采集方案
-
-一点扩展
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

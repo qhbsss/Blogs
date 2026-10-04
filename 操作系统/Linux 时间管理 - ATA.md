@@ -8,41 +8,16 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 190影响力 1.9k
-
-** 2
-
-** 1
-
-**
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
 ## Linux 时间管理
-
-[陈阳(逸殊)](https://ata.atatech.org/users/11000967975)
 
 2021-01-11发表2021-11-25更新95次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 引言
 
-本文整理了 Linux 内核中时间管理的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。  
+本文整理了 Linux 内核中时间管理的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。
 
 ## 时间管理
 
@@ -58,19 +33,19 @@ tags:
 1. 经典定时器：也就是我们前面所提到的低分辨率定时器，分辨率的大小取决于底层硬件（典型的分辨率是 4 ms）。
 2. 高分辨率定时器：对于面向媒体的应用，几毫秒的定时器分辨率是不够的。所以，最新的硬件提供了精确的多的计时手段，可以达到纳秒级的分辨率，它被称为高分辨率定时器。
 
-低分辨率定时器一般以一个固定的时钟周期发送信号，而高分辨率的时钟事件可以设定为在任意时间点发出。当我们在系统中添加一些定时任务时，就需要使用到这两种不同的定时器，假设我们使用低分辨率定时器来实现定时任务的话，这些定时任务只会在固定的周期时钟点触发，比如下图的 jiffie 1236，1237，1239 周期点，而当我们使用高分辨率定时器时，可以实现更精确地定时任务，如下图的小黑点可能是在某一指定的纳秒级时间点触发。  
+低分辨率定时器一般以一个固定的时钟周期发送信号，而高分辨率的时钟事件可以设定为在任意时间点发出。当我们在系统中添加一些定时任务时，就需要使用到这两种不同的定时器，假设我们使用低分辨率定时器来实现定时任务的话，这些定时任务只会在固定的周期时钟点触发，比如下图的 jiffie 1236，1237，1239 周期点，而当我们使用高分辨率定时器时，可以实现更精确地定时任务，如下图的小黑点可能是在某一指定的纳秒级时间点触发。
 
 ![[3c13550b-a98a-4dfc-a0a5-000a71a624b4.png|different-low-high-clock]]
 
 different-low-high-clock
 
-  
-这两种定时器在最底层还是由时钟芯片实现，芯片不仅提供了定时功能（定时事件和周期性事件），还可以用作时钟（获取当前系统时间）。例如，IA-32 系统有一个 PIT（可编程中断定时器），这是一个低分辨率定时器。而每个 CPU 上一般都会有一个该 CPU 独享的 APIC（高级可编程中断控制器），它是一个高分辨率定时器。  
+
+这两种定时器在最底层还是由时钟芯片实现，芯片不仅提供了定时功能（定时事件和周期性事件），还可以用作时钟（获取当前系统时间）。例如，IA-32 系统有一个 PIT（可编程中断定时器），这是一个低分辨率定时器。而每个 CPU 上一般都会有一个该 CPU 独享的 APIC（高级可编程中断控制器），它是一个高分辨率定时器。
 ![[df38bfef-75b7-4ab5-b690-fddffeed4d34.png|clock-system]]
 
 clock-system
 
-  
+
 上图展示了时间子系统中各个组件的关系，底层的硬件需要体系结构相关的代码进行封装，这样内核的其他代码才能通过一套统一的接口访问定时器的当前时间（左上角的时间源）。而时钟事件是周期性事件的基础，但是除了周期性事件之外，一些定时设备还可以在指定的时间点发送时钟事件（APIC），对于这类设备而言一般被称为单触发设备（one-shot device），高分辨率的定时任务主要是基于这类定时器（但是也不一定，如果禁用或没有这类设备）。而低分辨率定时器则是基于周期性时钟（PIT），它一般处理如下两类重要的任务：
 
 1. 处理全局 jiffies 计数器，该值周期性的增长，是一件特别简单的时间基准。
@@ -78,13 +53,13 @@ clock-system
 
 很显然，高分辨率定时器能解决我们的前面提出的多媒体应用的问题，它们需要精确地计时功能。但是，到此为止，我们还没有说 Linux 如何解决周期性时钟的耗电问题，实际上内核支持一种叫做动态时钟的机制，它允许时钟芯片停止发送周期性时钟事件，这样 CPU 就能进入稳定的睡眠状态，我们在后面介绍这种机制的实现。
 
-接下来，我们介绍一下 Linux 中的时间系统。下图提供了 Linux 的通用时间系统的概览。  
+接下来，我们介绍一下 Linux 中的时间系统。下图提供了 Linux 的通用时间系统的概览。
 
 ![[d04c57f7-34b8-4de1-8a93-4c80142422bb.png|general-time-system]]
 
 general-time-system
 
-  
+
 在内核中，有两种时钟类型：
 
 1. 全局时钟：负责提供周期时钟，主要用于更新 jiffies 值，在 IA-32 系统上一般由 PIT 实现。因为周期性时钟事件在每个 CPU 上都会触发，但是我们只需要选择其中一个 CPU 来修正全局时钟（jiffies）即可。
@@ -94,17 +69,14 @@ general-time-system
 
 在系统中，可能存在多个时间源（只读的方式查看当前时间，时间是由时钟源设备在硬件层面维护的），每个时钟源的精度可能各不相同，例如 IA-32 的体系结构上，TSC（时间戳计数器）是最精确的时钟源设备，所以内核一般会使用它。
 
-```bash
 cat /sys/devices/system/clocksource/clocksource0/available_clocksource
 tsc hpet acpi_pm // 时钟源列表
 
 cat /sys/devices/system/clocksource/clocksource0/current_clocksource
 tsc // 我们可以看到系统使用的时钟源是 tsc
-```
 
 除了时间源之外，别忘了还有时钟事件设备，我们可以在 `/sys/devices/system/clockevents` 目录中查看各个 CPU 使用的时钟事件设备，它们可能有的精度比较高，有的比较低。而且它们还可以在周期性事件模式和单触发时间模式中切换，通过 `cat /proc/timer_list` 可以确认每个设备的模式。
 
-```bash
 ls /sys/devices/system/clockevents
 broadcast  clockevent0  clockevent1 // 广播设备用于省电模式，后面再介绍
 
@@ -124,7 +96,6 @@ Clock Event Device: lapic
  set_mode:       lapic_timer_setup
  event_handler:  hrtimer_interrupt
  retries:        15824846
-```
 
 ### 低分辨率定时器实现
 
@@ -135,7 +106,7 @@ Clock Event Device: lapic
 当这个周期性的时钟中断发生时，要处理这两部分工作：
 
 1. 更新全局时钟 jiffies，更新墙上时间（系统已启动并运行了多长时间，单位是纳秒），统计系统负载，这部分工作内核会选择一个特定的 CPU 执行
-2. 处理注册的低分辨率定时任务，向调度器提供时间感知(通过软中断 TIMER\_SOFTIRQ)，这些工作在每个 CPU 上都会执行
+2. 处理注册的低分辨率定时任务，向调度器提供时间感知(通过软中断 TIMER_SOFTIRQ)，这些工作在每个 CPU 上都会执行
 
 在 32 位的内核中，jiffies 是由一个 32 位的数表示的（unsigned long），这就意味着在系统运行很长一段时间后，该计数器会达到最大值，然后被重置为 0，如果定时器频率是 100，那么不到 500 天后达到最大值，而对于更高的 HZ 值，这个时间会更短。而在 64 位的系统上，就不存在这个问题，Linux 不可能连续运行 10^12 天。
 
@@ -149,36 +120,41 @@ Clock Event Device: lapic
 
 接下来我们将介绍一个基于周期时钟的定时任务是如何实现的，在使用周期时钟时，它只会以一个固定的频率触发时钟中断，所以我们不得不在每次周期时钟中断时，确认是否有当前这一 jiffies 应该执行的任务，这个过程要尽可能地高效。这里我们先了解一下一个定时任务在内核中如何表示，然后再介绍内核如何高效的组织它们。
 
-```cpp
+```java
 struct timer_list {
-    struct list_head entry; // 同一 jiffies 触发的所有定时任务以链表形式组织，该字段保存了表头
-    unsigned long expires;  // 定时任务到期时间 jiffies
+```
+
+struct list_head entry; // 同一 jiffies 触发的所有定时任务以链表形式组织，该字段保存了表头
+unsigned long expires;  // 定时任务到期时间 jiffies
+
+```java
     void (*function)(unsigned long);    // 定时任务对应的函数
     unsigned long data; // 定时任务的参数
     struct tvec_t_base_s *base; // 指向一个基元素，其中的定时任务按到期时间排序，接下来就介绍它
 };
+
 ```
 
-在每个 CPU 上都会维护一个基元素 tvec\_t\_base\_s，它里面有 5 个组，这五个组中包含的定时任务是按照到期时间（偏移量 jiffies，而不是绝对时间 jiffies）递增的顺序保存的。例如，第一组 tv1 包含的是 0 - 255 jiffies 之后要触发的任务，第二个组内保存了 256 - ((2 ^ 14) - 1) jiffies 之后要执行的任务，以此类推可以得到下面的组与到期时间的对应关系。  
+在每个 CPU 上都会维护一个基元素 tvec_t_base_s，它里面有 5 个组，这五个组中包含的定时任务是按照到期时间（偏移量 jiffies，而不是绝对时间 jiffies）递增的顺序保存的。例如，第一组 tv1 包含的是 0 - 255 jiffies 之后要触发的任务，第二个组内保存了 256 - ((2 ^ 14) - 1) jiffies 之后要执行的任务，以此类推可以得到下面的组与到期时间的对应关系。
 
 ![[724c35e5-e323-49a7-a32a-0c7d06f87622.png|group-expired-time]]
 
 group-expired-time
 
-  
-每个组都指向了一个更下层的数组，就如下图所示。就像前面所说的，第一组对应的定时任务都在 0 - 255 jiffies后触发，所以第一组的下层数组有 256 个项，数组中的每一项对应了一个特定的 jiffies 值（数组的第 0 位，对应了当前这一 jiffies 应该触发的任务，数组的第 1 位，对应了下一 jiffies 应该触发的任务），如果一个 jiffies 有多个定时任务的话，它们会以链表的形式保存在一个数组项下。  
+
+每个组都指向了一个更下层的数组，就如下图所示。就像前面所说的，第一组对应的定时任务都在 0 - 255 jiffies后触发，所以第一组的下层数组有 256 个项，数组中的每一项对应了一个特定的 jiffies 值（数组的第 0 位，对应了当前这一 jiffies 应该触发的任务，数组的第 1 位，对应了下一 jiffies 应该触发的任务），如果一个 jiffies 有多个定时任务的话，它们会以链表的形式保存在一个数组项下。
 ![[ded8e37a-04db-46d1-98f4-9cb2c5063bb4.png|timer-group-relation]]
 
 timer-group-relation
 
-  
+
 除了第一组之外，其余组的下层数组项都是 64 个，对于这些数组项来说每一项就不再是对应一个 jiffies 周期了，对第二组来说每个数组项对应了 2 ^ 8 个周期，第三组对应了 2 ^ 14 个周期，第四组对应了 2 ^ 20 个周期，第五组对应了 2 ^ 26 个周期，你会发现每两组之间周期的差值正好是 2 ^ 6 = 64，到这你可能还没明白这个设计的巧妙之处，接下来我介绍完定时任务的触发执行过程，你就明白了。
 
 当每个周期时钟中断发生时，假设现在 jiffies = 0，内核会检查第一组 tv1 的下层数组项第 0 位，如果该数组项中不为 NULL，则说明 jiffies = 0 时没有定时任务，如果该数组项有内容，则把所有内容放到一个待决链表中，稍后一般通过软中断的方式执行。检查完第 0 项之后，记录一下当前处理的下标index = 0，当下一个周期时钟中断发生时，jiffies 变成了 1，这时候内核检查 index = 0，说明 tv1 的第 0 项已经处理过了，所以这次检查第 1 项，检查的过程和刚才完全一致，最后将 index 置为 1，内核持续这个过程直到 jiffies = 255，这时候 tv1 的所有数组项都检查完了，tv1 相当于被清空了，这时候内核会将 tv2 的第 0 项中的所有定时器填充到 tv1 中，因为 tv2 中的每个数组项中最多包含 2 ^ 8 = 256 个时钟周期，所以 tv2 的每个数组项正好能够填充整个 tv1，然后 tv2 记录一下该组的处理下标 index2 = 0，下次在需要填充 tv1 时就会从 tv2 的下标 1 开始，通过这种做法，当 tv2 处理完毕时就从 tv3 中借一个数组项填充整个 tv2，第三组中的一个数组项，正好够填充整个第二组，第四组的一个数组项正好够填充整个第三组，第五组的一个数组项足够填充整个第四组。
 
 就这样每次周期时钟中断时，就处理 tv1 的第一项，然后在所有项都处理完后，循环向后面的组中借过来一项填充自己，就完成了所有定时任务的检查。通过这种方式，内核可以不用扫描巨大的定时器链表，就能找到要触发的定时任务，处理范围仅限于第一组中的一个数组项。该数组项不是空就是一个链表，处理起来会非常快，而向后借项的过程也不需要多少时间。内核就借助这种算法，在周期性时钟中断的基础上实现了一个高效的定时任务机制。
 
-而且新添加定时任务的过程也很容易实现，就是根据定时器的到期时间（target\_jiffies - current\_jiffies）算出它所在的组以及在组中对应的数组项中。
+而且新添加定时任务的过程也很容易实现，就是根据定时器的到期时间（target_jiffies - current_jiffies）算出它所在的组以及在组中对应的数组项中。
 
 ### 高分辨率定时器实现
 
@@ -191,31 +167,31 @@ timer-group-relation
 1. 内核以红黑树的形式排序所有的定时任务
 2. 所有定时任务不是基于 jiffies 而是采用纳秒时间戳来表示到期时间
 
-高分辨率定时器有两个时钟，一个是单调时钟在系统启动时从 0 开始，另一个是系统的实际时间（年月日时分秒），单调时间是从零开始单调递增的，而实际时间是可以随意更改的（修改系统时间）。  
+高分辨率定时器有两个时钟，一个是单调时钟在系统启动时从 0 开始，另一个是系统的实际时间（年月日时分秒），单调时间是从零开始单调递增的，而实际时间是可以随意更改的（修改系统时间）。
 
 ![[820056ee-b7e1-4633-9c00-083658b0fc25.png|high-resolution-red-black-tree]]
 
 high-resolution-red-black-tree
 
-  
-系统中的每个 CPU 都为这两个时钟维护了各自的红黑树，来排序所有待决的定时任务。当新添加一个定时任务时，就根据使用的时钟类型，将其插入到对应的红黑树中，然后内核根据定时任务的到期时间向下层硬件中注册一个单触发事件，该事件的中断信号会在指定的事件点发出，在内核收到单触发事件中断时，内核从两个红黑树中的最左节点开始查找所有到期的任务，将到期任务加入到一个链表中（定时任务可以指定是在硬中断中执行还是软中断中执行，如果可以在软中断中执行才会被加入到链表，否则会在硬中断上下文中直接执行），然后向下层设备重新注册下一个单触发事件，以便能够触发下一个任务。最后引发一个软中断 HRTIMER\_SOFTIRQ，在软中断会处理定时任务（声明可以在软中断中执行的任务）。  
+
+系统中的每个 CPU 都为这两个时钟维护了各自的红黑树，来排序所有待决的定时任务。当新添加一个定时任务时，就根据使用的时钟类型，将其插入到对应的红黑树中，然后内核根据定时任务的到期时间向下层硬件中注册一个单触发事件，该事件的中断信号会在指定的事件点发出，在内核收到单触发事件中断时，内核从两个红黑树中的最左节点开始查找所有到期的任务，将到期任务加入到一个链表中（定时任务可以指定是在硬中断中执行还是软中断中执行，如果可以在软中断中执行才会被加入到链表，否则会在硬中断上下文中直接执行），然后向下层设备重新注册下一个单触发事件，以便能够触发下一个任务。最后引发一个软中断 HRTIMER_SOFTIRQ，在软中断会处理定时任务（声明可以在软中断中执行的任务）。
 ![[31f4a6b4-f031-4cb7-af08-8a644b25f6d4.png|high-resolution-clock-handle]]
 
 high-resolution-clock-handle
 
-  
-在执行定时任务的回调函数时，如果该回调函数的返回值是 HRTIMER\_RESTART 则说明该定时任务是一个循环定时任务，内核会按照该任务的要求，重新将该任务加入到红黑树中。通过这种循环定时任务我么就可以用来实现周期时钟。
+
+在执行定时任务的回调函数时，如果该回调函数的返回值是 HRTIMER_RESTART 则说明该定时任务是一个循环定时任务，内核会按照该任务的要求，重新将该任务加入到红黑树中。通过这种循环定时任务我么就可以用来实现周期时钟。
 
 #### 仿真周期时钟
 
-因为高分辨率定时器不提供周期性的时钟信号，所以需要基于高分辨率定时器提供一个等效的功能，周期时钟的仿真就像添加一个循环定时任务一样，这里内核为了防止多个 CPU 同时出发周期时钟时出现不必要的资源争抢，所以在设定每个 CPU 的周期时钟触发点时，故意都错开了一小段时间。假设第一个时钟的触发点是 0，并且包含 N 个 CPU 的话，那么之后每个 CPU 的时钟信号之间都会相差 `delta = tick_period / 2N` ，tick\_period 实际上就是一个 jiffies 的时长。  
+因为高分辨率定时器不提供周期性的时钟信号，所以需要基于高分辨率定时器提供一个等效的功能，周期时钟的仿真就像添加一个循环定时任务一样，这里内核为了防止多个 CPU 同时出发周期时钟时出现不必要的资源争抢，所以在设定每个 CPU 的周期时钟触发点时，故意都错开了一小段时间。假设第一个时钟的触发点是 0，并且包含 N 个 CPU 的话，那么之后每个 CPU 的时钟信号之间都会相差 `delta = tick_period / 2N` ，tick_period 实际上就是一个 jiffies 的时长。
 
 ![[c2b0f88a-6303-4efb-89e1-755670616101.png|high-resolution-simulate-repeat]]
 
 high-resolution-simulate-repeat
 
-  
-和低分辨率定时器一样，只会有一个 CPU 负责更新 jiffies，jiffies 加一，然后每个 CPU 都会管理进程时间，执行 CPU 周期时钟任务，最后计算下次单触发事件的时间，并向下层设备注册该事件。通过返回 HRTIMER\_RESTART 定时器会重新进入红黑树中，并在下一个始终到期时激活。  
+
+和低分辨率定时器一样，只会有一个 CPU 负责更新 jiffies，jiffies 加一，然后每个 CPU 都会管理进程时间，执行 CPU 周期时钟任务，最后计算下次单触发事件的时间，并向下层设备注册该事件。通过返回 HRTIMER_RESTART 定时器会重新进入红黑树中，并在下一个始终到期时激活。
 ![[d378ed6c-8de8-42be-b464-de46c4361c67.png|simulate-repeat-process]]
 
 simulate-repeat-process
@@ -234,7 +210,7 @@ simulate-repeat-process
 2. 如果负责更新全局时钟的 CPU 要进入睡眠，则将更新全局时钟的职责移交给别的 CPU
 3. 周期时钟停止工作
 4. 如果只有部分 CPU 进入睡眠，在其他 CPU 上需要通过单触发事件仿真周期时钟，这样才能完成这些 CPU 上的进程时间更新，jiffies 更新等工作，换句话说，就是周期时钟设备关闭，然后通过单触发设备仿真周期事件
-5. 如果所有 CPU 进入睡眠，仿真周期时钟也会关闭，那么会在中断发生或者定时任务到期时重新唤醒 CPU，这时候要通过时间源查看当前系统实际，然后根据 current\_system\_time - sleep\_start\_system\_time 的方式计算经过的 jiffies 数，并更新 jiffies 等
+5. 如果所有 CPU 进入睡眠，仿真周期时钟也会关闭，那么会在中断发生或者定时任务到期时重新唤醒 CPU，这时候要通过时间源查看当前系统实际，然后根据 current_system_time - sleep_start_system_time 的方式计算经过的 jiffies 数，并更新 jiffies 等
 
 理解了低分辨率系统的动态时钟工作模式后，我们再来看看高分辨率模式的工作方式，由于内核使用高分辨率模式时，时钟事件设备以单触发模式运行，所以相较于低分辨率模式，处理过程得到了进一步的简化：
 
@@ -244,14 +220,14 @@ simulate-repeat-process
 
 ### 广播模式
 
-在一些体系结构上，在某些省电模式启用时，时钟事件设备将进入睡眠，不过幸好系统中不只有一个时钟事件设备，因此仍然可以通过一个工作中的设备来代替停止的设备。  
+在一些体系结构上，在某些省电模式启用时，时钟事件设备将进入睡眠，不过幸好系统中不只有一个时钟事件设备，因此仍然可以通过一个工作中的设备来代替停止的设备。
 
 ![[e106dd28-3f5d-43bb-9dc6-f3251f221083.png|broadcast-time-event]]
 
 broadcast-time-event
 
-  
-在这种情况下，APIC 设备是不工作的，但是广播设备仍然可工作。广播设备可以工作与周期模式也可以工作与单触发模式，它的中断会通过 tick\_do\_periodic\_broadcast 处理，在这里会确认哪些 CPU 上的 APIC 停止工作了，对于这种 CPU 会将时钟中断的消息传递给它，它会像 APIC 未停用时一样处理一些原来的工作，然后它会检查是否有其他 CPU 也停用了 APIC，如果有的话会以 IPI（处理器间中断）的形式通知他们，对于那些被通知的 CPU 来说，它们是无法区分 IPI 中断和真正的 APIC 中断，所以它们会像往常一样工作。
+
+在这种情况下，APIC 设备是不工作的，但是广播设备仍然可工作。广播设备可以工作与周期模式也可以工作与单触发模式，它的中断会通过 tick_do_periodic_broadcast 处理，在这里会确认哪些 CPU 上的 APIC 停止工作了，对于这种 CPU 会将时钟中断的消息传递给它，它会像 APIC 未停用时一样处理一些原来的工作，然后它会检查是否有其他 CPU 也停用了 APIC，如果有的话会以 IPI（处理器间中断）的形式通知他们，对于那些被通知的 CPU 来说，它们是无法区分 IPI 中断和真正的 APIC 中断，所以它们会像往常一样工作。
 
 需要注意的是，处理器中断是很慢的，因而无法提供高分辨率定时器所需的精度和分辨率。如果启用了广播，那么内核会切换到低分辨率模式。
 
@@ -259,9 +235,9 @@ broadcast-time-event
 
 上述的所有内容仅仅是针对内核中的情况介绍的，而在用户进程中，处理的过程多少有些不同，首先注册的过程是基本一致的，只不过在用户进程这对时间的划分更加细致：
 
-1. ITIMER\_REAL：实际流逝的时间，不关心系统是处于内核态还是用户态，也不关心当前进程是否在运行中。定时器到期以 SIGALRM 信号通知。
-2. ITIMER\_VIRTUAL：只计算该进程在用户态消耗的时间。定时器到期以 SIGVTALRM 信号通知。
-3. ITIMER\_PROF：计算在用户态和内核态消耗的时间总和。定时器到期以 SIGPROF 信号通知。
+1. ITIMER_REAL：实际流逝的时间，不关心系统是处于内核态还是用户态，也不关心当前进程是否在运行中。定时器到期以 SIGALRM 信号通知。
+2. ITIMER_VIRTUAL：只计算该进程在用户态消耗的时间。定时器到期以 SIGVTALRM 信号通知。
+3. ITIMER_PROF：计算在用户态和内核态消耗的时间总和。定时器到期以 SIGPROF 信号通知。
 
 用户进程通过系统调用最终还是会调用到上述的定时系统中，而在需要触发任务时，内核不会在中断中执行用户进程的回调函数了。而是以信号的形式通知该进程，不同的时间基准下，会以不同的信号通知进程。同时，内核也不会负责用户进程的周期性任务，用户进程必须在自己处理完回调函数后，自己主动重新注册定时任务。之所以这样做，是为了防止用户进程设定周期过短的循环任务，这会浪费很多 CPU 时间，换句话说，这也是一种 DDoS (拒绝服务)攻击。
 
@@ -276,75 +252,37 @@ broadcast-time-event
 
 ## 参考内容
 
-\[1\]《Linux内核设计与实现》  
-\[2\]《Linux系统编程》  
-\[3\]《深入理解Linux内核》  
-\[4\]《深入Linux内核架构》  
-\[5\] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)  
-\[6\] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)  
-\[7\] [Linux中的物理内存管理 \[一\]](https://zhuanlan.zhihu.com/p/68465952)  
-\[8\] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)  
-\[9\] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)  
-\[10\] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)  
-\[11\] [linux内核学习笔记-struct vm\_area\_struct](https://blog.csdn.net/ywf861029/article/details/6114794)  
-\[12\] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)  
-\[13\] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)  
-\[14\] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)  
-\[15\] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)  
-\[16\] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)  
-\[17\] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)  
-\[18\] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)  
-\[18\] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)  
-\[19\] [页缓存page cache和地址空间address\_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)  
-\[20\] [rocketmq使用的系统参数（dirty\_background\_ration dirty\_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)  
-\[21\] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)  
-\[22\] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)  
-\[23\] [Linux中的内存回收\[一\]](https://zhuanlan.zhihu.com/p/70964195)  
-\[24\] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)  
-\[25\] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)  
-\[26\] [对 jiffies 溢出、回绕及 time\_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)  
-\[27\] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)  
-\[28\] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)  
-\[29\] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)  
-\[30\] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)  
-\[31\] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)  
-\[32\] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)  
-\[33\] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)
-
-END
-
-引言
-
-时间管理
-
-低分辨率定时器实现
-
-高分辨率定时器实现
-
-定时任务
-
-仿真周期时钟
-
-动态时钟
-
-广播模式
-
-定时器系统调用实现
-
-管理进程时间
-
-参考内容
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[1]《Linux内核设计与实现》
+[2]《Linux系统编程》
+[3]《深入理解Linux内核》
+[4]《深入Linux内核架构》
+[5] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)
+[6] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)
+[7] [Linux中的物理内存管理 [一]](https://zhuanlan.zhihu.com/p/68465952)
+[8] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)
+[9] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)
+[10] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)
+[11] [linux内核学习笔记-struct vm_area_struct](https://blog.csdn.net/ywf861029/article/details/6114794)
+[12] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)
+[13] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)
+[14] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)
+[15] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)
+[16] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)
+[17] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)
+[18] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)
+[18] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)
+[19] [页缓存page cache和地址空间address_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)
+[20] [rocketmq使用的系统参数（dirty_background_ration dirty_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)
+[21] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)
+[22] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)
+[23] [Linux中的内存回收[一]](https://zhuanlan.zhihu.com/p/70964195)
+[24] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)
+[25] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)
+[26] [对 jiffies 溢出、回绕及 time_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)
+[27] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)
+[28] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)
+[29] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)
+[30] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)
+[31] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)
+[32] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+[33] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)

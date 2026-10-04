@@ -10,42 +10,22 @@ tags:
 ---
 蚂蚁集团
 
-粉丝 4影响力 209
 
-** 76
 
-** 74
 
-** 10
-
-** 原创文章
 
 AI 辅助创作
 
 收录于专题
 
-[蚂蚁财保AI实战录](https://ata.atatech.org/specials/10000004220)
 
-**
 
-[陈霖(海维)](https://ata.atatech.org/users/12000203916)
 
-3月25日发表3月25日更新1.3k浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
-
-** 分享 **
-
-朗读文章12:33
-
-**
-
-Claude Code 用多了之后，写代码、看文件、查日志、提交 Git 这些事基本都在终端里完成了。IDEA 越来越像一个只在CR时才打开的重型武器。  
-既然终端变成了主战场，那用了多年的 iTerm2 + Oh My Zsh 就显得寒碜了。不是它们不好，是新工具实在太香。  
+Claude Code 用多了之后，写代码、看文件、查日志、提交 Git 这些事基本都在终端里完成了。IDEA 越来越像一个只在CR时才打开的重型武器。
+既然终端变成了主战场，那用了多年的 iTerm2 + Oh My Zsh 就显得寒碜了。不是它们不好，是新工具实在太香。
 推荐下面5 个工具，每个都是"用了就回不去"级别的。
 
 | 工具 | 一句话 | 替代 |
@@ -61,7 +41,7 @@ Claude Code 用多了之后，写代码、看文件、查日志、提交 Git 这
 如果你也在用 Claude Code（或者任何 AI 编码助手），直接把下面这段话丢给它：
 
 > 帮我安装以下终端工具并完成配置：
-> 
+>
 > 1. Ghostty（终端模拟器）—— brew cask 安装，配置 Catppuccin Mocha 主题
 > 2. Starship（命令提示符）—— brew 安装，应用 gruvbox-rainbow preset，配置到 zshrc
 > 3. Lazygit（Git TUI）—— brew 安装即可
@@ -69,7 +49,7 @@ Claude Code 用多了之后，写代码、看文件、查日志、提交 Git 这
 > 5. Zoxide（智能 cd）—— brew 安装，配置到 zshrc，用 --cmd cd 替换原生 cd
 > 6. JetBrainsMono Nerd Font —— brew cask 安装，配置到终端字体
 > 7. 卸载 Oh My Zsh，zshrc 中补上 history 和 completion 基础配置
-> 
+>
 > 我用的终端是 Ghostty（如果还没装就先装），shell 是 zsh。
 
 五分钟后你就有一个全新的终端环境了。是的，连装工具这件事本身都可以让 AI 代劳。
@@ -97,13 +77,10 @@ Ghostty 是 Zig 写的 GPU 加速终端，作者是 HashiCorp 的联合创始人
 
 ### 安装
 
-```bash
 brew install --cask ghostty
-```
 
 ### 我的配置（~/.config/ghostty/config）
 
-```
 theme = Catppuccin Mocha
 font-family = JetBrainsMono Nerd Font
 font-size = 14
@@ -122,7 +99,6 @@ cursor-style = bar
 cursor-style-blink = true
 mouse-hide-while-typing = true
 copy-on-select = clipboard
-```
 
 ### 小技巧
 
@@ -151,24 +127,20 @@ Starship 用 Rust 写的，单一二进制，不依赖任何 shell 框架。启�
 
 ### 安装
 
-```bash
 brew install starship
 
 # 在 ~/.zshrc 末尾加上
 eval "$(starship init zsh)"
-```
 
 ### 选主题
 
 Starship 内置了好几种 preset，我用的是 gruvbox-rainbow：
 
-```bash
 # 查看所有可用 preset
 starship preset --list
 
 # 直接应用（会覆盖现有配置）
 starship preset gruvbox-rainbow -o ~/.config/starship.toml
-```
 
 可选的 preset 还有：
 
@@ -177,21 +149,19 @@ starship preset gruvbox-rainbow -o ~/.config/starship.toml
 - `pure-preset` —— 极简风，只有目录和 Git
 - `tokyo-night` —— 东京之夜配色，暗色系
 
-👇🏻java目录，还会有个java小图标  
+👇🏻java目录，还会有个java小图标
 ![[Image 21.jpg]]
 
 ---
 
 ## 3\. Lazygit —— Git 操作从此告别命令行
 
-**替代对象** ： `git add/commit/push/log/diff/stash/rebase...` 一堆命令 / IDEA Git 面板  
+**替代对象** ： `git add/commit/push/log/diff/stash/rebase...` 一堆命令 / IDEA Git 面板
 有些简单的Git操作，打开IDE要吃掉2-4G的内存，每个项目都得开一个IDE窗口，但是Lazygit只要0.1秒启动，项目在终端直接切换。
 
 ### 安装
 
-```bash
 brew install lazygit
-```
 
 然后在任何 Git 仓库里输入 `lazygit` 就行。
 
@@ -199,7 +169,6 @@ brew install lazygit
 
 **五栏布局** ：
 
-```
 ┌─ Status ─┬─ Files ──────┬─ Commits ─────────┐
 │          │ M README.md  │ abc1234 fix: xxx  │
 │ branch:  │ M src/app.ts │ def5678 feat: yyy │
@@ -207,10 +176,9 @@ brew install lazygit
 ├──────────┴──────────────┴───────────────────┤
 │               Diff / Preview                 │
 └──────────────────────────────────────────────┘
-```
 
-有一个特别实用的： **直接看 diff** 。在 commit 列表里上下移动，下方实时显示每个 commit 改了什么，语法高亮，上下文行数随时调。以前想看某个 commit 的改动要 `git show abc1234` ，输出一坨纯文本，看得眼花。现在光标移过去就行了。  
-![[Image 22.jpg]]  
+有一个特别实用的： **直接看 diff** 。在 commit 列表里上下移动，下方实时显示每个 commit 改了什么，语法高亮，上下文行数随时调。以前想看某个 commit 的改动要 `git show abc1234` ，输出一坨纯文本，看得眼花。现在光标移过去就行了。
+![[Image 22.jpg]]
 （不好意思背景有点花）
 
 ---
@@ -227,11 +195,9 @@ Yazi（日语"矢"的意思，取"快如箭矢"之意）是一个终端文件管
 
 ### 安装
 
-```bash
 brew install yazi ffmpegthumbnailer poppler
 # ffmpegthumbnailer: 视频缩略图
 # poppler: PDF 预览
-```
 
 然后输入 `yazi` 进入。
 
@@ -239,14 +205,12 @@ brew install yazi ffmpegthumbnailer poppler
 
 **三栏 Miller Columns 布局** ：
 
-```
 ┌─ 父目录 ──┬─ 当前目录 ────┬─ 预览 ─────────┐
 │ workspace │ > src/       │ // app.ts     │
 │ Documents │   package.json│ import xxx    │
 │ Downloads │   README.md  │ from 'yyy'   │
 │ .config   │   tsconfig   │ ...          │
 └───────────┴──────────────┴────────────────┘
-```
 
 左边是父目录，中间是当前目录，右边是 **文件预览** 。对，直接在终端里预览：
 
@@ -258,8 +222,8 @@ brew install yazi ffmpegthumbnailer poppler
 
 用 Claude Code 的同学应该有感觉：AI 帮你改了一堆文件，你想快速扫一眼改了什么。以前要么 `cat` 一个个看，要么打开 IDE。现在 `yazi` 进去，光标上下移动，右边实时预览，几秒钟就能把所有改动扫完。
 
-![[Image 23.jpg]]  
-emmm还能预览图片，甚至视频  
+![[Image 23.jpg]]
+emmm还能预览图片，甚至视频
 ![[Image 24.jpg]]
 
 ### 日常操作
@@ -303,12 +267,10 @@ Zoxide 的逻辑很简单： **记录你去过的目录，下次输入关键词�
 
 ### 安装
 
-```bash
 brew install zoxide
 
 # 在 ~/.zshrc 加上（替换内置 cd 命令）
 eval "$(zoxide init zsh --cmd cd)"
-```
 
 注意最后的 `--cmd cd` ，这会直接替换掉你的 `cd` 命令。意思是你不用学新命令，正常用 `cd` 就行，它会自动加持。
 
@@ -316,7 +278,6 @@ eval "$(zoxide init zsh --cmd cd)"
 
 举几个我日常的例子：
 
-```bash
 # 以前
 cd ~/workspace/aiworkspace
 cd ~/workspace/fintgkteam
@@ -326,7 +287,6 @@ cd ~/workspace/finfundtrade
 cd aiwor       # → ~/workspace/aiworkspace
 cd fintgk      # → ~/workspace/fintgkteam
 cd fin trade   # → ~/workspace/finfundtrade（多个关键词，空格分隔）
-```
 
 就这么简单。你打 `cd aiwor` 就到 aiworkspace 了，不用按 Tab 补全，不用敲全名，它就是知道你要去哪。
 
@@ -343,7 +303,6 @@ cd fin trade   # → ~/workspace/finfundtrade（多个关键词，空格分隔�
 
 ### 进阶
 
-```bash
 # 交互模式：列出所有匹配结果让你选
 cdi fint
 # > ~/workspace/fintgkteam
@@ -356,7 +315,6 @@ zoxide query --list
 
 # 手动添加一个常用目录
 zoxide add ~/some/deep/path
-```
 
 ---
 
@@ -372,7 +330,7 @@ zoxide add ~/some/deep/path
 4. 需要手改的时候，按 `Enter` 用编辑器打开
 5. `lazygit` 打开 Git UI，stage + commit + push
 
-全程不用离开终端，全程键盘操作，全程丝滑。  
+全程不用离开终端，全程键盘操作，全程丝滑。
 ![[Image 25.jpg]]
 
 ---
@@ -384,79 +342,3 @@ zoxide add ~/some/deep/path
 现在是终端为中心：Claude Code 写代码，Yazi 看文件，Lazygit 管版本，Zoxide 跳目录，Starship 告诉你在哪。IDE 反而变成了偶尔才打开的重武器——解个复杂冲突，调个断点，仅此而已。
 
 去试试吧。反正 `brew install` 又不要钱。不想自己折腾的，把开头那段 Prompt 丢给 Claude Code 就行。
-
-END
-
-懒人安装：复制这段 Prompt 给 Claude Code
-
-1\. Ghostty —— 终端模拟器该换代了
-
-为什么换？
-
-体感差异
-
-安装
-
-我的配置（~/.config/ghostty/config）
-
-小技巧
-
-2\. Starship —— 彩虹色的命令提示符
-
-为什么换？
-
-体感差异
-
-安装
-
-选主题
-
-3\. Lazygit —— Git 操作从此告别命令行
-
-安装
-
-核心功能
-
-4\. Yazi —— 终端里的文件管理器
-
-为什么用？
-
-安装
-
-核心功能
-
-日常操作
-
-跟 zoxide 的联动
-
-小技巧
-
-5\. Zoxide —— cd 命令的终极进化
-
-为什么用？
-
-安装
-
-使用
-
-跟 Tab 补全比
-
-进阶
-
-组合技：这些工具的化学反应
-
-写在最后
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

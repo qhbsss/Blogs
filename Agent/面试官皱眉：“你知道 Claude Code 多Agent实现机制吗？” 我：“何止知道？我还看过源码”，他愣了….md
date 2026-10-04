@@ -138,7 +138,7 @@ Claude Code 在 subagent 启动时，把隔离做到了 **两个维度** ： **�
 
 这个机制在源码里其实就是一个过滤函数：
 
-```
+```java
 // src/tools/AgentTool/agentToolUtils.ts:70
 exportfunction filterToolsForAgent({ tools, isBuiltIn, isAsync, permissionMode }): Tools {
 return tools.filter(tool => {
@@ -146,12 +146,12 @@ return tools.filter(tool => {
     if (ALL_AGENT_DISALLOWED_TOOLS.has(tool.name)) returnfalse
     if (!isBuiltIn && CUSTOM_AGENT_DISALLOWED_TOOLS.has(tool.name)) returnfalse
     if (isAsync && !ASYNC_AGENT_ALLOWED_TOOLS.has(tool.name)) {
+```
       returnfalse
     }
     returntrue
   })
 }
-```
 
 可以看到就是顺着「全局黑名单 → 自定义 agent 加严 → 异步白名单」这三道条件依次判定。最后留下来的，才是这个 subagent 能用的工具。
 
@@ -203,7 +203,7 @@ Claude Code 专门开了一个 **小口子** ：其他写全局的口都堵死�
 
 对应到源码里，就是一个叫 `createSubagentContext` 的函数，我把最能说明上面四个决策的部分精简出来：
 
-```
+```java
 // src/utils/forkedAgent.ts:345
 exportfunction createSubagentContext(parentContext, overrides): ToolUseContext {
 return {
@@ -272,7 +272,7 @@ Claude Code 正是看穿了这两个坑，才换了一个完全不一样的路�
 
 对应到源码里的类型定义大致长这样：
 
-```
+```javascript
 // src/tasks/LocalAgentTask/LocalAgentTask.tsx:116
 export type LocalAgentTaskState = TaskStateBase & {
   type: 'local_agent';
@@ -308,9 +308,9 @@ Claude Code 的做法是： **自动把它唤醒** 。从磁盘上那份已经�
 
 对应到源码，SendMessage 工具里的核心逻辑长这样：
 
-```
 // src/tools/SendMessageTool/SendMessageTool.ts:800
 const task = appState.tasks[agentId]
+```javascript
 if (isLocalAgentTask(task) && !isMainSessionTask(task)) {
   if (task.status === 'running') {
     queuePendingMessage(agentId, input.message, context.setAppStateForTasks)
@@ -325,15 +325,15 @@ if (isLocalAgentTask(task) && !isMainSessionTask(task)) {
 
 「扔信箱」这个动作本身的实现就 4 行：
 
-```
+```javascript
 // src/tasks/LocalAgentTask/LocalAgentTask.tsx:162
 export function queuePendingMessage(taskId, msg, setAppState): void {
   updateTaskState<LocalAgentTaskState>(taskId, setAppState, task => ({
     ...task,
+```
     pendingMessages: [...task.pendingMessages, msg]
   }));
 }
-```
 
 纯纯的「追加到数组末尾」。
 
@@ -345,7 +345,7 @@ export function queuePendingMessage(taskId, msg, setAppState): void {
 
 父 agent 那边看到的就像用户发了一条新消息过来，长这样：
 
-```
+```java
 <task-notification>
 <task-id>agent-a1b</task-id>
 <output-file>/tmp/xxx.txt</output-file>
@@ -378,12 +378,12 @@ export function queuePendingMessage(taskId, msg, setAppState): void {
 
 对应到源码里，生成这段 XML 的代码就是在拼字符串：
 
-```
 // src/tasks/LocalAgentTask/LocalAgentTask.tsx:197
 const message = \`<${TASK_NOTIFICATION_TAG}>
 <${TASK_ID_TAG}>${taskId}</${TASK_ID_TAG}>
 <${OUTPUT_FILE_TAG}>${outputPath}</${OUTPUT_FILE_TAG}>
 <${STATUS_TAG}>${status}</${STATUS_TAG}>
+```java
 <${SUMMARY_TAG}>${summary}</${SUMMARY_TAG}>${resultSection}${usageSection}
 </${TASK_NOTIFICATION_TAG}>\`;
 enqueuePendingNotification({ value: message, mode: 'task-notification' });
@@ -403,10 +403,10 @@ subagent 跑起来之后，父 agent 其实要等一会。 **如果 subagent 很
 
 源码里这个「2 分钟阈值」就是一个常量开关：
 
-```
+```javascript
 // src/tools/AgentTool/AgentTool.tsx:72
 function getAutoBackgroundMs(): number {
-  if (isEnvTruthy(process.env.CLAUDE_AUTO_BACKGROUND_TASKS) 
+  if (isEnvTruthy(process.env.CLAUDE_AUTO_BACKGROUND_TASKS)
       || getFeatureValue_CACHED_MAY_BE_STALE('tengu_auto_background_agents', false)) {
     return 120_000;  // 2 分钟
   }
@@ -479,21 +479,23 @@ Fork Subagent 的直觉是这样的： **派一个子 agent 出去干活，但�
 
 对应到源码里，Claude Code 专门定义了一个类型（CacheSafeParams），把这五项打包：
 
-```
+```java
 // src/utils/forkedAgent.ts:57
 exporttype CacheSafeParams = {
 /** System prompt - 必须跟父完全一致 */
+```
   systemPrompt: SystemPrompt
+```java
 /** User context - 拼接在消息前，影响缓存 */
   userContext: { [k: string]: string }
 /** System context - 拼接在 system prompt 后，影响缓存 */
   systemContext: { [k: string]: string }
 /** 工具池、模型等所在的上下文 */
+```
   toolUseContext: ToolUseContext
 /** 父 agent 的消息前缀，用于缓存共享 */
   forkContextMessages: Message[]
 }
-```
 
 你看这个类型的意思很明显： **凡是会影响缓存命中的字段，我全列在这儿，你 Fork 的时候严格按这份清单跟父 agent 对齐** 。
 
@@ -505,10 +507,11 @@ Fork Subagent 的合成定义里有个有意思的细节，值得单独说。
 
 正常一个 subagent 有个生成 system prompt 的函数，跑的时候现生成一段 prompt 文本。但 Fork 机制用的那个 subagent 的生成函数 **直接返回空字符串** ：
 
-```
+```javascript
 // src/tools/AgentTool/forkSubagent.ts:60
 export const FORK_AGENT = {
   agentType: FORK_SUBAGENT_TYPE,
+```
   tools: ['*'],             // 用父的完整工具池
   maxTurns: 200,
   model: 'inherit',          // 继承父的模型
@@ -516,7 +519,6 @@ export const FORK_AGENT = {
   source: 'built-in',
   getSystemPrompt: () => '', // 返回空串！
 } satisfies BuiltInAgentDefinition
-```
 
 这不是偷懒，而是精心设计的。
 
@@ -540,17 +542,17 @@ Fork 机制不是万能的，它的 **适用场景很特定** ：你希望子 ag
 
 还有一个关键点： **Fork 机制和 Coordinator 模式是互斥的** 。Coordinator 模式下主 agent 已经是个纯协调者了，它派的 worker 本来就是异步的，不需要 Fork 这种「轻量分身」机制。两个机制职责重叠，就只留一个：
 
-```
+```java
 // src/tools/AgentTool/forkSubagent.ts:32
 exportfunction isForkSubagentEnabled(): boolean {
 if (feature('FORK_SUBAGENT')) {
     if (isCoordinatorMode()) returnfalse// 互斥！
     if (getIsNonInteractiveSession()) returnfalse
+```
     returntrue
   }
 returnfalse
 }
-```
 ![图片](data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg width='1px' height='1px' viewBox='0 0 1 1' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Ctitle%3E%3C/title%3E%3Cg stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0'%3E%3Cg transform='translate(-249.000000, -126.000000)' fill='%23FFFFFF'%3E%3Crect x='249' y='126' width='1' height='1'%3E%3C/rect%3E%3C/g%3E%3C/g%3E%3C/svg%3E)
 
 ### Fork 的工程启示
@@ -579,9 +581,9 @@ Claude Code 为此设计了一个专门的模式： **Coordinator 模式** 。�
 
 ### Coordinator 模式的启用
 
-这个模式不是默认开的，要显式打开。需要同时满足两个条件： **编译时的功能开关** 和\*\*运行时的环境变量 `CLAUDE_CODE_COORDINATOR_MODE=1` \*\*。
+这个模式不是默认开的，要显式打开。需要同时满足两个条件： **编译时的功能开关** 和**运行时的环境变量 `CLAUDE_CODE_COORDINATOR_MODE=1` **。
 
-```
+```javascript
 // src/coordinator/coordinatorMode.ts:36
 export function isCoordinatorMode(): boolean {
   if (feature('COORDINATOR_MODE')) {
@@ -601,8 +603,7 @@ Coordinator 模式下，主 agent 不干实际工作了，它只做三件事： 
 
 这个角色转换是通过主 agent 的 system prompt 强制约束出来的。打开源码里那段 prompt，开头就写得很明白：
 
-```
-You are Claude Code, an AI assistant that orchestrates software engineering 
+You are Claude Code, an AI assistant that orchestrates software engineering
 tasks across multiple workers.
 
 ## 1. Your Role
@@ -610,9 +611,8 @@ You are a **coordinator**. Your job is to:
 - Help the user achieve their goal
 - Direct workers to research, implement and verify code changes
 - Synthesize results and communicate with the user
-- Answer questions directly when possible, don't delegate work 
+- Answer questions directly when possible, don't delegate work
   that you can handle without tools
-```
 
 翻译一下： **你的身份是协调者，你的工作是指挥 worker 去做研究、实现、验证，然后自己合成结果跟用户交流。能自己回答的问题不要派人去做** 。
 
@@ -636,7 +636,6 @@ You are a **coordinator**. Your job is to:
 
 对应到源码里，这组「只有协调者能用」的内部工具是这样定义的：
 
-```
 // src/coordinator/coordinatorMode.ts:29
 const INTERNAL_WORKER_TOOLS = new Set([
   TEAM_CREATE_TOOL_NAME,       // 创建 worker 团队
@@ -644,7 +643,6 @@ const INTERNAL_WORKER_TOOLS = new Set([
   SEND_MESSAGE_TOOL_NAME,      // 给 worker 发消息
   SYNTHETIC_OUTPUT_TOOL_NAME,  // 合成最终输出给用户
 ])
-```
 
 ### 并行才是真本事
 
@@ -658,11 +656,9 @@ Coordinator 模式的 prompt 里有一句我特别喜欢：
 
 所以协调者要做的就是在一次 LLM 回合里，一口气生成多个派 worker 的工具调用：
 
-```
 派 worker 调研 auth 模块
 派 worker 调研 session 模块
 派 worker 调研 token 模块
-```
 
 这三个调用同时启动，三个 worker 同时干活，协调者等通知一条条返回。
 
@@ -825,7 +821,7 @@ Claude Code 那套「严格锁定缓存前缀 + 复用父 agent 已渲染字节�
 
 [万字长文图解 Claude Code 入门](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247556976&idx=1&sn=42da499653a6327031a2bfe929ba3589&scene=21#wechat_redirect)
 
-💪面试突击资源推荐：  
+💪面试突击资源推荐：
 ✅小林图解网站： [xiaolincoding.com](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247539587&idx=1&sn=aeba78d225c15a25cb00a7da6b79a201&scene=21#wechat_redirect)
 
 ✅简历制作网站： [jianli.xiaolinnote.com](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247554599&idx=1&sn=56ed604fbc6d33cf2398624d2efa64f3&scene=21#wechat_redirect)
@@ -834,8 +830,8 @@ Claude Code 那套「严格锁定缓存前缀 + 复用父 agent 已渲染字节�
 
 ✅刷题闯关+模拟面试： 牛面Offer小程序
 
-✅后端训练营： [Java/Go 后端训练营](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247553487&idx=2&sn=dbb10ac564a5c9c7abcfcfc845ed37fe&scene=21&token=1176637830&lang=zh_CN#wechat_redirect)  
-✅Agent训练营： [转行去做Agent开发了](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247556976&idx=2&sn=5533e4e8853203b77930cdd7bce5079c&scene=21#wechat_redirect)  
+✅后端训练营： [Java/Go 后端训练营](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247553487&idx=2&sn=dbb10ac564a5c9c7abcfcfc845ed37fe&scene=21&token=1176637830&lang=zh_CN#wechat_redirect)
+✅Agent训练营： [转行去做Agent开发了](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247556976&idx=2&sn=5533e4e8853203b77930cdd7bce5079c&scene=21#wechat_redirect)
 ✅AI开发项目： [AI Agent 项目](https://mp.weixin.qq.com/s?__biz=MzUxODAzNDg4NQ==&mid=2247557116&idx=1&sn=77abdd12dcb4a9a8bc290813238d1894&scene=21#wechat_redirect)
 
 图解Agent · 目录

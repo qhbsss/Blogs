@@ -8,35 +8,10 @@ description:
 tags:
   - "clippings"
 ---
-国际数字商业集团
-
-粉丝 42影响力 787
-
-** 26
-
-** 13
-
-** 2
-
-** 原创文章
-
-** 内部资料
-
-发表到圈儿
-
-[AE技术部（AETD）](https://ata.atatech.org/community/team/14) / [终端技术](https://ata.atatech.org/community/team/14?cid=3638) (首发)
-
-**
-
-[杨帆(洋风)](https://ata.atatech.org/users/11000197718)
-
 2022-10-27发表2023-07-27更新477次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ![](https://oss-ata.alibaba.com/article/2023/11/138bfe24-404d-4137-a5f2-cb70e94f719d.png)
 
@@ -48,25 +23,23 @@ tags:
 
 从前端和客户端协作的角度看，集团内相关终端解决方案有小程序、PHA、Weex 1.0 (停止维护)、NativeJS 、Flutter、和 Weex 2.0 等，传统调试方案有：
 
-<table><colgroup><col width="68"> <col width="143"> <col width="204"> <col width="371"></colgroup><tbody><tr><td rowspan="1" colspan="1"></td><td rowspan="1" colspan="1"><p>开发环境</p></td><td rowspan="1" colspan="1"><p>生产环境</p></td><td rowspan="1" colspan="1"><p>调试体验</p></td></tr><tr><td rowspan="1" colspan="1"><p>前端</p></td><td rowspan="1" colspan="1"><p>Chrome DevTools</p></td><td rowspan="1" colspan="1"><p>Chrome DevTools</p></td><td rowspan="1" colspan="1"><p>优势 体验一致，能力完备，拓展性好，支持多种场景</p><p>不足 移动端调试有一定成本</p></td></tr><tr><td rowspan="2" colspan="1"><p>客户端</p></td><td rowspan="1" colspan="1"><p>Xcode</p></td><td rowspan="2" colspan="1"><p>日志、掌中测、Debug 包等</p></td><td rowspan="2" colspan="1"><p>优势 客户端深层调试</p><p>不足 不同环境调试方式不同，生产环境调试难</p></td></tr><tr><td rowspan="1" colspan="1"><p>Android Studio</p></td></tr></tbody></table>
+
+|                | 开发环境            | 生产环境            | 调试体验                                   |
+| -------------- | --------------- | --------------- | -------------------------------------- |
+| 前端             | Chrome DevTools | Chrome DevTools | 优势 体验一致，能力完备，拓展性好，支持多种场景 不足 移动端调试有一定成本 |
+| 客户端            | Xcode           | 日志、掌中测、Debug 包等 | 优势 客户端深层调试 不足 不同环境调试方式不同，生产环境调试难       |
+| Android Studio |                 |                 |                                        |
+
 
 终端研发在实际真机环境中调试时，存在着很多问题：
 
-●
+- 黑盒客户端，运行状况，后台进程，一概不知
 
-黑盒客户端，运行状况，后台进程，一概不知
+- 真机与 PC 浏览器模拟器差异较大，真机调试成本高，难以覆盖全面
 
-●
+- Debug 包体验较差，稳定性难保障
 
-真机与 PC 浏览器模拟器差异较大，真机调试成本高，难以覆盖全面
-
-●
-
-Debug 包体验较差，稳定性难保障
-
-●
-
-...
+- ...
 
 ## AppDevTools
 
@@ -130,29 +103,17 @@ AppDevTools 插件开发调试演示
 
 客户端同时增强调试能力，弥补纯 JS 架构存在无法满足实际业务调试的需求，例如：
 
-●
+- 资源请求代理及监听
 
-资源请求代理及监听
+- 客户端日志分析
 
-●
+- 同层渲染组件调试
 
-客户端日志分析
+- 实时内存分析
 
-●
+- Weex 调试
 
-同层渲染组件调试
-
-●
-
-实时内存分析
-
-●
-
-Weex 调试
-
-●
-
-...
+- ...
 
 ![](https://oss-ata.alibaba.com/article/2023/11/f030c101-0113-4b2b-bf35-cbebb9281d8c.png)
 
@@ -174,7 +135,12 @@ AppDevTools 实现文档： [https://yuque.antfin-inc.com/apptools/dev-appdevtoo
 
 山海关无疑是一款优秀的 Web 调试工具，也许下一代会演进成面向未来终端的调试工具，同样值得期待。
 
-<table><colgroup><col width="130"> <col width="130"> <col width="130"> <col width="130"> <col width="130"></colgroup><tbody><tr><td rowspan="1" colspan="1"></td><td rowspan="1" colspan="1"><p>PHA</p></td><td rowspan="1" colspan="1"><p>Weex 1.0</p></td><td rowspan="1" colspan="1"><p>NativeJS</p></td><td rowspan="1" colspan="1"><p>Weex 2.0</p></td></tr><tr><td rowspan="1" colspan="1"><p>AppDevTools</p></td><td rowspan="1" colspan="1"><p>支持</p></td><td rowspan="1" colspan="1"><p>不支持</p></td><td rowspan="1" colspan="1"><p>不支持</p></td><td rowspan="1" colspan="1"><p>支持</p></td></tr><tr><td rowspan="1" colspan="1"><p>山海关</p></td><td rowspan="1" colspan="1"><p>支持</p></td><td rowspan="1" colspan="1"><p>支持部分调试能力</p></td><td rowspan="1" colspan="1"><p>支持部分调试能力</p></td><td rowspan="1" colspan="1"><p>不支持</p></td></tr></tbody></table>
+
+|             | PHA | Weex 1.0 | NativeJS | Weex 2.0 |
+| ----------- | --- | -------- | -------- | -------- |
+| AppDevTools | 支持  | 不支持      | 不支持      | 支持       |
+| 山海关         | 支持  | 支持部分调试能力 | 支持部分调试能力 | 不支持      |
+
 
 ## 写在最后
 
@@ -185,41 +151,3 @@ AppDevTools 实现文档： [https://yuque.antfin-inc.com/apptools/dev-appdevtoo
 调试工具是稳定性保障和快速定位问题的基础，彻底解决线上线下及真机调试难的痛点，要做的事情很多，要攻克的问题也不少。
 
 若所有参与终端基础设施建设的同学们能意识到统一 Web 标准及相关协议标准所带来的先进性和可发展性，并达成共识时，我相信终端的未来一定会更加美好。
-
-END
-
-背景
-
-AppDevTools
-
-特性
-
-1\. 快速简单
-
-2\. 不限环境
-
-3\. 掌控客户端
-
-4\. 覆盖集团前端大多数真机调试场景
-
-5\. 业务易扩展
-
-实现
-
-山海关
-
-写在最后
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

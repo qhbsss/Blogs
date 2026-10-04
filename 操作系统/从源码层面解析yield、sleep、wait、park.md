@@ -15,13 +15,11 @@ tags:
 
 是一个JNI方法
 
-```java
 体验AI代码助手 代码解读复制代码public static native void yield();
-```
 
 hotspot的JNI的实现入口一般都是在 `jvm.cpp` 中
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码JVM_ENTRY(void, JVM_Yield(JNIEnv *env, jclass threadClass))
   // ...
   if (os::dont_yield()) return;
@@ -31,12 +29,12 @@ hotspot的JNI的实现入口一般都是在 `jvm.cpp` 中
   } else {
     os::yield(); // 默认调用os的yield实现
   }
-JVM_END
 ```
+JVM_END
 
 最终会调用 `sched_yield()`
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码void os::yield() {
   sched_yield();
 }
@@ -44,7 +42,7 @@ JVM_END
 
 这是一个linux的系统调用，下面是相关的内核代码
 
-```c
+```java
 体验AI代码助手 代码解读复制代码SYSCALL_DEFINE0(sched_yield)
 {
   do_sched_yield();
@@ -64,7 +62,7 @@ static void do_sched_yield(void)
 
 对于普通线程来说，对应的调度队列是 `cfs_rq` ，对应的调度类是 `cfs_sched_class` ，对应的 `yield_task()` 函数是 `yield_task_fair()`
 
-```c
+```java
 体验AI代码助手 代码解读复制代码static void yield_task_fair(struct rq *rq)
 {
     // ...
@@ -84,7 +82,7 @@ static void do_sched_yield(void)
 
 对于普通任务来说，体现函数 `pick_next_entity` 中，这个函数从 `cfs_rq` 的红黑树队列取出下一个任务的调度实体
 
-```c
+```java
 体验AI代码助手 代码解读复制代码pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 {
   if (!left || (curr && entity_before(curr, left)))
@@ -110,7 +108,7 @@ static void do_sched_yield(void)
 
 然后，当前任务当然还要添加到队列里面去等待下一次调度啊。
 
-```c
+```java
 体验AI代码助手 代码解读复制代码static struct task_struct * pick_next_task_fair(...)
 {
   // ...
@@ -127,13 +125,11 @@ static void do_sched_yield(void)
 
 也是一个JNI方法
 
-```java
 体验AI代码助手 代码解读复制代码public static native void sleep(long millis) throws InterruptedException;
-```
 
 `sleep` 的入口如下，可以看出来，如果参数是0的话，可以转换成 `yield`
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码JVM_ENTRY(void, JVM_Sleep(JNIEnv* env, jclass threadClass, jlong millis))
   // ...
   if (millis == 0) {
@@ -154,19 +150,19 @@ static void do_sched_yield(void)
     thread->osthread()->set_state(old_state);
   }
   // ...
-JVM_END
 ```
+JVM_END
 
 调用了 `os::sleep` 函数（JVM实现的os，并不是操作系统的sleep），linux平台的实现代码如下
 
-```c++
+```javascript
 体验AI代码助手 代码解读复制代码int os::sleep(Thread* thread, jlong millis, bool interruptible) {
   ParkEvent * const slp = thread->_SleepEvent ;
   if (interruptible) {
     jlong prevtime = javaTimeNanos();
 
     for (;;) {
-      if (os::is_interrupted(thread, true)) { 
+      if (os::is_interrupted(thread, true)) {
         return OS_INTRPT;
       }
 
@@ -177,7 +173,7 @@ JVM_END
       } else {
         millis -= (newtime - prevtime) / NANOSECS_PER_MILLISEC;
       }
-      
+
       if(millis <= 0) {
         return OS_OK;
       }
@@ -196,7 +192,7 @@ JVM_END
 
 最终是调用 `ParkEvent` 的 `park` 函数，实现如下
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码int os::PlatformEvent::park(jlong millis) {
   int v ;
   for (;;) {
@@ -234,7 +230,7 @@ JVM_END
 
 熟悉的味道吧，上面是一个典型的Mesa Monitor条件等待代码了，其中 `os::Linux::safe_cond_timedwait` 的代码比较简单，就是调用了 `pthread_cond_timedwait` 函数
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码int os::Linux::safe_cond_timedwait(pthread_cond_t *_cond, pthread_mutex_t *_mutex, const struct timespec *_abstime)
 {
    if (is_NPTL()) {
@@ -252,13 +248,11 @@ JVM_END
 
 也是JNI方法
 
-```java
 体验AI代码助手 代码解读复制代码public final native void wait(long timeout) throws InterruptedException;
-```
 
 对应的入口是 `JVM_MonitorWait`
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码JVM_ENTRY(void, JVM_MonitorWait(JNIEnv* env, jobject handle, jlong ms))
   JVMWrapper("JVM_MonitorWait");
   Handle obj(THREAD, JNIHandles::resolve_non_null(handle));
@@ -267,12 +261,12 @@ JVM_END
     JvmtiExport::post_monitor_wait((JavaThread *)THREAD, (oop)obj(), ms);
   }
   ObjectSynchronizer::wait(obj, ms, CHECK);
-JVM_END
 ```
+JVM_END
 
 显而易见， `Object::wait` 是配合 `synchronized` 使用的，对应的代码是在 `synchronizer.cpp` 中，其中的 `wait` 实现代码如下
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码void ObjectSynchronizer::wait(Handle obj, jlong millis, TRAPS) {
   if (UseBiasedLocking) {
     BiasedLocking::revoke_and_rebias(obj, false, THREAD);
@@ -294,12 +288,12 @@ JVM_END
 
 忽略 `ObjectMonitor` 复杂的实现机制，我们只看关键的地方，如下所示
 
-```c++
+```javascript
 体验AI代码助手 代码解读复制代码void ObjectMonitor::wait(jlong millis, bool interruptible, TRAPS) {
   Thread * const Self = THREAD ;
   // ...
   if (interruptible && Thread::is_interrupted(Self, true) && !HAS_PENDING_EXCEPTION) {
-     // ... 
+     // ...
      THROW(vmSymbols::java_lang_InterruptedException()); // 处理中断
      return ;
    }
@@ -308,13 +302,15 @@ JVM_END
   // ...
   exit (true, Self) ; // 2. 释放java的monitor锁（也就是monitorexit）
   // ...
-       if (interruptible && 
-           (Thread::is_interrupted(THREAD, false) || 
+       if (interruptible &&
+```
+           (Thread::is_interrupted(THREAD, false) ||
+```java
             HAS_PENDING_EXCEPTION)) {
            // Intentionally empty
        } else if (node._notified == 0) {
          if (millis <= 0) {
-            Self->_ParkEvent->park () ; 
+            Self->_ParkEvent->park () ;
          } else {
             ret = Self->_ParkEvent->park (millis) ; // 3. 等待，和Thread::sleep一样的
          }
@@ -331,23 +327,21 @@ JVM_END
 
 同样也是JNI
 
-```java
 体验AI代码助手 代码解读复制代码public native void park(boolean isAbsolute, long time);
-```
 
 `Unsafe` 类比较特殊，它的native方法的入口在 `unsafe.cpp` 里面
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码UNSAFE_ENTRY(void, Unsafe_Park(JNIEnv *env, jobject unsafe, jboolean isAbsolute, jlong time))
   // ...
   thread->parker()->park(isAbsolute != 0, time);
   // ...
-UNSAFE_END
 ```
+UNSAFE_END
 
 和 `sleep` 、 `wait` 不同的是，这里调用的是 `Parker` 的 `park` 函数，而不是 `os::PlatformEvent::park` 了
 
-```c++
+```java
 体验AI代码助手 代码解读复制代码void Parker::park(bool isAbsolute, jlong time) {
   if (Thread::is_interrupted(thread, false)) {
     return;
@@ -360,7 +354,7 @@ UNSAFE_END
   if (time > 0) {
     unpackTime(&absTime, isAbsolute, time); // 0. 计算绝对时间
   }
-  if (Thread::is_interrupted(thread, false) || 
+  if (Thread::is_interrupted(thread, false) ||
 // 1. 尝试加mutex锁
 
     return;

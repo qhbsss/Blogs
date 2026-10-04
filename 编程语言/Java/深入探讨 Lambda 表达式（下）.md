@@ -8,47 +8,13 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-淘天集团
-
-勋章
-
-粉丝 17影响力 358
-
-** 3
-
-** 8
-
-**
-
-** 原创文章
-
-发表到圈儿
-
-[1688技术团队博客](https://ata.atatech.org/community/team/283) / [经验总结](https://ata.atatech.org/community/team/283?cid=1324) (首发)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[单苏苏(轩林)](https://ata.atatech.org/users/11000210474)
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
 **说明：**
 
 > 由于 Lambda 表达式涉及的周边知识点实在太多，因此拆分为上、下两篇文章讲解。
-> 
+>
 > 本篇为下篇，上篇请点击： [深入探讨 Lambda 表达式（上）](https://www.atatech.org/articles/159525)
 
-目录介绍：  
+目录介绍：
 ![[61d7f198-516d-419f-95a0-06c4bc05dde1.png]]
 
 在上篇 “ [深入探讨 Lambda 表达式（上）](https://www.atatech.org/articles/159525) ” 中，主要讲述了 1~4 章节，本篇，主要介绍 5~8 章节。
@@ -115,9 +81,7 @@ public static void main(String[] args) {
 
 不少人在使用 Lambda 表达式的尝鲜阶段，可能都遇到过一个错误提示：
 
-```xml
 Variable used in lambda expression should be final or effectively final
-```
 
 以上报错，就涉及到外部变量在 Labmda 表达式中的作用域，且有以下几个语法规则。
 
@@ -143,17 +107,19 @@ public class AClass {
         a++;
         new Thread(() -> {
             System.out.println("a=" + a); // 在 Lambda 表达式使用前有改动，编译报错
-            b++; // 在 Lambda 表达式中更改，报错
-            System.out.println("c=" + c); // 在 Lambda 表达式使用之后有改动，编译报错
-
-            System.out.println("num1=" + this.num1++); // 对象变量，或叫域变量，编译通过
-            AClass.num2 = AClass.num2 + 1;
-            System.out.println("num2=" + AClass.num2); // 静态变量，编译通过
-        }).start();
-        c++;
-    }
-}
 ```
+
+b++; // 在 Lambda 表达式中更改，报错
+System.out.println("c=" + c); // 在 Lambda 表达式使用之后有改动，编译报错
+
+System.out.println("num1=" + this.num1++); // 对象变量，或叫域变量，编译通过
+AClass.num2 = AClass.num2 + 1;
+System.out.println("num2=" + AClass.num2); // 静态变量，编译通过
+}).start();
+c++;
+}
+}
+
 
 上面的代码中，变量 `a` ， `b` ， `c` 都是局部变量，无论在 Lambda 表达式前、表达式中或表达式后修改，都是不允许的，直接编译报错。而对于域变量 `num1` ，以及静态变量 `num2` ，不受此规则限制。
 
@@ -170,12 +136,14 @@ public class AClass {
         int a = 1;
         new Thread(() -> {
             int a = 3; // 与外部的局部变量重名，编译报错
-            Integer num1 = 232; // 虽与域变量重名，允许，编译通过
-            Integer num2 = 11; // 虽与静态变量重名，允许，编译通过
-        }).start();
-    }
-}
 ```
+
+Integer num1 = 232; // 虽与域变量重名，允许，编译通过
+Integer num2 = 11; // 虽与静态变量重名，允许，编译通过
+}).start();
+}
+}
+
 
 友情提醒： 虽然域变量和静态变量可以重名，从可读性的角度考虑，最好也不用重复，养成良好的编码习惯。
 
@@ -283,7 +251,7 @@ public class Java8Tester {
 
 大家都知道，局部变量是存于 JVM 的栈中的，也就是线程私有的，若 Lambda 表达式中可直接修改这边变量，会不会引起什么问题？
 
-很多小伙伴想到了，如果这个 Lambda 表达式是在另一个线程中执行的，是拿不到局部变量的，因此表达式中拥有的只能是局部变量的副本。  
+很多小伙伴想到了，如果这个 Lambda 表达式是在另一个线程中执行的，是拿不到局部变量的，因此表达式中拥有的只能是局部变量的副本。
 如下的代码：
 
 ```java
@@ -314,8 +282,8 @@ public void test() {
 
 先假设 Lambda 表达式中的 flag 与外部的有关联。那么在多线程环境中，线程 A、线程 B 都在执行 Lambda 表达式，那么线程之间如何彼此知道 flag 的值呢？且外部的 flag 变量是在主线程的栈（stack）中，其他线程也无法得到其值，因此，这是自相矛盾的。
 
-**小结：**  
-  
+**小结：**
+
 前面我们列举了多个局部变量必须为 final 或 effectively final 的原因，而 Lambda 表达式并没有对实例变量或静态变量做任何约束。
 
 虽然没做约束，大家也应该明白，允许使用，并不代表就是线程安全的，看下面的例子：
@@ -413,12 +381,12 @@ public class OuterClass {
         System.out.println(Objects.equals(outerClass, innerClass.getOuterObj()));
     }
 }
+```
 
 #### 输出 ####
 Shan susu
 Shan susu1
 true
-```
 
 上面的例子中，函数 `getFullName()` 就是一个闭包函数，其持有一个外部引用的变量 `name` ，从输出结果可以看到，引用的外部变量变化，输出值也会跟随变化的，也是 **capture by reference** 。
 
@@ -444,12 +412,11 @@ public String getFullName() {
 
 就像 Consumer 接口的定义：
 
-```java
 @FunctionalInterface
+```java
 public interface Consumer<T> {
     /**
      * Performs this operation on the given argument.
-     *
      * @param t the input argument
      */
     void accept(T t);
@@ -551,9 +518,7 @@ public class Connection {
 
 注意，上面的构造函数是私有的，从而避免了由外部创建 `Connection` 对象，同时在其内部提供了一个静态方法 `useConnection()` ，入参就是一个 `Consumer` 对象。当我们外部想使用时，使用如下调用语句即可：
 
-```java
 Connection.useConnection(conn -> conn.operate());
-```
 
 - **Supplier 接口：供给型函数式接口**
 
@@ -562,9 +527,6 @@ Connection.useConnection(conn -> conn.operate());
 ```java
 public interface Supplier<T> {
     /**
-     * Gets a result.
-     *
-     * @return a result
      */
     T get();
 }
@@ -599,29 +561,3 @@ supplier2.get().run();
 ## 小结
 
 关于 Lambda 表达式的知识点，上篇文章 [深入探讨 Lambda 表达式（上）](https://www.atatech.org/articles/159525?spm=ata.21736010.0.0.76c27536daqCaZ) 和本篇就已经全部介绍完毕。各位小伙伴，你都掌握了吗？
-
-END
-
-5\. 与匿名类的区别
-
-6\. 变量作用域
-
-6.1 变量作用域的规则
-
-6.2 为何要 final？
-
-7\. Java 中的闭包
-
-8\. Consumer、Supplier 等函数式接口
-
-小结
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

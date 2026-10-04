@@ -10,39 +10,20 @@ tags:
 ---
 ATH事业群-千问事业部
 
-粉丝 238影响力 2.2k
 
-** 83
 
-** 31
 
-** 17
-
-** 原创文章
 
 AI 辅助创作开放访问
 
-**
 
-复制专用链接
-
-**
-
-[郭庆涛(志鲲)](https://ata.atatech.org/users/11000147537)
 
 昨天09:14发表昨天18:30更新947次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章25:47
-
-**
 
 > Talk is cheap, show the code.： [https://github.com/zhikunqingtao/zhikuncode/](https://github.com/zhikunqingtao/zhikuncode/) ，欢迎fork、感恩star❤️
 
@@ -62,7 +43,19 @@ AI 辅助创作开放访问
 
 几个关键数字：
 
-<table><colgroup><col width="375"> <col width="375"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>维度</p></td><td rowspan="1" colspan="1"><p>数据</p></td></tr><tr><td rowspan="1" colspan="1"><p>代码总量</p></td><td rowspan="1" colspan="1"><div>~77K 行（ <code>wc -l</code> 实际统计）</div></td></tr><tr><td rowspan="1" colspan="1"><p>后端规模</p></td><td rowspan="1" colspan="1"><p>416 个 Java 源文件，~62K 行代码，52 个包</p></td></tr><tr><td rowspan="1" colspan="1"><p>前端规模</p></td><td rowspan="1" colspan="1"><p>107 个 TypeScript/TSX 文件，~12K 行代码</p></td></tr><tr><td rowspan="1" colspan="1"><p>Python 服务</p></td><td rowspan="1" colspan="1"><p>14 个 Python 文件，~2K 行代码，29 个 API 端点</p></td></tr><tr><td rowspan="1" colspan="1"><p>工具系统</p></td><td rowspan="1" colspan="1"><p>47 个工具，15 个分类</p></td></tr><tr><td rowspan="1" colspan="1"><p>Agent 循环</p></td><td rowspan="1" colspan="1"><p>8 步查询循环，支持流式工具执行</p></td></tr><tr><td rowspan="1" colspan="1"><p>安全体系</p></td><td rowspan="1" colspan="1"><p>8 层 Bash 安全检查，289 个安全单元测试</p></td></tr><tr><td rowspan="1" colspan="1"><p>权限体系</p></td><td rowspan="1" colspan="1"><p>14步决策链（Step 1a~1k, 2a/2b, 3），4种权限模式（BYPASS/ALLOW/DEFAULT/PLAN）</p></td></tr><tr><td rowspan="1" colspan="1"><p>测试覆盖</p></td><td rowspan="1" colspan="1"><p>110/110 手动测试 100% 通过，347 个自动化测试全部通过</p></td></tr></tbody></table>
+
+| 维度        | 数据                                                             |
+| --------- | -------------------------------------------------------------- |
+| 代码总量      | ~77K 行（ `wc -l` 实际统计）                                          |
+| 后端规模      | 416 个 Java 源文件，~62K 行代码，52 个包                                  |
+| 前端规模      | 107 个 TypeScript/TSX 文件，~12K 行代码                               |
+| Python 服务 | 14 个 Python 文件，~2K 行代码，29 个 API 端点                             |
+| 工具系统      | 47 个工具，15 个分类                                                  |
+| Agent 循环  | 8 步查询循环，支持流式工具执行                                               |
+| 安全体系      | 8 层 Bash 安全检查，289 个安全单元测试                                      |
+| 权限体系      | 14步决策链（Step 1a~1k, 2a/2b, 3），4种权限模式（BYPASS/ALLOW/DEFAULT/PLAN） |
+| 测试覆盖      | 110/110 手动测试 100% 通过，347 个自动化测试全部通过                            |
+
 
 ---
 
@@ -140,15 +133,13 @@ Step 8: 状态更新 + Token 累加
 
 `Tool.java` （213 行）定义了工具接口，跟 Claude Code 的 `Tool.ts` （792 行）对照，我保留了核心方法并做了合理裁剪——渲染相关的逻辑移交给前端 React 组件。接口包含 6 个功能组：基础标识、执行与权限、延迟加载、并发安全、安全标记、API 格式。
 
+```java
 // Tool.java — fail-closed 安全默认值
-
 default boolean isConcurrencySafe(ToolInput input) {
-
-return isReadOnly(input); // 只有只读操作默认允许并发
-
+    return isReadOnly(input); // 只有只读操作默认允许并发
 }
-
 default boolean isReadOnly(ToolInput input) { return false; } // 默认非只读
+```
 
 这跟 Claude Code 的安全默认值设计一致：假设最坏情况，除非工具自己声明“我是安全的”。
 
@@ -156,7 +147,18 @@ default boolean isReadOnly(ToolInput input) { return false; } // 默认非只读
 
 覆盖度对比：
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>类别</p></td><td rowspan="1" colspan="1"><p>ZhikunCode</p></td><td rowspan="1" colspan="1"><p>Claude Code</p></td><td rowspan="1" colspan="1"><p>说明</p></td></tr><tr><td rowspan="1" colspan="1"><p>文件操作</p></td><td rowspan="1" colspan="1"><p>Read/Write/Edit/Glob/Grep</p></td><td rowspan="1" colspan="1"><p>FileRead/FileWrite/FileEdit/Glob/Grep</p></td><td rowspan="1" colspan="1"><p>完整对等</p></td></tr><tr><td rowspan="1" colspan="1"><p>命令执行</p></td><td rowspan="1" colspan="1"><p>BashTool（8层安全）</p></td><td rowspan="1" colspan="1"><p>BashTool（8层安全）</p></td><td rowspan="1" colspan="1"><p>完整对等</p></td></tr><tr><td rowspan="1" colspan="1"><p>代码智能</p></td><td rowspan="1" colspan="1"><p>LSP + tree-sitter (Python)</p></td><td rowspan="1" colspan="1"><p>内建 + LSP</p></td><td rowspan="1" colspan="1"><p>完整对等</p></td></tr><tr><td rowspan="1" colspan="1"><p>Agent</p></td><td rowspan="1" colspan="1"><p>AgentTool/SubAgentExecutor</p></td><td rowspan="1" colspan="1"><p>AgentTool/runAgent</p></td><td rowspan="1" colspan="1"><p>完整对等</p></td></tr><tr><td rowspan="1" colspan="1"><p>MCP</p></td><td rowspan="1" colspan="1"><p>10 工具 (2 服务器)</p></td><td rowspan="1" colspan="1"><p>动态注册</p></td><td rowspan="1" colspan="1"><p>协议兼容</p></td></tr><tr><td rowspan="1" colspan="1"><p>浏览器</p></td><td rowspan="1" colspan="1"><p>WebBrowserTool (13种action)</p></td><td rowspan="1" colspan="1"><p>无内建</p></td><td rowspan="1" colspan="1"><p>ZhikunCode 独有</p></td></tr><tr><td rowspan="1" colspan="1"><p>Git</p></td><td rowspan="1" colspan="1"><p>GitTool + Python增强</p></td><td rowspan="1" colspan="1"><p>依赖 BashTool</p></td><td rowspan="1" colspan="1"><p>ZhikunCode 更丰富</p></td></tr><tr><td rowspan="1" colspan="1"><p>计划</p></td><td rowspan="1" colspan="1"><p>PlanTool/VerifyPlanExecution</p></td><td rowspan="1" colspan="1"><p>PlanTool</p></td><td rowspan="1" colspan="1"><p>完整对等</p></td></tr></tbody></table>
+
+| 类别    | ZhikunCode                   | Claude Code                           | 说明             |
+| ----- | ---------------------------- | ------------------------------------- | -------------- |
+| 文件操作  | Read/Write/Edit/Glob/Grep    | FileRead/FileWrite/FileEdit/Glob/Grep | 完整对等           |
+| 命令执行  | BashTool（8层安全）               | BashTool（8层安全）                        | 完整对等           |
+| 代码智能  | LSP + tree-sitter (Python)   | 内建 + LSP                              | 完整对等           |
+| Agent | AgentTool/SubAgentExecutor   | AgentTool/runAgent                    | 完整对等           |
+| MCP   | 10 工具 (2 服务器)                | 动态注册                                  | 协议兼容           |
+| 浏览器   | WebBrowserTool (13种action)   | 无内建                                   | ZhikunCode 独有  |
+| Git   | GitTool + Python增强           | 依赖 BashTool                           | ZhikunCode 更丰富 |
+| 计划    | PlanTool/VerifyPlanExecution | PlanTool                              | 完整对等           |
+
 
 值得注意的是，在某些方面 ZhikunCode 比 Claude Code 工具更丰富——内建的 `WebBrowserTool` 支持 13 种浏览器操作（navigate/click/type/screenshot 等），另有 Python 服务提供代码智能和 Git 增强。但 Claude Code 工具总数更多（53 内建），生态丰富度上有差距。
 
@@ -168,7 +170,18 @@ default boolean isReadOnly(ToolInput input) { return false; } // 默认非只读
 
 这是整个项目中工程投入最大的模块。 `BashCommandClassifier.java` （1,113 行）+ `BashSecurityAnalyzer.java` （762 行）+ `BashParserCore.java` （1,117 行）+ `BashLexer.java` （825 行）+ `PathValidator.java` + `SedValidator.java` + `BashTool.java` （518 行）合在一起构成了一个很扎实的纵深防御体系：
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>层级</p></td><td rowspan="1" colspan="1"><p>实现类</p></td><td rowspan="1" colspan="1"><p>职责</p></td><td rowspan="1" colspan="1"><p>关键数据</p></td></tr><tr><td rowspan="1" colspan="1"><p>L1</p></td><td rowspan="1" colspan="1"><p>BashCommandClassifier</p></td><td rowspan="1" colspan="1"><p>三层只读验证</p></td><td rowspan="1" colspan="1"><p>~60 纯只读命令 + 9 正则 + 20+ flag 白名单</p></td></tr><tr><td rowspan="1" colspan="1"><p>L2</p></td><td rowspan="1" colspan="1"><p>BashParserCore + BashLexer</p></td><td rowspan="1" colspan="1"><p>完整 Bash AST 解析</p></td><td rowspan="1" colspan="1"><p>20 种节点类型，1,942 行解析器代码</p></td></tr><tr><td rowspan="1" colspan="1"><p>L3</p></td><td rowspan="1" colspan="1"><p>PathValidator</p></td><td rowspan="1" colspan="1"><p>路径安全边界</p></td><td rowspan="1" colspan="1"><p>32 种命令路径提取 + 17 系统路径保护 + 6 隐藏目录</p></td></tr><tr><td rowspan="1" colspan="1"><p>L4</p></td><td rowspan="1" colspan="1"><p>BashSecurityAnalyzer</p></td><td rowspan="1" colspan="1"><p>命令注入检测</p></td><td rowspan="1" colspan="1"><p>24 eval-like + 10 Zsh 危险 + 14 种 Unicode 空白</p></td></tr><tr><td rowspan="1" colspan="1"><p>L5</p></td><td rowspan="1" colspan="1"><p>BashTool</p></td><td rowspan="1" colspan="1"><p>危险 Flag 拦截</p></td><td rowspan="1" colspan="1"><p>sudo/su/doas 绝对拦截，rm -rf + 11 关键路径</p></td></tr><tr><td rowspan="1" colspan="1"><p>L6</p></td><td rowspan="1" colspan="1"><p>SedValidator</p></td><td rowspan="1" colspan="1"><p>Sed 命令安全</p></td><td rowspan="1" colspan="1"><p>POSIX 分隔符 + 危险操作 w/W/e/E</p></td></tr><tr><td rowspan="1" colspan="1"><p>L7</p></td><td rowspan="1" colspan="1"><p>bash-permissions.yml</p></td><td rowspan="1" colspan="1"><p>4 级规则</p></td><td rowspan="1" colspan="1"><p>blocked > deny > prompt > allow</p></td></tr><tr><td rowspan="1" colspan="1"><p>L8</p></td><td rowspan="1" colspan="1"><p>BashTool.checkPermissions</p></td><td rowspan="1" colspan="1"><p>最终决策</p></td><td rowspan="1" colspan="1"><p>fail-closed：解析失败 → 降级正则 → 默认拒绝</p></td></tr></tbody></table>
+
+| 层级  | 实现类                        | 职责             | 关键数据                                       |
+| --- | -------------------------- | -------------- | ------------------------------------------ |
+| L1  | BashCommandClassifier      | 三层只读验证         | ~60 纯只读命令 + 9 正则 + 20+ flag 白名单            |
+| L2  | BashParserCore + BashLexer | 完整 Bash AST 解析 | 20 种节点类型，1,942 行解析器代码                      |
+| L3  | PathValidator              | 路径安全边界         | 32 种命令路径提取 + 17 系统路径保护 + 6 隐藏目录            |
+| L4  | BashSecurityAnalyzer       | 命令注入检测         | 24 eval-like + 10 Zsh 危险 + 14 种 Unicode 空白 |
+| L5  | BashTool                   | 危险 Flag 拦截     | sudo/su/doas 绝对拦截，rm -rf + 11 关键路径         |
+| L6  | SedValidator               | Sed 命令安全       | POSIX 分隔符 + 危险操作 w/W/e/E                   |
+| L7  | bash-permissions.yml       | 4 级规则          | blocked > deny > prompt > allow            |
+| L8  | BashTool.checkPermissions  | 最终决策           | fail-closed：解析失败 → 降级正则 → 默认拒绝             |
+
 
 289 个安全单元测试覆盖了命令分类（77 个）、AST 解析（50 个）、注入检测（63 个）、敏感路径（22 个）、权限增强（68 个）、集成（9 个）等 6 个测试类中。
 
@@ -200,11 +213,11 @@ Step 3: 默认决策
 
 `SystemPromptBuilder.java` （1,227 行）是提示词的核心组装器，对照 Claude Code 的 `prompts.ts` （914 行），我实现了等价的分段缓存架构：
 
-静态段有 8 段，固定顺序：INTRO\_SECTION → SYSTEM\_SECTION → DOING\_TASKS\_SECTION → ACTIONS\_SECTION → USING\_TOOLS\_SECTION → TONE\_STYLE\_SECTION → OUTPUT\_EFFICIENCY\_SECTION → FUNCTION\_RESULT\_CLEARING\_SECTION。
+静态段有 8 段，固定顺序：INTRO_SECTION → SYSTEM_SECTION → DOING_TASKS_SECTION → ACTIONS_SECTION → USING_TOOLS_SECTION → TONE_STYLE_SECTION → OUTPUT_EFFICIENCY_SECTION → FUNCTION_RESULT_CLEARING_SECTION。
 
 外部模板 5 段： `tool_examples.txt` （199 行）、 `boundary_conditions.txt` （131 行）、 `code_style_guide.txt` （161 行）、 `security_practices.txt` （150 行）、 `error_recovery.txt` （154 行）。
 
-动态段 12 段：session\_guidance、memory、env\_info、language、output\_style、mcp\_instructions、scratchpad、frc、summarize\_tool\_results、token\_budget、ant\_specific\_guidance、project\_context。
+动态段 12 段：session_guidance、memory、env_info、language、output_style、mcp_instructions、scratchpad、frc、summarize_tool_results、token_budget、ant_specific_guidance、project_context。
 
 `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` 标记把 prompt 分成静态缓存域和动态域，跟 Claude Code 的设计一致。 `SystemPromptSectionCache.java` 用了双层 Caffeine 缓存——全局缓存（maxSize=50, TTL=30min）和会话级缓存（按 sessionId 隔离），通过 `contentHash` 判断段是否变了。
 
@@ -214,7 +227,16 @@ Step 3: 默认决策
 
 `ContextCascade.java` （344 行）实现了 6 层级联压缩（L0~L4 共 5 个主级别 + L1.5 中间层），跟 Claude Code 的“从轻到重”思路一样：
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>层级</p></td><td rowspan="1" colspan="1"><p>策略</p></td><td rowspan="1" colspan="1"><p>复杂度</p></td><td rowspan="1" colspan="1"><p>说明</p></td></tr><tr><td rowspan="1" colspan="1"><p>L0</p></td><td rowspan="1" colspan="1"><p>Snip</p></td><td rowspan="1" colspan="1"><p>O(1)</p></td><td rowspan="1" colspan="1"><p>无条件轻量截断，极低开销</p></td></tr><tr><td rowspan="1" colspan="1"><p>L1</p></td><td rowspan="1" colspan="1"><p>MicroCompact (FRC)</p></td><td rowspan="1" colspan="1"><p>O(n)</p></td><td rowspan="1" colspan="1"><p>8 种白名单工具结果清理，保护尾部 10 条</p></td></tr><tr><td rowspan="1" colspan="1"><p>L1.5</p></td><td rowspan="1" colspan="1"><p>ContextCollapse</p></td><td rowspan="1" colspan="1"><p>O(n)</p></td><td rowspan="1" colspan="1"><p>三级渐进折叠：Full → Summary → Skeleton</p></td></tr><tr><td rowspan="1" colspan="1"><p>L2</p></td><td rowspan="1" colspan="1"><p>AutoCompact</p></td><td rowspan="1" colspan="1"><p>API 调用</p></td><td rowspan="1" colspan="1"><p>全量摘要（保留 9 类信息），电路断路器保护</p></td></tr><tr><td rowspan="1" colspan="1"><p>L3</p></td><td rowspan="1" colspan="1"><p>CollapseDrain</p></td><td rowspan="1" colspan="1"><p>API 调用</p></td><td rowspan="1" colspan="1"><p>413 错误恢复</p></td></tr><tr><td rowspan="1" colspan="1"><p>L4</p></td><td rowspan="1" colspan="1"><p>ReactiveCompact</p></td><td rowspan="1" colspan="1"><p>API 调用</p></td><td rowspan="1" colspan="1"><p>紧急响应式压缩</p></td></tr></tbody></table>
+
+| 层级   | 策略                 | 复杂度    | 说明                               |
+| ---- | ------------------ | ------ | -------------------------------- |
+| L0   | Snip               | O(1)   | 无条件轻量截断，极低开销                     |
+| L1   | MicroCompact (FRC) | O(n)   | 8 种白名单工具结果清理，保护尾部 10 条           |
+| L1.5 | ContextCollapse    | O(n)   | 三级渐进折叠：Full → Summary → Skeleton |
+| L2   | AutoCompact        | API 调用 | 全量摘要（保留 9 类信息），电路断路器保护           |
+| L3   | CollapseDrain      | API 调用 | 413 错误恢复                         |
+| L4   | ReactiveCompact    | API 调用 | 紧急响应式压缩                          |
+
 
 `CompactService.java` （996 行）是压缩主体，包含 AutoCompact 断路器机制（连续失败就停止重试）和 `ContextCollapse` 的互斥设计（启用折叠就跳过 AutoCompact）。 `ToolResultSummarizer` 做三级摘要：小结果直接注入，中等的截断，大的用摘要——确保工具结果不会撑爆上下文窗口。
 
@@ -224,25 +246,15 @@ Step 3: 默认决策
 
 `McpClientManager.java` （587 行）管理 MCP 客户端的完整生命周期：
 
-●
+- SmartLifecycle Phase=2，Spring 容器启动时自动初始化，优先级在 Python 服务之后
 
-SmartLifecycle Phase=2，Spring 容器启动时自动初始化，优先级在 Python 服务之后
+- 双层健康检查：被动（@Scheduled 30s, `isAlive()` 检测）+ 主动（ `SseHealthChecker.performActiveHealthCheck()` 发 `notifications/ping` ）
 
-●
+- 异步延迟重连： `ScheduledExecutorService` 替代阻塞 `Thread.sleep` ，指数退避 1s→2s→4s→8s→16s（上限 30s）
 
-双层健康检查：被动（@Scheduled 30s, `isAlive()` 检测）+ 主动（ `SseHealthChecker.performActiveHealthCheck()` 发 `notifications/ping` ）
+- 幂等保护： `reconnectingServers` ConcurrentHashMap + `putIfAbsent` 原子操作，防重复重连
 
-●
-
-异步延迟重连： `ScheduledExecutorService` 替代阻塞 `Thread.sleep` ，指数退避 1s→2s→4s→8s→16s（上限 30s）
-
-●
-
-幂等保护： `reconnectingServers` ConcurrentHashMap + `putIfAbsent` 原子操作，防重复重连
-
-●
-
-自定义线程池： `RECONNECT_POOL` （2 daemon 线程），不占公共 ForkJoinPool
+- 自定义线程池： `RECONNECT_POOL` （2 daemon 线程），不占公共 ForkJoinPool
 
 `McpToolAdapter.java` 把 MCP 工具适配成内部 `Tool` 接口，支持描述覆盖（注册表 `enhancedDescription` 优先于 MCP 原始描述）、超时覆盖、结果截断保护（ `MAX_MCP_RESULT_SIZE = 1MB` ）和 Caffeine 结果缓存。
 
@@ -254,37 +266,21 @@ SmartLifecycle Phase=2，Spring 容器启动时自动初始化，优先级在 Py
 
 `coordinator/` 包（17 个 Java 文件）的实现覆盖了主要协作场景：
 
-●
+- SwarmService 做核心调度，管 Swarm 创建/查询/停止
 
-SwarmService 做核心调度，管 Swarm 创建/查询/停止
+- CoordinatorWorkflowEngine 编排四阶段工作流（Research → Synthesis → Implementation → Verification）
 
-●
+- SwarmWorkerRunner 基于 JDK 21 虚拟线程跑 Worker，复用 QueryEngine
 
-CoordinatorWorkflowEngine 编排四阶段工作流（Research → Synthesis → Implementation → Verification）
+- TeamMailbox.java（3.5KB）做线程安全的点对点 + 广播通信（ConcurrentLinkedQueue）
 
-●
+- LeaderPermissionBridge.java（5.8KB）让 Worker 的权限请求向 Leader 冒泡，60s 超时自动 DENY
 
-SwarmWorkerRunner 基于 JDK 21 虚拟线程跑 Worker，复用 QueryEngine
+- SharedTaskList 是 FIFO 任务队列，支持 addTask/claimTask/completeTask 三步流转
 
-●
+- ResultAggregator 汇总结果，带截断保护（单结果 50K 字符，总摘要 200K 字符）
 
-TeamMailbox.java（3.5KB）做线程安全的点对点 + 广播通信（ConcurrentLinkedQueue）
-
-●
-
-LeaderPermissionBridge.java（5.8KB）让 Worker 的权限请求向 Leader 冒泡，60s 超时自动 DENY
-
-●
-
-SharedTaskList 是 FIFO 任务队列，支持 addTask/claimTask/completeTask 三步流转
-
-●
-
-ResultAggregator 汇总结果，带截断保护（单结果 50K 字符，总摘要 200K 字符）
-
-●
-
-SwarmState 有 5 种阶段状态（INITIALIZING → RUNNING → IDLE → SHUTTING\_DOWN → TERMINATED），用 CAS 保线程安全
+- SwarmState 有 5 种阶段状态（INITIALIZING → RUNNING → IDLE → SHUTTING_DOWN → TERMINATED），用 CAS 保线程安全
 
 `SubAgentExecutor.java` （948 行）是子 Agent 的执行引擎，包含工具过滤三层逻辑、权限模式覆盖和防递归设计。
 
@@ -320,7 +316,16 @@ SwarmState 有 5 种阶段状态（INITIALIZING → RUNNING → IDLE → SHUTTIN
 
 ### 整体数据
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>测试类型</p></td><td rowspan="1" colspan="1"><p>数量</p></td><td rowspan="1" colspan="1"><p>通过率</p></td><td rowspan="1" colspan="1"><p>工具/框架</p></td></tr><tr><td rowspan="1" colspan="1"><p>后端安全单元测试</p></td><td rowspan="1" colspan="1"><p>289</p></td><td rowspan="1" colspan="1"><p>100%</p></td><td rowspan="1" colspan="1"><p>JUnit 5</p></td></tr><tr><td rowspan="1" colspan="1"><p>前端 Store 单元测试</p></td><td rowspan="1" colspan="1"><p>33</p></td><td rowspan="1" colspan="1"><p>100%</p></td><td rowspan="1" colspan="1"><p>Vitest</p></td></tr><tr><td rowspan="1" colspan="1"><p>Python 服务单元测试</p></td><td rowspan="1" colspan="1"><p>18</p></td><td rowspan="1" colspan="1"><p>100%</p></td><td rowspan="1" colspan="1"><p>pytest</p></td></tr><tr><td rowspan="1" colspan="1"><p>Playwright E2E 测试</p></td><td rowspan="1" colspan="1"><p>7</p></td><td rowspan="1" colspan="1"><p>100%</p></td><td rowspan="1" colspan="1"><p>Playwright + Chrome 147</p></td></tr><tr><td rowspan="1" colspan="1"><p>手动功能测试用例</p></td><td rowspan="1" colspan="1"><p>110</p></td><td rowspan="1" colspan="1"><p>100%</p></td><td rowspan="1" colspan="1"></td></tr><tr><td rowspan="1" colspan="1"><p>总计</p></td><td rowspan="1" colspan="1"><p>347</p></td><td rowspan="1" colspan="1"><p>100%</p></td><td rowspan="1" colspan="1"></td></tr></tbody></table>
+
+| 测试类型              | 数量  | 通过率  | 工具/框架                   |
+| ----------------- | --- | ---- | ----------------------- |
+| 后端安全单元测试          | 289 | 100% | JUnit 5                 |
+| 前端 Store 单元测试     | 33  | 100% | Vitest                  |
+| Python 服务单元测试     | 18  | 100% | pytest                  |
+| Playwright E2E 测试 | 7   | 100% | Playwright + Chrome 147 |
+| 手动功能测试用例          | 110 | 100% |                         |
+| 总计                | 347 | 100% |                         |
+
 
 347 个测试全部通过。不过需要指出，前端 33 个单元测试只覆盖了 Store 层，18 个组件目录的 UI 测试基本是空白，这是当前测试覆盖的主要短板。
 
@@ -328,35 +333,30 @@ SwarmState 有 5 种阶段状态（INITIALIZING → RUNNING → IDLE → SHUTTIN
 
 289 个安全测试的分布可以看出纵深防御的覆盖思路：
 
-●
+- `BashCommandClassifierTest` （77 个）：覆盖三层只读验证（~60 命令/9 正则/20+ flag 白名单）
 
-`BashCommandClassifierTest` （77 个）：覆盖三层只读验证（~60 命令/9 正则/20+ flag 白名单）
+- `BashParserGoldenTest` （50 个）：覆盖 20 种 AST 节点类型、管道/重定向/子 shell/变量展开
 
-●
+- `BashSecurityAnalyzerTest` （63 个）：控制字符、14 种 Unicode 空白、24 eval-like 内建命令、Zsh 危险命令
 
-`BashParserGoldenTest` （50 个）：覆盖 20 种 AST 节点类型、管道/重定向/子 shell/变量展开
+- `SensitivePathSecurityTest` （22 个）：17 系统路径保护、6 隐藏目录保护、符号链接解析
 
-●
+- `PermissionEnhancementGoldenTest` （68 个）：权限管道增强场景全覆盖
 
-`BashSecurityAnalyzerTest` （63 个）：控制字符、14 种 Unicode 空白、24 eval-like 内建命令、Zsh 危险命令
-
-●
-
-`SensitivePathSecurityTest` （22 个）：17 系统路径保护、6 隐藏目录保护、符号链接解析
-
-●
-
-`PermissionEnhancementGoldenTest` （68 个）：权限管道增强场景全覆盖
-
-●
-
-`SecurityFilterIntegrationTest` （9 个）：安全过滤器集成测试
+- `SecurityFilterIntegrationTest` （9 个）：安全过滤器集成测试
 
 ### 测试中发现的 BUG
 
 测试过程中发现了 4 个问题，我全部修复了：
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>编号</p></td><td rowspan="1" colspan="1"><p>问题</p></td><td rowspan="1" colspan="1"><p>级别</p></td><td rowspan="1" colspan="1"><p>状态</p></td></tr><tr><td rowspan="1" colspan="1"><p>#1</p></td><td rowspan="1" colspan="1"><p>start.sh 未加载.env</p></td><td rowspan="1" colspan="1"><p>High</p></td><td rowspan="1" colspan="1"><p>✅ 已修复</p></td></tr><tr><td rowspan="1" colspan="1"><p>#2</p></td><td rowspan="1" colspan="1"><p>Python PYTHONPATH 缺失</p></td><td rowspan="1" colspan="1"><p>Medium</p></td><td rowspan="1" colspan="1"><p>✅ 已修复</p></td></tr><tr><td rowspan="1" colspan="1"><p>#3</p></td><td rowspan="1" colspan="1"><p>BashTool 敏感路径拦截</p></td><td rowspan="1" colspan="1"><p>High</p></td><td rowspan="1" colspan="1"><p>✅ 已修复（Step 1k + 32 测试）</p></td></tr><tr><td rowspan="1" colspan="1"><p>#4</p></td><td rowspan="1" colspan="1"><p>tree-sitter 版本兼容性</p></td><td rowspan="1" colspan="1"><p>Medium</p></td><td rowspan="1" colspan="1"><p>✅ 已修复（版本检测兼容层）</p></td></tr></tbody></table>
+
+| 编号  | 问题                   | 级别     | 状态                     |
+| --- | -------------------- | ------ | ---------------------- |
+| #1  | start.sh 未加载.env     | High   | ✅ 已修复                  |
+| #2  | Python PYTHONPATH 缺失 | Medium | ✅ 已修复                  |
+| #3  | BashTool 敏感路径拦截      | High   | ✅ 已修复（Step 1k + 32 测试） |
+| #4  | tree-sitter 版本兼容性    | Medium | ✅ 已修复（版本检测兼容层）         |
+
 
 没有发现安全类高危漏洞。
 
@@ -366,27 +366,26 @@ SwarmState 有 5 种阶段状态（INITIALIZING → RUNNING → IDLE → SHUTTIN
 
 ### 资源占用
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>服务</p></td><td rowspan="1" colspan="1"><p>内存占用</p></td><td rowspan="1" colspan="1"><p>端口</p></td><td rowspan="1" colspan="1"><p>说明</p></td></tr><tr><td rowspan="1" colspan="1"><p>Java 后端</p></td><td rowspan="1" colspan="1"><p>~257 MB</p></td><td rowspan="1" colspan="1"><p>:8080</p></td><td rowspan="1" colspan="1"><p>Spring Boot 3.4.13 + JDK 21 虚拟线程</p></td></tr><tr><td rowspan="1" colspan="1"><p>React 前端</p></td><td rowspan="1" colspan="1"><p>~88 MB</p></td><td rowspan="1" colspan="1"><p>:5173</p></td><td rowspan="1" colspan="1"><p>Vite 5.4.11 开发服务器</p></td></tr><tr><td rowspan="1" colspan="1"><p>Python FastAPI</p></td><td rowspan="1" colspan="1"><p>~78 MB</p></td><td rowspan="1" colspan="1"><p>:8000</p></td><td rowspan="1" colspan="1"><p>Uvicorn 0.32.0 + tree-sitter</p></td></tr><tr><td rowspan="1" colspan="1"><p>三服务总计</p></td><td rowspan="1" colspan="1"><p>~423 MB</p></td><td rowspan="1" colspan="1"></td><td rowspan="1" colspan="1"></td></tr></tbody></table>
+
+| 服务             | 内存占用    | 端口    | 说明                               |
+| -------------- | ------- | ----- | -------------------------------- |
+| Java 后端        | ~257 MB | :8080 | Spring Boot 3.4.13 + JDK 21 虚拟线程 |
+| React 前端       | ~88 MB  | :5173 | Vite 5.4.11 开发服务器                |
+| Python FastAPI | ~78 MB  | :8000 | Uvicorn 0.32.0 + tree-sitter     |
+| 三服务总计          | ~423 MB |       |                                  |
+
 
 三个服务加起来 423 MB 左右，Java 后端占大头（257 MB）。开发环境下可以接受，生产部署时前端打包后不需要 Vite 开发服务器，实际占用会更低。
 
 ### 响应表现
 
-●
+- 工具执行：Read 工具 7-8ms，Grep 搜索返回 18 个文件结果
 
-工具执行：Read 工具 7-8ms，Grep 搜索返回 18 个文件结果
+- WebSocket 通信：STOMP 心跳 10s 双向，应用层 ping/pong 保活
 
-●
+- 流式输出：SSE 25+ 个 `text_delta` 事件逐步推送
 
-WebSocket 通信：STOMP 心跳 10s 双向，应用层 ping/pong 保活
-
-●
-
-流式输出：SSE 25+ 个 `text_delta` 事件逐步推送
-
-●
-
-MCP 重连：64 条重连日志中每次均在首次尝试成功（1s 延迟）
+- MCP 重连：64 条重连日志中每次均在首次尝试成功（1s 延迟）
 
 7 个 Playwright E2E 测试总耗时 8.5s，单个最慢 5.9s（响应式视口测试），最快 1.0s（主题切换）。
 
@@ -394,21 +393,31 @@ MCP 重连：64 条重连日志中每次均在首次尝试成功（1s 延迟）
 
 ## 跟 Claude Code 的正面对比
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>维度</p></td><td rowspan="1" colspan="1"><p>Claude Code</p></td><td rowspan="1" colspan="1"><p>ZhikunCode</p></td><td rowspan="1" colspan="1"><p>评价</p></td></tr><tr><td rowspan="1" colspan="1"><p>语言</p></td><td rowspan="1" colspan="1"><p>TypeScript (51万行, 1,884文件)</p></td><td rowspan="1" colspan="1"><p>Java ~62K + TS ~12K + Python ~2K = ~77K行</p></td><td rowspan="1" colspan="1"><p>三语言分层，总量约 1/5</p></td></tr><tr><td rowspan="1" colspan="1"><p>架构</p></td><td rowspan="1" colspan="1"><p>单进程单体</p></td><td rowspan="1" colspan="1"><p>三层分离微服务</p></td><td rowspan="1" colspan="1"><p>三层分离更便于企业环境运维</p></td></tr><tr><td rowspan="1" colspan="1"><p>UI</p></td><td rowspan="1" colspan="1"><p>终端优先 + VS Code/Web/Desktop 扩展</p></td><td rowspan="1" colspan="1"><p>Web 优先 React + Zustand</p></td><td rowspan="1" colspan="1"><p>定位不同：终端优先 vs Web 优先</p></td></tr><tr><td rowspan="1" colspan="1"><p>Agent Loop</p></td><td rowspan="1" colspan="1"><p>AsyncGenerator 两层循环</p></td><td rowspan="1" colspan="1"><p>8步 while 循环</p></td><td rowspan="1" colspan="1"><p>功能等价，Generator 更优雅</p></td></tr><tr><td rowspan="1" colspan="1"><p>工具数量</p></td><td rowspan="1" colspan="1"><p>53 内建</p></td><td rowspan="1" colspan="1"><p>47（15分类）</p></td><td rowspan="1" colspan="1"><p>Claude Code 更多</p></td></tr><tr><td rowspan="1" colspan="1"><p>Bash 安全</p></td><td rowspan="1" colspan="1"><p>18 文件 ~5,000 行</p></td><td rowspan="1" colspan="1"><p>6 核心文件 ~5,000+ 行</p></td><td rowspan="1" colspan="1"><p>等价覆盖</p></td></tr><tr><td rowspan="1" colspan="1"><p>权限模式</p></td><td rowspan="1" colspan="1"><p>6 种 + 远程熔断</p></td><td rowspan="1" colspan="1"><p>4 种（BYPASS/ALLOW/DEFAULT/PLAN）+ 14步决策链 + FeatureFlag killswitch</p></td><td rowspan="1" colspan="1"><p>等价</p></td></tr><tr><td rowspan="1" colspan="1"><p>MCP</p></td><td rowspan="1" colspan="1"><p>4 种传输 + OAuth + Elicitation</p></td><td rowspan="1" colspan="1"><p>SSE/STDIO/WebSocket/HTTP Streaming + 国内 MCP 预集成</p></td><td rowspan="1" colspan="1"><p>各有侧重</p></td></tr><tr><td rowspan="1" colspan="1"><p>多 Agent</p></td><td rowspan="1" colspan="1"><p>Tmux/InProcess 双后端</p></td><td rowspan="1" colspan="1"><p>InProcess (虚拟线程)</p></td><td rowspan="1" colspan="1"><p>Claude Code 隔离性更强</p></td></tr><tr><td rowspan="1" colspan="1"><p>System Prompt</p></td><td rowspan="1" colspan="1"><p>914 行 prompts.ts</p></td><td rowspan="1" colspan="1"><p>1,227 行 Builder + 795 行模板</p></td><td rowspan="1" colspan="1"><p>模板数量更多</p></td></tr><tr><td rowspan="1" colspan="1"><p>压缩策略</p></td><td rowspan="1" colspan="1"><p>4 层 (~4,000行)</p></td><td rowspan="1" colspan="1"><p>6 层 (1,340行)</p></td><td rowspan="1" colspan="1"><p>功能等价</p></td></tr><tr><td rowspan="1" colspan="1"><p>测试</p></td><td rowspan="1" colspan="1"><p>未公开</p></td><td rowspan="1" colspan="1"><p>347 自动化 + 110 手动</p></td><td rowspan="1" colspan="1"><p>有完整公开数据</p></td></tr><tr><td rowspan="1" colspan="1"><p>模型支持</p></td><td rowspan="1" colspan="1"><p>Claude 系列</p></td><td rowspan="1" colspan="1"><p>千问/DeepSeek/Moonshot/OpenAI 兼容</p></td><td rowspan="1" colspan="1"><p>不同定位</p></td></tr></tbody></table>
+
+| 维度            | Claude Code                   | ZhikunCode                                                      | 评价                  |
+| ------------- | ----------------------------- | --------------------------------------------------------------- | ------------------- |
+| 语言            | TypeScript (51万行, 1,884文件)    | Java ~62K + TS ~12K + Python ~2K = ~77K行                        | 三语言分层，总量约 1/5       |
+| 架构            | 单进程单体                         | 三层分离微服务                                                         | 三层分离更便于企业环境运维       |
+| UI            | 终端优先 + VS Code/Web/Desktop 扩展 | Web 优先 React + Zustand                                          | 定位不同：终端优先 vs Web 优先 |
+| Agent Loop    | AsyncGenerator 两层循环           | 8步 while 循环                                                     | 功能等价，Generator 更优雅  |
+| 工具数量          | 53 内建                         | 47（15分类）                                                        | Claude Code 更多      |
+| Bash 安全       | 18 文件 ~5,000 行                | 6 核心文件 ~5,000+ 行                                                | 等价覆盖                |
+| 权限模式          | 6 种 + 远程熔断                    | 4 种（BYPASS/ALLOW/DEFAULT/PLAN）+ 14步决策链 + FeatureFlag killswitch | 等价                  |
+| MCP           | 4 种传输 + OAuth + Elicitation   | SSE/STDIO/WebSocket/HTTP Streaming + 国内 MCP 预集成                 | 各有侧重                |
+| 多 Agent       | Tmux/InProcess 双后端            | InProcess (虚拟线程)                                                | Claude Code 隔离性更强   |
+| System Prompt | 914 行 prompts.ts              | 1,227 行 Builder + 795 行模板                                       | 模板数量更多              |
+| 压缩策略          | 4 层 (~4,000行)                 | 6 层 (1,340行)                                                    | 功能等价                |
+| 测试            | 未公开                           | 347 自动化 + 110 手动                                                | 有完整公开数据             |
+| 模型支持          | Claude 系列                     | 千问/DeepSeek/Moonshot/OpenAI 兼容                                  | 不同定位                |
+
 
 代码量差异值得说一下。我的项目总共约 77K 行（Java ~62K + React ~12K + Python ~2K），大概是 Claude Code（512,664 行 TypeScript）的 15%。差距主要来自三个地方：
 
-1.
+1. Claude Code 的 Ink 终端渲染引擎（19,842 行）在我这里由前端 React 组件替代
 
-Claude Code 的 Ink 终端渲染引擎（19,842 行）在我这里由前端 React 组件替代
+2. Claude Code 的 `components/` （81,546 行）和 `hooks/` （19,204 行）是终端 UI 实现
 
-2.
-
-Claude Code 的 `components/` （81,546 行）和 `hooks/` （19,204 行）是终端 UI 实现
-
-3.
-
-Claude Code 的 `commands/` （26,428 行，90+ 斜杠命令）在我这里通过 Skill 系统简化了
+3. Claude Code 的 `commands/` （26,428 行，90+ 斜杠命令）在我这里通过 Skill 系统简化了
 
 核心逻辑——Agent Loop、工具系统、权限体系、上下文管理——的代码量其实比较接近。
 
@@ -452,21 +461,13 @@ com.aicodeassistant
 
 ### 代码规范
 
-●
+- Java 代码用 `record` 类型定义不可变数据结构（如 `QueryResult` 、 `Usage` ）
 
-Java 代码用 `record` 类型定义不可变数据结构（如 `QueryResult` 、 `Usage` ）
+- `sealed interface` 用于工作流阶段（ `WorkflowPhase` ）和消息类型（ `ServerMessage` 41 种 record）
 
-●
+- `ConcurrentHashMap` + `AtomicBoolean` + `CAS` 保线程安全
 
-`sealed interface` 用于工作流阶段（ `WorkflowPhase` ）和消息类型（ `ServerMessage` 41 种 record）
-
-●
-
-`ConcurrentHashMap` + `AtomicBoolean` + `CAS` 保线程安全
-
-●
-
-Javadoc 注释引用规格说明（ `@see SPEC §x.x.x` ），便于追溯设计决策
+- Javadoc 注释引用规格说明（ `@see SPEC §x.x.x` ），便于追溯设计决策
 
 Java 21 的新特性用得比较充分，record 和 sealed interface 让代码简洁不少。
 
@@ -494,98 +495,14 @@ MCP 传输协议已实现 4 种（SSE/STDIO/WebSocket/HTTP Streaming），OAuth 
 
 ### 适合什么场景
 
-●
+- 企业内部部署：Java + Spring Boot 是企业最熟悉的技术栈，三层分离便于运维
 
-企业内部部署：Java + Spring Boot 是企业最熟悉的技术栈，三层分离便于运维
+- 需要用国产模型：千问 OpenAI 兼容模式的适配让你不用操心海外 API 的问题
 
-●
+- 二次开发：模块化设计加上完整测试覆盖，改代码时心里有底
 
-需要用国产模型：千问 OpenAI 兼容模式的适配让你不用操心海外 API 的问题
-
-●
-
-二次开发：模块化设计加上完整测试覆盖，改代码时心里有底
-
-●
-
-学习参考：作为 Claude Code 的 Java 实现，想理解大型 AI Agent 系统架构的话，这是个不错的学习材料
+- 学习参考：作为 Claude Code 的 Java 实现，想理解大型 AI Agent 系统架构的话，这是个不错的学习材料
 
 ## Talk is cheap, show the code
 
 再贴一遍github的源码： [https://github.com/zhikunqingtao/zhikuncode/](https://github.com/zhikunqingtao/zhikuncode/) ，欢迎fork、感恩star❤️
-
-END
-
-介绍
-
-架构选择：三层分离 vs TypeScript 单体
-
-QueryEngine：8步循环的设计
-
-工具系统：47 个工具（15分类）
-
-拆开看看核心模块
-
-BashTool 的 8 层安全体系
-
-权限管线 PermissionPipeline
-
-System Prompt 构建
-
-上下文压缩策略
-
-MCP 集成
-
-多 Agent 协作
-
-技术特色
-
-模型别名重构
-
-MCP 韧性增强
-
-AUTO 模式的紧急开关
-
-千问模型适配
-
-敏感数据运行时脱敏
-
-测试覆盖情况
-
-整体数据
-
-安全测试的细节
-
-测试中发现的 BUG
-
-性能数据
-
-资源占用
-
-响应表现
-
-跟 Claude Code 的正面对比
-
-可扩展性和维护性
-
-模块化
-
-代码规范
-
-已知不足
-
-我的整体判断
-
-适合什么场景
-
-Talk is cheap, show the code
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

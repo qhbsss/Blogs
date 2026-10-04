@@ -8,43 +8,13 @@ description:
 tags:
   - "clippings"
 ---
-国际数字商业集团
-
-粉丝 10影响力 214
-
-** 23
-
-** 16
-
-** 2
-
-** 原创文章
-
 AI 辅助创作
 
-发表到圈儿
 
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152) (首发)
 
-[阿里国际智能技术团队](https://ata.atatech.org/community/team/100114)
 
-**
 
-[于延涛(颜滔)](https://ata.atatech.org/users/11001820281)
 
-4月22日发表4月24日更新159次浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章30:37
-
-**
 
 > SIGIR 2026 Full Paper | Beyond Dense Connectivity: Explicit Sparsity for Scalable Recommendation
 
@@ -74,13 +44,9 @@ LLM的scaling law告诉我们：模型越大，效果越好。那么，推荐系
 
 为了理解这个现象，我们做了一件很简单的事，把线上工业CTR模型全连接层的学习权重拿出来做可视化（训练过程没有施加任何稀疏约束，如L2正则），结果：
 
-●
+- 92%的连接权重被隐式压制到接近零
 
-92%的连接权重被隐式压制到接近零
-
-●
-
-80%的权重能量集中在仅4%的输入维度
+- 80%的权重能量集中在仅4%的输入维度
 
 也就是说，我们给了模型一个全连接结构，但模型自己"选择"了稀疏。大量参数预算被浪费在"学习如何不使用某些连接"上。
 
@@ -104,13 +70,9 @@ Dense MLP训练后呈现出强烈的稀疏模式。既然模型自己"选择"了
 
 并不是。两者有本质区别：
 
-●
+- 隐式稀疏：接近零 ≠ 等于零。92%被"抑制"的权重仍有微小非零值，推理时仍消耗完整的计算和存储开销，对输出的边际贡献却极小。
 
-隐式稀疏：接近零 ≠ 等于零。92%被"抑制"的权重仍有微小非零值，推理时仍消耗完整的计算和存储开销，对输出的边际贡献却极小。
-
-●
-
-显式稀疏：不存在的连接直接被排除，根本不在计算图中出现。
+- 显式稀疏：不存在的连接直接被排除，根本不在计算图中出现。
 
 打个比方，隐式稀疏像图书管理员面对100万本书，每本都得翻一遍才能判断"这99万本不相关"；显式稀疏则先用索引系统到的1万本，只读这1万本。
 
@@ -128,17 +90,11 @@ $$
 
 这种数学结构意味着：
 
-1.
+1. Mixer的有效宽度是 m = S × C，可以高达 10^4 ~ 10^6
 
-Mixer的有效宽度是 m = S × C，可以高达 10^4 ~ 10^6
+2. 权重矩阵中非零元素的比例仅为 1/C 或 1/S，天然就是高度稀疏的
 
-2.
-
-权重矩阵中非零元素的比例仅为 1/C 或 1/S，天然就是高度稀疏的
-
-3.
-
-更进一步，Kronecker积参数化天然蕴含了隐式的L1正则化效应
+3. 更进一步，Kronecker积参数化天然蕴含了隐式的L1正则化效应
 
 这篇论文还通过实验验证了Golubeva假说：在固定参数量（连接数）的前提下，增大宽度（从而增大稀疏度）可以持续提升泛化性能。MLP-Mixer恰好体现了这一原则，它用结构化的稀疏连接，在巨大的有效宽度上高效地建模。
 
@@ -154,21 +110,17 @@ Mixer的有效宽度是 m = S × C，可以高达 10^4 ~ 10^6
 
 方法二：稀疏矩阵乘法
 
-●
-
-等价于一个16×4的稀疏矩阵 
+- 等价于一个16×4的稀疏矩阵
 $$
 S
 $$
  与输入向量的乘法
 
-●
-
-稀疏矩阵 
+- 稀疏矩阵
 $$
 S
 $$
- 的非零元素仅占 
+ 的非零元素仅占
 $$
 7/64 = 11\%
 $$
@@ -186,13 +138,9 @@ $$
 
 SSR的核心是先稀疏筛选，再融合：
 
-1.
+1. 筛选阶段：在非线性变换之前，通过显式稀疏筛选器从高维输入中选出一部分维度子集。
 
-筛选阶段：在非线性变换之前，通过显式稀疏筛选器从高维输入中选出一部分维度子集。
-
-2.
-
-融合阶段：在筛选后的"纯净"低维子空间内，做标准的稠密非线性变换，高效建模有效特征的高阶交互。
+2. 融合阶段：在筛选后的"纯净"低维子空间内，做标准的稠密非线性变换，高效建模有效特征的高阶交互。
 
 这里的关键设计选择是将"稀疏筛选"和"特征交互"解耦为两个独立阶段。Dense MLP试图用一个全连接层同时做这两件事，所有食材所有调料都放进去炒一锅出。SSR让第一阶段专注于"稀疏筛选"一些食材和调料，第二阶段专注于"炒菜"，各司其职。
 
@@ -202,15 +150,15 @@ SSR的核心是先稀疏筛选，再融合：
 
 ### 3.1 第一阶段：多视图稀疏筛选
 
-SSR将完整的输入向量 
+SSR将完整的输入向量
 $$
 x ∈ R^{d_{in}}
 $$
- 解耦为 b 个独立的"视图"，每个视图通过一个稀疏筛选器 
+ 解耦为 b 个独立的"视图"，每个视图通过一个稀疏筛选器
 $$
 F_i
 $$
- 从高维输入中提取净化后的子空间表示 
+ 从高维输入中提取净化后的子空间表示
 $$
 h_i ∈ R^{d_v}
 $$
@@ -225,29 +173,23 @@ $$
 $$
 h_i = x · B_i
 $$
- （B\_i 为二值选择矩阵，每列是one-hot向量）
+ （B_i 为二值选择矩阵，每列是one-hot向量）
 
-每个视图只是从输入中随机选取 
+每个视图只是从输入中随机选取
 $$
 d_v
 $$
  个维度，不是乘以一个稀疏矩阵，而是直接做索引切片（gather）。这意味着：
 
-●
+- 零FLOP：没有任何浮点乘加运算
 
-零FLOP：没有任何浮点乘加运算
+- 硬维度缩减：未选中的维度在物理上被排除在计算图之外
 
-●
-
-硬维度缩减：未选中的维度在物理上被排除在计算图之外
-
-●
-
-特征子空间多样性：不同视图之间独立采样，天然引入多样性
+- 特征子空间多样性：不同视图之间独立采样，天然引入多样性
 
 从矩阵运算的角度看，这一操作等价于用一个分块对角稀疏矩阵左乘扩展后的输入向量。
 
-具体构造过程如下：首先将输入 x 复制 b 份，形成扩展向量（通过Kronecker积 
+具体构造过程如下：首先将输入 x 复制 b 份，形成扩展向量（通过Kronecker积
 $$
 \mathbf{1}_b^\top \otimes \mathbf{x}
 $$
@@ -258,7 +200,7 @@ S = B_1 ⊕ B_2 ⊕ ... ⊕ B_b
 $$
  （直和，非对角区域全为零）
 
-其中每个子块 
+其中每个子块
 $$
 B_i ∈ R^{d_in × d_v}
 $$
@@ -266,17 +208,17 @@ $$
 
 ![[d2c2da24-5165-42e3-b3d1-333a51c3ed64.png]]
 
-稀疏度有多极致？ 以工业典型设置为例（d\_in ≈ 300, b = 8, d\_v = 64）：
+稀疏度有多极致？ 以工业典型设置为例（d_in ≈ 300, b = 8, d_v = 64）：
 
-每个 S\_i 的非零元素数：d\_v × 1 = 64
+每个 S_i 的非零元素数：d_v × 1 = 64
 
-整个 S 的非零元素总数：b × d\_v = 512
+整个 S 的非零元素总数：b × d_v = 512
 
-权重矩阵总元素数：b × d\_in × d\_v = 8 × 300 × 64 = 153,600
+权重矩阵总元素数：b × d_in × d_v = 8 × 300 × 64 = 153,600
 
 稀疏度 = 1 - 512/153,600 = 99.67%
 
-如果把 
+如果把
 $$
 d_{in}
 $$
@@ -286,13 +228,9 @@ $$
 
 从统计学习理论看，在推荐数据满足"特征交互以局部子集为主"的条件下，结构化稀疏可以找到一个更优的Bias-Variance operating point ：
 
-●
+- 有限预算下更优的函数逼近：Dense MLP在参数预算P下将隐层宽度限制为 h=P/d_in，在高维稀疏数据上将大量参数分散在无关交互方向，实际逼近能力受损。SSR将同样的预算集中在 b 个低维子空间上，每个子空间的交互被充分建模，这不是在无限参数意义上Dense MLP逼近不了（它的假设空间严格包含SSR），而是在有限预算下，匹配数据结构的约束反而带来更好的逼近
 
-有限预算下更优的函数逼近：Dense MLP在参数预算P下将隐层宽度限制为 h=P/d\_in，在高维稀疏数据上将大量参数分散在无关交互方向，实际逼近能力受损。SSR将同样的预算集中在 b 个低维子空间上，每个子空间的交互被充分建模，这不是在无限参数意义上Dense MLP逼近不了（它的假设空间严格包含SSR），而是在有限预算下，匹配数据结构的约束反而带来更好的逼近
-
-●
-
-更低的Variance：分块对角权重矩阵是全连接空间的强约束子集，在同等参数量下有效自由度更低
+- 更低的Variance：分块对角权重矩阵是全连接空间的强约束子集，在同等参数量下有效自由度更低
 
 前提是推荐数据的有效交互确实以局部特征子集为主。如果一个任务的标签强依赖所有维度的全局交互，SSR的分块结构反而会成为瓶颈。但第一章的权重可视化（80%能量集中在4%维度）和消融实验（去除多视图仅掉0.15-0.22pt）共同表明，推荐数据确实符合这一前提。
 
@@ -304,19 +242,19 @@ $$
 h_i = ICS_i(x · W_{proj}^i)
 $$
 
-其中 
+其中
 $$
 W_{proj}^i ∈ R^{d_in × d^*_v}
 $$
- 是每个视图的可学习投影矩阵， 
+ 是每个视图的可学习投影矩阵，
 $$
 d^*_v
 $$
- 通常大于静态策略中的 
+ 通常大于静态策略中的
 $$
 d_v
 $$
- （扩展维度以保留更多候选信号供动态筛选）。投影先把输入映射到 
+ （扩展维度以保留更多候选信号供动态筛选）。投影先把输入映射到
 $$
 d^*_v
 $$
@@ -334,11 +272,11 @@ $$
 z_i = σ(h_i · V_i + bias_i)
 $$
 
-其中 
+其中
 $$
 V_i ∈ R^{d_v × d_v}
 $$
- （静态）或 
+ （静态）或
 $$
 V_i ∈ R^{d_v^* × d_v}
 $$
@@ -352,7 +290,7 @@ LayerNorm放在拼接之前而非之后，是因为各视图的子空间统计�
 
 第二阶段本身也体现了稀疏性，但这次是参数层面的结构稀疏。
 
-整体等价于一个块对角权重矩阵 
+整体等价于一个块对角权重矩阵
 $$
 W_{block} = diag(V_1, ..., V_b)
 $$
@@ -360,9 +298,9 @@ $$
 
 ![[63fdb001-5237-47ad-9753-76f68e649384.png]]
 
-标准全连接参数量：O((b·d\_v)²)
+标准全连接参数量：O((b·d_v)²)
 
-块对角参数量： O(b·d\_v²)
+块对角参数量： O(b·d_v²)
 
 参数稀疏度： 1 - 1/b
 
@@ -380,23 +318,17 @@ $$
 
 具体来说，最后一层的处理流程如下：
 
-1.
-
-各视图独立完成稠密融合，得到各自的表示 
+1. 各视图独立完成稠密融合，得到各自的表示
 $$
 z_i
 $$
 
-2.
-
-将所有视图的输出沿视图维度取平均，得到统一的共享表示 
+2. 将所有视图的输出沿视图维度取平均，得到统一的共享表示
 $$
 \bar{z}
 $$
 
-3.
-
-基于这个共享表示 
+3. 基于这个共享表示
 $$
 \bar{z}
 $$
@@ -405,24 +337,20 @@ $$
 $$
 y_{ctr} = \sigma(W_{ctr}\bar{z} + b_{ctr})
 $$
- ， 
+ ，
 $$
 y_{cvr} = \sigma(W_{cvr}\bar{z} + b_{cvr})
 $$
 
 这种设计有几个关键考量：
 
-●
+- 多视图一致性约束：concat会保留各视图的差异性，而求平均迫使不同视图的子空间表示最终收敛到一个一致的共享语义空间，避免各视图各自为政
 
-多视图一致性约束：concat会保留各视图的差异性，而求平均迫使不同视图的子空间表示最终收敛到一个一致的共享语义空间，避免各视图各自为政
-
-●
-
-预测头的参数效率：如果最后一层仍用concat，预测head的输入维度将是 
+- 预测头的参数效率：如果最后一层仍用concat，预测head的输入维度将是
 $$
 b \times d_v
 $$
- ，参数量随视图数线性增长。改为平均后，预测head的输入维度固定为 
+ ，参数量随视图数线性增长。改为平均后，预测head的输入维度固定为
 $$
 d_v
 $$
@@ -432,13 +360,9 @@ $$
 
 传统的动态稀疏化通常依赖Top-k操作，但Top-k面临两个根本困难：
 
-1.
+1. 不可微：离散选择操作无法直接反向传播，通常需要STE（Straight-Through Estimator），但STE引入的梯度不一致会在训练中累积误差
 
-不可微：离散选择操作无法直接反向传播，通常需要STE（Straight-Through Estimator），但STE引入的梯度不一致会在训练中累积误差
-
-2.
-
-计算瓶颈：排序操作的复杂度为 
+2. 计算瓶颈：排序操作的复杂度为
 $$
 O(N log N)
 $$
@@ -452,7 +376,7 @@ ICS将稀疏化问题重新表述为一个离散时间非线性动态系统：
 
 μ^(t) = Mean(x^(t)) // 全局抑制场
 
-x^(t+1) = ReLU(x^(t) - α\_t · μ^(t)) // 适者生存
+x^(t+1) = ReLU(x^(t) - α_t · μ^(t)) // 适者生存
 
 信号恢复：y = γ ⊙ x^(T)
 
@@ -464,15 +388,11 @@ x^(t+1) = ReLU(x^(t) - α\_t · μ^(t)) // 适者生存
 
 实验也印证了这一点（Table 5）：
 
-●
+- T=1时，稀疏度仅76.4%，AUC=0.7821
 
-T=1时，稀疏度仅76.4%，AUC=0.7821
+- T=5时，稀疏度达到91.0%，AUC=0.7835
 
-●
-
-T=5时，稀疏度达到91.0%，AUC=0.7835
-
-关于信号恢复：由于每步竞争都使总能量单调递减 
+关于信号恢复：由于每步竞争都使总能量单调递减
 $$
 （ |x^{t+1}|_1 ≤ |x^{t}|_1 ）
 $$
@@ -504,17 +424,11 @@ SSR的最终形态不是一步到位的。在早期版本阶段，我们对这�
 
 几个值得注意的点：
 
-1.
+1. SSR-S用56%的参数和44%的FLOPs就超越了RankMixer，增益来自架构而非参数量
 
-SSR-S用56%的参数和44%的FLOPs就超越了RankMixer，增益来自架构而非参数量
+2. SSR-D在相近计算预算下取得了所有指标的最佳表现，ICS的动态稀疏确实有效
 
-2.
-
-SSR-D在相近计算预算下取得了所有指标的最佳表现，ICS的动态稀疏确实有效
-
-3.
-
-三个公开数据集（Avazu、Criteo、Alibaba）上SSR-D同样取得最优AUC（详见论文Table 2、Table 3），增益来自模型设计而非数据集特定调优
+3. 三个公开数据集（Avazu、Criteo、Alibaba）上SSR-D同样取得最优AUC（详见论文Table 2、Table 3），增益来自模型设计而非数据集特定调优
 
 ### 6.2 Scaling实验
 
@@ -522,17 +436,11 @@ SSR-D在相近计算预算下取得了所有指标的最佳表现，ICS的动态
 
 这张图展示了：
 
-●
+- Dense MLP在参数增大后迅速饱和，加再多参数也"喂不进去"
 
-Dense MLP在参数增大后迅速饱和，加再多参数也"喂不进去"
+- Wukong和RankMixer比Dense MLP好一些，但scaling曲线仍在趋于平缓
 
-●
-
-Wukong和RankMixer比Dense MLP好一些，但scaling曲线仍在趋于平缓
-
-●
-
-SSR-D在整个参数范围内保持了持续上升的趋势，在接近900M参数时依然在有效利用额外容量
+- SSR-D在整个参数范围内保持了持续上升的趋势，在接近900M参数时依然在有效利用额外容量
 
 这证实了论文的核心命题：稀疏筛选打破了密集架构的scaling天花板。
 
@@ -544,49 +452,31 @@ SSR-D在整个参数范围内保持了持续上升的趋势，在接近900M参�
 
 去除稀疏筛选（直接暴露全维输入给稠密块）：工业数据集AUC下降0.37pt，这是最大的单一因素
 
-●
+- 用Dropout替代稀疏筛选：AUC下降0.45pt，证明增益不是来自正则化
 
-用Dropout替代稀疏筛选：AUC下降0.45pt，证明增益不是来自正则化
-
-●
-
-用STE Top-k替代ICS：AUC下降0.29pt，验证了可微竞争机制在训练过程的优势
+- 用STE Top-k替代ICS：AUC下降0.29pt，验证了可微竞争机制在训练过程的优势
 
 ![[75165aab-c560-4b7d-978a-d6843d4b4f0f.png]]
 
 上图展示了ICS在训练过程中的行为：
 
-●
+- Layer 1收敛到约75%的稀疏度，Layer 2达到约90%
 
-Layer 1收敛到约75%的稀疏度，Layer 2达到约90%
+- 这种层级递增的稀疏性非常符合直觉：浅层保留更多原始信息，深层做更激进的筛选
 
-●
-
-这种层级递增的稀疏性非常符合直觉：浅层保留更多原始信息，深层做更激进的筛选
-
-●
-
-后期稀疏度稳定，说明模型找到了稳定的特征选择策略而非反复切换
+- 后期稀疏度稳定，说明模型找到了稳定的特征选择策略而非反复切换
 
 ### 6.4 线上A/B测试
 
 在AliExpress核心推荐场景的两周A/B测试中：
 
-●
+- CTR +2.1%
 
-CTR +2.1%
+- 人均订单量 +3.2%
 
-●
+- GMV +3.5%
 
-人均订单量 +3.2%
-
-●
-
-GMV +3.5%
-
-●
-
-延迟仅增加1ms（26ms vs 25ms）
+- 延迟仅增加1ms（26ms vs 25ms）
 
 ## 七、更深层的理解：为什么是"稀疏"？
 
@@ -622,21 +512,13 @@ SSR的显式稀疏架构则将"只有少数特征子集的交互是有效的"这
 
 这篇论文也留下一些开放问题：
 
-1.
+1. ICS的迭代次数T：目前设为5，但不同层/不同数据分布是否需要不同的T？自适应的迭代终止条件可能是一个方向。
 
-ICS的迭代次数T：目前设为5，但不同层/不同数据分布是否需要不同的T？自适应的迭代终止条件可能是一个方向。
+2. 静态与动态的融合：SSR-S和SSR-D目前是独立使用的。论文的中间文档提到了混合策略的可能性，用SSR-S做基础的结构稀疏，再用ICS做残差层面的动态调整。
 
-2.
+3. 向其他架构的推广：中间文档提到了向DSSM、Transformer等架构的扩展计划。特别是在推荐领域越来越流行的multi-modal fusion场景中，显式稀疏的Filter-then-Fuse范式是否同样有效？
 
-静态与动态的融合：SSR-S和SSR-D目前是独立使用的。论文的中间文档提到了混合策略的可能性，用SSR-S做基础的结构稀疏，再用ICS做残差层面的动态调整。
-
-3.
-
-向其他架构的推广：中间文档提到了向DSSM、Transformer等架构的扩展计划。特别是在推荐领域越来越流行的multi-modal fusion场景中，显式稀疏的Filter-then-Fuse范式是否同样有效？
-
-4.
-
-与MoE的关系：SSR的多视图架构在形式上类似MoE，但有本质区别，SSR的所有视图同时被激活并拼接输出，而MoE只激活部分专家。两者的结合（稀疏视图 + 稀疏专家路由）可能是一个有趣的方向。
+4. 与MoE的关系：SSR的多视图架构在形式上类似MoE，但有本质区别，SSR的所有视图同时被激活并拼接输出，而MoE只激活部分专家。两者的结合（稀疏视图 + 稀疏专家路由）可能是一个有趣的方向。
 
 ## 九、总结
 
@@ -646,90 +528,20 @@ ICS的迭代次数T：目前设为5，但不同层/不同数据分布是否需�
 
 ## 参考文献
 
-\[1\] Yantao Yu, Sen Qiao, Lei Shen, Bing Wang, Xiaoyi Zeng. "Beyond Dense Connectivity: Explicit Sparsity for Scalable Recommendation." SIGIR 2026.
+[1] Yantao Yu, Sen Qiao, Lei Shen, Bing Wang, Xiaoyi Zeng. "Beyond Dense Connectivity: Explicit Sparsity for Scalable Recommendation." SIGIR 2026.
 
-\[2\] Tomohiro Hayase and Kazushi Karakida. "Understanding MLP-Mixer as a Wide and Sparse MLP." ICML 2024.
+[2] Tomohiro Hayase and Kazushi Karakida. "Understanding MLP-Mixer as a Wide and Sparse MLP." ICML 2024.
 
-\[3\] Ilya Tolstikhin, Neil Houlsby, Alexander Kolesnikov, Lucas Beyer, Xiaohua Zhai, Thomas Unterthiner, Jessica Yung, Andreas Steiner, Daniel Keysers, Jakob Uszkoreit, Mario Lucic, and Alexey Dosovitskiy. "MLP-Mixer: An all-MLP Architecture for Vision." NeurIPS 2021.
+[3] Ilya Tolstikhin, Neil Houlsby, Alexander Kolesnikov, Lucas Beyer, Xiaohua Zhai, Thomas Unterthiner, Jessica Yung, Andreas Steiner, Daniel Keysers, Jakob Uszkoreit, Mario Lucic, and Alexey Dosovitskiy. "MLP-Mixer: An all-MLP Architecture for Vision." NeurIPS 2021.
 
-\[5\] Jie Zhu, Zhifang Fan, et al. "RankMixer: Scaling up Ranking Models in Industrial Recommenders." CIKM 2025.
+[5] Jie Zhu, Zhifang Fan, et al. "RankMixer: Scaling up Ranking Models in Industrial Recommenders." CIKM 2025.
 
-\[6\] Buyun Zhang, Liang Luo, Yuxin Chen, et al. "Wukong: Towards a Scaling Law for Large-Scale Recommendation." arXiv 2024.
+[6] Buyun Zhang, Liang Luo, Yuxin Chen, et al. "Wukong: Towards a Scaling Law for Large-Scale Recommendation." arXiv 2024.
 
-\[7\] Ruoxi Wang, Rakesh Shivanna, Derek Cheng, et al. "DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-Scale Learning to Rank Systems." WWW 2021.
+[7] Ruoxi Wang, Rakesh Shivanna, Derek Cheng, et al. "DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-Scale Learning to Rank Systems." WWW 2021.
 
-\[8\] Huifeng Guo, Ruiming Tang, Yunming Ye, et al. "DeepFM: A Factorization-Machine Based Neural Network for CTR Prediction." IJCAI 2017.
+[8] Huifeng Guo, Ruiming Tang, Yunming Ye, et al. "DeepFM: A Factorization-Machine Based Neural Network for CTR Prediction." IJCAI 2017.
 
-\[9\] Heng-Tze Cheng, Levent Koc, et al. "Wide & Deep Learning for Recommender Systems." DLRS 2016.
+[9] Heng-Tze Cheng, Levent Koc, et al. "Wide & Deep Learning for Recommender Systems." DLRS 2016.
 
-\[10\] Weiping Song, Chence Shi, et al. "AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks." CIKM 2019.
-
-END
-
-前言：探索排序大模型的另一种解法
-
-一、从一个反直觉的现象说起
-
-二、核心思想：从"隐式权重抑制"到"显式信号筛选"
-
-2.1 Dense MLP的问题
-
-2.2 隐式稀疏 vs 显式稀疏
-
-2.2.1 RankMixer的Mixer操作：另一种稀疏矩阵视角
-
-2.3 核心范式：先筛选，再融合（Filter-then-Fuse）
-
-三、SSR的架构设计：两阶段级联
-
-3.1 第一阶段：多视图稀疏筛选
-
-策略一：SSR-S：Static Random Filter 零FLOP的物理稀疏
-
-策略二：SSR-D（Iterative Competitive Sparse, ICS） 动态的可微稀疏
-
-3.2 第二阶段：视图内稠密融合
-
-3.3 多层堆叠与最后一层的特殊处理
-
-四、ICS：把Top-k重新想象为生态竞争
-
-五、从中间过程看设计演化
-
-六、实验
-
-6.1 核心结果
-
-6.2 Scaling实验
-
-6.3 消融实验的洞察
-
-6.4 线上A/B测试
-
-七、更深层的理解：为什么是"稀疏"？
-
-7.1 推荐系统与NLP/CV的根本差异
-
-7.2 隐式稀疏与显式稀疏的边界
-
-8.3 稀疏性作为归纳偏置对齐
-
-八、局限与展望
-
-九、总结
-
-参考文献
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[10] Weiping Song, Chence Shi, et al. "AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks." CIKM 2019.

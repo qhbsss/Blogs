@@ -8,35 +8,12 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-淘宝闪购
-
-粉丝 0影响力 14
-
-**
-
-** 1
-
-**
-
-** 原创文章
-
 AI 辅助创作 **
 
-[姬鹏举(之禺)](https://ata.atatech.org/users/11001692248)
 
-4月14日发表38次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
-
-** 分享 **
-
-朗读文章10:23
-
-**
 
 ## Playwright Web Scraper Skill 使用说明
 
@@ -44,12 +21,12 @@ AI 辅助创作 **
 
 ### 写在前面
 
-作为一名身处总部中台的运营同学，我的日常往往被大量的数据核对、竞品监测和信息搜集所占据。坦白说，我的 Coding 能力仅限于“Hello World”水平，面对那些需要登录、点击、滚动加载的动态网页，过去我只能选择最原始的方式——人工手动截图、复制、粘贴。这不仅效率低下，更挤占了我用于深度思考和业务策略规划的时间。  
+作为一名身处总部中台的运营同学，我的日常往往被大量的数据核对、竞品监测和信息搜集所占据。坦白说，我的 Coding 能力仅限于“Hello World”水平，面对那些需要登录、点击、滚动加载的动态网页，过去我只能选择最原始的方式——人工手动截图、复制、粘贴。这不仅效率低下，更挤占了我用于深度思考和业务策略规划的时间。
 这次介绍的 playwright-web-scraper Skill，正是我在这个问题上的一个务实探索。它不需要我精通 Python 或 JavaScript，而是通过“录制-回放”的直观方式，将复杂的网页交互转化为可重复执行的自动化脚本。这篇文章不谈高深的架构设计，只想从一个普通运营同学的视角，分享如何利用这个工具，把重复劳动交给机器，把创造力还给自己。
 
 ### 概述
 
-Playwright Web Scraper 是一个基于 Playwright Python 库的自动化网页爬虫 Skill，专为 QoderWork 平台设计。它帮助用户通过浏览器自动化的方式抓取网页数据，尤其擅长处理需要交互操作（如点击、填写表单、滚动加载）的动态页面。该 Skill 还集成了 Playwright 的 codegen 录制功能，允许用户通过可视化操作直接生成爬虫脚本，大幅降低编写爬虫的门槛。  
+Playwright Web Scraper 是一个基于 Playwright Python 库的自动化网页爬虫 Skill，专为 QoderWork 平台设计。它帮助用户通过浏览器自动化的方式抓取网页数据，尤其擅长处理需要交互操作（如点击、填写表单、滚动加载）的动态页面。该 Skill 还集成了 Playwright 的 codegen 录制功能，允许用户通过可视化操作直接生成爬虫脚本，大幅降低编写爬虫的门槛。
 适合非技术向同学的
 
 ### 适用场景
@@ -62,10 +39,8 @@ Playwright Web Scraper 是一个基于 Playwright Python 库的自动化网页�
 
 使用前需确保本地安装了 Python 3.7+ 和 pip。首次使用时运行以下命令安装 Playwright 及其浏览器驱动：
 
-```bash
 pip3 install playwright
 python3 -m playwright install
-```
 
 安装完成后可通过 `python3 -m playwright --version` 验证是否安装成功。
 
@@ -73,7 +48,6 @@ python3 -m playwright install
 
 整个 Skill 包含以下文件：
 
-```
 playwright-web-scraper/
 ├── SKILL.md                              # 核心指令文件，定义 Skill 的工作流程和行为规范
 ├── references/
@@ -83,7 +57,6 @@ playwright-web-scraper/
     ├── pagination_scraper.py             # 分页列表抓取模板
     ├── form_scraper.py                   # 表单筛选后抓取模板
     └── dynamic_content_scraper.py        # 动态内容/无限滚动抓取模板
-```
 
 ### 核心工作流程
 
@@ -93,9 +66,7 @@ playwright-web-scraper/
 
 **第二阶段：录制操作。** 通过 Playwright 的 codegen 工具打开目标网页，你在浏览器中手动执行所有操作（点击、输入、翻页等），工具会实时录制并生成对应的 Python 代码。录制命令为：
 
-```bash
 python3 -m playwright codegen --target python <目标URL>
-```
 
 录制时请注意：操作尽量放慢以保证录制完整；在输入密码等敏感信息时暂停录制；页面跳转后等待加载完毕再进行下一步；如果页面涉及分页、筛选器或动态加载元素，建议在录制过程中也执行一遍这些操作以确保生成的代码覆盖完整流程。
 
@@ -107,19 +78,19 @@ python3 -m playwright codegen --target python <目标URL>
 
 ### 四大模板详解
 
-#### 表格抓取模板（table\_scraper.py）
+#### 表格抓取模板（table_scraper.py）
 
 适用于页面上有 HTML `<table>` 标签的数据表格。该模板自动定位表格元素，逐行提取所有单元格文本，支持导出为 JSON 或 CSV 格式。使用时只需替换目标 URL 和表格选择器即可。
 
-#### 分页抓取模板（pagination\_scraper.py）
+#### 分页抓取模板（pagination_scraper.py）
 
 适用于数据分布在多个分页中的列表页面。模板会自动点击"下一页"按钮并累积数据，支持设置最大翻页数以防止无限循环。当检测到下一页按钮不可用或不存在时自动停止。
 
-#### 表单筛选抓取模板（form\_scraper.py）
+#### 表单筛选抓取模板（form_scraper.py）
 
 适用于需要先设置筛选条件（日期、下拉框、输入框等）再提取数据的看板或报表页面。模板支持通过字典方式传入多组筛选条件，自动识别输入框类型（ `<select>` 、 `<input>` 或自定义组件）并分别处理。
 
-#### 动态内容抓取模板（dynamic\_content\_scraper.py）
+#### 动态内容抓取模板（dynamic_content_scraper.py）
 
 适用于使用无限滚动或 AJAX 异步加载的页面。提供两种抓取策略：一是模拟滚动到底部并等待新内容加载，循环直到没有更多数据为止（设有最大滚动次数保护）；二是直接拦截页面的 API 请求，从响应中获取结构化 JSON 数据，这种方式通常更高效且更稳定。
 
@@ -164,55 +135,3 @@ python3 -m playwright codegen --target python <目标URL>
 - "帮我录制一个爬虫脚本"
 - "Scrape data from this website for me"
 - "Record a browser automation script"
-
-END
-
-Playwright Web Scraper Skill 使用说明
-
-写在前面
-
-概述
-
-适用场景
-
-环境要求与安装
-
-文件结构
-
-核心工作流程
-
-四大模板详解
-
-表格抓取模板（table\_scraper.py）
-
-分页抓取模板（pagination\_scraper.py）
-
-表单筛选抓取模板（form\_scraper.py）
-
-动态内容抓取模板（dynamic\_content\_scraper.py）
-
-登录状态管理
-
-快速参考手册
-
-输出格式支持
-
-安全与合规提醒
-
-常见问题与解决方案
-
-触发示例
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

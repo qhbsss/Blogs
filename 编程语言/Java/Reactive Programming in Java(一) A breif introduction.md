@@ -10,48 +10,30 @@ tags:
 ---
 阿里健康
 
-勋章
 
-粉丝 49影响力 826
 
-** 17
 
-** 26
 
-** 7
 
-** 原创文章
 
-发表到圈儿
 
-[阿里健康技术](https://ata.atatech.org/community/team/186) / [中间件](https://ata.atatech.org/community/team/186?cid=1253) (首发)
 
-**
-
-[刘金龙(诗翁)](https://ata.atatech.org/users/11000276723)
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-`Reactive Programming` 会越来越主流,但并不是特别容易理解,网上的文章也良莠不齐,甚至还要很多错误,所以准备写一个系列,介绍 Java 生态里 `Reactive Programming` 的方方面面,由于能力有限,文中难免有所疏漏,欢迎大家挑刺.  
+`Reactive Programming` 会越来越主流,但并不是特别容易理解,网上的文章也良莠不齐,甚至还要很多错误,所以准备写一个系列,介绍 Java 生态里 `Reactive Programming` 的方方面面,由于能力有限,文中难免有所疏漏,欢迎大家挑刺.
 本篇是该系列的第一篇,主要从宏观方面介绍 Reactive Programming,让大家对它的一系列概念有一个整体上的认知.(读后面的参考文献效果比读本文效果好的多...)
 
 ## 术语
 
-为了方便,先来说几个缩写,后文说到相关概念就直接用缩写了.  
+为了方便,先来说几个缩写,后文说到相关概念就直接用缩写了.
 RP: [Reactive Programming](https://en.m.wikipedia.org/wiki/Reactive_programming)
 
 FP: [Functional Programming](https://en.m.wikipedia.org/wiki/Functional_programming)
 
-FRP:[Functional Reactive Programming](https://en.m.wikipedia.org/wiki/Functional_reactive_programming).  
+FRP:[Functional Reactive Programming](https://en.m.wikipedia.org/wiki/Functional_reactive_programming).
 先看下维基的定义:
 
-Functional reactive programming (FRP) is a programming paradigm for reactive programming (asynchronous dataflow programming) using the building blocks of functional programming (e.g. map, reduce, filter).  
-看起来好像是采用了函数式编程的异步编程就是 FRP, 但是学术界貌似对此争议很大,我们不用太过纠结这个区别,但是在使用和讨论的时候还是要稍微注意一下,详细了解可以看下面两个链接.  
-[https://stackoverflow.com/questions/5385377/the-difference-between-reactive-and-functional-reactive-programming](https://stackoverflow.com/questions/5385377/the-difference-between-reactive-and-functional-reactive-programming)  
+Functional reactive programming (FRP) is a programming paradigm for reactive programming (asynchronous dataflow programming) using the building blocks of functional programming (e.g. map, reduce, filter).
+看起来好像是采用了函数式编程的异步编程就是 FRP, 但是学术界貌似对此争议很大,我们不用太过纠结这个区别,但是在使用和讨论的时候还是要稍微注意一下,详细了解可以看下面两个链接.
+[https://stackoverflow.com/questions/5385377/the-difference-between-reactive-and-functional-reactive-programming](https://stackoverflow.com/questions/5385377/the-difference-between-reactive-and-functional-reactive-programming)
 [http://conal.net/blog/posts/early-inspirations-and-new-directions-in-functional-reactive-programming](http://conal.net/blog/posts/early-inspirations-and-new-directions-in-functional-reactive-programming)
 
 ## What is Reactive Programming
@@ -60,11 +42,11 @@ Functional reactive programming (FRP) is a programming paradigm for reactive pro
 
 Reactive Streams is an initiative to provide a standard for asynchronous stream processing with non-blocking back pressure.
 
-从这里我们基本可以看出RP两个最重要的概念:`asynchronous` 和 `back pressure`.  
-RP就是通过生产者消费者模型异步的处理数据和控制数据流动.生产者,消费者和异步是大家耳熟能详的概念,不细说,这里着重讨论一下 `back pressure`,它的中文翻译是背压,无论从中文还是英文我们都没办法从字面上直观的理解出它的意思.网上对它的理解莫衷一是,我也没找到这个概念的源头,下面是我的一些理解:  
+从这里我们基本可以看出RP两个最重要的概念:`asynchronous` 和 `back pressure`.
+RP就是通过生产者消费者模型异步的处理数据和控制数据流动.生产者,消费者和异步是大家耳熟能详的概念,不细说,这里着重讨论一下 `back pressure`,它的中文翻译是背压,无论从中文还是英文我们都没办法从字面上直观的理解出它的意思.网上对它的理解莫衷一是,我也没找到这个概念的源头,下面是我的一些理解:
 大部分异步编程包括RP可以抽象成生产者消费者模式,生产者提交任务给消费者,消费者处理任务.当生产者提交任务的速度小于消费者处理任务的速度时,系统可以正常的运行,但是当提交任务的速度大于处理任务的速度时.`pressure` 出现了.传统的异步模型,比如我们最熟悉的 MQ, 是将这个 `pressure` 放到消费者那端,即生产者只要有任务就提交,那些处理不了的任务交给消费者处理,消费者可以缓存,也可以丢弃.线程池的任务队列和 `RejectedExecutionHandler` 就是最典型的在消费者端处理的例子.而 RP里是把这个 `pressure` 施加到生产者端,消费者告诉生产者自己能处理的极限,生产者每次都给消费者那么多数据,多余的数据则由生产者去处理,比如降低生产速度,缓存,丢弃等.仔细想一下,把这个压力放在生产端要比放在消费端处理更合理,有一些控制,比如降低生产速度,只有生产端才能完成.
 
-上面其实将 `back pressure` 和处理策略杂糅在一起说了,下面我们说下各种文献里对 `back pressure` 的定义,有的地方将把 `pressure` 交给生产者处理叫 `back pressure`,这个也符合 `back pressure` 在工程学上的定义(回压,反向压力),有的人信誓旦旦的说当设置了 buffer, 并且超过了 buffer 上限才叫 `back pressure`,也有的人认为只有限制生产者的速度这种处理方式才是 `back pressure`.我的理解是生产的速度大于消费的速度产生的 `pressure` 就是 `back pressure`,这个 `back` 和 `backlog` 里的 `back` 有相似的含义,代表积压,也就是由于处理不及时而积聚的压力,至于是把它给消费者还是给生产者,是 `buffer` 还是 `throttling` 还是 `sample`,都是处理这种 `pressure` 的一个策略.  
+上面其实将 `back pressure` 和处理策略杂糅在一起说了,下面我们说下各种文献里对 `back pressure` 的定义,有的地方将把 `pressure` 交给生产者处理叫 `back pressure`,这个也符合 `back pressure` 在工程学上的定义(回压,反向压力),有的人信誓旦旦的说当设置了 buffer, 并且超过了 buffer 上限才叫 `back pressure`,也有的人认为只有限制生产者的速度这种处理方式才是 `back pressure`.我的理解是生产的速度大于消费的速度产生的 `pressure` 就是 `back pressure`,这个 `back` 和 `backlog` 里的 `back` 有相似的含义,代表积压,也就是由于处理不及时而积聚的压力,至于是把它给消费者还是给生产者,是 `buffer` 还是 `throttling` 还是 `sample`,都是处理这种 `pressure` 的一个策略.
 具体那种说法对,大家还是自行阅读参考文献判断吧,别被我带到沟里去.也欢迎大家留言讨论.
 
 ## Reactive Programming的优劣
@@ -108,7 +90,7 @@ Netflix在2014年开发,有 JavaScript, Ruby, C#, Scala, C++, Java等语言的�
 
 ### Akka Streams
 
-Akka 是 Scala家族的杀手级应用,采用 actor 模式的消息驱动的异步编程框架.  
+Akka 是 Scala家族的杀手级应用,采用 actor 模式的消息驱动的异步编程框架.
 Akka Streams 实现了Reactive Streams 的接口去传送数据,但是它却完全和它们不耦合,即使用者在使用的时候根本发现不了Reactive Streams的接口,它( akka stream)提供了更好的 API.
 
 ### vert.x
@@ -121,7 +103,7 @@ Eclipse 开源的非常主流的异步编程框架,有多种语言实现.
 
 ## AD Time
 
-国际惯例,给我们的读书群\[独来读往\]打个广告,欢迎喜欢读书的小伙伴加入我们,一起交流,一起成长.详见  
+国际惯例,给我们的读书群[独来读往]打个广告,欢迎喜欢读书的小伙伴加入我们,一起交流,一起成长.详见
 [https://lark.alipay.com/growth/notes/zdu5a4](https://lark.alipay.com/growth/notes/zdu5a4)
 
 ## 后记
@@ -130,50 +112,8 @@ Eclipse 开源的非常主流的异步编程框架,有多种语言实现.
 
 ## 参考文献
 
-[https://spring.io/blog/2016/04/19/understanding-reactive-types](https://spring.io/blog/2016/04/19/understanding-reactive-types)  
-[https://github.com/reactive-streams/reactive-streams-jvm/tree/v1.0.2#specification](https://github.com/reactive-streams/reactive-streams-jvm/tree/v1.0.2#specification)  
-[https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape](https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape)  
-[https://akarnokd.blogspot.co.uk/2016/03/operator-fusion-part-1.html](https://akarnokd.blogspot.co.uk/2016/03/operator-fusion-part-1.html)  
+[https://spring.io/blog/2016/04/19/understanding-reactive-types](https://spring.io/blog/2016/04/19/understanding-reactive-types)
+[https://github.com/reactive-streams/reactive-streams-jvm/tree/v1.0.2#specification](https://github.com/reactive-streams/reactive-streams-jvm/tree/v1.0.2#specification)
+[https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape](https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape)
+[https://akarnokd.blogspot.co.uk/2016/03/operator-fusion-part-1.html](https://akarnokd.blogspot.co.uk/2016/03/operator-fusion-part-1.html)
 [https://github.com/ReactiveX/RxJava/wiki/Backpressure](https://github.com/ReactiveX/RxJava/wiki/Backpressure)
-
-END
-
-术语
-
-What is Reactive Programming
-
-Reactive Programming的优劣
-
-优势
-
-劣势
-
-Reactive Programming in reality
-
-Java9 Reactive
-
-RxJava
-
-Project Reactor
-
-Akka Streams
-
-vert.x
-
-其它
-
-AD Time
-
-后记
-
-参考文献
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

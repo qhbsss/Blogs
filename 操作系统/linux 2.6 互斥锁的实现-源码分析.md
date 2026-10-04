@@ -14,7 +14,7 @@ Linux 2.6 kernel的源码，下面结合代码来分析一下在X86体系结构�
 
 ##### 1\. 首先介绍一下互斥锁所使用的数据结构：
 
-```cpp
+```java
 struct mutex {
    atomic_t  count; //引用计数器,1: 所可以利用,小于等于0：该锁已被获取，需要等待
    spinlock_t  wait_lock;//自旋锁类型，保证多cpu下，对等待队列访问是安全的。
@@ -25,19 +25,14 @@ struct mutex {
 
 ##### 2\. 互斥锁加锁函数
 
-```csharp
 void inline __sched mutex_lock(struct mutex *lock)
-```
 
 调用了宏：
 
-```csharp
 __mutex_fastpath_lock(&lock->count, __mutex_lock_slowpath);
-```
 
-宏的定义：将mutex数据结构中，引用计数器减1，如果不为负数就返回，如果为负数，需要调用函数：\_\_mutex\_lock\_slowpath，接下来我们再来分析这个函数，我们先来分析一下这个宏。
+宏的定义：将mutex数据结构中，引用计数器减1，如果不为负数就返回，如果为负数，需要调用函数：__mutex_lock_slowpath，接下来我们再来分析这个函数，我们先来分析一下这个宏。
 
-```cpp
 #define __mutex_fastpath_lock(count, fail_fn)  /
 do {        /
    unsigned int dummy;    /
@@ -54,11 +49,10 @@ do {        /
    : "a" (count)    /
    : "memory", "ecx", "edx");  /
 } while (0)
-```
 
 ##### 3\. 回调函数
 
-```csharp
+```java
 static noinline int __sched __mutex_lock_killable_slowpath(atomic_t *lock_count)
 {
 //通过结构的成员地址，获取该结构地址
@@ -70,7 +64,7 @@ static noinline int __sched __mutex_lock_killable_slowpath(atomic_t *lock_count)
 
 ##### 4\. 阻塞进程真正获取锁的地方
 
-```csharp
+```java
 static inline int __sched
 __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,unsigned long ip)
 {
@@ -118,7 +112,9 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,unsign
        spin_lock_mutex(&lock->wait_lock, flags);
    }
    //表示已经获取了锁
+```
    done:
+```java
    lock_acquired(&lock->dep_map);
    //将该任务从等待队列中删除
    mutex_remove_waiter(lock, &waiter, task_thread_info(task));
@@ -134,17 +130,16 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,unsign
 
 ##### 5\. 解锁过程
 
-```csharp
+```java
 void __sched mutex_unlock(struct mutex *lock)
 {
    //解锁后lock->count将从0变为1
    __mutex_fastpath_unlock(&lock->count,__mutex_unlock_slowpath);
 }
+
+//该宏是对引用计数器实行加1操作，如果加后小于等于0，说明该等待队列上还有任务需要获取锁。调用__mutex_unlock_slowpath函数。
 ```
 
-//该宏是对引用计数器实行加1操作，如果加后小于等于0，说明该等待队列上还有任务需要获取锁。调用\_\_mutex\_unlock\_slowpath函数。
-
-```cpp
 #define __mutex_fastpath_unlock(count, fail_fn)  /
 do {        /
    unsigned int dummy;    /
@@ -160,19 +155,16 @@ do {        /
        : "a" (count)    /
        : "memory", "ecx", "edx");  /
 } while (0)
-```
 
-//该函数调用了\_\_mutex\_unlock\_slowpath函数。
+```java
+//该函数调用了__mutex_unlock_slowpath函数。
 
-```cpp
 static noinline void
 __mutex_unlock_slowpath(atomic_t *lock_count)
 {
    __mutex_unlock_common_slowpath(lock_count, 1);
 }
-```
 
-```csharp
 static inline void
 __mutex_unlock_common_slowpath(atomic_t *lock_count, int nested)
 {

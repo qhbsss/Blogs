@@ -8,39 +8,10 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-淘天集团
-
-粉丝 8影响力 158
-
-** 5
-
-** 5
-
-** 2
-
-** 原创文章
-
-**
-
-[唐辉(淡月)](https://ata.atatech.org/users/11001028505)
-
-3月18日发表3月18日更新81次浏览
-
-** 朗读
-
-** 字号
-
-** 笔记
-
-** 分享 **
-
-朗读文章04:33
-
 Powered by 通义语音合成
 
 通义语音合成
 
-**
 
 ## 背景
 
@@ -66,21 +37,21 @@ ls -la $(which openclaw)
 
 返回：
 
-lrwxr-xr-x@ 1 danyue staff 41 3 18 14:20 /Users/danyue/.nvs/node/24.12.0/arm64/bin/openclaw ->../lib/node\_modules/openclaw/openclaw.mjs
+lrwxr-xr-x@ 1 danyue staff 41 3 18 14:20 /Users/danyue/.nvs/node/24.12.0/arm64/bin/openclaw ->../lib/node_modules/openclaw/openclaw.mjs
 
 所以真正的源码目录在这里：
 
-/Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
+/Users/danyue/.nvs/node/24.12.0/arm64/lib/node_modules/openclaw
 
 把这个目录用 VSCode 打开，就可以开始调试了。
 
 类似
 
-qoder /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
+qoder /Users/danyue/.nvs/node/24.12.0/arm64/lib/node_modules/openclaw
 
 或者
 
-code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
+code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node_modules/openclaw
 
 > 如果没有code指令 可以参考
 
@@ -104,7 +75,7 @@ code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
 
 "version": "0.2.0",
 
-"configurations": \[
+"configurations": [
 
 {
 
@@ -114,33 +85,33 @@ code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
 
 "request": "launch",
 
-"program": "/Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw/openclaw.mjs",
+"program": "/Users/danyue/.nvs/node/24.12.0/arm64/lib/node_modules/openclaw/openclaw.mjs",
 
-"args": \["gateway"\],
+"args": ["gateway"],
 
 "runtimeExecutable": "/Users/danyue/.nvs/node/24.12.0/arm64/bin/node",
 
 "env": {
 
-"OPENCLAW\_SKIP\_CHANNELS": "0",
+"OPENCLAW_SKIP_CHANNELS": "0",
 
-"OPENCLAW\_GATEWAY\_TOKEN": "7cad9a0099aa5b63c0ebe48959b5da1e6622d9c80492a6c7"
+"OPENCLAW_GATEWAY_TOKEN": "7cad9a0099aa5b63c0ebe48959b5da1e6622d9c80492a6c7"
 
 },
 
-"resolveSourceMapLocations": \[
+"resolveSourceMapLocations": [
 
-"${workspaceFolder}/\*\*",
+"${workspaceFolder}/**",
 
-"!\*\*/node\_modules/\*\*"
+"!**/node_modules/**"
 
-\],
+],
 
-"skipFiles": \[
+"skipFiles": [
 
-"<node\_internals>/\*\*"
+"<node_internals>/**"
 
-\],
+],
 
 "console": "integratedTerminal",
 
@@ -148,7 +119,7 @@ code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
 
 }
 
-\]
+]
 
 }
 
@@ -156,21 +127,13 @@ code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
 
 几点说明：
 
-●
+- `program` 指向 openclaw 的入口文件
 
-`program` 指向 openclaw 的入口文件
+- `args` 是传给 openclaw 的参数，这里用的是 `gateway` 子命令
 
-●
+- `env` 里放了一些环境变量，根据你的实际情况调整
 
-`args` 是传给 openclaw 的参数，这里用的是 `gateway` 子命令
-
-●
-
-`env` 里放了一些环境变量，根据你的实际情况调整
-
-●
-
-`sourceMaps` 开启后可以在 TypeScript 源码里打断点
+- `sourceMaps` 开启后可以在 TypeScript 源码里打断点
 
 配置好后，按 F5 或者点击左侧调试图标里的「Debug OpenClaw Gateway」就可以启动了。
 
@@ -199,23 +162,3 @@ code /Users/danyue/.nvs/node/24.12.0/arm64/lib/node\_modules/openclaw
 文档： [https://docs.openclaw.ai/zh-CN](https://docs.openclaw.ai/zh-CN)
 
 deepwiki: [https://deepwiki.com/openclaw/openclaw](https://deepwiki.com/openclaw/openclaw)
-
-END
-
-背景
-
-找到源代码
-
-配置 VSCode 调试
-
-相关可交叉参考地址
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

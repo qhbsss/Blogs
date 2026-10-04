@@ -10,65 +10,18 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 3.0k影响力 25k
 
-**
 
-**
 
-**
 
-** 原创文章
 
-** AI辅助创作 50%
-
-发表到圈儿
-
-[ATA之家](https://ata.atatech.org/community/group/45) (首发)
-
-[智能引擎技术](https://ata.atatech.org/community/group/271)
-
-[AI Agent前沿技术交流圈](https://ata.atatech.org/community/group/1000154)
-
-[AI 提效俱乐部](https://ata.atatech.org/community/group/1000096)
-
-[AI情报社](https://ata.atatech.org/community/group/1000072)
-
-[悦读社](https://ata.atatech.org/community/group/3446)
-
-[AIGC-AI内容生成ChatGPT爱好者](https://ata.atatech.org/community/group/3432)
-
-[翰林院](https://ata.atatech.org/community/group/3390)
-
-[蚂蚁数据智能](https://ata.atatech.org/community/group/3310)
-
-[AI特派员](https://ata.atatech.org/community/group/2571)
-
-[数据那点事儿](https://ata.atatech.org/community/group/647)
-
-[阿里巴巴算法大学](https://ata.atatech.org/community/group/152)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
-[姜剑(飞樰)](https://ata.atatech.org/users/11000429133)
 
 54 分钟前发表50次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 背景
 
@@ -94,21 +47,13 @@ tags:
 
 相比 DeepSeek Harness 将所有组件都彻底抽象成插件的形式，Codex 其实还没到那种程度，它只是在代码层面把每一块都分成了一个独立的 Crate。这里面有几个比较关键的 Crate 可以介绍一下：
 
-●
+- codex-core：这是最核心的部分，包含了 Agent 运行最主要的几个环节，比如 Session、主 Loop、工具执行、上下文管理与压缩等等，都在这个 Core 里面运行。
 
-codex-core：这是最核心的部分，包含了 Agent 运行最主要的几个环节，比如 Session、主 Loop、工具执行、上下文管理与压缩等等，都在这个 Core 里面运行。
+- codex-protocol：指的是数据定义层。比如用户的动作被称为 Op（操作），模型 Agent 的操作被称为 Event，还有 Response Item 等模型回复内容，它维护了整个系统底层的一套协议。
 
-●
+- codex-api：也就是模型的 API 层，封装了 OpenAI 的 Response API，包括 HTTP 和 WebSocket 这两种传输协议。
 
-codex-protocol：指的是数据定义层。比如用户的动作被称为 Op（操作），模型 Agent 的操作被称为 Event，还有 Response Item 等模型回复内容，它维护了整个系统底层的一套协议。
-
-●
-
-codex-api：也就是模型的 API 层，封装了 OpenAI 的 Response API，包括 HTTP 和 WebSocket 这两种传输协议。
-
-●
-
-codex-app-server：可以叫协议服务层。整个 Codex Harness 把最核心的逻辑都封装到了这个 App Server 里面，对外暴露出一个 JSON-RPC 接口。这样一来，不管你是 TUI 命令行形式，还是 Desktop 桌面端，都是对接到这个 Codex App Server 上。相当于顶层协议可以有很多种，但底层的实现都是统一提供的。
+- codex-app-server：可以叫协议服务层。整个 Codex Harness 把最核心的逻辑都封装到了这个 App Server 里面，对外暴露出一个 JSON-RPC 接口。这样一来，不管你是 TUI 命令行形式，还是 Desktop 桌面端，都是对接到这个 Codex App Server 上。相当于顶层协议可以有很多种，但底层的实现都是统一提供的。
 
 除此之外，还有 codex-tui，也就是终端界面；codex-exec，是无头的执行前端，给脚本或者 CLI 使用；以及 codex-rollout，这是会话持久层，这个东西其实就是 Agent Trace，只不过在 Codex 里面定义为 Rollout。它会把历史对话的所有 Agent Trace 存成文件或者放到 SQLite 数据库里。
 
@@ -168,27 +113,17 @@ codex-app-server：可以叫协议服务层。整个 Codex Harness 把最核心�
 
 第一种叫 Fork Turns，就是去 Fork 一个自己的“影分身”。这个分身可以选择三种模式，而且这三种模式体现了对上下文的精细化控制：
 
-●
+- 全部继承：完全继承父对话的上下文和历史记录，相当于纯 Fork 出来一个自己的分身。这主要是用来做并行的，比如要处理好几个没有串联关系的任务时，就可以搞几个“影分身”来快速处理，起到加速作用。
 
-全部继承：完全继承父对话的上下文和历史记录，相当于纯 Fork 出来一个自己的分身。这主要是用来做并行的，比如要处理好几个没有串联关系的任务时，就可以搞几个“影分身”来快速处理，起到加速作用。
+- 继承最近三轮：只继承最近的三轮对话来 Fork 一个自己出来。这样上下文有一定隔离，但又保留了近期信息，适合在完成某些任务时清理一下上下文。
 
-●
-
-继承最近三轮：只继承最近的三轮对话来 Fork 一个自己出来。这样上下文有一定隔离，但又保留了近期信息，适合在完成某些任务时清理一下上下文。
-
-●
-
-无上下文（None）：完全不附带任何上下文，Fork 出一个全新的、干净的子 Agent，用来完成需要彻底上下文隔离的任务。
+- 无上下文（None）：完全不附带任何上下文，Fork 出一个全新的、干净的子 Agent，用来完成需要彻底上下文隔离的任务。
 
 另外还有一个机制叫 Mailbox，是一种异步通信的语义化机制，Agent 之间通过这个 Mailbox 来通信。它有两种通知方式：
 
-●
+- Send Message：只入信箱但不唤醒目标 Agent。也就是说，一个 Agent 完成一些事情后想告知另一个 Agent，就把信息存到信箱里。目标 Agent 如果主动读信箱就能发现这条信息，如果不读就发现不了，这是一种被动通知。这种方式的好处是不会打断目标 Agent 当前正在运行的任务，但坏处是它有概率不去读 Mailbox，导致通信失效。
 
-Send Message：只入信箱但不唤醒目标 Agent。也就是说，一个 Agent 完成一些事情后想告知另一个 Agent，就把信息存到信箱里。目标 Agent 如果主动读信箱就能发现这条信息，如果不读就发现不了，这是一种被动通知。这种方式的好处是不会打断目标 Agent 当前正在运行的任务，但坏处是它有概率不去读 Mailbox，导致通信失效。
-
-●
-
-Follow-up Task：发到信箱里的同时，还会给目标 Agent 发一轮请求。这样目标 Agent 就会被发送方打断，相当于像用户一样又提了一轮问题。这种方式能主动通知对方“我这边发生了变化，信息存在 Mailbox 里你可以去读”，好处是能实时让对方感知到变化，但坏处是可能会打断目标 Agent 当前正在执行的任务。
+- Follow-up Task：发到信箱里的同时，还会给目标 Agent 发一轮请求。这样目标 Agent 就会被发送方打断，相当于像用户一样又提了一轮问题。这种方式能主动通知对方“我这边发生了变化，信息存在 Mailbox 里你可以去读”，好处是能实时让对方感知到变化，但坏处是可能会打断目标 Agent 当前正在执行的任务。
 
 所以这两种通知机制各有优劣，Codex 都保留了。整体来看，它的中间通信还是通过 Mailbox 这样一个类似 Shared Context 的中间态来实现的。这套 Multi-Agent 或者说 Agent 协同的设计，确实非常有意思。
 
@@ -262,11 +197,11 @@ History 则是完整的历史对话信息，主要指的就是完整的 Agent Tr
 
 ## References
 
-\[1\] 深度解析 Codex Harness： [https://mp.weixin.qq.com/s/C7f\_O\_wdzO2lVroMvlS8NA](https://mp.weixin.qq.com/s/C7f_O_wdzO2lVroMvlS8NA)
+[1] 深度解析 Codex Harness： [https://mp.weixin.qq.com/s/C7f_O_wdzO2lVroMvlS8NA](https://mp.weixin.qq.com/s/C7f_O_wdzO2lVroMvlS8NA)
 
-\[2\] Codex/ChatGPT 官网： [https://openai.com/codex/](https://openai.com/codex/)
+[2] Codex/ChatGPT 官网： [https://openai.com/codex/](https://openai.com/codex/)
 
-\[3\] Codex Github 开源项目： [https://github.com/openai/codex](https://github.com/openai/codex)
+[3] Codex Github 开源项目： [https://github.com/openai/codex](https://github.com/openai/codex)
 
 欢迎大家点击此处加入 [“AI Agent前沿技术交流群”](https://qr.dingtalk.com/action/joingroup?code=v1,k1,8NXOCeBlSZDURG3l49gr9pgfI/DC4FpOpgoRJGycvIE=&_dt_no_comment=1&origin=11?) ，或者手机扫码加群 👇🏻
 
@@ -276,138 +211,52 @@ History 则是完整的历史对话信息，主要指的就是完整的 Agent Tr
 
 『AI方法论』：
 
-●
+- [从 Loop 到 Graph Engineering 的演进思考与实战](https://ata.atatech.org/articles/11020728011) 🔥
 
-[从 Loop 到 Graph Engineering 的演进思考与实战](https://ata.atatech.org/articles/11020728011) 🔥
+- [Agent到底如何评测？基本概念与经典方法](https://ata.atatech.org/articles/11020698840) 🔥🔥
 
-●
+- [Loop Engineering 概念解析、思考与实践](https://ata.atatech.org/articles/11020674841) 🔥🔥
 
-[Agent到底如何评测？基本概念与经典方法](https://ata.atatech.org/articles/11020698840) 🔥🔥
+- [如何更科学、方向可控的实现 Skill 的“自进化”?](https://ata.atatech.org/articles/11020655223) 🔥🔥
 
-●
+- [Agent 核心技术概念与范式发生了哪些演变以及背后的思考](https://ata.atatech.org/articles/11020644402) 🔥🔥
 
-[Loop Engineering 概念解析、思考与实践](https://ata.atatech.org/articles/11020674841) 🔥🔥
+- [Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
 
-●
+- [如何让 Agent 更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
 
-[如何更科学、方向可控的实现 Skill 的“自进化”?](https://ata.atatech.org/articles/11020655223) 🔥🔥
+- [如何构建和调优高可用性的 Agent ？浅谈阿里云服务领域 Agent 构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
 
-●
-
-[Agent 核心技术概念与范式发生了哪些演变以及背后的思考](https://ata.atatech.org/articles/11020644402) 🔥🔥
-
-●
-
-[Agent / Skills / Teams 架构演进过程及技术选型之道](https://ata.atatech.org/articles/11020589335) 🔥🔥
-
-●
-
-[如何让 Agent 更符合预期？基于上下文工程和多智能体构建云小二Aivis的十大实战经验](https://ata.atatech.org/articles/11020485223) 🔥
-
-●
-
-[如何构建和调优高可用性的 Agent ？浅谈阿里云服务领域 Agent 构建的方法论](https://ata.atatech.org/articles/11020423727) 🔥
-
-●
-
-[为什么一定要做 Agent 智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
+- [为什么一定要做 Agent 智能体？在大模型时代下对需求研发范式变革的一些思考](https://ata.atatech.org/articles/11020324491) 🔥
 
 『项目解析』：
 
-●
+- [深度解析 DeepSeek Harness 架构和 Cordis 插件体系的设计思路](https://ata.atatech.org/articles/11020768407) 🔥🔥
 
-[深度解析 DeepSeek Harness 架构和 Cordis 插件体系的设计思路](https://ata.atatech.org/articles/11020768407) 🔥🔥
+- [深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
 
-●
+- [深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
 
-[深度解析 Hermes Agent 如何实现“自进化”及其 Prompt / Context / Harness 的设计实践](https://ata.atatech.org/articles/11020604988) 🔥🔥
+- [深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
 
-●
+- [从 LLM Wiki / Obsidian-Wiki / GBrain 来看 Agent时代知识的“自组织”与“自进化”](https://ata.atatech.org/articles/11020627647) 🔥🔥
 
-[深度解析 Claude Code 在 Prompt / Context / Harness 的设计与实践](https://ata.atatech.org/articles/11020605711) 🔥🔥
-
-●
-
-[深度解析 OpenClaw 在 Prompt / Context / Harness 三个维度中的设计哲学与实践](https://ata.atatech.org/articles/11020608010) 🔥🔥
-
-●
-
-[从 LLM Wiki / Obsidian-Wiki / GBrain 来看 Agent时代知识的“自组织”与“自进化”](https://ata.atatech.org/articles/11020627647) 🔥🔥
-
-●
-
-[Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
+- [Manus的技术实现原理浅析与简单复刻](https://ata.atatech.org/articles/11020391613) 🔥🔥
 
 『观点思考』：
 
-●
-
-[从技术视角剖析AI时代“蒸馏”的真相](https://ata.atatech.org/articles/11020688812) 🔥
+- [从技术视角剖析AI时代“蒸馏”的真相](https://ata.atatech.org/articles/11020688812) 🔥
 
 『业务落地』：
 
-●
+- [从 Multi-Agent 到 Skills：云小二 Aivis 如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
 
-[从 Multi-Agent 到 Skills：云小二 Aivis 如何解决复杂的弹性计算类技术问题](https://ata.atatech.org/articles/11020582433) 🔥
+- [MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
 
-●
+- [阿里云服务领域 Agent 平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
 
-[MetaAgent：万字长文解析「阿里云服务域如何实现Agent全自动化生产」](https://ata.atatech.org/articles/11020570424) 🔥
+- [基于通义千问的阿里云小智服务领域 Agent 设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
 
-●
+- [基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
 
-[阿里云服务领域 Agent 平台的技术探索：从自主灵活到稳定可控的「万字深度思考」](https://ata.atatech.org/articles/11020397608) 🔥
-
-●
-
-[基于通义千问的阿里云小智服务领域 Agent 设计与实践总结](https://ata.atatech.org/articles/11020209229) 🔥
-
-●
-
-[基于通义千问的阿里云服务领域大模型“重塑”云小智客服机器人](https://ata.atatech.org/articles/11020083220)
-
-●
-
-[基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)
-
-END
-
-背景
-
-Codex 的核心 Harness 架构
-
-整体架构：模块化解耦设计
-
-事件驱动：Op 与 Event 的双向通信
-
-三层循环：Task、Turn 与 Sampling
-
-工具并发：并行执行与有序拼装
-
-World State：通过 Diff 优化上下文
-
-SubAgent 与 Mailbox：精细化的协同
-
-arg0 参数：身份识别与下文预告
-
-Codex 的 Memory 和上下文压缩设计
-
-上下文压缩：“交接文档”式的策略
-
-Memory 机制：两阶段记忆与可遗忘机制
-
-全新方案 Token Budget：跨窗口短期记忆
-
-总结
-
-References
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+- [基于通义千问的阿里云服务领域大模型是如何“炼”成的？](https://ata.atatech.org/articles/11020081215)

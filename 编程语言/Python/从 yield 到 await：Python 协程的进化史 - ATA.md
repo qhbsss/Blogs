@@ -10,61 +10,26 @@ tags:
 ---
 云智能集团
 
-粉丝 8影响力 84
 
-** 18
 
-** 12
 
-** 2
-
-** 原创文章
 
 AI 辅助创作
 
-发表到圈儿
 
-[人生苦短我用Python](https://ata.atatech.org/community/group/1246) (首发)
-
-[阿里云基础设施](https://ata.atatech.org/community/team/3)
-
-[ATA之家](https://ata.atatech.org/community/group/45)
-
-[Python](https://ata.atatech.org/community/group/63)
-
-[弹性计算](https://ata.atatech.org/community/team/114)
-
-[云布道师](https://ata.atatech.org/community/team/628)
-
-开放访问
-
-**
-
-复制专用链接
-
-**
 
 ## 从 yield 到 await：Python 协程的进化史
 
-[刘天宇(剑洁)](https://ata.atatech.org/users/11001850788)
-
 2025-10-24发表2025-10-30更新230次浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
-
-朗读文章14:23
 
 Powered by 通义语音合成
 
 通义语音合成
 
-**
 
 内容创意 from 剑洁、润色加工 by 千问
 
@@ -144,31 +109,27 @@ e.send("Hi") # 打印 "Echo: Hi"
 
 设想我们有两个生成器：
 
-●
+- 子任务负责处理具体逻辑；
 
-子任务负责处理具体逻辑；
+- 父任务负责流程编排。
 
-●
-
-父任务负责流程编排。
-
-def child\_task():
+def child_task():
 
 for i in range(3):
 
 print(f" Child step {i}")
 
-yield f"data\_{i}"
+yield f"data_{i}"
 
-return "child\_done"
+return "child_done"
 
-def parent\_task():
+def parent_task():
 
 print("Parent start")
 
-\# 想要“调用” child\_task 并将其产出透传出去
+\# 想要“调用” child_task 并将其产出透传出去
 
-for data in child\_task():
+for data in child_task():
 
 yield data # 手动循环转发
 
@@ -182,11 +143,13 @@ print("Parent end")
 
 外部无法直接向 `child_task` 发送数据：
 
-p = parent\_task()
+```java
+p = parent_task()
 
 next(p)
 
 p.send("X") # ❌ 实际发送给了父生成器，但父层没有接收逻辑！
+```
 
 #### 🔹 2. 异常无法穿透
 
@@ -206,15 +169,22 @@ p.throw(ValueError())
 
 我们需要一种机制，能让父生成器把“控制权”完全交给子生成器，直到后者完成为止。理想语义包括：
 
-<table><colgroup><col width="375"> <col width="375"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>功能</p></td><td rowspan="1" colspan="1"><p>行为</p></td></tr><tr><td rowspan="1" colspan="1"><p>数据产出</p></td><td rowspan="1" colspan="1"><div>子的 <code>yield</code> 直接对外可见</div></td></tr><tr><td rowspan="1" colspan="1"><p>数据输入</p></td><td rowspan="1" colspan="1"><div>外部 <code>send(value)</code> 自动传给子</div></td></tr><tr><td rowspan="1" colspan="1"><p>异常处理</p></td><td rowspan="1" colspan="1"><div><code>.throw(exc)</code> / <code>.close()</code> 穿透到子</div></td></tr><tr><td rowspan="1" colspan="1"><p>返回值捕获</p></td><td rowspan="1" colspan="1"><div>父级能拿到子的 <code>return</code> 值</div></td></tr></tbody></table>
+
+| 功能    | 行为                              |
+| ----- | ------------------------------- |
+| 数据产出  | 子的 `yield` 直接对外可见               |
+| 数据输入  | 外部 `send(value)` 自动传给子          |
+| 异常处理  | `.throw(exc)` / `.close()` 穿透到子 |
+| 返回值捕获 | 父级能拿到子的 `return` 值              |
+
 
 我们希望这样写：
 
-def parent\_task():
+def parent_task():
 
 print("Parent start")
 
-result = yield from child\_task() # 控制权移交，结束后自动继续
+result = yield from child_task() # 控制权移交，结束后自动继续
 
 print(f"Child returned: {result}")
 
@@ -236,13 +206,9 @@ print("Parent end")
 
 ### 3.1 出现时间与背景
 
-●
+- `yield from` 正式发布：2012年9月（Python 3.3）
 
-`yield from` 正式发布：2012年9月（Python 3.3）
-
-●
-
-`@wrappertask` 首次引入：2013年5月7日
+- `@wrappertask` 首次引入：2013年5月7日
 
 ✅ 数字上看， `@wrappertask` 是在 `yield from` 标准化之后才被加入 OpenStack 的。
 
@@ -258,19 +224,21 @@ print("Parent end")
 
 @wrappertask
 
-def parent\_task():
+def parent_task():
 
+```java
 self.setup()
 
-yield child\_task()
+yield child_task()
 
 self.cleanup()
+```
 
 这与未来 `yield from` 的使用方式惊人相似。
 
 在 Heat 中，一个典型的 `@wrappertask` 示例是在一个云资源的 `destroy` 父任务中调用 `delete` 子任务：
 
-\# commit\_id: e649574d4751ffd8578f63787621c3a26d383a34
+\# commit_id: e649574d4751ffd8578f63787621c3a26d383a34
 
 class Resource(status.ResourceStatus)
 
@@ -288,7 +256,7 @@ return
 
 try:
 
-resource\_objects.Resource.delete(self.context, self.id)
+resource_objects.Resource.delete(self.context, self.id)
 
 except exception.NotFound:
 
@@ -318,21 +286,23 @@ Python 2. For example::
 
 @wrappertask
 
-def parent\_task(self):
+def parent_task(self):
 
+```java
 self.setup()
 
-yield self.child\_task()
+yield self.child_task()
 
 self.cleanup()
+```
 
 """
 
-def wrapper(\*args, \*\*kwargs):
+def wrapper(*args, **kwargs):
 
 \# 启动父生成器任务
 
-parent = task(\*args, \*\*kwargs)
+parent = task(*args, **kwargs)
 
 \# 遍历父生成器产生的每个子任务
 
@@ -392,11 +362,11 @@ raise exit
 
 2012 年，随着 Python 3.3 发布，PEP 380 正式引入 `yield from` ，一举解决了嵌套生成器问题：
 
-def parent\_task():
+def parent_task():
 
 print("Parent start")
 
-result = yield from child\_task() # 所有行为自动代理
+result = yield from child_task() # 所有行为自动代理
 
 print(f"Child returned: {result}")
 
@@ -404,7 +374,14 @@ print("Parent end")
 
 相比 `@wrappertask` ， `yield from` 的优势在于：
 
-<table><colgroup><col width="250"> <col width="250"> <col width="250"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>特性</p></td><td rowspan="1" colspan="1"><div><code>@wrappertask</code></div></td><td rowspan="1" colspan="1"><div><code>yield from</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>是否需装饰器</p></td><td rowspan="1" colspan="1"><p>是</p></td><td rowspan="1" colspan="1"><p>否</p></td></tr><tr><td rowspan="1" colspan="1"><p>是否通用</p></td><td rowspan="1" colspan="1"><p>特定库实现</p></td><td rowspan="1" colspan="1"><p>语言内置</p></td></tr><tr><td rowspan="1" colspan="1"><p>性能</p></td><td rowspan="1" colspan="1"><p>较慢（多重循环）</p></td><td rowspan="1" colspan="1"><p>更快（C 层优化）</p></td></tr><tr><td rowspan="1" colspan="1"><p>易用性</p></td><td rowspan="1" colspan="1"><p>难理解</p></td><td rowspan="1" colspan="1"><p>简洁直观</p></td></tr></tbody></table>
+
+| 特性     | `@wrappertask` | `yield from` |
+| ------ | -------------- | ------------ |
+| 是否需装饰器 | 是              | 否            |
+| 是否通用   | 特定库实现          | 语言内置         |
+| 性能     | 较慢（多重循环）       | 更快（C 层优化）    |
+| 易用性    | 难理解            | 简洁直观         |
+
 
 从此，开发者无需再造轮子。
 
@@ -414,55 +391,50 @@ print("Parent end")
 
 尽管 `yield from` 极大提升了表达力，但它仍有局限：
 
-●
+- 它仍属于普通生成器语法，难区分“真协程”与“假生成器”
 
-它仍属于普通生成器语法，难区分“真协程”与“假生成器”
+- 可被误用于非异步场景
 
-●
-
-可被误用于非异步场景
-
-●
-
-缺乏类型提示和静态检查支持
+- 缺乏类型提示和静态检查支持
 
 因此，PEP 492 （2015年，Python 3.5）提出了更高级的抽象：
 
 ### 5.1 新关键字：async def 与 await
 
-async def child\_coro():
+async def child_coro():
 
 await asyncio.sleep(1)
 
-return "child\_done"
+return "child_done"
 
-async def parent\_coro():
+async def parent_coro():
 
+```java
 print("Parent start")
-
-result = await child\_coro()
-
+result = await child_coro()
 print(f"Child returned: {result}")
-
 print("Parent end")
+```
 
 关键变化：
 
-●
+- `async def` 明确定义一个 原生协程函数
 
-`async def` 明确定义一个 原生协程函数
+- `await` 替代 `yield from` ，只能用于 awaitable 对象
 
-●
-
-`await` 替代 `yield from` ，只能用于 awaitable 对象
-
-●
-
-类型清晰、上下文明确、安全性高
+- 类型清晰、上下文明确、安全性高
 
 ### 5.2 await 与 yield from 的关系
 
-<table><colgroup><col width="250"> <col width="250"> <col width="250"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>对比项</p></td><td rowspan="1" colspan="1"><div><code>yield from gen</code></div></td><td rowspan="1" colspan="1"><div><code>await coro</code></div></td></tr><tr><td rowspan="1" colspan="1"><p>支持对象</p></td><td rowspan="1" colspan="1"><p>任意生成器或可迭代</p></td><td rowspan="1" colspan="1"><div>仅限 <code>Awaitable</code> 类型</div></td></tr><tr><td rowspan="1" colspan="1"><p>使用位置</p></td><td rowspan="1" colspan="1"><p>任何函数</p></td><td rowspan="1" colspan="1"><div>仅限 <code>async def</code> 函数内</div></td></tr><tr><td rowspan="1" colspan="1"><p>错误提示</p></td><td rowspan="1" colspan="1"><p>混乱或静默失败</p></td><td rowspan="1" colspan="1"><p>明确报错</p></td></tr><tr><td rowspan="1" colspan="1"><p>设计意图</p></td><td rowspan="1" colspan="1"><p>数据委派</p></td><td rowspan="1" colspan="1"><p>异步等待</p></td></tr><tr><td rowspan="1" colspan="1"><p>运行环境</p></td><td rowspan="1" colspan="1"><p>可独立运行</p></td><td rowspan="1" colspan="1"><p>必须由事件循环驱动</p></td></tr></tbody></table>
+
+| 对比项  | `yield from gen` | `await coro`       |
+| ---- | ---------------- | ------------------ |
+| 支持对象 | 任意生成器或可迭代        | 仅限 `Awaitable` 类型  |
+| 使用位置 | 任何函数             | 仅限 `async def` 函数内 |
+| 错误提示 | 混乱或静默失败          | 明确报错               |
+| 设计意图 | 数据委派             | 异步等待               |
+| 运行环境 | 可独立运行            | 必须由事件循环驱动          |
+
 
 > 🔄 本质上， `await` 是 `yield from` 在异步上下文下的专用化版本——去除了通用性，换取更强的语义清晰度。
 
@@ -476,9 +448,9 @@ import asyncio
 
 async def main():
 
-task1 = asyncio.create\_task(some\_work())
+task1 = asyncio.create_task(some_work())
 
-task2 = asyncio.create\_task(other\_work())
+task2 = asyncio.create_task(other_work())
 
 await task1
 
@@ -488,21 +460,13 @@ asyncio.run(main()) # 启动事件循环
 
 关键组件成熟：
 
-●
+- `EventLoop` ：统一调度所有协程
 
-`EventLoop` ：统一调度所有协程
+- `Task` ：封装协程为并发单位
 
-●
+- `Future` ：表示未完成的结果
 
-`Task` ：封装协程为并发单位
-
-●
-
-`Future` ：表示未完成的结果
-
-●
-
-`gather/wait` ：批量管理多个协程
+- `gather/wait` ：批量管理多个协程
 
 至此，Python 完成了从“生成器兼职协程”到“原生异步优先”的全面转型。
 
@@ -510,7 +474,16 @@ asyncio.run(main()) # 启动事件循环
 
 ## 完整演化时间轴（按实际发展顺序）
 
-<table><colgroup><col width="250"> <col width="250"> <col width="250"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>年份</p></td><td rowspan="1" colspan="1"><p>技术</p></td><td rowspan="1" colspan="1"><p>说明</p></td></tr><tr><td rowspan="1" colspan="1"><p>2001</p></td><td rowspan="1" colspan="1"><div>生成器 (<code>yield</code>)</div></td><td rowspan="1" colspan="1"><p>Python 2.2 引入，用于惰性迭代</p></td></tr><tr><td rowspan="1" colspan="1"><p>2006</p></td><td rowspan="1" colspan="1"><div><code>send()</code> 方法</div></td><td rowspan="1" colspan="1"><p>Python 2.5 开启双向通信，协程雏形形成</p></td></tr><tr><td rowspan="1" colspan="1"><p>2012</p></td><td rowspan="1" colspan="1"><div><code>yield from</code></div></td><td rowspan="1" colspan="1"><p>Python 3.3 正式支持，标准化生成器委托机制</p></td></tr><tr><td rowspan="1" colspan="1"><p>2013</p></td><td rowspan="1" colspan="1"><div><code>@wrappertask</code></div></td><td rowspan="1" colspan="1"><div>OpenStack 为 Python 2 实现 <code>yield from</code> 的等价机制</div></td></tr><tr><td rowspan="1" colspan="1"><p>2015</p></td><td rowspan="1" colspan="1"><div><code>async</code> / <code>await</code></div></td><td rowspan="1" colspan="1"><p>Python 3.5 新增关键字，分离协程与生成器</p></td></tr><tr><td rowspan="1" colspan="1"><p>2016+</p></td><td rowspan="1" colspan="1"><div><code>asyncio</code> 生态完善</div></td><td rowspan="1" colspan="1"><p>构建完整的异步程序模型</p></td></tr></tbody></table>
+
+| 年份    | 技术                | 说明                                         |
+| ----- | ----------------- | ------------------------------------------ |
+| 2001  | 生成器 (`yield`)     | Python 2.2 引入，用于惰性迭代                       |
+| 2006  | `send()` 方法       | Python 2.5 开启双向通信，协程雏形形成                   |
+| 2012  | `yield from`      | Python 3.3 正式支持，标准化生成器委托机制                 |
+| 2013  | `@wrappertask`    | OpenStack 为 Python 2 实现 `yield from` 的等价机制 |
+| 2015  | `async` / `await` | Python 3.5 新增关键字，分离协程与生成器                  |
+| 2016+ | `asyncio` 生态完善    | 构建完整的异步程序模型                                |
+
 
 > 💡 注： `@wrappertask` 出现在 `yield from` 之后，反映了 语言先进但平台滞后 的典型工程现实 —— 新特性普及需要过渡周期。
 
@@ -518,27 +491,31 @@ asyncio.run(main()) # 启动事件循环
 
 ## 总结：一段从“补丁”到“标准”的进化之路
 
-<table><colgroup><col width="187"> <col width="187"> <col width="187"> <col width="187"></colgroup><tbody><tr><td rowspan="1" colspan="1"><p>阶段</p></td><td rowspan="1" colspan="1"><p>核心机制</p></td><td rowspan="1" colspan="1"><p>代表语法</p></td><td rowspan="1" colspan="1"><p>解决的问题</p></td></tr><tr><td rowspan="1" colspan="1"><p>🧱 基础设施</p></td><td rowspan="1" colspan="1"><div>生成器 + <code>yield</code></div></td><td rowspan="1" colspan="1"><div><code>yield x</code></div></td><td rowspan="1" colspan="1"><p>提供暂停/恢复能力</p></td></tr><tr><td rowspan="1" colspan="1"><p>🔁 双向通信</p></td><td rowspan="1" colspan="1"><div><code>send()</code> 方法</div></td><td rowspan="1" colspan="1"><div><code>val = yield</code></div></td><td rowspan="1" colspan="1"><p>实现外部注入数据</p></td></tr><tr><td rowspan="1" colspan="1"><p>🔗 层级管理</p></td><td rowspan="1" colspan="1"><p>手动转发</p></td><td rowspan="1" colspan="1"><div><code>for item in gen: yield item</code></div></td><td rowspan="1" colspan="1"><p>初步组合任务，但功能残缺</p></td></tr><tr><td rowspan="1" colspan="1"><p>⛓️ 工程补丁</p></td><td rowspan="1" colspan="1"><div><code>@wrappertask</code></div></td><td rowspan="1" colspan="1"><div><code>yield subtask()</code></div></td><td rowspan="1" colspan="1"><p>在无语言支持下模拟完整委托</p></td></tr><tr><td rowspan="1" colspan="1"><p>🔗 标准委托</p></td><td rowspan="1" colspan="1"><div><code>yield from</code></div></td><td rowspan="1" colspan="1"><div><code>yield from gen()</code></div></td><td rowspan="1" colspan="1"><p>语言内建机制，解决嵌套难题</p></td></tr><tr><td rowspan="1" colspan="1"><p>✨ 专用抽象</p></td><td rowspan="1" colspan="1"><div><code>async/await</code></div></td><td rowspan="1" colspan="1"><div><code>await coro</code></div></td><td rowspan="1" colspan="1"><p>明确异步边界，提升安全与可读性</p></td></tr><tr><td rowspan="1" colspan="1"><p>🏗️ 生态支撑</p></td><td rowspan="1" colspan="1"><div><code>asyncio</code> 框架</div></td><td rowspan="1" colspan="1"><div><code>create_task()</code>, <code>run()</code></div></td><td rowspan="1" colspan="1"><p>构建完整异步程序模型</p></td></tr></tbody></table>
+
+| 阶段      | 核心机制           | 代表语法                          | 解决的问题           |
+| ------- | -------------- | ----------------------------- | --------------- |
+| 🧱 基础设施  | 生成器 + `yield`  | `yield x`                     | 提供暂停/恢复能力       |
+| 🔁 双向通信  | `send()` 方法    | `val = yield`                 | 实现外部注入数据        |
+| 🔗 层级管理  | 手动转发           | `for item in gen: yield item` | 初步组合任务，但功能残缺    |
+| ⛓️ 工程补丁 | `@wrappertask` | `yield subtask()`             | 在无语言支持下模拟完整委托   |
+| 🔗 标准委托  | `yield from`   | `yield from gen()`            | 语言内建机制，解决嵌套难题   |
+| ✨ 专用抽象  | `async/await`  | `await coro`                  | 明确异步边界，提升安全与可读性 |
+| 🏗️ 生态支撑 | `asyncio` 框架   | `create_task()`, `run()`      | 构建完整异步程序模型      |
+
 
 ---
 
 ## 启示
 
-1.
-
-痛点驱动创新 `@wrappertask`
+1. 痛点驱动创新 `@wrappertask`
 
 虽是临时补丁，但它来源于 OpenStack 这类超大规模系统的实际调度需求。正是这些真实世界的挑战，反向推动了语言标准的演进。
 
-2.
-
-抽象逐层递进
+2. 抽象逐层递进
 
 技术演进不是跳跃式的，而是遵循 “hack → 模式 → 库 → 语法 → 生态” 的升维路径。
 
-3.
-
-清晰优于灵活
+3. 清晰优于灵活
 
 `async/await` 牺牲了 `yield from` 的通用性，换来的是更低的认知成本和更高的工程可靠性。
 
@@ -549,67 +526,3 @@ asyncio.run(main()) # 启动事件循环
 理解这段历史，不仅能让我们写出更好的异步代码，更能明白：
 
 > 💬 每一个优雅的 API，都曾经历过无数粗糙的原型与漫长的打磨。
-
-END
-
-引言
-
-第一阶段：生成器的本质——yield 的出现
-
-1.1 什么是生成器？
-
-1.2 双向通信：send() 方法的诞生（Python 2.5）
-
-第二阶段：现实困境 —— 嵌套生成器的控制流难题
-
-2.1 示例：父子任务关系
-
-2.2 手动转发的三大痛点
-
-🔹 1. 控制流不透明
-
-🔹 2. 异常无法穿透
-
-🔹 3. 返回值丢失
-
-✅ 理想解决方案应当是什么样子？
-
-第三阶段：社区补丁 —— OpenStack 的 @wrappertask 装饰器
-
-3.1 出现时间与背景
-
-3.2 wrappertask 的设计目标
-
-3.3 实现原理简析
-
-3.4 历史地位：一场“超前落地”的工业化验证
-
-第四阶段：语法标准化 —— yield from 登场（Python 3.3）
-
-第五阶段：专用抽象 —— 原生协程登场（Python 3.5）
-
-5.1 新关键字：async def 与 await
-
-5.2 await 与 yield from 的关系
-
-第六阶段：生态成型 —— asyncio 与事件循环整合
-
-完整演化时间轴（按实际发展顺序）
-
-总结：一段从“补丁”到“标准”的进化之路
-
-启示
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838

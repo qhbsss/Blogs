@@ -10,47 +10,19 @@ tags:
 ---
 云智能集团
 
-勋章
 
-粉丝 77影响力 1.3k
 
-** 296
 
-** 186
-
-** 22
-
-** 原创文章
-
-发表到圈儿
-
-[大淘宝前端技术-TaoFED](https://ata.atatech.org/community/team/11) (首发)
-
-[淘天业务技术](https://ata.atatech.org/community/team/68)
 
 收录于专题
 
-[ATA头条速递第105期本周值得关注的技术动态](https://ata.atatech.org/specials/10000000014)
-
-[SSR 实战](https://ata.atatech.org/specials/10000003826)
-
-**
-
-[陈俊(水澜)](https://ata.atatech.org/users/11000024798)
 
 发表更新6.9k浏览
 
-** 朗读
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
-朗读文章11:24
-
-**
 
 作者：水澜、九十、繁易、霸剑、卓凌 (排名不分先后)
 
@@ -124,13 +96,9 @@ CSR 渲染模式需要在终端设备上完成资源加载、数据加载以及�
 
 目前流式渲染已在营销会场、频道（每日好店、U先、汽车）、淘菜菜等业务中落地。以每日好店业务为例：
 
-●
+- 低端机内容上屏时间从 6.2s 加快到 1.2s
 
-低端机内容上屏时间从 6.2s 加快到 1.2s
-
-●
-
-中端机内容上屏时间从 2.6s 加快到 0.7s
+- 中端机内容上屏时间从 2.6s 加快到 0.7s
 
 （左 CSR，右流式 SSR）
 
@@ -138,49 +106,31 @@ CSR 渲染模式需要在终端设备上完成资源加载、数据加载以及�
 
 流式 SSR 的实现，最基本的原理是：
 
-●
+- 基于 HTTP 协议中的 chunked 编码规范，设置响应头的 Transfer-Encoding 为 chunked 对 HTML 内容进行分块传输。
 
-基于 HTTP 协议中的 chunked 编码规范，设置响应头的 Transfer-Encoding 为 chunked 对 HTML 内容进行分块传输。
-
-●
-
-在浏览器侧，流式地读取数据并进行渲染，这是主流浏览器默认支持的。
+- 在浏览器侧，流式地读取数据并进行渲染，这是主流浏览器默认支持的。
 
 结合 Node.js 内置的 HTTP 模块，实现一个最简单的流式 DEMO 示例如下：
 
+```javascript
 const http = require('http');
-
 const server = http.createServer(async (req, res) => {
-
-res.setHeader('Content-Type', 'text/html');
-
-res.setHeader('Transfer-Encoding', 'chunked')
-
-// 分区块的传输页面内容
-
-res.write('\<html>');
-
-res.write('\<head>\<title>Stream Demo\</title>\<head>');
-
-res.write('\<body>');
-
-// 模拟服务端暂停
-
-await sleep(3000);
-
-res.write('\<h2>Hello\</h2>');
-
-await sleep(3000);
-
-res.write('\<h2>ICE 3\</h2>');
-
-res.write('\</body>\</html>');
-
-res.end();
-
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Transfer-Encoding', 'chunked')
+    // 分区块的传输页面内容
+    res.write('\<html>');
+    res.write('\<head>\<title>Stream Demo\</title>\<head>');
+    res.write('\<body>');
+    // 模拟服务端暂停
+    await sleep(3000);
+    res.write('\<h2>Hello\</h2>');
+    await sleep(3000);
+    res.write('\<h2>ICE 3\</h2>');
+    res.write('\</body>\</html>');
+    res.end();
 });
-
 server.listen(3000);
+```
 
 基于这个基本原理，将页面分为骨架屏和几个区块，并行地渲染这些区块，然后将渲染好的区块分段返回，就可以实现基本的流式 SSR 。
 
@@ -202,13 +152,9 @@ ice.js 3 结合 React 18 支持了流式 SSR 应用的研发，让开发者可�
 
 在 SSR 的基础上，标记流式需要被流式渲染的组件，就完成了 SSR 到流式 SSR 的升级。体现在代码上是：
 
-●
+- 使用 withSuspense 包裹需要被异步返回的组件
 
-使用 withSuspense 包裹需要被异步返回的组件
-
-●
-
-使用 useSuspenseData 包裹组件对应的数据请求
+- 使用 useSuspenseData 包裹组件对应的数据请求
 
 流式组件示例：
 

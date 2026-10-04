@@ -8,41 +8,16 @@ description:
 tags:
   - "clippings"
 ---
-中国电商事业群-飞猪
-
-粉丝 190影响力 1.9k
-
-** 3
-
-** 4
-
-** 1
-
-** 原创文章
-
-开放访问
-
-**
-
-复制专用链接
-
-**
-
 ## Linux 系统调用
-
-[陈阳(逸殊)](https://ata.atatech.org/users/11000967975)
 
 2021-01-11发表2023-03-31更新184次浏览
 
-** 字号
 
-** 笔记
 
-** 分享 **
 
 ## 引言
 
-本文整理了 Linux 内核中系统调用的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。  
+本文整理了 Linux 内核中系统调用的相关知识，其他 Linux 相关文章均收录于 [贝贝猫的文章目录](https://www.atatech.org/articles/192584) 。
 
 ## 系统调用实现
 
@@ -56,11 +31,11 @@ tags:
 
 下例展示了使用标准库的程序例子，通过追踪其执行过程，你就会发现在标准库函数之下，实际上隐藏了很多的系统调用：
 
-```cpp
 #include<stdio.h>
 #include<fcntl.h>
 #include<unistd.h>
 #include<malloc.h>
+```c
 int main() {
     int handle，bytes;
     void* ptr;
@@ -75,7 +50,6 @@ int main() {
 
 上例程序打开文件 `/tmp/test/txt` ，读取了前 150 个字节然后打印到标准输出，这是 UNIX head 命令的一个简单版本。我们可以通过 strace 工具来追踪该程序的运行过程 `strace -o log.txt ./shead` 。
 
-```
 execve("./shead"，["./shead"]，[/* 27 vars */]) = 0
 uname(sys="Linux"，node="jupiter"，...) = 0
 brk(0) = 0x8049750
@@ -107,7 +81,6 @@ write(1，"A black cat crossing your path s"...，77) = 77 # 写到标准输出
 write(1，" -- Groucho Marx\n"，32) = 32
 munmap(0x40018000，4096) = 0
 _exit(0) = ？
-```
 
 跟踪记录显示，该应用程序进行了大量源代码中没有明确列出的系统调用。这说明了应用程序与内核之间强烈的依赖关系，上例反复使用了系统调用。
 
@@ -129,13 +102,13 @@ POSIX标准(这是Portable Operating System Interface for UNIX)已经成为该�
 
 上述方案将新信号的快速投递和系统调用的中断组合起来，但它并非是唯一的解决方案。BSD 内核将中断系统调用的执行并切换到用户态执行信号处理程序。在发生这种情况时，该系统调用不会有返回值，内核在信号处理程序结束后将自动重启该调用。因为该行为对用户应用程序是透明的，也不再需要重复实现对 -EINTR 返回值的检查和调用的重启，所以与 SystemV 方法相比，这种方案更受程序员的欢迎。
 
-Linux 则兼容上述的两种方案，通过 SA\_RESTART 标志来开启 BSD 方案，可以在安装信号处理程序时按需对具体信号指定该标志。而 SystemV 提议的机制用作 Linux 的默认方案，之所以这么做是因为 BSD 机制偶尔会引发一些问题，如下列例子所示。
+Linux 则兼容上述的两种方案，通过 SA_RESTART 标志来开启 BSD 方案，可以在安装信号处理程序时按需对具体信号指定该标志。而 SystemV 提议的机制用作 Linux 的默认方案，之所以这么做是因为 BSD 机制偶尔会引发一些问题，如下列例子所示。
 
-```cpp
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
 
+```c
 volatile int signaled = 0;
 
 void handler (int signum) {
@@ -152,7 +125,6 @@ int main() {
    while (read(STDIN_FILENO，&ch，1) != 1 && !signaled);
 }
 ```
-
 如果在上例中采用 BSD 的方案，那么当我们给该进程发送信号后，进程不会立即结束，虽然信号处理程序会将 signaled 置为 1，但是因为 read 系统调用会被自动重启，所以如果用户不输入一个字符，该进程仍然不会关闭，这就和进程结束条件的字面含义冲突 `接收到信号或者标准输入读到一个字符就终止` 。
 
 这个时候如果采用的是 SystemV 的方案就不会出现这个问题，当信号处理程序执行时，read 系统调用会被中断并返回 -EINTR，当信号处理程序执行结束时会将 signaled 置为 1，然后切换回原先的应用执行栈，它会重新检查退出条件，发现 `!signaled = 0` 后，会退出进程。
@@ -172,22 +144,22 @@ int main() {
 
 系统调用的处理函数，在形式上有如下几个共同的特性。
 
-- 每个函数的名称前缀都是 sys\_，每一个这样的函数对应了一个系统调用。
+- 每个函数的名称前缀都是 sys_，每一个这样的函数对应了一个系统调用。
 - 所有的处理函数都最多接受5个参数。这些参数在参数列表中指定，与普通的 C 函数相同。
-- 所有的系统调用都在核心态执行。我们前面说过了，内核态不能随便直接访问用户态的内存。所以我们才使用 copy\_from\_user、copy\_to\_user 或其他同类函数，这些函数是为了确保在进行实际读写操作之前目标内存区必须在内核内存中，也就是说不能出现缺页异常。
+- 所有的系统调用都在核心态执行。我们前面说过了，内核态不能随便直接访问用户态的内存。所以我们才使用 copy_from_user、copy_to_user 或其他同类函数，这些函数是为了确保在进行实际读写操作之前目标内存区必须在内核内存中，也就是说不能出现缺页异常。
 
 在内核将控制权转移给处理函数后，控制流就进入了和平台无关的代码中，即不依赖于特定的 CPU 或体系结构。但因为各种原因，也有一些例外。有少量处理程序函数是针对各个平台分别实现的。
 
-在返回结果时，处理程序函数无须进行特别的操作，简单的一个 return 后接返回值即可。在核心态和用户态之间的切换，由特定于平台的内核代码执行，这与中断处理函数是无关的。下图说明了这个过程，我们可以看到在调用真正的处理程序前后，都有一段内核代码，这些代码都是和体系结构相关的汇编代码，它们负责调用实际的处理函数，并将处理函数的返回值交给应用程序。  
+在返回结果时，处理程序函数无须进行特别的操作，简单的一个 return 后接返回值即可。在核心态和用户态之间的切换，由特定于平台的内核代码执行，这与中断处理函数是无关的。下图说明了这个过程，我们可以看到在调用真正的处理程序前后，都有一段内核代码，这些代码都是和体系结构相关的汇编代码，它们负责调用实际的处理函数，并将处理函数的返回值交给应用程序。
 
 ![[225c5b1b-2e72-421a-8b13-d6bb765a0a3e.png|system-call-switch]]
 
 system-call-switch
 
-  
+
 图中的处理程序大多是 C 语言实现的，其中有一些实现非常简单，就比如获取当前进程 UID 的系统调用 getuid：
 
-```cpp
+```java
 asmlinkage long sys_getuid(void)
 {
     return current->uid;
@@ -207,7 +179,7 @@ asmlinkage long sys_getuid(void)
 - 如果一个系统调用需要超过6个不同的参数，它们只能借助进程内存空间中的 C 结构实例来传递。系统调用将借助寄存器，将其指向该结构实例的一个指针传递给内核。
 - 如果系统调用产生了多个返回数据，没法不能通过返回值机制传递给用户进程。必须通过指定的内存区交换该数据。当然，该内存区必须在用户空间中，使得用户应用程序能够访问。
 
-前面我们提到过 Linux 一个约定：在内核访问自身的内存区时，虚拟地址和物理内存页之间的映射必须时刻存在的，不能出现被换出的情况。但用户空间的内存则不同，页可能被换出，甚至可能尚未分配物理内存页。因而，内核不能简单地反引用用户空间的指针，而必须采用特定的函数，确保目标内存区已经在物理内存中。为确保内核遵守了这种约定，内核在进行实际的系统调用前会将用户内存拷贝到内核（copy\_from\_user）。而当内核需要将一些内容拷贝到用户空间时会使用 copy\_to\_user。
+前面我们提到过 Linux 一个约定：在内核访问自身的内存区时，虚拟地址和物理内存页之间的映射必须时刻存在的，不能出现被换出的情况。但用户空间的内存则不同，页可能被换出，甚至可能尚未分配物理内存页。因而，内核不能简单地反引用用户空间的指针，而必须采用特定的函数，确保目标内存区已经在物理内存中。为确保内核遵守了这种约定，内核在进行实际的系统调用前会将用户内存拷贝到内核（copy_from_user）。而当内核需要将一些内容拷贝到用户空间时会使用 copy_to_user。
 
 下面概述了一些流行的体系结构上进行系统调用的方法。
 
@@ -217,9 +189,9 @@ asmlinkage long sys_getuid(void)
 
 上述的这些对汇编指令的调用都是 C 标准库帮我们实现的，我们的应用程序将参数传递给 C 标准库，C 标准库帮我们把相关参数存入寄存器，并发出和 CPU 体系结构对应的汇编指令，进而让 CPU 切换到内核态，并跳转到内核中的系统调用中枢处理函数。
 
-然后内核面临的任务就是找到和系统调用编号对应的实际处理函数，并向该函数提供必要的参数。内核通过一个 sys\_call\_table 表来查找和系统调用编号对应的处理函数。IA-32 处理器上，对应的系统调用表如下：
+然后内核面临的任务就是找到和系统调用编号对应的实际处理函数，并向该函数提供必要的参数。内核通过一个 sys_call_table 表来查找和系统调用编号对应的处理函数。IA-32 处理器上，对应的系统调用表如下：
 
-```cpp
+```java
 ENTRY(sys_call_table)
 .long sys_restart_syscall /* 0 - old "setup()" system call，used for restarting */ .long sys_exit
 .long sys_fork
@@ -235,13 +207,12 @@ ENTRY(sys_call_table)
 .long sys_fallocate
 ```
 
-内核在使用该表时，就像使用一个数组一样，sys\_call\_table 会指向上表的基地址，当系统调用编号是 5 时，内核就会将该基地址加上编号 5 就是对应处理函数的地址，在调用该处理函数之前，内核会将寄存器中保存的系统调用参数（还记得吗？系统调用通过寄存器传递参数）压入内核栈中，然后内核跳转到对应的处理函数中执行。
+内核在使用该表时，就像使用一个数组一样，sys_call_table 会指向上表的基地址，当系统调用编号是 5 时，内核就会将该基地址加上编号 5 就是对应处理函数的地址，在调用该处理函数之前，内核会将寄存器中保存的系统调用参数（还记得吗？系统调用通过寄存器传递参数）压入内核栈中，然后内核跳转到对应的处理函数中执行。
 
-> 因为内核态和用户态使用两个不同的栈，用户栈在虚拟内存中，内核栈在 task\_struct 结构中保存。系统调用的参数不能像普通用户态进程那样直接在栈上传递，这两个栈之间的切换，在有的体系结构中是由 CPU 特权级别从用户态切换到内核态时 CPU 自动完成，而在其他体系结构中是由内核通过汇编语言完成。
+> 因为内核态和用户态使用两个不同的栈，用户栈在虚拟内存中，内核栈在 task_struct 结构中保存。系统调用的参数不能像普通用户态进程那样直接在栈上传递，这两个栈之间的切换，在有的体系结构中是由 CPU 特权级别从用户态切换到内核态时 CPU 自动完成，而在其他体系结构中是由内核通过汇编语言完成。
 
 系统调用实际处理函数返回值代表了这次系统调用的执行情况，一般来说负数表示错误，0 或者正数表示成功。从错误码到其实际语义的对应关系如下：
 
-```cpp
 #define EPERM /*操作不允许 */
 #define ENOENT /*文件或目录不存在*/
 #define ESRCH /*进程不存在*/
@@ -253,18 +224,17 @@ ENTRY(sys_call_table)
 #define EBADF /*错误的文件编号 */
 #define ECHILD 12345678900 /*没有子进程*/
 ...
-```
 
 当系统调用的实际处理函数返回后，会将返回值放置在内核栈上，然后内核要负责将核心态转换回用户态，然后将系统调用的返回值传递给用户进程，这个返回值的传递和系统调用参数的传递类似，内核会将内核栈上的返回值复制到一个特定的处理器寄存器上（IA-32 上的 eax，Alpha 系统上的 a3 等），标准库会处理该寄存器并将寄存器中的返回值传递给应用程序。
 
-这里还有一个问题，内核是如何跳转回用户进程的执行流中的呢？它怎么知道用户进程原来执行到哪一行的呢？这实际上也是通过内核栈来完成的，在调用实际的处理函数之前，内核不仅将参数寄存器压入内核栈，还将用户进程的指令执行相关的寄存器入栈，在需要返回用户进程的时候，通过栈内保存的内容恢复指令执行相关的寄存器，这个过程我们称之为现场保护和现场恢复。下图就整个系统调用的过程。  
+这里还有一个问题，内核是如何跳转回用户进程的执行流中的呢？它怎么知道用户进程原来执行到哪一行的呢？这实际上也是通过内核栈来完成的，在调用实际的处理函数之前，内核不仅将参数寄存器压入内核栈，还将用户进程的指令执行相关的寄存器入栈，在需要返回用户进程的时候，通过栈内保存的内容恢复指令执行相关的寄存器，这个过程我们称之为现场保护和现场恢复。下图就整个系统调用的过程。
 
 ![[b0de1d37-f3fd-4bdd-841d-08e963c4b286.png|system-call-stack]]
 
 system-call-stack
 
-  
-在上图中，我们还能看到在系统调用处理函数中会判断是否需要执行调度，这一点我们在介绍系统调度的时候就提过，由于有的系统调用耗时较长（周期调度器已经希望收回其执行权，设置了 TIF\_NEED\_RESCHED，但是因为没开启内核抢占，所以只能等主动调度器来完成这部分工作），甚至会阻塞等待资源，这些时候就会执行调度程序，切换进程。
+
+在上图中，我们还能看到在系统调用处理函数中会判断是否需要执行调度，这一点我们在介绍系统调度的时候就提过，由于有的系统调用耗时较长（周期调度器已经希望收回其执行权，设置了 TIF_NEED_RESCHED，但是因为没开启内核抢占，所以只能等主动调度器来完成这部分工作），甚至会阻塞等待资源，这些时候就会执行调度程序，切换进程。
 
 在系统调用结束后，会执行信号处理程序（如果有信号到来），我们之前也介绍了，Linux 默认会沿用 SystemV 的策略：信号到来会打断系统调用并返回 -EINTR，系统调用被打断后处理信号。
 
@@ -285,75 +255,37 @@ system-call-stack
 
 ## 参考内容
 
-\[1\]《Linux内核设计与实现》  
-\[2\]《Linux系统编程》  
-\[3\]《深入理解Linux内核》  
-\[4\]《深入Linux内核架构》  
-\[5\] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)  
-\[6\] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)  
-\[7\] [Linux中的物理内存管理 \[一\]](https://zhuanlan.zhihu.com/p/68465952)  
-\[8\] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)  
-\[9\] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)  
-\[10\] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)  
-\[11\] [linux内核学习笔记-struct vm\_area\_struct](https://blog.csdn.net/ywf861029/article/details/6114794)  
-\[12\] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)  
-\[13\] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)  
-\[14\] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)  
-\[15\] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)  
-\[16\] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)  
-\[17\] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)  
-\[18\] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)  
-\[18\] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)  
-\[19\] [页缓存page cache和地址空间address\_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)  
-\[20\] [rocketmq使用的系统参数（dirty\_background\_ration dirty\_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)  
-\[21\] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)  
-\[22\] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)  
-\[23\] [Linux中的内存回收\[一\]](https://zhuanlan.zhihu.com/p/70964195)  
-\[24\] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)  
-\[25\] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)  
-\[26\] [对 jiffies 溢出、回绕及 time\_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)  
-\[27\] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)  
-\[28\] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)  
-\[29\] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)  
-\[30\] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)  
-\[31\] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)  
-\[32\] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)  
-\[33\] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)
-
-END
-
-引言
-
-系统调用实现
-
-设计基础
-
-追踪系统调用
-
-标准
-
-系统调用的重启
-
-实现
-
-系统调用设计
-
-访问用户空间
-
-系统调用种类
-
-参考内容
-
-**
-
-**
-
-有什么问题，和我聊聊吧～
-
-**
-
-内部资料
-
-INTERNAL
-
-495838
+[1]《Linux内核设计与实现》
+[2]《Linux系统编程》
+[3]《深入理解Linux内核》
+[4]《深入Linux内核架构》
+[5] [Linux 内核进程管理之进程ID](https://www.cnblogs.com/hazir/p/linux_kernel_pid.html)
+[6] [服务器三大体系SMP、NUMA、MPP介绍](http://server.51cto.com/sCollege-198840.htm)
+[7] [Linux中的物理内存管理 [一]](https://zhuanlan.zhihu.com/p/68465952)
+[8] [Linux内核中的page migration和compaction机制简介](http://www.voidcn.com/article/p-ahfmecnz-brq.html)
+[9] [物理地址、虚拟地址（线性地址）、逻辑地址以及MMU的知识](https://blog.csdn.net/macrossdzh/article/details/5954763)
+[10] [逻辑地址](https://baike.baidu.com/item/%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80)
+[11] [linux内核学习笔记-struct vm_area_struct](https://blog.csdn.net/ywf861029/article/details/6114794)
+[12] [Linux中匿名页的反向映射](http://liujunming.top/2017/09/03/Linux%E4%B8%AD%E5%8C%BF%E5%90%8D%E9%A1%B5%E7%9A%84%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84/#%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%E7%9A%84%E5%BC%95%E5%85%A5)
+[13] [系统调用过程详解](https://blog.csdn.net/sodawaterer/article/details/53456516)
+[14] [再谈Linux内核中的RCU机制](http://www.voidcn.com/article/p-odbijlps-bob.html)
+[15] [Unix domain socket 和 TCP/IP socket 的区别](https://jaminzhang.github.io/network/the-difference-between-unix-domain-socket-and-tcp-ip-socket/)
+[16] [Linux通用块设备层](https://www.ilinuxkernel.com/files/Linux.Generic.Block.Layer.pdf)
+[17] [ext2文件系统结构分析](https://blog.csdn.net/YuZhiHui_No1/article/details/50256713)
+[18] [linux ACL权限规划：getfacl,setfacl使用](https://blog.51cto.com/guodong810/1176427)
+[18] [查找——图文翔解RadixTree（基数树）](https://blog.csdn.net/yang_yulei/article/details/46371975)
+[19] [页缓存page cache和地址空间address_space](http://roux.top/2017/10/28/page%20cache%E5%92%8Caddress_space/)
+[20] [rocketmq使用的系统参数（dirty_background_ration dirty_ratio）](https://blog.csdn.net/arkblue/article/details/45796551)
+[21] [Linux内存调节之zone watermark](https://zhuanlan.zhihu.com/p/73539328)
+[22] [Linux的内存回收和交换](https://blog.csdn.net/renwotao2009/article/details/51979343)
+[23] [Linux中的内存回收[一]](https://zhuanlan.zhihu.com/p/70964195)
+[24] [linux内存源码分析 - 内存回收(整体流程)](https://www.cnblogs.com/tolimit/p/5435068.html)
+[25] [Linux 软中断机制分析](https://blog.csdn.net/li_wen01/article/details/82659406)
+[26] [对 jiffies 溢出、回绕及 time_after 宏的理解](https://blog.csdn.net/DLUTBruceZhang/article/details/9919453)
+[27] [learn-linux-network-namespace](https://github.com/caisan/myblog/blob/master/learn-linux-network-namespace.md)
+[28] [显式拥塞通知](https://zh.wikipedia.org/wiki/%E6%98%BE%E5%BC%8F%E6%8B%A5%E5%A1%9E%E9%80%9A%E7%9F%A5)
+[29] [聊聊 TCP 长连接和心跳那些事](https://www.cnkirito.moe/tcp-talk/)
+[30] [关于 TCP/IP，必知必会的十个问题](https://juejin.im/post/598ba1d06fb9a03c4d6464ab)
+[31] [TCP协议三次握手连接四次握手断开和DOS攻击](https://blog.csdn.net/fw0124/article/details/7452695)
+[32] [TCP 的那些事儿（上）](https://coolshell.cn/articles/11564.html)
+[33] [TCP 的那些事儿（下）](https://coolshell.cn/articles/11609.html)
