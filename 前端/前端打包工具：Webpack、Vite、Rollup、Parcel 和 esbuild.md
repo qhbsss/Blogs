@@ -19,9 +19,7 @@ tags:
 
 
 
-Powered by 通义语音合成
 
-通义语音合成
 
 
 随着前端技术的不断发展，JavaScript 的打包工具也日益丰富，各具特色。本文将详细介绍几款主流的打包工具，包括 Webpack、 Vite、Rollup、Parcel 和 esbuild ，并分析它们的特点、优势以及适用场景，同时提供相关代码示例。

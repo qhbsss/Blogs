@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "ATA Article Final",
+  "behavior": "create",
+  "noteContentFormat": "# {{selector:[class^=article_] > h1[class^=title_]}}\n\n> [!info] 文章信息\n> 作者：{{selector:[class^=meta-author_] a}}  \n> 发布：{{selector:[class^=meta-info_] > span:nth-child(1) > span}}  \n> 更新：{{selector:[class^=meta-info_] > span:nth-child(2) > span}}  \n> 来源：{{url}}\n\n{{selectorHtml:[class^=renderer_] .ding-renderer-container|markdown|replace:\"●\":\"-\"|replace:\"-\\n\\n\\n\":\"- \"|replace:\"-\\n\\n\":\"- \"|replace:\"-\\n\":\"- \"}}",
+  "properties": [],
+  "triggers": [
+    "https://ata.atatech.org/articles/"
+  ],
+  "noteNameFormat": "{{selector:[class^=article_] > h1[class^=title_]|safe_name}}",
+  "path": "Clippings/ATA"
+}

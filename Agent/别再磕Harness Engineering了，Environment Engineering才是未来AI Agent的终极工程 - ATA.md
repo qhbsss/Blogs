@@ -23,9 +23,7 @@ AI 辅助创作
 
 
 
-Powered by 通义语音合成
 
-通义语音合成
 
 
 > 三年之内，构建LLM应用的方式经历了四次范式跃迁——Prompt Engineering → Context Engineering → Harness Engineering → Environment Engineering。每一次跃迁都在回答同一个问题： **当模型本身不再是瓶颈时，工程师的价值到底在哪里？**

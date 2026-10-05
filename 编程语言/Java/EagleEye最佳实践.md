@@ -19,7 +19,7 @@ tags:
 
 
 
-1. ## 关于链路追踪
+## 关于链路追踪
 
 ### 1.1 行业背景
 
@@ -78,7 +78,7 @@ tags:
 
 但现实远没有想象的美好，就比如刚刚说的对中间件的支持，也不是所有中间件都支持，比如 SchedulerX 就不支持，原因不详，对于这种情况那就得特殊处理，诸如此类的问题倒也不麻烦，但是总结分享一下，大家也能少走点弯路节省点宝贵的时间，下面分享一下我个人的实践经验。
 
-2. ## 如何将 traceId 打印到日志文件
+## 如何将 traceId 打印到日志文件
 
 ### 2.1 问题
 
@@ -119,7 +119,7 @@ logback.xml pattern 节点添加 traceId 后，就可以在日志中打印出来
 
 %d{HH:mm:ss.SSS} [traceId: %X{EAGLEEYE_TRACE_ID} /rpcId: %X{EAGLEEYE_RPC_ID}] [%thread] ${PID:- } %logger{36} %-5level - %msg%n"
 
-3. ## 某些中间件不支持 EagleEye
+## 某些中间件不支持 EagleEye
 
 ### 3.1 问题说明
 
@@ -376,7 +376,7 @@ public class demoJob extends JavaProcessor {
 }
 ```
 
-4. ## 多线程的EagleEye上下文传递
+## 多线程的EagleEye上下文传递
 
 ### 4.1 问题说明
 
@@ -453,7 +453,7 @@ public void testTrace() {
 }
 ```
 
-5. ## 声明式多线程的上下文传递：@Async
+## 声明式多线程的上下文传递：@Async
 
 ### 5.1 问题说明
 

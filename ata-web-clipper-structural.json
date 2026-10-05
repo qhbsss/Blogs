@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "ATA Article Structural Lists",
+  "behavior": "create",
+  "noteContentFormat": "# {{selector:[class^=article_] > h1[class^=title_]}}\n\n> [!info] 文章信息\n> 作者：{{selector:[class^=meta-author_] a}}  \n> 发布：{{selector:[class^=meta-info_] > span:nth-child(1) > span}}  \n> 更新：{{selector:[class^=meta-info_] > span:nth-child(2) > span}}  \n> 来源：{{url}}\n\n{{selectorHtml:[class^=renderer_] .ding-renderer-container|replace:'/<div[^>]*data-testid=\"list\"[^>]*data-isordered=\"false\"[^>]*>\\s*<div[^>]*data-testid=\"group-list-container\"[^>]*>\\s*<span[^>]*data-testid=\"list-symbol-wrapper\"[^>]*>\\s*<span[^>]*data-testid=\"list-symbol\"[^>]*>.*?<\\/span>\\s*<\\/span>\\s*<div[^>]*data-type=\"paragraph\"[^>]*>(.*?)<\\/div>\\s*<\\/div>\\s*<\\/div>/gs':'<ul><li>$1</li></ul>'|replace:'/<div[^>]*data-testid=\"list\"[^>]*data-isordered=\"true\"[^>]*>\\s*<div[^>]*data-testid=\"group-list-container\"[^>]*>\\s*<span[^>]*data-testid=\"list-symbol-wrapper\"[^>]*>\\s*<span[^>]*data-testid=\"list-symbol\"[^>]*>([0-9]+)\\.<\\/span>\\s*<\\/span>\\s*<div[^>]*data-type=\"paragraph\"[^>]*>(.*?)<\\/div>\\s*<\\/div>\\s*<\\/div>/gs':'<ol start=\"$1\"><li>$2</li></ol>'|markdown}}",
+  "properties": [],
+  "triggers": [
+    "https://ata.atatech.org/articles/"
+  ],
+  "noteNameFormat": "{{selector:[class^=article_] > h1[class^=title_]|safe_name}}",
+  "path": "Clippings/ATA"
+}

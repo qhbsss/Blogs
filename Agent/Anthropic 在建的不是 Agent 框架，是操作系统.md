@@ -133,10 +133,12 @@ Anthropic 博客报告了显著的性能提升 [1]：解耦后 p50 TTFT 降低�
 
 VM 的 dmesg 时间线里有一个关键的跳跃：
 
+```
 [  30.731516] Run /process_api as init process
                     ~~~ 48.5 小时间隔 ~~~
 [174695.927758] virtio_blk: [vdc] new size: 24848 sectors
 [174695.953952] random: crng reseeded due to virtual machine fork
+```
 
 时间从 30 秒跳到了 174695 秒（48.5 小时后），中间的空白是 VM 被冻结为快照的时间。然后 VM 从快照恢复，块设备被热替换为新的后端。每个 Session 拿到自己的 rootfs（Ubuntu 24.04 的 ext4 分区）、Claude Code 程序（squashfs 只读分区）、和环境运行器（squashfs 只读分区）。
 
