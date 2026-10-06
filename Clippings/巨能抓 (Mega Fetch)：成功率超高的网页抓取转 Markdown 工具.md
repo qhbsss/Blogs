@@ -24,7 +24,7 @@ AI辅助创作 50%
 4月1日发表9月21日更新
 
 
-![](redirect_110.png)
+![](<../images/redirect_110.png>)
 
 ## 背景
 

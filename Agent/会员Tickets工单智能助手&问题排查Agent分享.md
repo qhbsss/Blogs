@@ -21,7 +21,7 @@ tags:
 
 我们用 AI 把这件事做成了一条闭环流水线：
 
-![image.png](redirect_41.png)
+![image.png](<../images/redirect_41.png>)
 
 下面分四个部分展开： **① Agent 架构层级 → ② 外部交互链路 → ③ 知识上下文组织 → ④ Agent Loop 实现** 。
 
@@ -33,7 +33,7 @@ tags:
 
 ### 1.1 应用层：面向"受众场景"的定制编排
 
-![image.png](redirect_42.png)
+![image.png](<../images/redirect_42.png>)
 
 应用层是 **流程编排型 workflow** ，直接面向使用者（业务/运营）的场景做定制化处理。它不负责"怎么排查"，只负责"把排查这件事接入到具体的业务场景里，并把结果处理成受众想要的样子"。
 
@@ -64,7 +64,7 @@ tags:
 
 每一种能力，其内部都可以抽象为一个从"意图识别"到"结果综合"的四层闭环模型：
 
-![image.png](redirect_43.png)
+![image.png](<../images/redirect_43.png>)
 
 - **L1 交互与意图理解层** ：提取结构化参数（userId、orderId、timestamp、scene_tag），识别问题类型，判断是否在能力边界内。关键机制有三个—— `userId 补全` （缺失时用昵称反查）、 `边界守卫` （拒绝非会员业务）、 `SOP 路由` （把典型场景映射到标准流程）。
 - **L2 RAG 知识与规则层** ：为工具调用和结果解读提供权威依据，是 Agent 行为的"宪法"。核心是 **查询模板库** （SLS/Holo 的唯一合法模板，只允许替换占位符）、 **业务规则字典** 、 **工具契约** 。
@@ -89,7 +89,7 @@ tags:
 
 思考➡️Act➡️结果——每轮推理步骤的运行模式
 
-![image.png](redirect_44.png)
+![image.png](<../images/redirect_44.png>)
 
 ### 1.3 上下文与工具原子能力层：最稳定的地基
 
@@ -97,7 +97,7 @@ tags:
 
 ### 1.4 三层架构总览
 
-![image.png](redirect_45.png)
+![image.png](<../images/redirect_45.png>)
 
 ---
 
@@ -132,7 +132,7 @@ tags:
 | 6 | **投放钉钉互动卡片** | 见 2.5 |
 | 7 | **打处理完成标记** | 后续重投的相同工单不再处理 |
 
-![image.png](redirect_46.png)
+![image.png](<../images/redirect_46.png>)
 
 ### 2.4 双 Agent 协作：编排层 → 排查本体
 
@@ -145,10 +145,10 @@ tags:
 > 这种"编排层 + 本体"的分工，让 **业务定制** （工单场景怎么接、结果怎么呈现）与 **核心排查能力** （怎么查账号、怎么归因）解耦：本体可以被多个应用层（Tickets、VOC 舆情）复用，而每个应用层可以独立演进自己的入口和输出。
 
 `**ticketSmartAgent**` **（工单智能助手-增强型，应用层/编排型）**
-![image.png](redirect_47.png)
+![image.png](<../images/redirect_47.png>)
 
 `**memberCheckAnswer**` **（会员排查 Agent 本体）**
-![image.png](redirect_48.png)
+![image.png](<../images/redirect_48.png>)
 
 ### 2.5 结果回传：钉钉互动卡片
 
@@ -176,7 +176,7 @@ getAccessToken(appKey, appSecret)
 
 **示意图：**
 
-![image.png](redirect_49.png)
+![image.png](<../images/redirect_49.png>)
 
 ### 2.6 卡片回调：Stream 长连接
 
@@ -184,7 +184,7 @@ getAccessToken(appKey, appSecret)
 
 运营点击卡片按钮后，通过钉钉 **Stream 长连接** （topic `/v1.0/card/instances/callback` ）回调到服务端。处理流程：
 
-![image.png](redirect_50.png)
+![image.png](<../images/redirect_50.png>)
 
 这里有几个"踩过坑"沉淀下来的硬约束，很值得分享，具体见原创ATA文章 [《钉钉互动卡片接入实战：从发送到回调，踩完所有坑》](https://ata.atatech.org/articles/11020736039?spm=ata.25287382.0.0.45a87536RywkCR) ：
 
@@ -194,7 +194,7 @@ getAccessToken(appKey, appSecret)
 
 ### 2.7 落库、报表与人工打标
 
-![image.png](redirect_51.png)
+![image.png](<../images/redirect_51.png>)
 
 - **落库** ：复用 `vip_ai_config` 单表， `type = tickets_work_order_enhanced` ， `data` 字段用 **JSON 承载全部业务数据** （新增字段时 DTO/Adapter/DAL/前端协议全都不用改，这是本方案的关键设计）。
 - **HSF 查询/管理服务** （ `member-ai-client` 协议）： `TicketsDiagnosisQueryService` （queryPage / queryByCode / queryStat）供 OneDay 仪表盘； `TicketsDiagnosisManageService` （updateFeedback / deleteByCode）支持后台补录与删除。后台管理接口 **完全不依赖 Stream** ，是回调链路的天然兜底。
@@ -214,22 +214,22 @@ getAccessToken(appKey, appSecret)
 成本估算：每条工单花费token约等于200万，<=0.5元
 
 诊断明细：
-![image.png](redirect_52.png)
+![image.png](<../images/redirect_52.png>)
 
 准确率指标：
-![image.png](redirect_53.png)
+![image.png](<../images/redirect_53.png>)
 
 诊断详情：
-![image.png](redirect_54.png)
+![image.png](<../images/redirect_54.png>)
 
 诊断耗时指标：
-![image.png](redirect_55.png)
+![image.png](<../images/redirect_55.png>)
 
 提效指标：
-![image.png](redirect_56.png)
+![image.png](<../images/redirect_56.png>)
 
 成本估算：
-![image.png](redirect_57.png) ![image.png](redirect_58.png)
+![image.png](<../images/redirect_57.png>) ![image.png](<../images/redirect_58.png>)
 
 ---
 
@@ -241,7 +241,7 @@ getAccessToken(appKey, appSecret)
 
 会员排查 Agent 的每一个"原子工具"，本质上都是一次对底层数据/服务的封装。通过对 `starrynight/xinxuan-setup` 仓库的代码检索，可以清晰地看到工具的 **来源与分层封装模式** ：
 
-![image.png](redirect_59.png)
+![image.png](<../images/redirect_59.png>)
 
 **核心结论：会员排查 Agent 的工具不是"直连底层"，而是由** `**xinxuan-setup**` **的** `**setup-service**` **统一自建了一层 HSF Provider 做封装聚合，最终由idelab工具箱进行注册（底层本质其实也是一个MCP服务）。**
 
@@ -261,7 +261,7 @@ getAccessToken(appKey, appSecret)
 
 知识库整体分为 **两大类** ，分工明确：详情见： [《AI答疑/排查架构&进展》](https://alidocs.dingtalk.com/i/nodes/14lgGw3P8vxjwogPCgGx0b45V5daZ90D?utm_scene=person_space&iframeQuery=anchorId%3Duu_mrsr0rcbvcmy1rinfi)
 
-![image.png](redirect_60.png)
+![image.png](<../images/redirect_60.png>)
 
 这套分层在于： **排查知识库是 Agent 的"方法论"，规则知识库是业务的"事实源"。** 前者告诉模型"该用哪个工具、怎么用、结果怎么读"，后者告诉模型"这个业务本来是怎么规定的"。二者在 L2 层共同构成了 Agent 行为的约束边界——无论走 SOP 还是 Self-Plan，都必须溯源到知识库， **禁止臆造查询语句、禁止自创归因** 。
 
@@ -297,7 +297,7 @@ Agent Loop 要解决的就是这个问题： **让 Agent 的每一次真实执�
 
 这套闭环的物理载体，是 ideaGoal 云端文件库中的一个公共目录 `问题排查Agent/` 。它的实际结构如下（真实存在、按天累积）：
 
-![image.png](redirect_61.png)
+![image.png](<../images/redirect_61.png>)
 
 > **关键点：执行链会持久化在云端文件库中，便于回溯改进。** 每条日志文件名里的 `sessionId` 与第二部分 2.3 中"落库时生成的同一个 sessionId"完全对应—— **这就是"线上一次真实诊断"与"离线可回溯资产"之间的锚点** 。
 
@@ -305,7 +305,7 @@ Agent Loop 要解决的就是这个问题： **让 Agent 的每一次真实执�
 
 Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
-![image.png](redirect_62.png)
+![image.png](<../images/redirect_62.png>)
 
 #### ① 执行链日志归档（执行链日志归档_21718）
 
@@ -315,7 +315,7 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 排查Agent - memberCheckAnswer下钻示意图：
 
-![image.png](redirect_63.png)
+![image.png](<../images/redirect_63.png>)
 
 #### ② GoldSet样例提炼（金标准样例提炼_22526）
 
@@ -326,7 +326,7 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 示意图：
 
-![image.png](redirect_64.png)
+![image.png](<../images/redirect_64.png>)
 
 #### ③ 会话评测（会话评测_22150）
 
@@ -337,11 +337,11 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 任务示意图：
 
-![image.png](redirect_65.png)
+![image.png](<../images/redirect_65.png>)
 
 ### 4.4 闭环如何"合拢"：从产物到进化
 
-![image.png](redirect_66.png)
+![image.png](<../images/redirect_66.png>)
 
 把三个 sub-agent 串起来，Agent Loop 的完整逻辑是：
 
@@ -354,15 +354,15 @@ Agent Loop 由三个已固化的 ideaGoal 任务（sub-agent）串联而成：
 
 一次自迭代所经历的步骤：
 
-![image.png](redirect_67.png)
+![image.png](<../images/redirect_67.png>)
 
-![image.png](redirect_68.png)
+![image.png](<../images/redirect_68.png>)
 
-![image.png](redirect_69.png)
+![image.png](<../images/redirect_69.png>)
 
 ### 4.5 一张图收束全篇
 
-![image.png](redirect_70.png)
+![image.png](<../images/redirect_70.png>)
 
 ---
 

@@ -22,7 +22,7 @@ MVCC 的实现依赖于：**隐藏字段、Read View、undo log**，在可重复
 >undo log中的历史版本并不是物理上真实存在的，**真实物理存在只有最新的一条记录，其他历史记录都是通过回滚日志推导出来的。**
 
 **Read View中包含以下字段**：
-![](./images/image.png)
+![](<../images/Image.png>)
 ![](https://cdn.xiaolincoding.com/gh/xiaolincoder/ImageHost4@main/mysql/事务隔离/readview结构.drawio.png)
 
 ![](./images/1724059013810_image.png)

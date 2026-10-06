@@ -26,7 +26,7 @@ tags:
 
 我们在里面还发现了：一套近 20 种消息类型的 WebSocket 协议（ `execute(name, input) -> string` 的真实面目）、Firecracker 快照恢复驱动的百毫秒级沙箱启动、三种完全不同的产品（CCR / Baku / BYOC）跑在同一套基础设施上且唯一区别是一个 JSON 字段。更值得注意的是，Managed Agents 的 Agent Loop 独立于 Claude Code 且不支持 context compaction（超过 1M token 直接报错），而它和传统操作系统之间存在一张几乎一一对应的完整 OS 映射表。
 
-![Managed Agents 沙箱解剖：Firecracker microVM 内部结构](redirect.webp)
+![Managed Agents 沙箱解剖：Firecracker microVM 内部结构](<../images/redirect.webp>)
 
 Managed Agents 沙箱解剖：Firecracker microVM 内部结构
 
@@ -44,7 +44,7 @@ Anthropic 的工程博客里藏着一个不太起眼的技术细节 [1]：Claude
 
 这就是 Sutton 核心论点的具体体现：利用大规模计算的方法，总是最终战胜利用人类知识编码的方法。翻译成 Agent 的语言—— **你为模型的局限性写的每一行补偿代码，都会在模型变强的那一天变成技术债。而模型变强的速度，比你还技术债的速度快得多。**
 
-![Bitter Lesson：每一行 harness 代码的保质期都在缩短](redirect_1.webp)
+![Bitter Lesson：每一行 harness 代码的保质期都在缩短](<../images/redirect_1.webp>)
 
 Bitter Lesson：每一行 harness 代码的保质期都在缩短
 
@@ -106,7 +106,7 @@ internal/
 构建元数据显示它依赖 `github.com/anthropics/anthropic/api-go` at `(devel)` ，从 Anthropic 的 monorepo 直接构建。包结构中的 `envtype/anthropic/` 和 `envtype/byoc/` 直接对应 Managed Agents 的两种部署模式。也就是说，逆向工程的入口虽然是一个"Claude Code"的 Session，但发现的是 **Managed Agents 平台的通用基础设施** 。
 
 为什么上述 Claude Code 都加了引号？因为 Managed Agents 平台中的 Agent Loop 其实是独立于 Claude Code 的 Agent 服务。我们发现它还没支持压缩，并且主子 Agent 的实现与 Claude Code 也不一致。（实际测试中，Managed Agents 的 Agent 在上下文超过 1M token 后会直接报错，而不是像 Claude Code 那样触发压缩。）
-![](redirect_2.webp)
+![](<../images/redirect_2.webp>)
 这个差异值得多想一层。Claude Code 做了 context compaction，因为它是面向用户的产品，session 可以持续几小时，上下文必然会爆。Compaction 是一个 UX 妥协：丢失一部分上下文信息，换取 session 继续运行。但 compaction 说白了就是一个关于"模型上下文窗口不够用"的工程补偿。上下文窗口从 4K 到 8K 到 32K 到 200K 到 1M，按这个趋势，10M 甚至更大只是时间问题。到那时，compaction 本身就成了 dead weight，和 Sonnet 4.5 的 context anxiety resets 一样。
 
 Managed Agents 选择不做 compaction，直接在 1M 处报错，看起来像是"没做完"。但从 meta-harness 的框架来理解这个选择：不把关于模型局限性的假设烧进平台层。如果某个 harness（比如 Claude Code 的）需要 compaction，那是 harness 自己的事情，平台不替你做这个决定。
@@ -148,7 +148,7 @@ ext4 分区的 mount count = 11，说明同一个 rootfs 模板至少被 11 个�
 
 所谓"懒加载容器"，做的是虚拟机级别的基础设施工程。
 
-![Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、五层安全隔离、快照恢复流水线](redirect_3.webp)
+![Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、五层安全隔离、快照恢复流水线](<../images/redirect_3.webp>)
 
 Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、五层安全隔离、快照恢复流水线
 
@@ -170,7 +170,7 @@ Managed Agents 沙箱架构蓝图：从 Host 层到 Agent 层的五层架构、�
 
 我在读 Anthropic 工程博客时，最初把 OS 类比当作一种修辞手法。但随着逆向深入，我突然意识到 **这是字面意义上的操作系统工程。**
 
-![传统 OS 与 Agent OS（Managed Agents）的完整映射](redirect_4.webp)
+![传统 OS 与 Agent OS（Managed Agents）的完整映射](<../images/redirect_4.webp>)
 
 传统 OS 与 Agent OS（Managed Agents）的完整映射
 
@@ -221,7 +221,7 @@ Anthropic 把它们合二为一了。Session 既是状态的持久存储（事�
 
 到目前为止，我一直在从"是什么"的角度拆解 Managed Agents。现在切换到"为什么"。Brain-Hands 分离是一个在安全、速度、成本三个维度上同时做优化的设计决策。Anthropic 在"Building effective agents"[6] 中讨论了 Agent 设计的一般原则，而 Managed Agents 的具体实现把这些原则推到了极致。
 
-![Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略](redirect_5.webp)
+![Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略](<../images/redirect_5.webp>)
 
 Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略
 
@@ -267,7 +267,7 @@ Anthropic 工程博客指出 [1]，Brain 和 Hands 解耦后容器的大部分�
 
 Brain-Hands 分离之所以是一个好的架构决策，在于它同时带来了安全、速度、成本等多方面好处。协议隔离提升了安全性，按需路由提升了速度，空闲回收降低了成本。所以我倾向于把 Brain-Hands 分离看作一个设计原则，而非实现细节。 **它更接近于 Agent 基础设施的"用户态/内核态"分离原则。** 操作系统设计中用户态/内核态分离同时服务于安全、性能、资源管理，因为它是正确的抽象层级划分。
 
-![Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略](redirect_6.webp)
+![Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略](<../images/redirect_6.webp>)
 
 Brain-Hands 三维分离架构蓝图：核心架构、execute() 协议桥、三维优化收益、工具路由策略
 
@@ -310,7 +310,7 @@ Anthropic 博客指出 [1]，Managed Agents 平台的目标是 matching Claude's
 5. **更强的模型** 让更多 harness 假设过期
 6. 回到第 1 步
 
-![自进化飞轮：架构在加速自己的前提条件成立](redirect_7.webp)
+![自进化飞轮：架构在加速自己的前提条件成立](<../images/redirect_7.webp>)
 
 自进化飞轮：架构在加速自己的前提条件成立
 
@@ -376,7 +376,7 @@ AWS：Bedrock（Model API）-> Bedrock Agents -> AgentCore（框架无关的 Age
 
 **所有大厂都在从"卖模型调用"走向"卖 Agent 运行时"。** 抽象层级自然上移的结果。就像云计算从 IaaS（卖虚拟机）走向 PaaS（卖运行时）再走向 Serverless（卖函数调用），AI 基础设施也在从 Model API（卖推理调用）走向 Agent API（卖任务完成）。
 
-![Agent API 抽象层级演进蓝图：Model API vs Agent API 对比、四大厂商行业趋同、云计算抽象层级对照](redirect_8.webp)
+![Agent API 抽象层级演进蓝图：Model API vs Agent API 对比、四大厂商行业趋同、云计算抽象层级对照](<../images/redirect_8.webp>)
 
 Agent API 抽象层级演进蓝图：Model API vs Agent API 对比、四大厂商行业趋同、云计算抽象层级对照
 
@@ -430,7 +430,7 @@ Anthropic 在赌 `execute(name, input) -> string` 能做到同样的事。
 
 如果你正在建 Agent 产品，这篇文章的分析可以浓缩成三个值得问自己的问题：
 
-![Agent 开发者自检：三个关键问题](redirect_9.webp)
+![Agent 开发者自检：三个关键问题](<../images/redirect_9.webp>)
 
 Agent 开发者自检：三个关键问题
 

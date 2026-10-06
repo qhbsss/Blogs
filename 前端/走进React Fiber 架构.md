@@ -28,7 +28,7 @@ Fiber能否给我们答案，又将带给我们什么惊喜，卷起一波新的
 
 ## react协调是什么
 
-![](redirect_20.png)
+![](<../images/redirect_20.png>)
 
 > 协调是react中重要的一部分，其中包含了如何对新旧树差异进行比较以达到仅更新差异的部分。
 
@@ -43,7 +43,7 @@ Fiber能否给我们答案，又将带给我们什么惊喜，卷起一波新的
 
 老一辈人常常把电影称为“移动的画”，我们小时候看的手翻书就是快速翻动的一页页画，其本质上实现原理跟动画是一样的。
 
-![](redirect_21.png)
+![](<../images/redirect_21.png>)
 
 帧：在动画过程中，每一幅静止画面即为一“帧”；
 帧率：是用于测量显示帧数的量度，测量单位为“每秒显示帧数”（Frame per Second，FPS）或“赫兹”；
@@ -54,11 +54,11 @@ Fiber能否给我们答案，又将带给我们什么惊喜，卷起一波新的
 
 浏览器中的GUI渲染线程和JS引擎线程
 
-![](redirect_22.png)
+![](<../images/redirect_22.png>)
 
 > 在浏览器中GUI渲染线程与JS引擎线程是互斥的，当JS引擎执行时GUI线程会被挂起（相当于被冻结了），GUI更新会被保存在一个队列中等到JS引擎空闲时立即被执行。
 
-![](redirect_23.png)
+![](<../images/redirect_23.png>)
 浏览器拥挤的主线程
 
 React16 推出Fiber之前协调算法是Stack Reconciler，即递归遍历所有的 Virtual DOM 节点执行Diff算法，一旦开始便无法中断，直到整颗虚拟dom树构建完成后才会释放主线程，因其JavaScript单线程的特点，若当下组件具有复杂的嵌套和逻辑处理，diff便会堵塞UI进程，使动画和交互等优先级相对较高的任务无法立即得到处理，造成页面卡顿掉帧，影响用户体验。
@@ -118,10 +118,10 @@ function b() {
 ```
 
 a执行性能截图：掉帧严重，普遍fps为1139.6ms
-![](redirect_24.png)
+![](<../images/redirect_24.png>)
 
 b执行性能截图: fps处于15ms～19ms
-![](redirect_25.png)
+![](<../images/redirect_25.png>)
 
 > 究其原因是因为浏览器的主线程需要处理GUI描绘，时间器处理，事件处理，JS执行，远程资源加载等，当做某件事，只有将它做完才能做下一件事。如果有足够的时间，浏览器是会对我们的代码进行编译优化（JIT）及进行热代码优化，一些DOM操作，内部也会对reflow进行处理。reflow是一个性能黑洞，很可能让页面的大多数元素进行重新布局。
 
@@ -156,7 +156,7 @@ JavaScript原生的执行模型：通过调用栈来管理函数执行状态。
 
 react以往的渲染就是使用原生执行栈来管理组件树的递归渲染，当其层次较深component不断递归子节点，无法被打断就会导致主线程堵塞ui卡顿。
 
-![](redirect_26.png)
+![](<../images/redirect_26.png>)
 
 ##### 可控的调用栈
 
@@ -164,7 +164,7 @@ react以往的渲染就是使用原生执行栈来管理组件树的递归渲染
 
 它的特性就是时间分片(time slicing)和暂停(supense)。
 
-![](redirect_27.png)
+![](<../images/redirect_27.png>)
 
 #### 具备扁平化的链表数据存储结构的js对象：
 
@@ -271,7 +271,7 @@ type Fiber = {|
 
 ### 链表结构
 
-![](redirect_28.png)
+![](<../images/redirect_28.png>)
 fiber中最为重要的是return、child、sibling指针，连接父子兄弟节点以构成一颗单链表fiber树，其扁平化的单链表结构的特点将以往递归遍历改为了循环遍历，实现深度优先遍历。
 
 React16特别青睐于链表结构，链表在内存里不是连续的，动态分配，增删方便，轻量化，对异步友好
@@ -296,7 +296,7 @@ function createWorkInProgress(current, ...) {
 }
 ```
 
-![](redirect_29.png)
+![](<../images/redirect_29.png>)
 **alternate** fiber可以理解为一个fiber版本池，用于交替记录组件更新（切分任务后变成多阶段更新）过程中fiber的更新，因为在组件更新的各阶段，更新前及更新过程中fiber状态并不一致，在需要恢复时（如发生冲突），即可使用另一者直接回退至上一版本fiber。
 
 Dan在 [Beyond React 16](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html) 演讲中用了一个非常恰当的比喻，那就是Git 功能分支，你可以将 WIP 树想象成从旧树中 Fork 出来的功能分支，你在这新分支中添加或移除特性，即使是操作失误也不会影响旧的分支。当你这个分支经过了测试和完善，就可以合并到旧分支，将其替换掉。
@@ -439,8 +439,8 @@ React能够非常快速地更新，并且为了实现高性能，它采用了一
 
 每个fiber节点都可以具有与之相关的effects, 通过fiber节点中的effectTag字段表示。
 
-![](redirect_30.png)
-![](redirect_31.png)
+![](<../images/redirect_30.png>)
+![](<../images/redirect_31.png>)
 
 此列表的目标是标记具有DOM更新或与其关联的其他effects的节点，此列表是WIP tree的子集，并使用nextEffect属性，而不是current和workInProgress树中使用的child属性进行链接。
 
@@ -460,7 +460,7 @@ Reconciliation分为两个阶段：reconciliation 和 commit
 
 #### reconciliation
 
-![](redirect_32.png)
+![](<../images/redirect_32.png>)
 从图中可以看到，可以把reconciler阶段分为三部分，分别以红线划分。简单的概括下三部分的工作：
 
 1. 第一部分从 ReactDOM.render() 方法开始，把接收的React Element转换为Fiber节点，并为其设置优先级，记录update等。这部分主要是一些数据方面的准备工作。
@@ -469,7 +469,7 @@ Reconciliation分为两个阶段：reconciliation 和 commit
 
 #### commit阶段
 
-![](redirect_33.png)
+![](<../images/redirect_33.png>)
 
 这个阶段主要做的工作拿到reconciliation阶段产出的所有更新工作，提交这些工作并调用渲染模块（react-dom）渲染UI。完成UI渲染之后，会调用剩余的生命周期函数，所以异常处理也会在这部分进行
 
@@ -597,18 +597,18 @@ expiration算法源码
 > requestIdleCallback：
 > 在浏览器空闲时段内调用的函数排队。是开发人员可以在主事件循环上执行后台和低优先级工作而不会影响延迟关键事件，如动画和输入响应。
 
-![](redirect_34.png)
+![](<../images/redirect_34.png>)
 
 其在回调参数中IdleDeadline可以获取到当前帧剩余的时间。利用这个信息可以合理的安排当前帧需要做的事情，如果时间足够，那继续做下一个任务，如果时间不够就歇一歇。
 
 > requestAnimationFrame：告诉浏览器你希望执行一个动画，并且要求浏览器在下次重绘之前调用指定的回调函数更新动画
 
-![](redirect_35.png)
+![](<../images/redirect_35.png>)
 
 > 合作式调度:这是一种’契约‘调度，要求我们的程序和浏览器紧密结合，互相信任。比如可以由浏览器给我们分配执行时间片，我们要按照约定在这个时间内执行完毕，并将控制权还给浏览器。
 
-![](redirect_36.png)
-![](redirect_37.png)
+![](<../images/redirect_36.png>)
+![](<../images/redirect_37.png>)
 
 Fiber所做的就是需要分解渲染任务，然后根据优先级使用API调度，异步执行指定任务：
 
@@ -622,7 +622,7 @@ Fiber所做的就是需要分解渲染任务，然后根据优先级使用API调
 因为其在协调阶段任务可被打断的特点，任务在切片后运行完一段便将控制权交还到react负责任务调度的模块，再根据任务的优先级，继续运行后面的任务。所以会导致某些组件渲染到一半便会打断以运行其他紧急，优先级更高的任务，运行完却不会继续之前中断的部分，而是重新开始，所以在协调的所有生命周期都会面临这种被多次调用的情况。
 为了限制这种被多次重复调用，耗费性能的情况出现，react官方一步步把处在协调阶段的部分生命周期进行移除。
 
-![](redirect_38.png)
+![](<../images/redirect_38.png>)
 
 废弃：
 
@@ -637,7 +637,7 @@ Fiber所做的就是需要分解渲染任务，然后根据优先级使用API调
 - [componentDidcatch](https://zh-hans.reactjs.org/docs/react-component.html#componentdidcatch)
 - [staic getderivedstatefromerror](https://zh-hans.reactjs.org/docs/react-component.html#static-getderivedstatefromerror)
 
-![newLifeCircle](redirect_39.png)
+![newLifeCircle](<../images/redirect_39.png>)
 
 newLifeCircle
 
@@ -792,7 +792,7 @@ export function unstable_createResource(fetch, maybeHashInput) {
 }
 ```
 
-![](redirect_40.png)
+![](<../images/redirect_40.png>)
 
 为此，React使用Promises。
 组件可以在其render方法（或在组件的渲染过程中调用的任何东西，例如新的静态getDerivedStateFromProps）中抛出Promise。

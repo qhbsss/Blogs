@@ -56,7 +56,7 @@ js基础检测网址
 
 - 仔细查看，可以看到这个windows包含了很多方法，属性
 
-![在这里插入图片描述](redirect.png)
+![在这里插入图片描述](<../images/redirect.png>)
 一个窗口有一个基类对象 `Object` ，并且有个 `prototype`,其中有个属性 `constructor`
 
 1. 其中windows有个 `Object` ，翻译为“ `对象` ”
@@ -65,7 +65,7 @@ js基础检测网址
 
 最后得到一个 `[native code]` 表示浏览器底层实现的c++机器语言代码，这已经到达了底层代码
 
-![在这里插入图片描述](redirect_1.png)
+![在这里插入图片描述](<../images/redirect_1.png>)
 
 ## 3、__proto__(隐式原型)
 
@@ -78,20 +78,20 @@ js基础检测网址
 - 然后打印三个对象的 `__proto__` 属性，b方法和dog类，直接输出到了c++底层代码部分
 - 重点看a，打印的是一个 `Number` 对象，那么说明 `__proto__` 指向的是 `Number` 数据类型对象，展开 `Number` 对象可以看到其拥有 `__proto__`,
 - 方法，和类原型
-	![在这里插入图片描述](redirect_2.png)
+	![在这里插入图片描述](<../images/redirect_2.png>)
 	那么如果多打印一次此属性，可以发现 `constructor` 指向的是 `Object（）` ，对象！！！并且再无 `__proto__`
-	![在这里插入图片描述](redirect_3.png)
+	![在这里插入图片描述](<../images/redirect_3.png>)
 	如果继续打印呢,可看到为空，那么这个其实已经结束，知道定位到 `window.Object.prototype` 为止
-	![在这里插入图片描述](redirect_4.png)
+	![在这里插入图片描述](<../images/redirect_4.png>)
 	打印，prototype， `原型形态` ，可以看到a变量没有 `显示原型` ，只有函数类有
-	![在这里插入图片描述](redirect_5.png)
+	![在这里插入图片描述](<../images/redirect_5.png>)
 	结论理解：
 
 1、 `__proto__` 有点想下一级查找的意思，查找 `constructor`
 2、每一个（函数，方法）构造器’ `constructor` '都有‘ `prototype` ’属性即 `显示原型`
 3、层级查找直到windows.Object.prototype为止，此时打印显示原型 undefined，隐式原型为 null
 
-![在这里插入图片描述](redirect_6.png)
+![在这里插入图片描述](<../images/redirect_6.png>)
 
 ## 4、原型链详解
 
@@ -103,7 +103,7 @@ var a = [1,2,3];
 a.__proto__ === Array.prototype; // true
 12
 
-![在这里插入图片描述](redirect_7.png)
+![在这里插入图片描述](<../images/redirect_7.png>)
 
 ①所有引用类型都有一个_proto_(隐式原型)属性，属性值是一个普通的对象 (__proto__指向prototype,所以也可以说值直接是 prototype)
 ②所有函数都有一个prototype(原型)属性，属性值是一个普通的对象
@@ -122,12 +122,12 @@ function Person(name) {
 ```
 12345
 
-![在这里插入图片描述](redirect_8.png)
+![在这里插入图片描述](<../images/redirect_8.png>)
 在child中查找某个属性时，会执行下面步骤 ：
-![在这里插入图片描述](redirect_9.png)
+![在这里插入图片描述](<../images/redirect_9.png>)
 
 访问链路：
-![在这里插入图片描述](redirect_10.png)
+![在这里插入图片描述](<../images/redirect_10.png>)
 
 ①一直往上层查找，直到到null还没有找到，则返回 undefined
 ②Object.prototype.*proto* === null
@@ -149,9 +149,9 @@ function Person() {}
 ```
 1234
 
-![在这里插入图片描述](redirect_11.png)
+![在这里插入图片描述](<../images/redirect_11.png>)
 Object是JS中所有对象数据类型的基类(最顶层的类)在Object.prototype上没有 `_proto_` 这个属性
-![在这里插入图片描述](redirect_12.png)
+![在这里插入图片描述](<../images/redirect_12.png>)
 相关文章：
 [https://zhuanlan.zhihu.com/p/93263239](https://zhuanlan.zhihu.com/p/93263239)
 [https://blog.csdn.net/MrWangJB/article/details/107932306](https://blog.csdn.net/MrWangJB/article/details/107932306)
@@ -208,7 +208,7 @@ true
 12345678910
 
 程序都是自上运行，在声明式中，因为执行到b()，还没有定义函数，则报错，但是a()是函数式，是全局可以调用的，这也就为什么在看js文件时候，发现一些函数写在最后，也能运行
-![在这里插入图片描述](redirect_13.png)
+![在这里插入图片描述](<../images/redirect_13.png>)
 
 匿名函数扩展
 
@@ -269,10 +269,10 @@ function Person(name) {
 
 - 这是因为，var声明了是私有属性
 
-![在这里插入图片描述](redirect_14.png)
+![在这里插入图片描述](<../images/redirect_14.png>)
 
 那么通过return也不能真正返回
-![在这里插入图片描述](redirect_15.png)
+![在这里插入图片描述](<../images/redirect_15.png>)
 
 ### 1.2 特权方法
 
@@ -348,7 +348,7 @@ function People() {
 ```
 123456789101112
 
-![在这里插入图片描述](redirect_16.png)
+![在这里插入图片描述](<../images/redirect_16.png>)
 
 > 这个例子中的Person构造函数与getName()和setName()方法一样，都有权访问私有变量name。在这种模式下，变量name就变成了一个静态的、由所有实例共享的属性。也就是说，在一个实力上调用setName()会影响所有实例。而调用setName()或新建一个Person实例都会赋予name属性一个新值。结果就是所有实例都会返回相同的值。
 >
@@ -467,7 +467,7 @@ child1.sex
 123456789101112
 
 在Child中有 `name` 属性，但是没有 `sex` 属性，在设置继承后，先是打印 `name` ，会直接到 `child1` 实例对象查找，查找到了，所以输出为“ `child` ”，那么打印 `sex` 时候， `child1` 实例对象并没有，于是 `__proto__` 继续查找，其 `显示原型` ，即构造函数的 `prototype`,于是在 `显示原型` 找到了 `sex` ，输出 `box`
-![在这里插入图片描述](redirect_17.png)
+![在这里插入图片描述](<../images/redirect_17.png>)
 
 ### 2.2 class类继承：extends、super()
 
@@ -493,10 +493,10 @@ class Parent {
 ```
 12345678910111213141516
 
-![在这里插入图片描述](redirect_18.png)
+![在这里插入图片描述](<../images/redirect_18.png>)
 相关文章
 [https://www.cnblogs.com/ndos/p/8138263.html](https://www.cnblogs.com/ndos/p/8138263.html)
-![在这里插入图片描述](redirect_19.png)
+![在这里插入图片描述](<../images/redirect_19.png>)
 
 ## 3、多态
 

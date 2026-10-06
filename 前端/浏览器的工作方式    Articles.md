@@ -53,7 +53,7 @@ tags:
 5. **界面后端** ：用于绘制组合框和窗口等基本 widget。此后端公开的接口并非平台专用。在底层，它使用操作系统界面方法。
 6. **JavaScript 解释器** 。用于解析和执行 JavaScript 代码。
 7. **数据存储** 。这是持久层。浏览器可能需要在本地保存各种数据，例如 Cookie。浏览器还支持 localStorage、IndexedDB、WebSQL 和 FileSystem 等存储机制。
-![浏览器组件](browser-components-9cd8ff834cc9c_2880.png)
+![浏览器组件](<../images/browser-components-9cd8ff834cc9c_2880.png>)
 
 图 1：浏览器组件
 
@@ -75,7 +75,7 @@ tags:
 
 之后，渲染引擎的基本流程如下：
 
-![渲染引擎基本流程](rendering-engine-basic-fl-2fba02b24e871_.png)
+![渲染引擎基本流程](<../images/rendering-engine-basic-fl-2fba02b24e871_.png>)
 
 图 2：渲染引擎基本流程
 
@@ -89,11 +89,11 @@ tags:
 
 #### 主要流程示例
 
-![WebKit 主要流程。](webkit-main-flow-b779d50c0cf28_2880.png)
+![WebKit 主要流程。](<../images/webkit-main-flow-b779d50c0cf28_2880.png>)
 
 图 3：WebKit 主流程
 
-![Mozilla 的 Gecko 呈现引擎主流程。](mozillas-gecko-rendering-b18e445544965_2.jpg)
+![Mozilla 的 Gecko 呈现引擎主流程。](<../images/mozillas-gecko-rendering-b18e445544965_2.jpg>)
 
 图 4：Mozilla 的 Gecko 渲染引擎主流程
 
@@ -109,7 +109,7 @@ Gecko 将采用视觉格式的元素的树称为“帧树”。每个元素都�
 
 例如，解析表达式 `2 + 3 - 1` 可能会返回以下树：
 
-![数学表达式树节点。](mathematical-expression-t-6681a2511ead2_.png)
+![数学表达式树节点。](<../images/mathematical-expression-t-6681a2511ead2_.png>)
 
 图 5：数学表达式树节点
 
@@ -129,7 +129,7 @@ Gecko 将采用视觉格式的元素的树称为“帧树”。每个元素都�
 
 解析器知道如何移除空格和换行符等无关紧要的字符。
 
-![从源文档到解析树](from-source-document-par-c9c8c59da1ef2_2.png)
+![从源文档到解析树](<../images/from-source-document-par-c9c8c59da1ef2_2.png>)
 
 图 6：从源文档到解析树
 
@@ -141,7 +141,7 @@ Gecko 将采用视觉格式的元素的树称为“帧树”。每个元素都�
 
 在许多情况下，解析树不是最终产品。解析通常用于翻译：将输入文档转换为其他格式。例如编译。将源代码编译为机器代码的编译器会先将其解析为解析树，然后将该树转换为机器代码文档。
 
-![编译流程](compilation-flow-57cfc3aa68a53_2880.png)
+![编译流程](<../images/compilation-flow-57cfc3aa68a53_2880.png>)
 
 图 7：编译流程
 
@@ -257,7 +257,7 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 此标记会转换为以下 DOM 树：
 
-![示例标记的 DOM 树](dom-tree-the-example-mar-70be67fe14c9a_2.png)
+![示例标记的 DOM 树](<../images/dom-tree-the-example-mar-70be67fe14c9a_2.png>)
 
 图 8：示例标记的 DOM 树
 
@@ -283,7 +283,7 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 分词器会识别令牌，将其传递给树构造函数，并使用下一个字符来识别下一个令牌，以此类推，直到输入结束。
 
-![HTML 解析流程（摘自 HTML5 规范）](html-parsing-flow-taken-6118c51b92b56_28.png)
+![HTML 解析流程（摘自 HTML5 规范）](<../images/html-parsing-flow-taken-6118c51b92b56_28.png>)
 
 图 9：HTML 解析流程（摘自 HTML5 规范）
 
@@ -305,7 +305,7 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 现在，我们回到 **“代码处于打开状态”** 。 使用下一个输入 `/` 会导致创建 `end tag token` 并移至 **“标记名称状态”** 。再次强调一下，我们会一直保持此状态，直到达到 `>` 。然后，系统会发出新的代码令牌，我们会返回到 **“数据状态”** 。 系统会将 `</html>` 输入视为前面的示例。
 
-![对示例输入进行词元化处理](tokenizing-example-input-9d0cc36689681_2.png)
+![对示例输入进行词元化处理](<../images/tokenizing-example-input-9d0cc36689681_2.png>)
 
 图 10：对示例输入进行令牌化
 
@@ -331,7 +331,7 @@ DOM 与标记之间几乎是一对一的关系。例如：
 
 收到正文结束令牌后，系统会转换为 **“正文后”** 模式。现在，我们将收到 html 结束标记，这会将我们转换到 **“body 后”** 模式。收到文件结束令牌后，解析将结束。
 
-![示例 HTML 的树构建。](tree-construction-exampl-4e9757a851f96.gif)
+![示例 HTML 的树构建。](<../images/tree-construction-exampl-4e9757a851f96.gif>)
 
 图 11：示例 HTML 的树状结构
 
@@ -530,7 +530,7 @@ ruleset
 
 WebKit 使用 [Flex 和 Bison](#generating_parsers_automatically) 解析器生成器从 CSS 语法文件自动创建解析器。如解析器简介中所述，Bison 会创建自底向上的移位-规约解析器。Firefox 使用手动编写的顶向下解析器。在这两种情况下，每个 CSS 文件都会解析为 StyleSheet 对象。每个对象都包含 CSS 规则。CSS 规则对象包含选择器和声明对象，以及与 CSS 语法对应的其他对象。
 
-![解析 CSS。](parsing-css-4531ebee58764_2880.png)
+![解析 CSS。](<../images/parsing-css-4531ebee58764_2880.png>)
 
 图 12：解析 CSS
 
@@ -617,7 +617,7 @@ RenderObject* RenderObject::createObject(Node* node, RenderStyle* style)
 
 某些渲染对象与 DOM 节点相对应，但不在树中的同一位置。浮动元素和绝对定位元素不在流中，放置在树的其他部分，并映射到真实框架。占位符框应该是它们原本所在的位置。
 
-![渲染树和相应的 DOM 树。](the-render-tree-the-corr-f699894ef4c75_2.png)
+![渲染树和相应的 DOM 树。](<../images/the-render-tree-the-corr-f699894ef4c75_2.png>)
 
 图 13：渲染树和对应的 DOM 树。“视口”是初始容器块。在 WebKit 中，它将是“RenderView”对象
 
@@ -673,7 +673,7 @@ WebKit 节点引用样式对象 (RenderStyle)。 在某些情况下，这些对�
 
 Firefox 还提供了两个额外的树来简化样式计算：规则树和样式上下文树。WebKit 也具有样式对象，但它们未存储在样式上下文树等树中，只有 DOM 节点指向其相关样式。
 
-![Firefox 样式的上下文树。](firefox-style-context-tre-f578b75b74df7_.png)
+![Firefox 样式的上下文树。](<../images/firefox-style-context-tre-f578b75b74df7_.png>)
 
 图 14：Firefox 样式的上下文树。
 
@@ -683,7 +683,7 @@ Firefox 还提供了两个额外的树来简化样式计算：规则树和样式
 
 其基本思想是将树路径视为字典中的字词。假设我们已经计算出以下规则树：
 
-![计算的规则树](computed-rule-tree-f874f412bbaf_2880.png)
+![计算的规则树](<../images/computed-rule-tree-f874f412bbaf_2880.png>)
 
 图 15：计算出的规则树。
 
@@ -743,13 +743,13 @@ div span {margin-bottom:4px}
 
 生成的规则树如下所示（节点用节点名称标记：它们指向的规则的编号）：
 
-![规则树](the-rule-tree-23f05b0dac33f_2880.png)
+![规则树](<../images/the-rule-tree-23f05b0dac33f_2880.png>)
 
 图 16：规则树
 
 上下文树将如下所示（节点名称：指向的规则节点）：
 
-![上下文树。](the-context-tree-771124b7cb80d_2880.png)
+![上下文树。](<../images/the-context-tree-771124b7cb80d_2880.png>)
 
 图 17：上下文树
 
@@ -910,7 +910,7 @@ HTML 使用基于流的布局模型，这意味着在大多数情况下，可以
 
 当渲染程序脏时，系统会触发增量布局（异步）。例如，当额外内容从网络传入并添加到 DOM 树后，将新的渲染程序附加到渲染树中时。
 
-![增量布局。](incremental-layout-da3da0a148135_2880.png)
+![增量布局。](<../images/incremental-layout-da3da0a148135_2880.png>)
 
 图 18：增量布局 - 仅排列脏渲染程序及其子项
 
@@ -1037,7 +1037,7 @@ while (!mExiting)
 
 每个框都有一个内容区域（例如文本、图片等），以及可选的周围内边距、边框和边距区域。
 
-![CSS2 盒模型](css2-box-model-9c2ab852d1fb4_2880.jpg)
+![CSS2 盒模型](<../images/css2-box-model-9c2ab852d1fb4_2880.jpg>)
 
 图 19：CSS2 盒模型
 
@@ -1081,25 +1081,25 @@ none: no box is generated.
 
 版块框：用于构成版块，在浏览器窗口中具有自己的矩形。
 
-![屏蔽框。](block-box-b5c0bff4a44d2_2880.png)
+![屏蔽框。](<../images/block-box-b5c0bff4a44d2_2880.png>)
 
 图 20：分块框
 
 内嵌盒：没有自己的块，但位于包含块内。
 
-![内嵌框。](inline-boxes-a9ff03002e7e2_2880.png)
+![内嵌框。](<../images/inline-boxes-a9ff03002e7e2_2880.png>)
 
 图 21：内嵌框
 
 区块的格式为垂直排列。内嵌内容采用水平格式。
 
-![块级格式和内嵌格式。](block-inline-formatting-a8450c63cf457_28.png)
+![块级格式和内嵌格式。](<../images/block-inline-formatting-a8450c63cf457_28.png>)
 
 图 22：块级格式和内嵌格式
 
 内嵌框放置在线条或“线条框”内。 如果这些框采用“基准”对齐方式（即元素的底部与另一个框的非底部对齐），线条的高度至少与最高的框一样高，但可以更高。 如果容器宽度不足，内嵌内容将被放置在多行中。这通常是段落中发生的情况。
 
-![线条。](lines-68c55a378a7ff_2880.png)
+![线条。](<../images/lines-68c55a378a7ff_2880.png>)
 
 图 23：线条
 
@@ -1109,7 +1109,7 @@ none: no box is generated.
 
 相对定位 - 按常规方式定位，然后按所需的增量移动。
 
-![相对定位。](relative-positioning-fceed0670b8c5_2880.png)
+![相对定位。](<../images/relative-positioning-fceed0670b8c5_2880.png>)
 
 图 24：相对定位
 
@@ -1124,7 +1124,7 @@ none: no box is generated.
 
 将如下所示：
 
-![浮点型。](float-dd9b790210284_2880.png)
+![浮点型。](<../images/float-dd9b790210284_2880.png>)
 
 图 25：浮点数
 
@@ -1132,7 +1132,7 @@ none: no box is generated.
 
 无论正常流程如何，布局都会精确定义。该元素不参与正常流程。这些尺寸是相对于容器而言的。在固定模式下，容器是视口。
 
-![固定定位。](fixed-positioning-881933fcb1a2f_2880.png)
+![固定定位。](<../images/fixed-positioning-881933fcb1a2f_2880.png>)
 
 图 26：固定定位
 
@@ -1167,7 +1167,7 @@ none: no box is generated.
 
 结果如下：
 
-![固定定位。](fixed-positioning-84a46b366dc9a_2880.png)
+![固定定位。](<../images/fixed-positioning-84a46b366dc9a_2880.png>)
 
 图 27：固定定位
 
