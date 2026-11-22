@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200px" height="684px" viewBox="0 0 1200 684" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>linux-io-copy_file_range</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="444" height="71"></rect>
+        <filter x="-1.6%" y="-7.0%" width="103.2%" height="119.7%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-3" x="0" y="0" width="183" height="40" rx="8"></rect>
+        <filter x="-3.8%" y="-12.5%" width="107.7%" height="135.0%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-5" x="0" y="0" width="183" height="40" rx="8"></rect>
+        <filter x="-3.8%" y="-12.5%" width="107.7%" height="135.0%" filterUnits="objectBoundingBox" id="filter-6">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-7" x="0" y="0" width="300" height="40" rx="8"></rect>
+        <filter x="-2.3%" y="-12.5%" width="104.7%" height="135.0%" filterUnits="objectBoundingBox" id="filter-8">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-9" x="0" y="0" width="145" height="40" rx="8"></rect>
+        <filter x="-4.8%" y="-12.5%" width="109.7%" height="135.0%" filterUnits="objectBoundingBox" id="filter-10">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-11" x="0" y="0" width="145" height="40" rx="8"></rect>
+        <filter x="-4.8%" y="-12.5%" width="109.7%" height="135.0%" filterUnits="objectBoundingBox" id="filter-12">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-13" x="0" y="0" width="145" height="40" rx="8"></rect>
+        <filter x="-4.8%" y="-12.5%" width="109.7%" height="135.0%" filterUnits="objectBoundingBox" id="filter-14">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="linux-io-copy_file_range" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#EFF1F3" x="0" y="0" width="1200" height="684"></rect>
+        <g id="Copyright" transform="translate(463, 0)">
+            <text id="@panjf2000" fill="#979797" font-family="Futura-Medium, Futura" font-size="14" font-weight="400">
+                <tspan x="97.5019531" y="42">@panjf2000</tspan>
+            </text>
+            <text id="title" fill="#50514F" font-family="Helvetica" font-size="24" font-weight="normal">
+                <tspan x="0.916015625" y="23">Linux I/O copy_file_range</tspan>
+            </text>
+        </g>
+        <g id="hardware" transform="translate(285, 534)">
+            <path d="M0,0 L630,0 L630,141 L0,141 L0,0 Z" id="Path-5" stroke="#979797" stroke-width="3" stroke-dasharray="5"></path>
+            <text id="Hardware" fill="#50514F" font-family="Futura-Medium, Futura" font-size="20" font-weight="400">
+                <tspan x="4.22363281" y="21">Hardware</tspan>
+            </text>
+            <g id="disk" transform="translate(94, 51)">
+                <g id="Rectangle">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                    <use fill="#AED9E0" fill-rule="evenodd" xlink:href="#path-1"></use>
+                </g>
+                <text id="Disk" font-family="Futura-Medium, Futura" font-size="20" font-weight="400" fill="#FDFFFD">
+                    <tspan x="3.8671875" y="21"> </tspan>
+                    <tspan x="10.0390625" y="21" font-size="24">Disk</tspan>
+                </text>
+            </g>
+        </g>
+        <path id="Line-20" d="M450.83837,189.861082 L450.988644,190.849726 L467.884,302.008 L473.816675,301.107061 L469,316 L459.975654,303.210896 L465.907,302.309 L449.011356,191.150274 L448.861082,190.16163 L450.83837,189.861082 Z" fill="#979797" fill-rule="nonzero"></path>
+        <path id="Line" d="M749.152739,189.86768 L751.13232,190.152739 L750.989791,191.14253 L734.984,302.285 L740.923951,303.140642 L732,316 L727.066884,301.145224 L733.005,302 L749.010209,190.85747 L749.152739,189.86768 Z" fill="#979797" fill-rule="nonzero"></path>
+        <g id="user-buffer" transform="translate(358, 151)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                <use fill="#EAD2AC" fill-rule="evenodd" xlink:href="#path-3"></use>
+            </g>
+            <text id="File-descriptor" font-family="Futura-Medium, Futura" font-size="18" font-weight="400" fill="#FEFFFD">
+                <tspan x="34.3349609" y="27">File descriptor</tspan>
+            </text>
+        </g>
+        <g id="user-buffer-2" transform="translate(659, 151)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
+                <use fill="#EAD2AC" fill-rule="evenodd" xlink:href="#path-5"></use>
+            </g>
+            <text id="File-descriptor" font-family="Futura-Medium, Futura" font-size="18" font-weight="400" fill="#FEFFFD">
+                <tspan x="33.8349609" y="27">File descriptor</tspan>
+            </text>
+        </g>
+        <g id="user-proc" transform="translate(450, 99)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
+                <use fill="#9CAFB7" fill-rule="evenodd" xlink:href="#path-7"></use>
+            </g>
+            <text id="User-process" font-family="Futura-Medium, Futura" font-size="22" font-weight="400" fill="#FEFFFD">
+                <tspan x="87.3364258" y="29">User process</tspan>
+            </text>
+        </g>
+        <path d="M285,74 L915,74 L915,228 L285,228 L285,74 Z" id="Path-5" stroke="#979797" stroke-width="3" stroke-dasharray="5"></path>
+        <path d="M286,291 L916,291 L916,509 L286,509 L286,291 Z" id="Path-5" stroke="#979797" stroke-width="3" stroke-dasharray="5"></path>
+        <path id="Line-10" d="M732.170741,354.596131 L733.403869,356.170741 L732.616564,356.787305 L619.139,445.655 L622.838215,450.379238 L607.5,453.5 L614.206319,439.356971 L617.905,444.08 L731.383436,355.212695 L732.170741,354.596131 Z" fill="#979797" fill-rule="nonzero"></path>
+        <path id="Line-10" d="M468.823814,354.596804 L469.613505,355.210309 L584.057,444.12 L587.738861,439.383095 L594.5,453.5 L579.149793,450.438768 L582.83,445.7 L468.386495,356.789691 L467.596804,356.176186 L468.823814,354.596804 Z" fill="#979797" fill-rule="nonzero"></path>
+        <g id="File-inode" transform="translate(659, 315)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-10)" xlink:href="#path-9"></use>
+                <use fill="#E4C1F9" fill-rule="evenodd" xlink:href="#path-9"></use>
+            </g>
+            <text id="inode" font-family="Futura-Medium, Futura" font-size="20" font-weight="400" fill="#FEFFFD">
+                <tspan x="47.4873047" y="26">inode</tspan>
+            </text>
+        </g>
+        <g id="File-inode-Copy" transform="translate(396, 315)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-12)" xlink:href="#path-11"></use>
+                <use fill="#E4C1F9" fill-rule="evenodd" xlink:href="#path-11"></use>
+            </g>
+            <text id="inode" font-family="Futura-Medium, Futura" font-size="20" font-weight="400" fill="#FEFFFD">
+                <tspan x="47.4873047" y="26">inode</tspan>
+            </text>
+        </g>
+        <text id="User-space" fill="#50514F" font-family="Futura-Medium, Futura" font-size="20" font-weight="400">
+            <tspan x="290.348633" y="99">User space</tspan>
+        </text>
+        <text id="Kernel-space" fill="#50514F" font-family="Futura-Medium, Futura" font-size="20" font-weight="400">
+            <tspan x="290.318359" y="311">Kernel space</tspan>
+        </text>
+        <g id="Syscall" transform="translate(478, 229)">
+            <text id="copy_file_range()" fill="#50514F" font-family="Futura-Medium, Futura" font-size="18" font-weight="400">
+                <tspan x="2.43310547" y="37.5">copy_file_range()</tspan>
+            </text>
+            <path id="Line-7" d="M150,0 L157,14 L151,14 L151,48 L157,48 L150,62 L143,48 L149,48 L149,14 L143,14 L150,0 Z" fill="#F25F5C" fill-rule="nonzero"></path>
+            <text id="Context-switching" fill="#50514F" font-family="Futura-Medium, Futura" font-size="18" font-weight="400">
+                <tspan x="168.517578" y="25.5">Context </tspan>
+                <tspan x="162.659668" y="49.5">switching</tspan>
+            </text>
+        </g>
+        <g id="Data" transform="translate(546, 601)">
+            <rect id="Rectangle" fill="#FE938C" x="0" y="0" width="110" height="40" rx="8"></rect>
+            <text font-family="Futura-Medium, Futura" font-size="20" font-weight="400" fill="#FEFFFD">
+                <tspan x="32.4248047" y="26">Data</tspan>
+            </text>
+        </g>
+        <path id="Line-2" d="M602,492 L602,587 L608,587 L601,601 L594,587 L600,587 L600,492 L602,492 Z" fill="#979797" fill-rule="nonzero"></path>
+        <line x1="286" y1="408" x2="915" y2="408" id="Line-21" stroke="#979797" stroke-width="2" stroke-linecap="square" stroke-dasharray="0,5"></line>
+        <g id="Reflink" transform="translate(528, 453)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-14)" xlink:href="#path-13"></use>
+                <use fill="#73BFB8" fill-rule="evenodd" xlink:href="#path-13"></use>
+            </g>
+            <text id="reflink" font-family="Futura-Medium, Futura" font-size="20" font-weight="400" fill="#FEFFFD">
+                <tspan x="45.5341797" y="26">reflink</tspan>
+            </text>
+        </g>
+        <text id="VFS-——-Btrfs" fill="#50514F" font-family="Futura-Medium, Futura" font-size="20" font-weight="400">
+            <tspan x="295.859375" y="430">VFS —— Btrfs</tspan>
+        </text>
+    </g>
+</svg>

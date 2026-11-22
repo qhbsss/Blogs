@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200px" height="1000px" viewBox="0 0 1200 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>cpu-caches-memory-hierarchy</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="322" height="70" rx="8"></rect>
+        <filter x="-2.2%" y="-7.1%" width="104.3%" height="120.0%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-3" x="0" y="0" width="146" height="40" rx="8"></rect>
+        <filter x="-4.8%" y="-12.5%" width="109.6%" height="135.0%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-5" x="0" y="0" width="190" height="40" rx="8"></rect>
+        <filter x="-3.7%" y="-12.5%" width="107.4%" height="135.0%" filterUnits="objectBoundingBox" id="filter-6">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <polygon id="path-7" points="18 42 415 42 415 437 18 437"></polygon>
+        <filter x="-2.1%" y="-1.6%" width="104.3%" height="104.3%" filterUnits="objectBoundingBox" id="filter-8">
+            <feMorphology radius="1.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="2" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feMorphology radius="1.5" operator="erode" in="SourceAlpha" result="shadowInner"></feMorphology>
+            <feOffset dx="0" dy="2" in="shadowInner" result="shadowInner"></feOffset>
+            <feComposite in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"></feComposite>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <text id="text-9" font-family="AppleSymbols, Apple Symbols" font-size="30" font-weight="normal">
+            <tspan x="3.27246094" y="20">Core 1</tspan>
+        </text>
+        <filter x="-9.0%" y="-17.9%" width="117.9%" height="150.0%" filterUnits="objectBoundingBox" id="filter-10">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-11" x="0" y="0" width="100" height="50" rx="8"></rect>
+        <filter x="-7.0%" y="-10.0%" width="114.0%" height="128.0%" filterUnits="objectBoundingBox" id="filter-12">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-13" x="0" y="0" width="322" height="70" rx="8"></rect>
+        <filter x="-2.2%" y="-7.1%" width="104.3%" height="120.0%" filterUnits="objectBoundingBox" id="filter-14">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-15" x="0" y="0" width="146" height="40" rx="8"></rect>
+        <filter x="-4.8%" y="-12.5%" width="109.6%" height="135.0%" filterUnits="objectBoundingBox" id="filter-16">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-17" x="0" y="0" width="190" height="40" rx="8"></rect>
+        <filter x="-3.7%" y="-12.5%" width="107.4%" height="135.0%" filterUnits="objectBoundingBox" id="filter-18">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <polygon id="path-19" points="18 42 415 42 415 437 18 437"></polygon>
+        <filter x="-2.1%" y="-1.6%" width="104.3%" height="104.3%" filterUnits="objectBoundingBox" id="filter-20">
+            <feMorphology radius="1.5" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="2" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feMorphology radius="1.5" operator="erode" in="SourceAlpha" result="shadowInner"></feMorphology>
+            <feOffset dx="0" dy="2" in="shadowInner" result="shadowInner"></feOffset>
+            <feComposite in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"></feComposite>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <text id="text-21" font-family="AppleSymbols, Apple Symbols" font-size="30" font-weight="normal">
+            <tspan x="2.82568359" y="20">Core N</tspan>
+        </text>
+        <filter x="-9.0%" y="-17.9%" width="117.9%" height="150.0%" filterUnits="objectBoundingBox" id="filter-22">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-23" x="0" y="0" width="100" height="50" rx="8"></rect>
+        <filter x="-7.0%" y="-10.0%" width="114.0%" height="128.0%" filterUnits="objectBoundingBox" id="filter-24">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-25" x="0" y="0" width="791" height="68" rx="8"></rect>
+        <filter x="-0.9%" y="-7.4%" width="101.8%" height="120.6%" filterUnits="objectBoundingBox" id="filter-26">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <text id="text-27" font-family="Helvetica" font-size="30" font-weight="normal">
+            <tspan x="5.93652344" y="29">Processor Package</tspan>
+        </text>
+        <filter x="-2.6%" y="-13.9%" width="105.1%" height="138.9%" filterUnits="objectBoundingBox" id="filter-28">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-29" x="0" y="0" width="947" height="124" rx="8"></rect>
+        <filter x="-0.7%" y="-4.0%" width="101.5%" height="111.3%" filterUnits="objectBoundingBox" id="filter-30">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="cpu-caches-memory-hierarchy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#EFF1F3" x="0" y="0" width="1200" height="1000"></rect>
+        <g id="Copyright" transform="translate(447, 0)" font-family="AppleSymbols, Apple Symbols" font-weight="normal">
+            <text id="@panjf2000" fill="#979797" font-size="18">
+                <tspan x="116.035645" y="33">@panjf2000</tspan>
+            </text>
+            <text id="CPU-Caches-&amp;-Memory" fill="#50514F" font-size="26">
+                <tspan x="3.32714844" y="17">CPU Caches &amp; Memory Hierarchy</tspan>
+            </text>
+        </g>
+        <path id="Line" d="M620,688 C623.865993,688 627,691.134007 627,695 C627,698.526122 624.392812,701.443302 621.00101,701.928967 L621.00101,818.071033 C624.392812,818.556698 627,821.473878 627,825 C627,828.865993 623.865993,832 620,832 C616.134007,832 613,828.865993 613,825 C613,821.473531 615.607702,818.556123 618.999992,818.07089 L618.999992,701.92911 C615.607702,701.443877 613,698.526469 613,695 C613,691.134007 616.134007,688 620,688 Z" fill="#979797" fill-rule="nonzero"></path>
+        <g id="Processor-package" transform="translate(129, 76)">
+            <path id="Line" d="M765,457 C768.865993,457 772,460.134007 772,464 C772,467.526122 769.392812,470.443302 766.00101,470.928967 L766.00101,543.071033 C769.392812,543.556698 772,546.473878 772,550 C772,553.865993 768.865993,557 765,557 C761.134007,557 758,553.865993 758,550 C758,546.473531 760.607702,543.556123 763.999992,543.07089 L763.999992,470.92911 C760.607702,470.443877 758,467.526469 758,464 C758,460.134007 761.134007,457 765,457 Z" fill="#979797" fill-rule="nonzero"></path>
+            <path id="Line" d="M238,457 C241.865993,457 245,460.134007 245,464 C245,467.526122 242.392812,470.443302 239.00101,470.928967 L239.00101,543.071033 C242.392812,543.556698 245,546.473878 245,550 C245,553.865993 241.865993,557 238,557 C234.134007,557 231,553.865993 231,550 C231,546.473531 233.607702,543.556123 236.999992,543.07089 L236.999992,470.92911 C233.607702,470.443877 231,467.526469 231,464 C231,460.134007 234.134007,457 238,457 Z" fill="#979797" fill-rule="nonzero"></path>
+            <g id="CPU-1" transform="translate(10, 48)">
+                <path id="Line-2" d="M120,252 C123.865993,252 127,255.134007 127,259 C127,262.526122 124.392812,265.443302 121.00101,265.928967 L121.00101,339.071033 C124.392812,339.556698 127,342.473878 127,346 C127,349.865993 123.865993,353 120,353 C116.134007,353 113,349.865993 113,346 C113,342.473531 115.607702,339.556123 118.999992,339.07089 L118.999992,265.92911 C115.607702,265.443877 113,262.526469 113,259 C113,255.134007 116.134007,252 120,252 Z" fill="#979797" fill-rule="nonzero"></path>
+                <path id="Line-2-Copy" d="M300,252 C303.865993,252 307,255.134007 307,259 C307,262.526122 304.392812,265.443302 301.00101,265.928967 L301.00101,339.071033 C304.392812,339.556698 307,342.473878 307,346 C307,349.865993 303.865993,353 300,353 C296.134007,353 293,349.865993 293,346 C293,342.473531 295.607702,339.556123 298.999992,339.07089 L298.999992,265.92911 C295.607702,265.443877 293,262.526469 293,259 C293,255.134007 296.134007,252 300,252 Z" fill="#979797" fill-rule="nonzero"></path>
+                <path id="Line" d="M118,118 C121.865993,118 125,121.134007 125,125 C125,128.526122 122.392812,131.443302 119.00101,131.928967 L119.00101,212.071033 C122.392812,212.556698 125,215.473878 125,219 C125,222.865993 121.865993,226 118,226 C114.134007,226 111,222.865993 111,219 C111,215.473531 113.607702,212.556123 116.999992,212.07089 L116.999992,131.92911 C113.607702,131.443877 111,128.526469 111,125 C111,121.134007 114.134007,118 118,118 Z" fill="#979797" fill-rule="nonzero"></path>
+                <g id="L2-cache" transform="translate(56, 346)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                        <use fill="#70D6FF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    </g>
+                    <text id="l2" font-family="AppleSymbols, Apple Symbols" font-size="36" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="102.367188" y="43">L2 Cache</tspan>
+                    </text>
+                </g>
+                <g id="L1-dcache" transform="translate(39, 219)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                        <use fill="#73BFB8" fill-rule="evenodd" xlink:href="#path-3"></use>
+                    </g>
+                    <text id="daemons" font-family="AppleSymbols, Apple Symbols" font-size="22" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="16.6259766" y="25">L1 Data Cache</tspan>
+                    </text>
+                </g>
+                <g id="L1-icache" transform="translate(205, 219)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
+                        <use fill="#FFA69E" fill-rule="evenodd" xlink:href="#path-5"></use>
+                    </g>
+                    <text id="libraries" font-family="AppleSymbols, Apple Symbols" font-size="22" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="14.8901367" y="25">L1 Instruction Cache</tspan>
+                    </text>
+                </g>
+                <g id="Path">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
+                    <use stroke="#979797" stroke-width="3" xlink:href="#path-7"></use>
+                </g>
+                <g id="Core-1" fill-rule="nonzero" fill="#50514F">
+                    <use fill-opacity="1" filter="url(#filter-10)" xlink:href="#text-9"></use>
+                    <use xlink:href="#text-9"></use>
+                    <use fill-opacity="1" xlink:href="#text-9"></use>
+                </g>
+                <g id="Registers" transform="translate(68, 75)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-12)" xlink:href="#path-11"></use>
+                        <use fill="#E4C1F9" fill-rule="evenodd" xlink:href="#path-11"></use>
+                    </g>
+                    <text id="daemons" font-family="AppleSymbols, Apple Symbols" font-size="22" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="15.2329102" y="30">Registers</tspan>
+                    </text>
+                </g>
+            </g>
+            <g id="CPU-2" transform="translate(538, 48)">
+                <path id="Line-2" d="M120,252 C123.865993,252 127,255.134007 127,259 C127,262.526122 124.392812,265.443302 121.00101,265.928967 L121.00101,339.071033 C124.392812,339.556698 127,342.473878 127,346 C127,349.865993 123.865993,353 120,353 C116.134007,353 113,349.865993 113,346 C113,342.473531 115.607702,339.556123 118.999992,339.07089 L118.999992,265.92911 C115.607702,265.443877 113,262.526469 113,259 C113,255.134007 116.134007,252 120,252 Z" fill="#979797" fill-rule="nonzero"></path>
+                <path id="Line-2-Copy" d="M300,252 C303.865993,252 307,255.134007 307,259 C307,262.526122 304.392812,265.443302 301.00101,265.928967 L301.00101,339.071033 C304.392812,339.556698 307,342.473878 307,346 C307,349.865993 303.865993,353 300,353 C296.134007,353 293,349.865993 293,346 C293,342.473531 295.607702,339.556123 298.999992,339.07089 L298.999992,265.92911 C295.607702,265.443877 293,262.526469 293,259 C293,255.134007 296.134007,252 300,252 Z" fill="#979797" fill-rule="nonzero"></path>
+                <path id="Line" d="M118,118 C121.865993,118 125,121.134007 125,125 C125,128.526122 122.392812,131.443302 119.00101,131.928967 L119.00101,212.071033 C122.392812,212.556698 125,215.473878 125,219 C125,222.865993 121.865993,226 118,226 C114.134007,226 111,222.865993 111,219 C111,215.473531 113.607702,212.556123 116.999992,212.07089 L116.999992,131.92911 C113.607702,131.443877 111,128.526469 111,125 C111,121.134007 114.134007,118 118,118 Z" fill="#979797" fill-rule="nonzero"></path>
+                <g id="L2-cache" transform="translate(56, 346)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-14)" xlink:href="#path-13"></use>
+                        <use fill="#70D6FF" fill-rule="evenodd" xlink:href="#path-13"></use>
+                    </g>
+                    <text id="l2" font-family="AppleSymbols, Apple Symbols" font-size="36" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="102.367188" y="43">L2 Cache</tspan>
+                    </text>
+                </g>
+                <g id="L1-dcache" transform="translate(39, 219)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-16)" xlink:href="#path-15"></use>
+                        <use fill="#73BFB8" fill-rule="evenodd" xlink:href="#path-15"></use>
+                    </g>
+                    <text id="daemons" font-family="AppleSymbols, Apple Symbols" font-size="22" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="16.6259766" y="25">L1 Data Cache</tspan>
+                    </text>
+                </g>
+                <g id="L1-icache" transform="translate(205, 219)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-18)" xlink:href="#path-17"></use>
+                        <use fill="#FFA69E" fill-rule="evenodd" xlink:href="#path-17"></use>
+                    </g>
+                    <text id="libraries" font-family="AppleSymbols, Apple Symbols" font-size="22" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="14.8901367" y="25">L1 Instruction Cache</tspan>
+                    </text>
+                </g>
+                <g id="Path">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-20)" xlink:href="#path-19"></use>
+                    <use stroke="#979797" stroke-width="3" xlink:href="#path-19"></use>
+                </g>
+                <g id="Core-N" fill-rule="nonzero" fill="#50514F">
+                    <use fill-opacity="1" filter="url(#filter-22)" xlink:href="#text-21"></use>
+                    <use xlink:href="#text-21"></use>
+                    <use fill-opacity="1" xlink:href="#text-21"></use>
+                </g>
+                <g id="Registers" transform="translate(68, 75)">
+                    <g id="Rectangle">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-24)" xlink:href="#path-23"></use>
+                        <use fill="#E4C1F9" fill-rule="evenodd" xlink:href="#path-23"></use>
+                    </g>
+                    <text id="daemons" font-family="AppleSymbols, Apple Symbols" font-size="22" font-weight="normal" fill="#FFFFFF">
+                        <tspan x="15.2329102" y="30">Registers</tspan>
+                    </text>
+                </g>
+            </g>
+            <g id="L3-cache" transform="translate(95, 550)">
+                <g id="Rectangle">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-26)" xlink:href="#path-25"></use>
+                    <use fill="#FFD670" fill-rule="evenodd" xlink:href="#path-25"></use>
+                </g>
+                <text id="syscalls-interface" font-family="AppleSymbols, Apple Symbols" font-size="32" font-weight="normal" fill="#FFFFFF">
+                    <tspan x="343.4375" y="40">L3 Cache</tspan>
+                </text>
+            </g>
+            <path d="M0,37 L982,37 L982,680 L0,680 L0,37 Z" id="Path" stroke="#979797" stroke-width="3" stroke-dasharray="5"></path>
+            <g fill-rule="nonzero" fill="#50514F">
+                <use fill-opacity="1" filter="url(#filter-28)" xlink:href="#text-27"></use>
+                <use xlink:href="#text-27"></use>
+                <use fill-opacity="1" xlink:href="#text-27"></use>
+            </g>
+        </g>
+        <g id="mem" transform="translate(148, 825)">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-30)" xlink:href="#path-29"></use>
+                <use fill="#F694C1" fill-rule="evenodd" xlink:href="#path-29"></use>
+            </g>
+            <text font-family="AppleSymbols, Apple Symbols" font-size="40" font-weight="normal" fill="#FFFFFF">
+                <tspan x="381.408203" y="70">Main Memory</tspan>
+            </text>
+        </g>
+        <text id="L1-cache" fill="#50514F" font-family="AppleSymbols, Apple Symbols" font-size="30" font-weight="normal">
+            <tspan x="16.7226562" y="386">L1 Cache</tspan>
+        </text>
+        <line x1="0.5" y1="435.5" x2="1200.5" y2="435.5" id="Parting-line" stroke="#979797" stroke-width="3" stroke-linecap="square" stroke-dasharray="0,7"></line>
+        <line x1="0.5" y1="594.5" x2="1200.5" y2="594.5" id="Parting-line-2" stroke="#979797" stroke-width="3" stroke-linecap="square" stroke-dasharray="0,7"></line>
+        <line x1="0.5" y1="732.5" x2="1200.5" y2="732.5" id="Parting-line-3" stroke="#979797" stroke-width="3" stroke-linecap="square" stroke-dasharray="0,7"></line>
+        <text id="L2-cache" fill="#50514F" font-family="AppleSymbols, Apple Symbols" font-size="30" font-weight="normal">
+            <tspan x="16.7226562" y="579">L2 Cache</tspan>
+        </text>
+        <text id="L3-cache" fill="#50514F" font-family="AppleSymbols, Apple Symbols" font-size="30" font-weight="normal">
+            <tspan x="16.7226562" y="717">L3 Cache</tspan>
+        </text>
+        <text id="L3-cache" fill="#50514F" font-family="AppleSymbols, Apple Symbols" font-size="30" font-weight="normal">
+            <tspan x="42.9121094" y="893">RAM</tspan>
+        </text>
+        <text id="L1-cache" fill="#50514F" fill-rule="nonzero" font-family="Futura-Medium, Futura" font-size="30" font-weight="400">
+            <tspan x="605.334961" y="242">…</tspan>
+        </text>
+        <line x1="7.8382949e-13" y1="291" x2="1200" y2="291" id="Parting-line" stroke="#979797" stroke-width="3" stroke-linecap="square" stroke-dasharray="0,7"></line>
+    </g>
+</svg>
